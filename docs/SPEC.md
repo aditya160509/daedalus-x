@@ -878,6 +878,60 @@ The original v1.0 specification states that its authors checked or referenced th
 
 **Build order:** get one end-to-end real experiment working, validate it, then make the interface exceptional. The visual spectacle amplifies the evidence; it cannot replace it.
 
+## Appendix B — Commercial-grade visual and insight features (added 2026-10-30)
+
+All features run on data the pipeline already exports (`viz.json`/`viz.bin`, force histories, Monte Carlo), except B.3 #7, which needs one extra free OpenFOAM adjoint solve. Every visual shows its provenance and run acceptance, and none may render a number from a rejected run without the rejection banner.
+
+### B.1 AETHER Wind Tunnel
+1. **Pressure Skin:** smooth contour-banded surface Cp with hover readout.
+2. **Smoke Streams:** glowing animated streamlines with depth fade.
+3. **Wake Scanner:** a draggable slice plane, front to back, through the flow.
+4. **Flow Arrows:** velocity glyphs on slices.
+5. **Split Compare:** two designs side by side plus a difference map.
+6. **Fly-through:** a scripted cinematic camera path, nose to wake.
+
+### B.2 AETHER Design
+7. **Studio Render:** physically based paint, environment reflections, soft shadows, turntable.
+8. **Exploded View:** animated assembly separation.
+9. **Measure Callouts:** dimensions and clearances drawn on the model.
+
+### B.3 Flow insight (commercial CFD staples)
+1. **Q-criterion vortex cores:** 3D vortex tubes (wing tips, wheels).
+2. **Iso-surfaces:** wake shell at Ux/U∞ = 0.5.
+3. **Surface oil flow:** wall-shear streaks showing skin-friction direction.
+4. **Separation and reattachment markers** from wall shear.
+5. **Total-pressure loss** on wake slices.
+6. **Drag build-up curve:** cumulative drag from nose to tail.
+7. **Adjoint sensitivity map:** surface coloured by d(drag)/d(normal displacement) (OpenFOAM adjoint, free). Highest-value feature.
+8. **Delta maps:** design A − B for surface Cp and wake.
+9. **Mesh viewer:** grid and refinement zones.
+10. **Convergence health dashboard:** traffic-light status per run, live solver monitor.
+
+### B.4 TITAN Race
+1. **Race Replay:** 3D car on the track, synced to telemetry.
+2. **Telemetry Wall:** ATLAS-style stacked channels with one synced cursor.
+3. **Spread Fan:** Monte Carlo race-time band over the speed trace.
+4. **What-if sliders:** mass, CdA and thrust giving live race time and spread.
+5. **Ghost race:** two designs racing side by side with the time gap.
+
+### B.5 ORACLE, FORGE, ATLAS, presentation
+1. **Design Map:** tested designs coloured by drag, with an uncertainty cloud.
+2. **Next-Best Card:** the recommended experiment with expected gain and confidence.
+3. **Rule Hotspots:** near-fail and fail parts glow on the car, with margins.
+4. **Run Timeline:** runs and predictions with hash-verified badges.
+5. **Prediction Scorecard:** predicted against measured.
+6. **Story Deck (Competition Mode):** full-screen judge walkthrough.
+7. **One-click report:** PDF engineering report generated from evidence.
+8. **AR view:** car and flow on a phone via WebXR.
+
+### B.6 Build order
+1. Adjoint map, Q-criterion, oil flow, Pressure Skin and Smoke Streams.
+2. What-if sliders and ghost race.
+3. The remaining AETHER items.
+4. ORACLE and FORGE visuals.
+5. ATLAS, the report and Competition Mode.
+6. AR last.
+
 ## Appendix A — Revision note
 
 v1.0–v1.7 (25–26 October 2026) consolidated the original Daedalus brief into one application, one backlog (Section 13) and G0–G5 gates. v1.8 removed duplicated sections, renamed-feature studios, revision logs and illustrative savings arithmetic, and adopted CfdOF; v2.0 replaced it with a free local path (OpenFOAM.app + foamlib case template), CfdOF optional. v1.9 adopted Ax for experiment selection and Tracker for video analysis, and cut light/tablet modes, the M3 model, mass-loss and stand-transfer investigations, complex job recovery, restore drills, tolerance/sensitivity Tier 1 items and multi-level readiness labels. No implementation or measurement has been performed; Section 18 lists outstanding intake.
