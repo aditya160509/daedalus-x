@@ -67,3 +67,35 @@ def test_unsorted_thrust_rejected() -> None:
     bad = {"t_s": [0, 2, 1], "force_n": [1, 1, 1], "provenance": "estimated", "source": "x"}
     r = client.post("/v1/race/simulate", json=body(thrust=bad))
     assert r.status_code == 422
+
+
+def test_montecarlo_endpoint() -> None:
+    from fastapi.testclient import TestClient
+
+    from daedalus.api import create_app
+
+    body = {
+        "race": {
+            "model": "M2",
+            "mass_kg": 0.05,
+            "track_length_m": 20.0,
+            "thrust": {
+                "t_s": [0, 0.3],
+                "force_n": [8, 8],
+                "provenance": "estimated",
+                "source": "test",
+            },
+            "cda_m2": 0.0015,
+            "crr": 0.01,
+            "input_provenance": "estimated",
+        },
+        "n": 200,
+        "seed": 3,
+    }
+    r = TestClient(create_app()).post("/v1/race/montecarlo", json=body)
+    assert r.status_code == 200, r.text
+    d = r.json()
+    assert d["finish_fraction"] == 1.0 and d["provenance"] == "predicted"
+    assert sum(d["histogram"]["counts"]) == 200
+    assert d["percentiles_s"]["p5"] < d["percentiles_s"]["p95"]
+    assert d["sensitivity"]["thrust"] < 0

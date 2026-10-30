@@ -102,7 +102,11 @@ class SolverSettings:
 
 
 def simulate(
-    car: CarParams, model: ModelLevel = ModelLevel.M2, settings: SolverSettings | None = None
+    car: CarParams,
+    model: ModelLevel = ModelLevel.M2,
+    settings: SolverSettings | None = None,
+    *,
+    force_terms: bool = True,
 ) -> RaceResult:
     s = settings or SolverSettings()
     if model is ModelLevel.M0:
@@ -158,11 +162,15 @@ def simulate(
     else:
         reason, time_s = "max_time_reached", None
 
-    terms = {
-        "thrust_n": np.array([thrust(ti) for ti in t]),
-        "drag_n": np.array([drag(vi) for vi in v]),
-        "rolling_n": np.array([roll(vi) for vi in v]),
-    }
+    terms = (
+        {
+            "thrust_n": np.array([thrust(ti) for ti in t]),
+            "drag_n": np.array([drag(vi) for vi in v]),
+            "rolling_n": np.array([roll(vi) for vi in v]),
+        }
+        if force_terms
+        else {}
+    )
     return RaceResult(model, finished, time_s, t, x, v, float(v.max()), reason, terms)
 
 

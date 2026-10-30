@@ -8,6 +8,7 @@ import numpy as np
 from fastapi import APIRouter
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from daedalus import montecarlo
 from daedalus.contracts import Provenance
 from daedalus.dynamics import CarParams, ModelLevel, ThrustCurve, simulate
 
@@ -110,4 +111,72 @@ def simulate_race(req: RaceSimulationRequest) -> RaceSimulationResponse:
             ch("drag", "N", terms["drag_n"]),
             ch("rolling_resistance", "N", terms["rolling_n"]),
         ],
+    )
+
+
+class UncertaintyInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    mass: float = Field(default=0.005, ge=0, lt=0.5)
+    cda: float = Field(default=0.05, ge=0, lt=0.5)
+    crr: float = Field(default=0.2, ge=0, lt=0.5)
+    thrust: float = Field(default=0.05, ge=0, lt=0.5)
+
+
+class MonteCarloRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    race: RaceSimulationRequest
+    uncertainty: UncertaintyInput = UncertaintyInput()
+    n: int = Field(default=1000, ge=10, le=5000)
+    seed: int = Field(default=0, ge=0)
+
+
+class Histogram(BaseModel):
+    edges_s: list[float]
+    counts: list[int]
+
+
+class MonteCarloResponse(BaseModel):
+    provenance: Literal["predicted"] = "predicted"
+    n: int
+    seed: int
+    finish_fraction: float
+    mean_s: float | None
+    std_s: float | None
+    percentiles_s: dict[str, float]
+    sensitivity: dict[str, float]
+    histogram: Histogram
+
+
+@router.post("/montecarlo")
+def race_montecarlo(req: MonteCarloRequest) -> MonteCarloResponse:
+    r = req.race
+    car = CarParams(
+        mass_kg=r.mass_kg,
+        track_length_m=r.track_length_m,
+        thrust=ThrustCurve(np.asarray(r.thrust.t_s, float), np.asarray(r.thrust.force_n, float)),
+        cda_m2=r.cda_m2,
+        crr=r.crr,
+        rho_kg_m3=r.rho_kg_m3,
+    )
+    res = montecarlo.run(
+        car,
+        montecarlo.Uncertainty(**req.uncertainty.model_dump()),
+        n=req.n,
+        seed=req.seed,
+        model=ModelLevel(r.model),
+    )
+    counts, edges = (
+        np.histogram(res.times_s, bins=40) if res.times_s.size else (np.zeros(0), np.zeros(0))
+    )
+    return MonteCarloResponse(
+        n=res.n,
+        seed=res.seed,
+        finish_fraction=res.finish_fraction,
+        mean_s=res.mean_s,
+        std_s=res.std_s,
+        percentiles_s=res.percentiles_s,
+        sensitivity=res.sensitivity,
+        histogram=Histogram(edges_s=edges.tolist(), counts=[int(c) for c in counts]),
     )

@@ -86,6 +86,35 @@ export interface RaceSimulationRequest {
 export const simulateRace = (req: RaceSimulationRequest) =>
   request("/v1/race/simulate", RaceSimulation, { method: "POST", body: JSON.stringify(req) });
 
+export const MonteCarlo = z.object({
+  provenance: z.literal("predicted"),
+  n: z.number(),
+  seed: z.number(),
+  finish_fraction: z.number(),
+  mean_s: z.number().nullable(),
+  std_s: z.number().nullable(),
+  percentiles_s: z.record(z.string(), z.number()),
+  sensitivity: z.record(z.string(), z.number()),
+  histogram: z.object({ edges_s: z.array(z.number()), counts: z.array(z.number()) }),
+});
+export type MonteCarlo = z.infer<typeof MonteCarlo>;
+export interface UncertaintyInput {
+  mass: number;
+  cda: number;
+  crr: number;
+  thrust: number;
+}
+export const raceMonteCarlo = (
+  race: RaceSimulationRequest,
+  uncertainty: UncertaintyInput,
+  n = 1000,
+  seed = 0,
+) =>
+  request("/v1/race/montecarlo", MonteCarlo, {
+    method: "POST",
+    body: JSON.stringify({ race, uncertainty, n, seed }),
+  });
+
 export const DesignSummary = z.object({
   design_id: z.string(),
   source_file: z.string(),

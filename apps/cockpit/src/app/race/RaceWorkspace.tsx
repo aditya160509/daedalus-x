@@ -27,6 +27,7 @@ import {
   type ThrustEstimate,
   type ThrustTrace,
 } from "@/lib/thrust";
+import { SpreadPanel } from "./SpreadPanel";
 
 /**
  * Starting assumptions, all labelled "estimated": spec §1.3 scenario values (20 m track) plus
@@ -296,7 +297,10 @@ export function RaceWorkspace() {
         </Panel>
       </div>
 
-      <Results sim={sim.data} error={sim.error} loading={sim.isFetching} valid={valid} />
+      <div className="flex min-h-0 flex-col gap-3 overflow-y-auto">
+        <Results sim={sim.data} error={sim.error} loading={sim.isFetching} valid={valid} />
+        {valid && <SpreadPanel request={deferred} />}
+      </div>
     </div>
   );
 }
@@ -382,7 +386,7 @@ function Results({
   const peakDrag = Math.max(...(sim.channels.find((c) => c.name === "drag")?.values ?? [0]));
 
   return (
-    <div className="grid min-h-0 grid-rows-[auto_1fr] gap-3">
+    <div className="grid min-h-[560px] flex-1 grid-rows-[auto_1fr] gap-3">
       <div className="grid grid-cols-4 gap-3">
         <Metric
           label="Travel time"

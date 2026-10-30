@@ -16,6 +16,7 @@ import subprocess
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -59,12 +60,42 @@ class CaseConfig:
     turbulence_intensity: float = 0.005
     turbulence_length_m: float = 0.01
     ground_offset_m: float = 0.0005
+    # Stop early once the windowed Cd average moves less than this (relative). None = run to end.
+    early_stop_tolerance: float | None = 0.001
+    early_stop_window: int = 200
 
     def __post_init__(self) -> None:
         if not (0 < self.speed_m_s < 100):
             raise ValueError("speed must be in (0, 100) m/s")
         if self.n_procs < 1 or self.max_iterations < 50:
             raise ValueError("n_procs >= 1 and max_iterations >= 50 required")
+        if self.early_stop_window < 20:
+            raise ValueError("early_stop_window must be >= 20")
+        if self.early_stop_tolerance is not None and not (0 < self.early_stop_tolerance < 0.1):
+            raise ValueError("early_stop_tolerance must be in (0, 0.1)")
+
+    @classmethod
+    def preset(cls, fidelity: str, **overrides: Any) -> CaseConfig:
+        if fidelity not in FIDELITY:
+            raise ValueError(f"unknown fidelity {fidelity!r}; choose from {sorted(FIDELITY)}")
+        return cls(**{**FIDELITY[fidelity], **overrides})
+
+
+# Mesh/iteration presets. "quick" is ~3x fewer cells for screening design changes; every
+# reported number must come from "final" (and, for acceptance, a grid study).
+FIDELITY: dict[str, dict[str, Any]] = {
+    "quick": {
+        "base_cell_m": 0.03,
+        "surface_level": (3, 4),
+        "wing_level": (4, 4),
+        "near_box_level": 2,
+        "wake_box_level": 1,
+        "n_layers": 2,
+        "max_iterations": 800,
+        "early_stop_window": 150,
+    },
+    "final": {},
+}
 
 
 @dataclass(frozen=True)
@@ -408,6 +439,25 @@ def _control_dict(cfg: CaseConfig, car: CarGeometry, aref_half: float) -> str:
         f"        patches ({g});\n{common}    }}\n"
         for g in car.groups
     )
+    early_stop = (
+        ""
+        if cfg.early_stop_tolerance is None
+        else f"""    earlyStop
+    {{
+        type runTimeControl; libs (utilityFunctionObjects);
+        conditions
+        {{
+            cdSteady
+            {{
+                type average; functionObject forceCoeffs; fields (Cd);
+                tolerance {_v(cfg.early_stop_tolerance)};
+                window {cfg.early_stop_window}; windowType approximate;
+            }}
+        }}
+        satisfiedAction end;
+    }}
+"""
+    )
     return (
         _dict("controlDict")
         + f"""application     simpleFoam;
@@ -449,7 +499,7 @@ functions
         fields (U p k omega);
         writeControl timeStep; writeInterval 1;
     }}
-}}
+{early_stop}}}
 """
     )
 

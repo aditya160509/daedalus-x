@@ -114,3 +114,20 @@ def test_read_dat_tolerates_text_columns(tmp_path: Path) -> None:
     names, d = read_dat(p)
     assert names == ["Time", "U_solver", "Ux_initial", "U_converged"]
     assert d[0, 2] == pytest.approx(0.01)
+
+
+def test_early_stop_function_object_and_presets(tmp_path: Path, design: Path) -> None:
+    write_case(tmp_path / "a", design, CaseConfig.preset("quick", n_procs=2))
+    cd: Any = FoamFile(tmp_path / "a/system/controlDict").as_dict()
+    cond = cd["functions"]["earlyStop"]["conditions"]["cdSteady"]
+    assert cond["functionObject"] == "forceCoeffs" and cond["window"] == 150
+    assert cd["endTime"] == 800
+
+    write_case(tmp_path / "b", design, CaseConfig(early_stop_tolerance=None))
+    cd = FoamFile(tmp_path / "b/system/controlDict").as_dict()
+    assert "earlyStop" not in cd["functions"]
+
+    with pytest.raises(ValueError):
+        CaseConfig.preset("ultra")
+    q, f = CaseConfig.preset("quick"), CaseConfig.preset("final")
+    assert q.base_cell_m > f.base_cell_m and q.surface_level < f.surface_level

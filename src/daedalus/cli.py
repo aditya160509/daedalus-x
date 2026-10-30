@@ -28,8 +28,15 @@ def main(argv: list[str] | None = None) -> int:
     cr.add_argument("case", type=Path, help="new case directory (must not exist)")
     cr.add_argument("--speed", type=float, default=20.0, help="freestream speed, m/s")
     cr.add_argument("--procs", type=int, default=6)
-    cr.add_argument("--max-iter", type=int, default=1500)
-    cr.add_argument("--base-cell", type=float, default=0.02, help="background cell size, m")
+    cr.add_argument(
+        "--fidelity",
+        choices=sorted(cfd.FIDELITY),
+        default="final",
+        help="quick: coarse mesh for design screening; final: reported numbers",
+    )
+    cr.add_argument("--max-iter", type=int, help="override the fidelity's iteration cap")
+    cr.add_argument("--base-cell", type=float, help="override background cell size, m")
+    cr.add_argument("--no-early-stop", action="store_true", help="always run to max-iter")
     cr.add_argument("--resume-from", help="re-run an existing case from this step")
 
     a = p.parse_args(argv)
@@ -47,9 +54,14 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
         return 0
-    cfg = cfd.CaseConfig(
-        speed_m_s=a.speed, n_procs=a.procs, max_iterations=a.max_iter, base_cell_m=a.base_cell
-    )
+    overrides: dict[str, object] = {"speed_m_s": a.speed, "n_procs": a.procs}
+    if a.max_iter is not None:
+        overrides["max_iterations"] = a.max_iter
+    if a.base_cell is not None:
+        overrides["base_cell_m"] = a.base_cell
+    if a.no_early_stop:
+        overrides["early_stop_tolerance"] = None
+    cfg = cfd.CaseConfig.preset(a.fidelity, **overrides)
     if a.resume_from is None:
         cfd.write_case(a.case, a.design, cfg)
     res = cfd.run_case(a.case, cfg.n_procs, resume_from=a.resume_from)
