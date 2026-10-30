@@ -6,13 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write src"
   },
   "dependencies": {
     "@react-three/drei": "10.7.6",
     "@react-three/fiber": "9.3.0",
     "@tanstack/react-query": "5.90.2",
     "echarts": "6.0.0",
+    "lucide-react": "0.544.0",
     "next": "15.5.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",
@@ -29,6 +33,7 @@
     "@types/three": "0.180.0",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
+    "prettier": "3.6.2",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "3.2.4"
