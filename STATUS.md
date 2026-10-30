@@ -9,10 +9,10 @@
 | P1-03 | Job runner | GPT | todo | |
 | P1-04 | Units and imports | GPT | todo | |
 | P2-01 | Race model M0–M2 | Claude | accepted | [evidence](evidence/P2-01.md) |
-| P2-02 | Calibration and sealed predictions | GPT | todo | |
-| P2-03 | Monte Carlo uncertainty | GPT | todo | |
+| P2-02 | Calibration and sealed predictions | Claude | sealing/verify/score done (tests/test_predictions.py); calibration needs measured runs | |
+| P2-03 | Monte Carlo uncertainty | Claude | done: vectorised, 2000 samples in 0.9 s, API + Race panel (tests/test_montecarlo.py) | |
 | P3-01 | Geometry path decision | GPT + Claude | blocked: car CAD/GLB | |
-| P3-02 | OpenFOAM case template | Claude | in progress (OpenFOAM verified with motorBike) | [evidence](evidence/P3-02-motorbike.md) |
+| P3-02 | OpenFOAM case template | Claude | template + pipeline done; first Orbit run rejected (Cd unsteady 5.6%, 9 skewed faces) | [motorBike](evidence/P3-02-motorbike.md), [orbit](evidence/P3-02-orbit-baseline.md) |
 | P3-03 | Grid study and speed check | GPT | todo | |
 | P3-04 | Component forces and field export | GPT | todo | |
 | P4-01 | Surrogate | GPT | todo | |
