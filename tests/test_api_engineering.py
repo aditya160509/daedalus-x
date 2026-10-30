@@ -55,10 +55,28 @@ def test_path_traversal_rejected(client: TestClient) -> None:
 def test_running_run_has_history_but_no_result(client: TestClient) -> None:
     runs = client.get("/v1/cfd/runs").json()
     assert runs == [
-        {"run_id": "run_1", "state": "running", "speed_m_s": 20.0, "cd": None, "acceptance": None}
+        {
+            "run_id": "run_1",
+            "state": "running",
+            "speed_m_s": 20.0,
+            "cd": None,
+            "acceptance": None,
+            "has_viz": False,
+        }
     ]
     detail = client.get("/v1/cfd/runs/run_1").json()
     assert detail["state"] == "running"
     assert detail["result"] is None
     assert detail["coefficients"]["values"]["Cd"] == [0.6, 0.55]
     assert detail["provenance"] == "simulated"
+
+
+def test_viz_files_served_when_exported(client: TestClient, tmp_path: Path) -> None:
+    assert client.get("/v1/cfd/runs/run_1/viz.json").status_code == 404
+    v = tmp_path / "runs/run_1/viz"
+    v.mkdir()
+    (v / "viz.json").write_text('{"version": 1}')
+    (v / "viz.bin").write_bytes(b"\x00\x01\x02\x03")
+    assert client.get("/v1/cfd/runs/run_1/viz.json").json() == {"version": 1}
+    assert client.get("/v1/cfd/runs/run_1/viz.bin").content == b"\x00\x01\x02\x03"
+    assert client.get("/v1/cfd/runs").json()[0]["has_viz"] is True

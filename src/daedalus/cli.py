@@ -39,7 +39,15 @@ def main(argv: list[str] | None = None) -> int:
     cr.add_argument("--no-early-stop", action="store_true", help="always run to max-iter")
     cr.add_argument("--resume-from", help="re-run an existing case from this step")
 
+    cv = c.add_parser("viz", help="export pressure, streamlines and slices for the cockpit")
+    cv.add_argument("case", type=Path, help="finished, reconstructed case directory")
+
     a = p.parse_args(argv)
+    if a.area == "cfd" and a.cmd == "viz":
+        from daedalus import viz  # heavy (VTK); only loaded when needed
+
+        print(viz.export(a.case))
+        return 0
     if a.area == "geometry":
         r = geometry.import_car(a.step, a.out, forward_axis=a.forward, up_axis=a.up)
         print(
@@ -65,6 +73,13 @@ def main(argv: list[str] | None = None) -> int:
     if a.resume_from is None:
         cfd.write_case(a.case, a.design, cfg)
     res = cfd.run_case(a.case, cfg.n_procs, resume_from=a.resume_from)
+    if res.succeeded:
+        from daedalus import viz
+
+        try:
+            viz.export(a.case)
+        except Exception as e:  # visual export must never mask a solver result
+            print(f"warning: flow-field export failed: {e}", file=sys.stderr)
     print(json.dumps(asdict(res), indent=2))
     return 0 if res.succeeded else 1
 

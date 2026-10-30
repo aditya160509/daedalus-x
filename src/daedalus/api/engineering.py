@@ -136,6 +136,7 @@ def list_runs() -> list[dict[str, Any]]:
                 "speed_m_s": json.loads(m.read_text())["config"]["speed_m_s"],
                 "cd": res and res.get("cd"),
                 "acceptance": res and res.get("acceptance"),
+                "has_viz": (run / "viz/viz.json").exists(),
             }
         )
     return out
@@ -157,3 +158,19 @@ def get_run(run_id: str) -> CfdRunDetail:
         coefficients=_series(coeff, ["Cd", "Cl"]),
         residuals=_series(resid, ["Ux_initial", "p_initial", "k_initial", "omega_initial"]),
     )
+
+
+@router.get("/cfd/runs/{run_id}/viz.json")
+def run_viz_meta(run_id: str) -> FileResponse:
+    path = _safe_dir("runs", run_id) / "viz/viz.json"
+    if not path.exists():
+        raise HTTPException(404, "no flow-field export for this run; run `daedalus cfd viz`")
+    return FileResponse(path, media_type="application/json")
+
+
+@router.get("/cfd/runs/{run_id}/viz.bin")
+def run_viz_bin(run_id: str) -> FileResponse:
+    path = _safe_dir("runs", run_id) / "viz/viz.bin"
+    if not path.exists():
+        raise HTTPException(404, "no flow-field export for this run; run `daedalus cfd viz`")
+    return FileResponse(path, media_type="application/octet-stream")

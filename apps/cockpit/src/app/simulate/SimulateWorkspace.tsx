@@ -8,6 +8,7 @@ import { HistoryChart } from "@/components/charts/HistoryChart";
 import { EmptyState, Metric, Panel, ProvenanceBadge } from "@/components/ui/primitives";
 import { type CfdRunDetail, getCfdRun, listCfdRuns } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { FlowPanel } from "./FlowPanel";
 
 const RHO = 1.204; // kg/m³, matches the case template
 const CD_WINDOW = 200; // iterations used by the acceptance gate
@@ -71,7 +72,10 @@ export function SimulateWorkspace() {
         </div>
       </header>
       {detail.data ? (
-        <RunView run={detail.data} />
+        <RunView
+          run={detail.data}
+          hasViz={runs.data?.find((r) => r.run_id === runId)?.has_viz ?? false}
+        />
       ) : (
         <div className="flex-1 animate-pulse rounded-xl bg-surface-2" />
       )}
@@ -93,7 +97,7 @@ function StateDot({ state }: { state: "running" | "succeeded" | "failed" }) {
   );
 }
 
-function RunView({ run }: { run: CfdRunDetail }) {
+function RunView({ run, hasViz }: { run: CfdRunDetail; hasViz: boolean }) {
   const { manifest, result, coefficients, residuals } = run;
   const U = manifest.reference.U_m_s;
   const A = manifest.reference.Aref_full_m2;
@@ -254,12 +258,7 @@ function RunView({ run }: { run: CfdRunDetail }) {
         </ol>
       </Panel>
 
-      <Panel title="Flow fields" className="lg:col-span-12" bodyClassName="p-4">
-        <p className="text-sm text-muted-foreground">
-          Surface pressure, streamlines and wake slices need the ParaView export (step P3-04). They
-          are not drawn until real field data exists.
-        </p>
-      </Panel>
+      <FlowPanel runId={run.run_id} hasViz={hasViz} />
     </div>
   );
 }

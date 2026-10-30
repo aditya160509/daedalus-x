@@ -14,7 +14,7 @@
 | P3-01 | Geometry path decision | GPT + Claude | blocked: car CAD/GLB | |
 | P3-02 | OpenFOAM case template | Claude | template + pipeline done; first Orbit run rejected (Cd unsteady 5.6%, 9 skewed faces) | [motorBike](evidence/P3-02-motorbike.md), [orbit](evidence/P3-02-orbit-baseline.md) |
 | P3-03 | Grid study and speed check | GPT | todo | |
-| P3-04 | Component forces and field export | GPT | todo | |
+| P3-04 | Component forces and field export | Claude | done: Cp surface, streamlines, wake/centreline slices in cockpit | [evidence](evidence/P3-04-flow-fields.md) |
 | P4-01 | Surrogate | GPT | todo | |
 | P4-02 | Next-experiment recommendation | GPT | todo | |
 | P4-03 | LHS benchmark harness | GPT | todo | |

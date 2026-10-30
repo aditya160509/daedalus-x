@@ -138,6 +138,7 @@ export const CfdRunSummary = z.object({
   speed_m_s: z.number(),
   cd: z.number().nullable(),
   acceptance: z.string().nullable(),
+  has_viz: z.boolean().default(false),
 });
 export type CfdRunSummary = z.infer<typeof CfdRunSummary>;
 export const listCfdRuns = () => request("/v1/cfd/runs", z.array(CfdRunSummary));
@@ -212,3 +213,105 @@ export const CfdRunDetail = z.object({
 export type CfdRunDetail = z.infer<typeof CfdRunDetail>;
 export const getCfdRun = (id: string) =>
   request(`/v1/cfd/runs/${encodeURIComponent(id)}`, CfdRunDetail);
+
+const BufRef = z.object({
+  offset: z.number().int().nonnegative(),
+  length: z.number().int().nonnegative(),
+  type: z.enum(["f32", "u32", "u8"]),
+});
+const MeshLayer = z.object({
+  positions: BufRef,
+  indices: BufRef,
+  scalar: BufRef,
+  group: BufRef.optional(),
+  groups: z.array(z.string()).optional(),
+  scalar_name: z.string(),
+  range: z.tuple([z.number(), z.number()]),
+});
+const LineLayer = z.object({
+  positions: BufRef,
+  offsets: BufRef,
+  scalar: BufRef,
+  scalar_name: z.string(),
+  range: z.tuple([z.number(), z.number()]),
+});
+export const VizMeta = z.object({
+  version: z.literal(1),
+  U_m_s: z.number(),
+  car: z.object({ length_m: z.number(), width_m: z.number(), height_m: z.number() }),
+  acceptance: z.string(),
+  reasons: z.array(z.string()),
+  iterations: z.number().nullable(),
+  bytes: z.number(),
+  layers: z.object({
+    surface: MeshLayer,
+    streamlines: LineLayer,
+    wake: MeshLayer,
+    centreline: MeshLayer,
+  }),
+  provenance: z.literal("simulated"),
+  notes: z.array(z.string()),
+});
+export type VizMeta = z.infer<typeof VizMeta>;
+type BufRef = z.infer<typeof BufRef>;
+
+export interface FlowMesh {
+  positions: Float32Array;
+  indices: Uint32Array;
+  scalar: Float32Array;
+  group?: Uint8Array;
+  range: [number, number];
+  name: string;
+}
+export interface FlowLines {
+  positions: Float32Array;
+  offsets: Uint32Array;
+  scalar: Float32Array;
+  range: [number, number];
+  name: string;
+}
+export interface FlowField {
+  meta: VizMeta;
+  surface: FlowMesh;
+  streamlines: FlowLines;
+  wake: FlowMesh;
+  centreline: FlowMesh;
+}
+
+/** Fetch the flow-field export and map typed-array views onto one binary buffer (no copies). */
+export async function getFlowField(runId: string): Promise<FlowField> {
+  const base = `/v1/cfd/runs/${encodeURIComponent(runId)}`;
+  const meta = await request(`${base}/viz.json`, VizMeta);
+  const res = await fetch(`/api${base}/viz.bin`);
+  if (!res.ok) throw new ApiError(`flow-field data: ${res.statusText}`, res.status);
+  const buf = await res.arrayBuffer();
+  if (buf.byteLength !== meta.bytes) {
+    throw new ApiError(`flow-field data is ${buf.byteLength} bytes, expected ${meta.bytes}`, 500);
+  }
+  const view = (r: BufRef) => {
+    const Ctor = { f32: Float32Array, u32: Uint32Array, u8: Uint8Array }[r.type];
+    return new Ctor(buf, r.offset, r.length);
+  };
+  const mesh = (l: z.infer<typeof MeshLayer>): FlowMesh => ({
+    positions: view(l.positions) as Float32Array,
+    indices: view(l.indices) as Uint32Array,
+    scalar: view(l.scalar) as Float32Array,
+    group: l.group ? (view(l.group) as Uint8Array) : undefined,
+    range: l.range,
+    name: l.scalar_name,
+  });
+  const L = meta.layers;
+  return {
+    meta,
+    surface: mesh(L.surface),
+    wake: mesh(L.wake),
+    centreline: mesh(L.centreline),
+    streamlines: {
+      positions: view(L.streamlines.positions) as Float32Array,
+      offsets: view(L.streamlines.offsets) as Uint32Array,
+      scalar: view(L.streamlines.scalar) as Float32Array,
+      range: L.streamlines.range,
+      name: L.streamlines.scalar_name,
+    },
+  };
+}
