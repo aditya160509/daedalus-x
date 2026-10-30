@@ -127,6 +127,15 @@ function RunView({ run }: { run: CfdRunDetail }) {
       })),
     [residuals],
   );
+  // Scale the Cd axis to the settled second half so oscillation is visible, not the transient.
+  const cdRange = useMemo((): [number, number] | undefined => {
+    const tail = cdSeries.slice(Math.floor(cdSeries.length / 2)).filter(Number.isFinite);
+    if (tail.length < 2) return undefined;
+    const lo = Math.min(...tail);
+    const hi = Math.max(...tail);
+    const pad = Math.max((hi - lo) * 0.25, Math.abs(hi) * 0.005);
+    return [+(lo - pad).toPrecision(3), +(hi + pad).toPrecision(3)];
+  }, [cdSeries]);
   const band = useMemo(() => {
     const last = coefficients?.iteration.at(-1);
     return last && last > CD_WINDOW
@@ -137,7 +146,7 @@ function RunView({ run }: { run: CfdRunDetail }) {
   return (
     <div className="grid min-h-0 flex-1 auto-rows-min gap-4 overflow-y-auto lg:grid-cols-12">
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6 lg:col-span-12">
-        <Metric label="Drag coefficient Cd" value={fmt(cd)} provenance="simulated" />
+        <Metric label="Cd" value={fmt(cd)} provenance="simulated" />
         <Metric
           label="CdA"
           value={cd == null ? "—" : (cd * A * 1e4).toFixed(2)}
@@ -145,13 +154,13 @@ function RunView({ run }: { run: CfdRunDetail }) {
           provenance="simulated"
         />
         <Metric
-          label="Drag at speed"
+          label="Drag"
           value={cd == null ? "—" : (cd * q * A).toFixed(3)}
           unit="N"
           provenance="simulated"
           hint={`q = ${q.toFixed(0)} Pa, Aref = ${(A * 1e4).toFixed(2)} cm²`}
         />
-        <Metric label="Lift coefficient Cl" value={fmt(cl)} provenance="simulated" />
+        <Metric label="Cl" value={fmt(cl)} provenance="simulated" />
         <Metric
           label="Mesh cells"
           value={result?.cells != null ? result.cells.toLocaleString() : "—"}
@@ -165,7 +174,7 @@ function RunView({ run }: { run: CfdRunDetail }) {
 
       <Panel
         title="Drag convergence"
-        description="Cd per iteration. The run is accepted only if Cd varies under 1% in the shaded window."
+        description="Cd per iteration, axis fitted to the settled half (scroll to zoom). Accepted only if Cd varies under 1% in the shaded window."
         className="h-80 lg:col-span-7"
         actions={<ProvenanceBadge value="simulated" />}
       >
@@ -175,6 +184,7 @@ function RunView({ run }: { run: CfdRunDetail }) {
             series={cdHistory}
             yLabel="Cd"
             band={band}
+            yRange={cdRange}
             ariaLabel="Drag coefficient against iteration"
           />
         ) : (

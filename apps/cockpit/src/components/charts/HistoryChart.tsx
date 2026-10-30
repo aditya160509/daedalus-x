@@ -15,6 +15,7 @@ export function HistoryChart({
   yLabel,
   log = false,
   band,
+  yRange,
   ariaLabel,
 }: {
   iteration: number[];
@@ -23,6 +24,8 @@ export function HistoryChart({
   log?: boolean;
   /** Shaded acceptance window, e.g. the Cd stability window. */
   band?: { from: number; label: string };
+  /** Fixed y extent, e.g. to hide the start-up transient; the full history stays zoomable. */
+  yRange?: [number, number];
   ariaLabel: string;
 }) {
   const host = useECharts(() => {
@@ -31,6 +34,7 @@ export function HistoryChart({
       animation: false,
       textStyle: { fontFamily: t.mono },
       grid: { left: 56, right: 16, top: 28, bottom: 32 },
+      dataZoom: [{ type: "inside", filterMode: "none" }],
       legend: {
         top: 0,
         right: 8,
@@ -61,6 +65,8 @@ export function HistoryChart({
       yAxis: {
         type: log ? "log" : "value",
         scale: !log,
+        min: yRange?.[0],
+        max: yRange?.[1],
         name: yLabel,
         nameLocation: "middle",
         nameGap: 42,
@@ -93,6 +99,6 @@ export function HistoryChart({
             : undefined,
       })),
     };
-  }, [iteration, series, yLabel, log, band]);
+  }, [iteration, series, yLabel, log, band, yRange]);
   return <div ref={host} className="h-full w-full" role="img" aria-label={ariaLabel} />;
 }
