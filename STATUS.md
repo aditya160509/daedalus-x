@@ -4,7 +4,7 @@
 |---|---|---|---|---|
 | P0-01 | Repo and toolchain | Claude | accepted | [evidence](evidence/P0-01.md) |
 | P0-02 | Data contracts | Claude | accepted (2 items moved to P1-01/P1-02) | [evidence](evidence/P0-02.md) |
-| P1-01 | Evidence store | GPT | todo | |
+| P1-01 | Evidence store | Claude | accepted | [evidence](evidence/P1-01.md) |
 | P1-02 | API skeleton | GPT | todo | |
 | P1-03 | Job runner | GPT | todo | |
 | P1-04 | Units and imports | GPT | todo | |
