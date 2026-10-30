@@ -10,3 +10,6 @@ out/
 *.log
 .DS_Store
 data/runs/
+data/reference/
+data/designs/
+data/runs/

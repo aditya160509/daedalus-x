@@ -1,0 +1,61 @@
+"""Command line: `daedalus geometry import ...`, `daedalus cfd run ...`."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from dataclasses import asdict
+from pathlib import Path
+
+from daedalus import cfd, geometry
+
+
+def main(argv: list[str] | None = None) -> int:
+    p = argparse.ArgumentParser(prog="daedalus")
+    sub = p.add_subparsers(dest="area", required=True)
+
+    g = sub.add_parser("geometry").add_subparsers(dest="cmd", required=True)
+    gi = g.add_parser("import", help="STEP assembly -> engineering frame, CFD STLs, GLB")
+    gi.add_argument("step", type=Path)
+    gi.add_argument("out", type=Path)
+    gi.add_argument("--forward", required=True, help="source axis pointing to the nose, e.g. -Y")
+    gi.add_argument("--up", required=True, help="source axis pointing up, e.g. +Z")
+
+    c = sub.add_parser("cfd").add_subparsers(dest="cmd", required=True)
+    cr = c.add_parser("run", help="generate, mesh, solve and evaluate one case")
+    cr.add_argument("design", type=Path, help="design directory from `geometry import`")
+    cr.add_argument("case", type=Path, help="new case directory (must not exist)")
+    cr.add_argument("--speed", type=float, default=20.0, help="freestream speed, m/s")
+    cr.add_argument("--procs", type=int, default=6)
+    cr.add_argument("--max-iter", type=int, default=1500)
+    cr.add_argument("--base-cell", type=float, default=0.02, help="background cell size, m")
+    cr.add_argument("--resume-from", help="re-run an existing case from this step")
+
+    a = p.parse_args(argv)
+    if a.area == "geometry":
+        r = geometry.import_car(a.step, a.out, forward_axis=a.forward, up_axis=a.up)
+        print(
+            json.dumps(
+                {
+                    "size_m": [r.length_m, r.width_m, r.height_m],
+                    "frontal_area_m2": r.frontal_area_m2,
+                    "groups": r.groups,
+                    "warnings": r.warnings,
+                },
+                indent=2,
+            )
+        )
+        return 0
+    cfg = cfd.CaseConfig(
+        speed_m_s=a.speed, n_procs=a.procs, max_iterations=a.max_iter, base_cell_m=a.base_cell
+    )
+    if a.resume_from is None:
+        cfd.write_case(a.case, a.design, cfg)
+    res = cfd.run_case(a.case, cfg.n_procs, resume_from=a.resume_from)
+    print(json.dumps(asdict(res), indent=2))
+    return 0 if res.succeeded else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

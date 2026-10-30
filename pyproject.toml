@@ -4,15 +4,19 @@ version = "0.1.0"
 description = "Daedalus X — Veloira autonomous race engineering system"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "build123d>=0.13.0",
     "fastapi>=0.162.0",
+    "foamlib>=1.10.0",
     "numpy>=2.5.4",
     "pint>=0.26.2",
     "pydantic>=2",
     "scipy>=1.18.1",
+    "trimesh>=5.2.0",
     "uvicorn[standard]>=0.54.0",
 ]
 
 [project.scripts]
+daedalus = "daedalus.cli:main"
 daedalus-api = "daedalus.api.__main__:main"
 
 [build-system]
@@ -26,14 +30,22 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "N", "SIM", "RUF"]
 
+[tool.ruff.lint.per-file-ignores]
+# physics symbols (U, L, W, H) follow engineering convention
+"src/daedalus/cfd.py" = ["N806"]
+
 [tool.mypy]
 strict = true
 python_version = "3.12"
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
-module = ["scipy.*", "pint.*"]
+module = ["scipy.*", "pint.*", "trimesh.*"]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["daedalus.geometry"]
+disallow_untyped_calls = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -19,7 +19,7 @@ export function PendingWorkspace({
           <ul className="mt-4 space-y-1.5 text-left">
             {needs.map((n) => (
               <li key={n.step} className="flex gap-3">
-                <span className="w-12 shrink-0 font-mono text-[10px] text-accent">{n.step}</span>
+                <span className="w-12 shrink-0 font-mono text-[10px] text-brand">{n.step}</span>
                 <span>{n.what}</span>
               </li>
             ))}

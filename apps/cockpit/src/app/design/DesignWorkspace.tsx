@@ -2,7 +2,8 @@
 
 import { AlertTriangle, Box, FileUp, Maximize2, Minimize2 } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { designGlbUrl, listDesigns } from "@/lib/api";
 import {
   Button,
   EmptyState,
@@ -11,8 +12,8 @@ import {
   SegmentedControl,
 } from "@/components/ui/primitives";
 import type { CameraPreset } from "@/components/viewer/CarViewer";
-import { cn } from "@/lib/cn";
-import { type LoadedModel, loadGlb } from "@/lib/gltf";
+import { cn } from "@/lib/utils";
+import { type LoadedModel, loadGlb, loadGlbUrl } from "@/lib/gltf";
 
 const CarViewer = dynamic(() => import("@/components/viewer/CarViewer").then((m) => m.CarViewer), {
   ssr: false,
@@ -55,6 +56,30 @@ export function DesignWorkspace() {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  // Load the first imported reference design from the API so the workspace opens on a real car.
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const designs = await listDesigns();
+        const first = designs[0];
+        if (!first || cancelled) return;
+        setLoading(true);
+        const loaded = await loadGlbUrl(designGlbUrl(first.design_id), `${first.design_id}.glb`);
+        if (cancelled) return;
+        setModel((current) => current ?? loaded);
+        setNonce((n) => n + 1);
+      } catch {
+        // API offline: the drop zone remains the entry point.
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const selectedPart = model?.parts.find((p) => p.uuid === selected);
@@ -109,7 +134,7 @@ export function DesignWorkspace() {
         <div
           className={cn(
             "absolute inset-0 transition-colors",
-            dragOver && "bg-accent/5 ring-2 ring-accent ring-inset",
+            dragOver && "bg-brand/5 ring-2 ring-brand ring-inset",
           )}
           onDragOver={(e) => {
             e.preventDefault();
@@ -172,17 +197,17 @@ export function DesignWorkspace() {
                 <Row k="Width (z)" v={`${(model.extents.z * 1000).toFixed(1)} mm`} />
                 <Row k="Triangles" v={model.triangles.toLocaleString()} />
                 <Row k="Parts" v={String(model.parts.length)} />
-                <dt className="text-muted">SHA-256</dt>
+                <dt className="text-muted-foreground">SHA-256</dt>
                 <dd className="truncate font-mono text-[10px] text-text-2" title={model.sha256}>
                   {model.sha256.slice(0, 16)}…
                 </dd>
-                <dd className="col-span-2 pt-1 text-2xs text-muted">
+                <dd className="col-span-2 pt-1 text-2xs text-muted-foreground">
                   Bounding box of the display mesh, assuming glTF metres. Not valid for
                   scrutineering.
                 </dd>
               </dl>
             ) : (
-              <p className="text-xs text-muted">Import a model to see its dimensions.</p>
+              <p className="text-xs text-muted-foreground">Import a model to see its dimensions.</p>
             )}
           </Panel>
           <Panel title="Parts" bodyClassName="overflow-y-auto py-1">
@@ -197,12 +222,12 @@ export function DesignWorkspace() {
                       onClick={() => setSelected(p.uuid === selected ? null : p.uuid)}
                       className={cn(
                         "flex w-full items-center gap-2 py-1 pr-3 text-left text-xs text-text-2 hover:bg-surface-3 hover:text-text",
-                        p.uuid === selected && "bg-accent/10 text-accent",
+                        p.uuid === selected && "bg-brand/10 text-brand",
                       )}
                       style={{ paddingLeft: 12 + p.depth * 12 }}
                     >
                       <span className="truncate">{p.name}</span>
-                      <span className="tabular ml-auto font-mono text-[10px] text-muted">
+                      <span className="tabular ml-auto font-mono text-[10px] text-muted-foreground">
                         {p.triangles.toLocaleString()}
                       </span>
                     </button>
@@ -210,7 +235,7 @@ export function DesignWorkspace() {
                 ))}
               </ul>
             ) : (
-              <p className="px-3 py-2 text-xs text-muted">
+              <p className="px-3 py-2 text-xs text-muted-foreground">
                 {model ? "No named parts in this file." : "—"}
               </p>
             )}
@@ -218,11 +243,11 @@ export function DesignWorkspace() {
           {selectedPart && (
             <Panel title="Selection" bodyClassName="p-3 text-xs space-y-1">
               <div className="font-medium text-text">{selectedPart.name}</div>
-              <div className="text-muted">
+              <div className="text-muted-foreground">
                 {selectedPart.meshCount} mesh(es) · {selectedPart.triangles.toLocaleString()}{" "}
                 triangles
               </div>
-              <div className="pt-1 text-2xs text-muted">
+              <div className="pt-1 text-2xs text-muted-foreground">
                 Rules, CFD forces and measurements link here once those records exist.
               </div>
             </Panel>
@@ -236,7 +261,7 @@ export function DesignWorkspace() {
 function Row({ k, v }: { k: string; v: string }) {
   return (
     <>
-      <dt className="text-muted">{k}</dt>
+      <dt className="text-muted-foreground">{k}</dt>
       <dd className="tabular text-right font-mono text-text">{v}</dd>
     </>
   );

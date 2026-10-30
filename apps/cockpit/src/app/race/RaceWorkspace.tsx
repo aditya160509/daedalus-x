@@ -118,7 +118,7 @@ export function RaceWorkspace() {
               { value: "M2", label: "M2 · + drag + rolling" },
             ]}
           />
-          <p className="text-2xs leading-relaxed text-muted">
+          <p className="text-2xs leading-relaxed text-muted-foreground">
             SciPy solve_ivp to the finish line. A car that stops early is a non-finish, never a
             time.
           </p>
@@ -179,7 +179,7 @@ export function RaceWorkspace() {
             max={1.5}
             step={0.001}
           />
-          <p className="pt-1 text-2xs leading-relaxed text-muted">
+          <p className="pt-1 text-2xs leading-relaxed text-muted-foreground">
             Replace with measured mass and CFD-derived CdA once available.
           </p>
         </Panel>
@@ -240,13 +240,13 @@ export function RaceWorkspace() {
           ) : (
             <div className="space-y-1 text-xs">
               <div className="truncate font-mono text-text">{source.name}</div>
-              <div className="text-muted">
+              <div className="text-muted-foreground">
                 {source.trace.t_s.length} samples · {source.trace.t_s.at(-1)?.toFixed(3)} s
               </div>
               <label className="flex items-center gap-2 pt-1 text-text-2">
                 <input
                   type="checkbox"
-                  className="accent-[var(--color-accent)]"
+                  className="accent-[var(--brand)]"
                   checked={source.provenance === "measured"}
                   onChange={(e) =>
                     setSource({
@@ -292,7 +292,7 @@ export function RaceWorkspace() {
               <AlertTriangle size={12} /> {fileError}
             </p>
           )}
-          <p className="text-2xs text-muted">CSV columns: time [s], force [N].</p>
+          <p className="text-2xs text-muted-foreground">CSV columns: time [s], force [N].</p>
         </Panel>
       </div>
 
@@ -421,7 +421,7 @@ function Results({
         title="Telemetry · time domain"
         actions={
           <>
-            {loading && <span className="text-2xs text-muted">updating…</span>}
+            {loading && <span className="text-2xs text-muted-foreground">updating…</span>}
             <ProvenanceBadge value="predicted" />
           </>
         }

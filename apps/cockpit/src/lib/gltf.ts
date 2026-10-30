@@ -63,3 +63,11 @@ export async function loadGlb(file: File): Promise<LoadedModel> {
     triangles: total,
   };
 }
+
+/** Fetch a server-side GLB and load it through the same hashing/part pipeline as a local file. */
+export async function loadGlbUrl(url: string, name: string): Promise<LoadedModel> {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`GLB request failed: ${res.status} ${res.statusText}`);
+  const blob = await res.blob();
+  return loadGlb(new File([blob], name, { type: "model/gltf-binary" }));
+}

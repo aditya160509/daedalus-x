@@ -71,10 +71,10 @@ export function TelemetryChart({
       const instance = chart.current;
       const el = host.current;
       if (!instance || !el) return;
-      const line = css("--color-line");
-      const muted = css("--color-muted");
-      const text2 = css("--color-text-2");
-      const accent = css("--color-accent");
+      const line = css("--border");
+      const muted = css("--muted-foreground");
+      const text2 = css("--text-2");
+      const accent = css("--brand");
       const n = tracks.length;
       const top = 8;
       const bottom = 46;
@@ -85,13 +85,13 @@ export function TelemetryChart({
       instance.setOption(
         {
           animation: false,
-          textStyle: { fontFamily: css("--font-mono") },
+          textStyle: { fontFamily: css("--font-jetbrains") },
           axisPointer: { link: [{ xAxisIndex: "all" }], lineStyle: { color: accent, width: 1 } },
           tooltip: {
             trigger: "axis",
-            backgroundColor: css("--color-surface-2"),
-            borderColor: css("--color-line-strong"),
-            textStyle: { color: css("--color-text"), fontSize: 11 },
+            backgroundColor: css("--popover"),
+            borderColor: css("--line-strong"),
+            textStyle: { color: css("--foreground"), fontSize: 11 },
             valueFormatter: (v: unknown) => (typeof v === "number" ? v.toPrecision(4) : String(v)),
           },
           grid: tracks.map((_, i) => ({

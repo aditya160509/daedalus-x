@@ -1,58 +1,140 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-/* Daedalus X design tokens (spec §7.2). Components use these tokens only. */
-@theme {
-  --color-bg: #090b0e;
-  --color-surface: #0f1318;
-  --color-surface-2: #141920;
-  --color-surface-3: #1a2029;
-  --color-line: #222a34;
-  --color-line-strong: #2f3945;
-  --color-text: #e7ebef;
-  --color-text-2: #a9b3bd;
-  --color-muted: #6f7b87;
-  --color-accent: #22d3ee;
-  --color-accent-dim: #0e7490;
-  --color-risk: #f5a524;
-  --color-danger: #f0525a;
-  --color-ok: #3ccf91;
+@custom-variant dark (&:is(.dark *));
 
-  /* provenance (always paired with a text label) */
-  --color-prov-measured: #3ccf91;
-  --color-prov-simulated: #5aa8ff;
-  --color-prov-predicted: #b18cff;
-  --color-prov-estimated: #d8b45a;
-  --color-prov-synthetic: #8a96a3;
+/*
+ * Daedalus X design tokens (spec §7.2).
+ * shadcn/ui semantic variables drive every component; Daedalus-specific roles (brand cyan,
+ * risk, provenance) are added on top. The cockpit is always dark: a calm neutral graphite with
+ * a single cyan accent reserved for focus, selection and live data.
+ */
+:root {
+  --radius: 0.75rem;
 
+  --background: #0b0b0c;
+  --foreground: #ececee;
+  --card: #141416;
+  --card-foreground: #ececee;
+  --popover: #18181b;
+  --popover-foreground: #ececee;
+  --primary: #f1f1f3;
+  --primary-foreground: #111113;
+  --secondary: #1c1c1f;
+  --secondary-foreground: #d4d4d8;
+  --muted: #1c1c1f;
+  --muted-foreground: #8a8a93;
+  --accent: #212125;
+  --accent-foreground: #f1f1f3;
+  --destructive: #f0525a;
+  --border: #242428;
+  --input: #2a2a2f;
+  --ring: #3dd6f0;
+
+  --sidebar: #0f0f11;
+  --sidebar-foreground: #c9c9cf;
+  --sidebar-border: #1e1e22;
+
+  --brand: #3dd6f0;
+  --risk: #f5a524;
+  --ok: #3ccf91;
+  --surface-3: #1f1f23;
+  --line-strong: #33333a;
+  --text-2: #b4b4bc;
+
+  --prov-measured: #3ccf91;
+  --prov-simulated: #5aa8ff;
+  --prov-predicted: #b18cff;
+  --prov-estimated: #e0b85c;
+  --prov-synthetic: #8a8a93;
+
+  --chart-1: #3dd6f0;
+  --chart-2: #b18cff;
+  --chart-3: #e0b85c;
+  --chart-4: #5aa8ff;
+  --chart-5: #3ccf91;
+}
+
+@theme inline {
   --font-sans: var(--font-inter);
   --font-mono: var(--font-jetbrains);
 
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: calc(var(--radius) - 2px);
+  --radius-xl: var(--radius);
+  --radius-panel: var(--radius);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Daedalus roles */
+  --color-bg: var(--background);
+  --color-surface: var(--card);
+  --color-surface-2: var(--secondary);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--border);
+  --color-line-strong: var(--line-strong);
+  --color-text: var(--foreground);
+  --color-text-2: var(--text-2);
+  --color-brand: var(--brand);
+  --color-risk: var(--risk);
+  --color-danger: var(--destructive);
+  --color-ok: var(--ok);
+  --color-prov-measured: var(--prov-measured);
+  --color-prov-simulated: var(--prov-simulated);
+  --color-prov-predicted: var(--prov-predicted);
+  --color-prov-estimated: var(--prov-estimated);
+  --color-prov-synthetic: var(--prov-synthetic);
+
   --text-2xs: 0.6875rem;
   --text-2xs--line-height: 1rem;
-
-  --radius-panel: 6px;
   --ease-snappy: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 @layer base {
+  * {
+    @apply border-border outline-ring/50;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-strong) transparent;
+  }
   html,
   body {
     height: 100%;
-    background: var(--color-bg);
-    color: var(--color-text);
+  }
+  body {
+    @apply bg-background text-foreground;
     font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
     -webkit-font-smoothing: antialiased;
   }
   ::selection {
-    background: color-mix(in oklab, var(--color-accent) 35%, transparent);
-  }
-  :focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
-  }
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-line-strong) transparent;
+    background: color-mix(in oklab, var(--brand) 30%, transparent);
   }
 }
 
@@ -66,9 +148,9 @@
 @utility label-caps {
   font-size: var(--text-2xs);
   line-height: var(--text-2xs--line-height);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--muted-foreground);
   font-weight: 500;
 }
 

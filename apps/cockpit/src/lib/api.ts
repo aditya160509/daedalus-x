@@ -85,3 +85,101 @@ export interface RaceSimulationRequest {
 
 export const simulateRace = (req: RaceSimulationRequest) =>
   request("/v1/race/simulate", RaceSimulation, { method: "POST", body: JSON.stringify(req) });
+
+export const DesignSummary = z.object({
+  design_id: z.string(),
+  source_file: z.string(),
+  source_sha256: z.string(),
+  length_m: z.number(),
+  width_m: z.number(),
+  height_m: z.number(),
+  frontal_area_m2: z.number(),
+  groups: z.record(z.string(), z.array(z.string())),
+  warnings: z.array(z.string()),
+  provenance: Provenance,
+});
+export type DesignSummary = z.infer<typeof DesignSummary>;
+export const listDesigns = () => request("/v1/designs", z.array(DesignSummary));
+export const designGlbUrl = (id: string) => `/api/v1/designs/${encodeURIComponent(id)}/display.glb`;
+
+export const RunState = z.enum(["running", "succeeded", "failed"]);
+export const CfdRunSummary = z.object({
+  run_id: z.string(),
+  state: RunState,
+  speed_m_s: z.number(),
+  cd: z.number().nullable(),
+  acceptance: z.string().nullable(),
+});
+export type CfdRunSummary = z.infer<typeof CfdRunSummary>;
+export const listCfdRuns = () => request("/v1/cfd/runs", z.array(CfdRunSummary));
+
+const Series = z.object({
+  iteration: z.array(z.number()),
+  values: z.record(z.string(), z.array(z.number())),
+});
+export type Series = z.infer<typeof Series>;
+
+const GroupForce = z.object({
+  drag_x: z.number(),
+  side_y: z.number(),
+  lift_z: z.number(),
+  pressure_drag_x: z.number(),
+  viscous_drag_x: z.number(),
+});
+
+export const CfdResult = z.object({
+  succeeded: z.boolean(),
+  steps: z.array(
+    z.object({
+      name: z.string(),
+      command: z.string(),
+      seconds: z.number(),
+      returncode: z.number(),
+    }),
+  ),
+  cells: z.number().nullable(),
+  mesh_ok: z.boolean().nullable(),
+  mesh_failures: z.array(z.string()),
+  iterations: z.number().nullable(),
+  converged_by_residuals: z.boolean().nullable(),
+  cd: z.number().nullable(),
+  cl: z.number().nullable(),
+  cd_window_spread: z.number().nullable(),
+  forces_n: z.record(z.string(), GroupForce),
+  force_sum_check: z.record(z.string(), z.number()),
+  acceptance: z.string(),
+  reasons: z.array(z.string()),
+  host: z.record(z.string(), z.string()),
+});
+export type CfdResult = z.infer<typeof CfdResult>;
+
+export const CfdRunDetail = z.object({
+  run_id: z.string(),
+  state: RunState,
+  manifest: z.object({
+    template: z.string(),
+    config: z.record(z.string(), z.unknown()),
+    car: z.object({
+      length_m: z.number(),
+      width_m: z.number(),
+      height_m: z.number(),
+      frontal_area_m2: z.number(),
+      groups: z.array(z.string()),
+    }),
+    base_cells: z.array(z.number()),
+    reference: z.object({
+      U_m_s: z.number(),
+      lRef_m: z.number(),
+      Aref_full_m2: z.number(),
+      Aref_half_m2: z.number(),
+    }),
+    assumptions: z.array(z.string()),
+  }),
+  result: CfdResult.nullable(),
+  coefficients: Series.nullable(),
+  residuals: Series.nullable(),
+  provenance: z.literal("simulated"),
+});
+export type CfdRunDetail = z.infer<typeof CfdRunDetail>;
+export const getCfdRun = (id: string) =>
+  request(`/v1/cfd/runs/${encodeURIComponent(id)}`, CfdRunDetail);
