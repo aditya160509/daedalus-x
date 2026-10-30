@@ -12,7 +12,7 @@
 | P2-02 | Calibration and sealed predictions | GPT | todo | |
 | P2-03 | Monte Carlo uncertainty | GPT | todo | |
 | P3-01 | Geometry path decision | GPT + Claude | blocked: car CAD/GLB | |
-| P3-02 | OpenFOAM case template | GPT | in progress (OpenFOAM.app installing) | |
+| P3-02 | OpenFOAM case template | Claude | in progress (OpenFOAM verified with motorBike) | [evidence](evidence/P3-02-motorbike.md) |
 | P3-03 | Grid study and speed check | GPT | todo | |
 | P3-04 | Component forces and field export | GPT | todo | |
 | P4-01 | Surrogate | GPT | todo | |
