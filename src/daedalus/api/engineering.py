@@ -174,3 +174,25 @@ def run_viz_bin(run_id: str) -> FileResponse:
     if not path.exists():
         raise HTTPException(404, "no flow-field export for this run; run `daedalus cfd viz`")
     return FileResponse(path, media_type="application/octet-stream")
+
+
+@router.get("/studies")
+def list_studies() -> list[dict[str, object]]:
+    from daedalus.gridstudy import report
+
+    root = data_root()
+    studies = root / "studies"
+    return [report(root, plan.parent.name) for plan in sorted(studies.glob("*/plan.json"))]
+
+
+@router.get("/studies/{study_id}")
+def get_study(study_id: str) -> dict[str, object]:
+    from daedalus.gridstudy import report
+
+    _safe_dir("studies", study_id)
+    try:
+        return report(data_root(), study_id)
+    except FileNotFoundError as exc:
+        raise HTTPException(404, "study plan not found") from exc
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc

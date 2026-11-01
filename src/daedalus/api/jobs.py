@@ -25,6 +25,9 @@ class CfdParams(Params):
     speed: float = Field(default=20, gt=0, lt=100)
     fidelity: Literal["quick", "final"] = "quick"
     procs: int = Field(default=8, ge=1, le=256)
+    base_cell_m: float | None = Field(default=None, gt=0, le=0.5)
+    domain_cell_m: float | None = Field(default=None, gt=0, le=0.5)
+    acceptance_mode: Literal["steady", "averaged"] | None = None
 
 
 class VizParams(Params):

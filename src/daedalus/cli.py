@@ -11,6 +11,10 @@ from pathlib import Path
 
 def main(argv: list[str] | None = None) -> int:
     args = argv if argv is not None else sys.argv[1:]
+    if args and args[0] == "grid":
+        from daedalus.gridstudy import main as grid_main
+
+        return grid_main(args[1:])
     if args and args[0] == "jobs":
         from daedalus.jobs import main as jobs_main
 
@@ -19,6 +23,7 @@ def main(argv: list[str] | None = None) -> int:
 
     p = argparse.ArgumentParser(prog="daedalus")
     sub = p.add_subparsers(dest="area", required=True)
+    sub.add_parser("grid", help="queue a mesh/speed study or report its results")
     sub.add_parser("jobs", help="durable job submission, worker and listing")
 
     g = sub.add_parser("geometry").add_subparsers(dest="cmd", required=True)
@@ -42,6 +47,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     cr.add_argument("--max-iter", type=int, help="override the fidelity's iteration cap")
     cr.add_argument("--base-cell", type=float, help="override background cell size, m")
+    cr.add_argument(
+        "--domain-cell", type=float, help="fixed domain rounding cell size for grid studies"
+    )
     cr.add_argument("--no-early-stop", action="store_true", help="always run to max-iter")
     cr.add_argument(
         "--acceptance-mode",
@@ -80,6 +88,8 @@ def main(argv: list[str] | None = None) -> int:
         overrides["max_iterations"] = a.max_iter
     if a.base_cell is not None:
         overrides["base_cell_m"] = a.base_cell
+    if a.domain_cell is not None:
+        overrides["domain_cell_m"] = a.domain_cell
     if a.acceptance_mode is not None:
         overrides["acceptance_mode"] = a.acceptance_mode
     if a.no_early_stop:

@@ -11,6 +11,7 @@ import { EmptyState, Metric, Panel, ProvenanceBadge } from "@/components/ui/prim
 import { type CfdRunDetail, getCfdRun, listCfdRuns } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { FlowPanel } from "./FlowPanel";
+import { GridStudyPanel } from "./GridStudyPanel";
 
 const RHO = 1.204; // kg/m³, matches the case template
 const CD_WINDOW = 200; // iterations used by the acceptance gate
@@ -260,6 +261,7 @@ function RunView({ run, hasViz }: { run: CfdRunDetail; hasViz: boolean }) {
       </Panel>
 
       <FlowPanel runId={run.run_id} hasViz={hasViz} />
+      <GridStudyPanel />
     </div>
   );
 }

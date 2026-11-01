@@ -44,7 +44,7 @@ def test_case_dicts_parse_and_carry_parameters(tmp_path: Path, design: Path) -> 
     assert FoamFile(case / "system/decomposeParDict")["numberOfSubdomains"] == 4
     assert (case / "constant/triSurface/front_wing.stl").exists()
     meta: Any = m
-    assert meta["template"] == "daedalus-halfcar-v2"
+    assert meta["template"] == "daedalus-halfcar-v3"
     assert any("symmetryPlane" in a for a in meta["assumptions"])
 
 

@@ -292,3 +292,14 @@ class LocalJob(BaseModel):
             **self.model_dump(mode="json", exclude={"params_json"}),
             "params": json.loads(self.params_json),
         }
+
+
+class GridConvergence(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid", allow_inf_nan=False)
+    status: Literal["monotonic", "oscillatory", "divergent", "indeterminate"]
+    reason: str
+    ratio: float | None = None
+    order: float | None = None
+    extrapolated_cd: float | None = None
+    gci_fine_pct: float | None = None
+    asymptotic_ratio: float | None = None

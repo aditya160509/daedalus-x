@@ -27,7 +27,7 @@ AcceptanceMode = Literal["steady", "averaged"]
 CD_AVERAGING_WINDOW = 500
 CD_BATCHES = 10
 
-TEMPLATE_VERSION = "daedalus-halfcar-v2"
+TEMPLATE_VERSION = "daedalus-halfcar-v3"
 OPENFOAM_LAUNCHER = "openfoam"  # OpenFOAM.app wrapper: `openfoam -c "<command>"`
 
 HEADER = """/*--------------------------------*- C++ -*----------------------------------*\\
@@ -57,6 +57,7 @@ class CaseConfig:
     nu_m2_s: float = 1.5e-5
     rho_kg_m3: float = 1.204
     base_cell_m: float = 0.02
+    domain_cell_m: float | None = None
     surface_level: tuple[int, int] = (4, 5)
     wing_level: tuple[int, int] = (5, 5)
     near_box_level: int = 3
@@ -75,6 +76,12 @@ class CaseConfig:
     def __post_init__(self) -> None:
         if not (0 < self.speed_m_s < 100):
             raise ValueError("speed must be in (0, 100) m/s")
+        if self.base_cell_m <= 0 or not math.isfinite(self.base_cell_m):
+            raise ValueError("base_cell_m must be finite and positive")
+        if self.domain_cell_m is not None and (
+            self.domain_cell_m <= 0 or not math.isfinite(self.domain_cell_m)
+        ):
+            raise ValueError("domain_cell_m must be finite and positive")
         if self.n_procs < 1 or self.max_iterations < 50:
             raise ValueError("n_procs >= 1 and max_iterations >= 50 required")
         if self.acceptance_mode not in (None, "steady", "averaged"):
@@ -156,7 +163,7 @@ class Domain:
     @classmethod
     def around(cls, car: CarGeometry, cfg: CaseConfig) -> Domain:
         L = car.length_m
-        snap = cfg.base_cell_m
+        snap = cfg.domain_cell_m or cfg.base_cell_m
 
         def r(v: float) -> float:
             return round(v / snap) * snap

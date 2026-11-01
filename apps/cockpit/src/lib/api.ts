@@ -362,3 +362,45 @@ export interface CfdJobInput {
 }
 export const submitCfdJob = (params: CfdJobInput) =>
   request("/v1/jobs", Job, { method: "POST", body: JSON.stringify({ kind: "cfd_run", params }) });
+
+const StudyCase = z.object({
+  label: z.string(),
+  run_id: z.string(),
+  job_id: z.string(),
+  base_cell_m: z.number(),
+  speed_m_s: z.number(),
+  cells: z.number().nullable(),
+  cd: z.number().nullable(),
+  ci95: z.tuple([z.number(), z.number()]).nullable(),
+  quality_eligible: z.boolean(),
+  acceptance: z.string().nullable(),
+});
+export const GridStudy = z.object({
+  study_id: z.string(),
+  provenance: z.literal("simulated"),
+  state: z.string(),
+  note: z.string(),
+  cases: z.array(StudyCase),
+  gci: z
+    .object({
+      status: z.string(),
+      reason: z.string(),
+      ratio: z.number().nullable(),
+      order: z.number().nullable(),
+      extrapolated_cd: z.number().nullable(),
+      gci_fine_pct: z.number().nullable(),
+      asymptotic_ratio: z.number().nullable(),
+    })
+    .nullable(),
+  speed_check: z
+    .object({
+      slope: z.number(),
+      slope_ci95: z.tuple([z.number(), z.number()]),
+      re_insensitive_within_ci: z.boolean(),
+      interpretation: z.string(),
+    })
+    .nullable(),
+});
+export type GridStudy = z.infer<typeof GridStudy>;
+export const listStudies = () => request("/v1/studies", z.array(GridStudy));
+export const getStudy = (id: string) => request(`/v1/studies/${encodeURIComponent(id)}`, GridStudy);

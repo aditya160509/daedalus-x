@@ -117,6 +117,14 @@ class JobQueue:
             speed = spec.get("speed", 20.0)
             if not isinstance(speed, (int, float)) or not 0 < speed < 100:
                 raise ValueError("speed must be in (0, 100) m/s")
+            for key in ("base_cell_m", "domain_cell_m"):
+                value = spec.get(key)
+                if value is not None and (
+                    not isinstance(value, (float, int)) or not 0 < value <= 0.5
+                ):
+                    raise ValueError(f"{key} must be in (0, 0.5] m")
+            if spec.get("acceptance_mode") not in (None, "steady", "averaged"):
+                raise ValueError("acceptance_mode must be steady or averaged")
             if spec.get("fidelity", "quick") not in ("quick", "final"):
                 raise ValueError("fidelity must be quick or final")
         elif kind == "cfd_viz":
@@ -401,6 +409,13 @@ def execute(queue: JobQueue, job: Job) -> None:
             "--fidelity",
             params.get("fidelity", "quick"),
         ]
+        for key, flag in (
+            ("base_cell_m", "--base-cell"),
+            ("domain_cell_m", "--domain-cell"),
+            ("acceptance_mode", "--acceptance-mode"),
+        ):
+            if params.get(key) is not None:
+                command.extend([flag, str(params[key])])
     elif job.kind == "cfd_viz":
         command = [*base, "cfd", "viz", str(queue.item_path("runs", params["run"]))]
     elif job.kind == "geometry_import":
