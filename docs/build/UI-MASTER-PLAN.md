@@ -81,7 +81,7 @@ Part 1 (sections A–H) is the build list. Part 2 (R1–R8) names the best exist
 | ID | What | Open source | Replaces | Effort | Pri |
 |---|---|---|---|---|---|
 | E1 | F1-style telemetry wall with synced cursors and zoom | **uPlot** lanes in a **PlotJuggler**-style layout | ECharts lanes | 1 | P1 |
-| E2 | Replay with timeline scrubber, markers and keyboard | coss **Slider** + existing R3F scene | Buttons | 0.5 | P0 |
+| E2 ✅ | Replay with timeline scrubber, markers and keyboard | coss **Slider** + existing R3F scene | Buttons | 0.5 | P0 |
 | E3 | Broadcast-style 3D replay: motion blur, track lights, ghost trail | **postprocessing** `MotionBlur`, drei `Trail` | Basic scene | 1 | P1 |
 | E4 | 3D labels without DOM roots (fixes drei Html warning) | drei **Text** (troika) with local font | drei `Html` | 0.3 | P0 |
 | E5 | Monte Carlo distribution plus tornado sensitivity chart | ECharts | Histogram only | 0.5 | P1 |

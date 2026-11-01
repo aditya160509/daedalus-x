@@ -1,8 +1,9 @@
 "use client";
 
 import { Pause, Play, RotateCcw } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SegmentedControl } from "@/components/ui/primitives";
+import { Slider } from "@/components/ui/slider";
 import type { LoadedModel } from "@/lib/gltf";
 import { RaceTrackScene, type ReplayCamera } from "./RaceTrackScene";
 import { useRacePlayback, type RaceTrace } from "./useRaceCar";
@@ -64,6 +65,18 @@ export function RaceReplay({
     setPlaying((value) => !value);
   };
 
+  // Space plays or pauses, but only when no control has focus.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.code !== "Space" || event.metaKey || event.ctrlKey || event.altKey) return;
+      if (event.target !== document.body) return;
+      event.preventDefault();
+      toggle();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="relative min-h-0 flex-1 overflow-hidden bg-background">
@@ -109,6 +122,26 @@ export function RaceReplay({
         >
           <RotateCcw size={13} />
         </button>
+        <div className="flex min-w-48 flex-1 items-center gap-3">
+          <span className="font-mono text-[11px] text-muted-foreground tabular-nums">
+            {cursor.toFixed(2)} s
+          </span>
+          <Slider
+            aria-label="Replay timeline"
+            min={0}
+            max={Math.max(endTime, 0.001)}
+            step={0.01}
+            value={[Math.min(cursor, endTime)]}
+            disabled={endTime <= 0}
+            onValueChange={([t]) => {
+              setPlaying(false);
+              onCursor(t);
+            }}
+          />
+          <span className="font-mono text-[11px] text-muted-foreground tabular-nums">
+            {endTime.toFixed(2)} s
+          </span>
+        </div>
         <div className="flex items-center gap-2">
           <span className="text-[10px] tracking-wide text-muted-foreground uppercase">Speed</span>
           <SegmentedControl
@@ -118,7 +151,7 @@ export function RaceReplay({
             options={SPEEDS}
           />
         </div>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <span className="text-[10px] tracking-wide text-muted-foreground uppercase">Camera</span>
           <SegmentedControl
             label="Replay camera"
