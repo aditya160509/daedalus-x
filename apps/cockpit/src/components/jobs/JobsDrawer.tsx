@@ -5,14 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ListTodo } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Dialog,
   DialogContent,
@@ -152,6 +145,7 @@ function JobCard({ job }: { job: Job }) {
   );
 }
 
+/** Global job tray: a popover from the header, so the workspace stays in view. */
 export function JobsDrawer() {
   const [open, setOpen] = useState(false);
   const cache = useQueryClient();
@@ -170,23 +164,23 @@ export function JobsDrawer() {
     }
   }, [jobs.data, cache]);
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
         <Button variant="outline" size="sm">
           <ListTodo />
           Jobs{" "}
           {jobs.data?.filter((j) => j.state === "queued" || j.state === "running").length || ""}
         </Button>
-      </SheetTrigger>
-      <SheetContent className="flex w-full flex-col overflow-y-auto sm:max-w-xl">
-        <SheetHeader>
-          <SheetTitle>Local jobs</SheetTitle>
-          <SheetDescription>
+      </PopoverTrigger>
+      <PopoverContent className="flex max-h-[min(70dvh,40rem)] flex-col overflow-hidden p-0">
+        <div className="border-b px-4 py-3">
+          <h2 className="text-sm font-semibold">Local jobs</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
             Durable queue · one CFD job at a time. Computational completion is separate from
             scientific acceptance.
-          </SheetDescription>
-        </SheetHeader>
-        <div className="space-y-3 px-4 pb-5">
+          </p>
+        </div>
+        <div className="min-h-0 space-y-3 overflow-y-auto p-4">
           {jobs.isPending && <div className="h-24 animate-pulse rounded-xl bg-surface-2" />}
           {jobs.error && (
             <p role="alert" className="text-sm text-danger">
@@ -202,7 +196,7 @@ export function JobsDrawer() {
             <JobCard key={job.id} job={job} />
           ))}
         </div>
-      </SheetContent>
-    </Sheet>
+      </PopoverContent>
+    </Popover>
   );
 }

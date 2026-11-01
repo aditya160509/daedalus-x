@@ -37,7 +37,7 @@ Part 1 (sections A–H) is the build list. Part 2 (R1–R8) names the best exist
 | B2 ✅ | ⌘K command palette: go to workspace, run CFD, open design, switch run, toggle layers, with ↑↓ / Enter / Esc footer | coss **Command** (cmdk-style) | None | 1 | P0 |
 | B3 | Breadcrumb top bar with run picker, units and provenance chips | coss **Breadcrumb / Menu / Badge** | Custom header | 0.5 | P0 |
 | B4 | Settings page in T3-style grouped rows (units, solver presets, CPU limits, theme, data paths) | coss **Field / Switch / Select / NumberField / Group** | None | 1 | P1 |
-| B5 | Global job tray: running CFD jobs, progress, cancel, logs | coss **Popover / Progress** + `@legendapp/list` | "Jobs 5" button | 1 | P0 |
+| B5 ✅ | Global job tray: running CFD jobs, progress, cancel, logs | coss **Popover / Progress** + `@legendapp/list` | "Jobs 5" button | 1 | P0 |
 | B6 | Resizable, dockable workspace layout (tabs, split, float, save layout) | **Dockview** (MIT) | Fixed CSS grids | 2 | P0 |
 | B7 ✅ (Design) | Split panes inside docks | **react-resizable-panels** | Fixed widths | 0.3 | P1 |
 | B8 | Saved layouts per workspace, reset to default | Dockview `toJSON` / `fromJSON` + localStorage | None | 0.5 | P1 |
