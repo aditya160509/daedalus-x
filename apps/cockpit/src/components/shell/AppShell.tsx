@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Box,
   ChevronsUpDown,
+  FileStack,
   Gauge,
   LayoutDashboard,
   PanelLeftClose,
@@ -20,6 +21,7 @@ import { Toaster } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { CommandPalette, OPEN_EVENT } from "./CommandPalette";
 import { RunPicker } from "./RunPicker";
+import { EvidenceDrawer, OPEN_EVIDENCE } from "@/components/evidence/EvidenceDrawer";
 import { Key } from "./Key";
 import { getHealth } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -330,15 +332,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             )}
             <div className="ml-auto flex items-center gap-4">
               <RunPicker />
-              <span className="text-xs text-muted-foreground">
-                SI units · provenance on every value
-              </span>
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new Event(OPEN_EVIDENCE))}
+                className="flex h-8 items-center gap-2 rounded-md border px-2.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              >
+                <FileStack className="size-3.5" aria-hidden />
+                Evidence
+                <Key>E</Key>
+              </button>
             </div>
           </header>
           <main className="min-h-0 flex-1 overflow-hidden">{children}</main>
         </div>
       </div>
       <CommandPalette items={ALL} />
+      <EvidenceDrawer />
       <Toaster
         theme="dark"
         position="bottom-right"

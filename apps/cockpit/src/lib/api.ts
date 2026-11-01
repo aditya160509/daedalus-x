@@ -657,3 +657,15 @@ export const ForgeChecks = z.object({
 });
 export const getForgeChecks = (design: string) =>
   request(`/v1/forge/checks?design=${encodeURIComponent(design)}`, ForgeChecks);
+
+// ATLAS evidence (T12)
+export const EvidenceRow = z.object({
+  id: z.string(),
+  kind: z.string(),
+  created_at: z.string(),
+  body: z.record(z.string(), z.unknown()),
+  verified: z.boolean(),
+});
+export type EvidenceRow = z.infer<typeof EvidenceRow>;
+export const listEvidence = (q?: string) =>
+  request(`/v1/evidence/records${q ? `?q=${encodeURIComponent(q)}` : ""}`, z.array(EvidenceRow));

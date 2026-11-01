@@ -56,7 +56,7 @@ export function SheetContent({
       >
         {children}
         <Primitive.Close
-          aria-label="Close jobs drawer"
+          aria-label="Close"
           className="absolute top-3 right-3 rounded-md p-1 text-muted-foreground hover:bg-secondary focus-visible:outline-2 focus-visible:outline-brand"
         >
           <X className="size-4" />

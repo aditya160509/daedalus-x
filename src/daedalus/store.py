@@ -131,6 +131,22 @@ class EvidenceStore:
         for (body,) in rows:
             yield kind.model_validate_json(body)
 
+    def timeline(
+        self, limit: int = 200, kind: str | None = None, q: str | None = None
+    ) -> list[tuple[str, str, str, str]]:
+        """(id, kind, created_at, body JSON), newest first; `q` matches id or body text."""
+        sql = "SELECT id, kind, created_at, body FROM records WHERE 1=1"
+        args: list[object] = []
+        if kind:
+            sql += " AND kind = ?"
+            args.append(kind)
+        if q:
+            sql += " AND (id LIKE ? OR body LIKE ?)"
+            args += [f"%{q}%", f"%{q}%"]
+        sql += " ORDER BY created_at DESC, id DESC LIMIT ?"
+        args.append(limit)
+        return [tuple(r) for r in self._db.execute(sql, args)]  # type: ignore[misc]
+
     def _references(self, record: BaseModel) -> list[str]:
         own = ID_FIELD[type(record)]  # type: ignore[index]
         refs: list[str] = []
