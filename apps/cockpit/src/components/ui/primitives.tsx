@@ -210,17 +210,20 @@ export function SegmentedControl<T extends string>({
 }) {
   return (
     <ToggleGroup
-      type="single"
       aria-label={label}
-      value={value}
-      onValueChange={(v) => v && onChange(v as T)}
+      value={[value]}
+      onValueChange={(next) => {
+        // A single-choice group: clicking the pressed segment keeps it selected.
+        const picked = next.find((v) => v !== value);
+        if (picked) onChange(picked as T);
+      }}
       className="rounded-lg border bg-secondary/50 p-0.5"
     >
       {options.map((o) => (
         <ToggleGroupItem
           key={o.value}
           value={o.value}
-          className="h-7 rounded-md px-3 text-xs text-muted-foreground data-[state=on]:bg-accent data-[state=on]:text-foreground data-[state=on]:shadow-sm"
+          className="h-7 rounded-md px-3 text-xs text-muted-foreground data-[pressed]:bg-accent data-[pressed]:text-foreground data-[pressed]:shadow-sm"
         >
           {o.label}
         </ToggleGroupItem>

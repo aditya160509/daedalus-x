@@ -1,14 +1,32 @@
 "use client";
 
-import type { ComponentProps } from "react";
-import { Dialog as Primitive } from "radix-ui";
+import type { ComponentProps, ReactElement } from "react";
+import { Dialog as Primitive } from "@base-ui/react/dialog";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Sheet = Primitive.Root;
-export const SheetTrigger = Primitive.Trigger;
 export const SheetTitle = Primitive.Title;
 export const SheetDescription = Primitive.Description;
+
+/** `asChild` renders the single child element as the trigger, Radix-style. */
+export function SheetTrigger({
+  asChild,
+  children,
+  ...props
+}: ComponentProps<typeof Primitive.Trigger> & { asChild?: boolean }) {
+  if (asChild) {
+    return (
+      <Primitive.Trigger data-slot="sheet-trigger" render={children as ReactElement} {...props} />
+    );
+  }
+  return (
+    <Primitive.Trigger data-slot="sheet-trigger" {...props}>
+      {children}
+    </Primitive.Trigger>
+  );
+}
+
 export function SheetHeader({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
@@ -20,17 +38,18 @@ export function SheetHeader({ className, ...props }: ComponentProps<"div">) {
     />
   );
 }
+
 export function SheetContent({
   className,
   children,
   ...props
-}: ComponentProps<typeof Primitive.Content>) {
+}: ComponentProps<typeof Primitive.Popup>) {
   return (
     <Primitive.Portal>
-      <Primitive.Overlay className="fixed inset-0 z-50 bg-background/80" />
-      <Primitive.Content
+      <Primitive.Backdrop className="fixed inset-0 z-50 bg-background/80" />
+      <Primitive.Popup
         className={cn(
-          "fixed inset-y-0 right-0 z-50 w-full border-l bg-card shadow-lg sm:max-w-lg",
+          "fixed inset-y-0 right-0 z-50 w-full border-l bg-card shadow-lg outline-none sm:max-w-lg",
           className,
         )}
         {...props}
@@ -38,11 +57,11 @@ export function SheetContent({
         {children}
         <Primitive.Close
           aria-label="Close jobs drawer"
-          className="absolute right-3 top-3 rounded-md p-1 text-muted-foreground hover:bg-secondary focus-visible:outline-2 focus-visible:outline-brand"
+          className="absolute top-3 right-3 rounded-md p-1 text-muted-foreground hover:bg-secondary focus-visible:outline-2 focus-visible:outline-brand"
         >
           <X className="size-4" />
         </Primitive.Close>
-      </Primitive.Content>
+      </Primitive.Popup>
     </Primitive.Portal>
   );
 }
