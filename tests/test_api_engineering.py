@@ -19,10 +19,20 @@ def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
             {
                 "source_file": "car.step",
                 "source_sha256": "sha256:" + "0" * 64,
+                "transform": {"source_units": "mm", "scale_to_m": 0.001},
                 "length_m": 0.2,
                 "width_m": 0.07,
                 "height_m": 0.05,
                 "frontal_area_m2": 0.0025,
+                "parts": [
+                    {
+                        "label": "Main",
+                        "group": "body",
+                        "volume_m3": 0.0001,
+                        "bbox_min_m": [0.0, 0.0, 0.0],
+                        "bbox_max_m": [0.2, 0.07, 0.05],
+                    }
+                ],
                 "groups": {"body": ["Main"]},
                 "warnings": [],
             }
@@ -44,6 +54,11 @@ def test_list_designs_and_glb(client: TestClient) -> None:
     assert designs[0]["provenance"] == "estimated"
     r = client.get("/v1/designs/car_a/display.glb")
     assert r.status_code == 200 and r.content == b"glTF"
+    geometry = client.get("/v1/designs/car_a/geometry.json")
+    assert geometry.status_code == 200
+    assert geometry.json()["parts"][0]["label"] == "Main"
+    assert geometry.json()["parts"][0]["volume_m3"] == 0.0001
+    assert client.get("/v1/designs/missing/geometry.json").status_code == 404
 
 
 def test_path_traversal_rejected(client: TestClient) -> None:

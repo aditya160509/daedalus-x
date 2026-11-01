@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DragBuildupChart } from "@/components/charts/DragBuildupChart";
 import { EmptyState, Panel, ProvenanceBadge, SegmentedControl } from "@/components/ui/primitives";
-import type { CameraPreset } from "@/components/viewer/CarViewer";
+import type { CameraPreset } from "@/components/viewer/types";
 import { ControlRail } from "@/components/viewer/flow/ControlRail";
 import { LayerOptions } from "@/components/viewer/flow/LayerOptions";
 import {

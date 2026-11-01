@@ -4,7 +4,7 @@ import { Circle, Pause, Play, Video } from "lucide-react";
 import { SegmentedControl } from "@/components/ui/primitives";
 import { type ColormapName, cssGradient } from "@/lib/colormap";
 import { cn } from "@/lib/utils";
-import type { CameraPreset } from "../CarViewer";
+import type { CameraPreset } from "../types";
 import type { Probe, ViewStats } from "./types";
 
 const PRESETS: ReadonlyArray<{ value: CameraPreset; label: string }> = [

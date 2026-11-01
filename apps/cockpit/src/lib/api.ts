@@ -131,6 +131,31 @@ export type DesignSummary = z.infer<typeof DesignSummary>;
 export const listDesigns = () => request("/v1/designs", z.array(DesignSummary));
 export const designGlbUrl = (id: string) => `/api/v1/designs/${encodeURIComponent(id)}/display.glb`;
 
+export const DesignPart = z.object({
+  label: z.string(),
+  group: z.string(),
+  volume_m3: z.number(),
+  bbox_min_m: z.tuple([z.number(), z.number(), z.number()]),
+  bbox_max_m: z.tuple([z.number(), z.number(), z.number()]),
+});
+export type DesignPart = z.infer<typeof DesignPart>;
+export const DesignGeometry = z.object({
+  design_id: z.string(),
+  source_file: z.string(),
+  source_sha256: z.string(),
+  transform: z.record(z.string(), z.unknown()),
+  length_m: z.number(),
+  width_m: z.number(),
+  height_m: z.number(),
+  frontal_area_m2: z.number(),
+  parts: z.array(DesignPart),
+  groups: z.record(z.string(), z.array(z.string())),
+  warnings: z.array(z.string()),
+});
+export type DesignGeometry = z.infer<typeof DesignGeometry>;
+export const getDesignGeometry = (id: string) =>
+  request(`/v1/designs/${encodeURIComponent(id)}/geometry.json`, DesignGeometry);
+
 export const RunState = z.enum(["running", "succeeded", "failed"]);
 export const CfdRunSummary = z.object({
   run_id: z.string(),

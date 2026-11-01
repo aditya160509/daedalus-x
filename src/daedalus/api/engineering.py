@@ -78,6 +78,41 @@ def design_glb(design_id: str) -> FileResponse:
     return FileResponse(path, media_type="model/gltf-binary")
 
 
+class DesignPart(BaseModel):
+    label: str
+    group: str
+    volume_m3: float
+    bbox_min_m: list[float]
+    bbox_max_m: list[float]
+
+
+class DesignGeometry(BaseModel):
+    design_id: str
+    source_file: str
+    source_sha256: str
+    transform: dict[str, Any]
+    length_m: float
+    width_m: float
+    height_m: float
+    frontal_area_m2: float
+    parts: list[DesignPart]
+    groups: dict[str, list[str]]
+    warnings: list[str]
+
+
+@router.get("/designs/{design_id}/geometry.json", response_model=DesignGeometry)
+def design_geometry(design_id: str) -> DesignGeometry:
+    """Full import record, including per-part volume and watertight warnings."""
+    path = _safe_dir("designs", design_id) / "geometry.json"
+    if not path.exists():
+        raise HTTPException(404, "geometry record not found")
+    try:
+        raw = json.loads(path.read_text())
+        return DesignGeometry(design_id=design_id, **raw)
+    except (KeyError, TypeError, ValueError) as exc:
+        raise HTTPException(422, f"invalid geometry record: {exc}") from exc
+
+
 class Series(BaseModel):
     iteration: list[int]
     values: dict[str, list[float]]

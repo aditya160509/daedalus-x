@@ -11,7 +11,7 @@ Take the **first `todo` whose dependencies are `accepted` or `review`**. "Lane" 
 | T04 | [Flow insight export: Q-criterion, iso-surfaces, oil flow, separation, total-pressure loss, drag build-up](tasks/T04-flow-insight-export.md) | backend-viz | — | review | Codex (GPT-6) |
 | T05 | [Adjoint drag sensitivity map](tasks/T05-adjoint-sensitivity.md) | backend-cfd | T01 | in-progress | Codex (GPT-6) |
 | T06 | [AETHER Wind Tunnel: commercial-grade visuals](tasks/T06-aether-wind-tunnel.md) | frontend-3d | T04 | review | DeepSeek V4.1 |
-| T07 | [AETHER Design Studio](tasks/T07-aether-design-studio.md) | frontend-3d | — | todo | |
+| T07 | [AETHER Design Studio](tasks/T07-aether-design-studio.md) | frontend-3d | — | review | DeepSeek V4.1 |
 | T08 | [TITAN race experience](tasks/T08-titan-race.md) | frontend-2d | — | todo | |
 | T09 | [Importers, units, calibration](tasks/T09-importers-calibration.md) | backend-api | T02 | todo | |
 | T10 | [ORACLE optimisation](tasks/T10-oracle.md) | backend-ml + frontend-2d | T02, T03 | todo | |

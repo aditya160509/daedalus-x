@@ -24,7 +24,7 @@ Remaining work is tracked task-by-task in [docs/build/TASK-BOARD.md](docs/build/
 | P6-01 | Design system | Claude | accepted (partial) | [evidence](evidence/P6-01-03.md) |
 | P6-02 | App shell | Claude | accepted (partial) | [evidence](evidence/P6-01-03.md) |
 | P6-03 | 3D car viewer | Claude | accepted (partial) | [evidence](evidence/P6-01-03.md) |
-| P6-04 | Design workspace | Claude | partial: GLB viewer, part list, auto-loads reference car | |
+| P6-04 | Design workspace | Claude + DeepSeek | T07 review: studio/engineering modes, exploded view, dimensions and measure, inspector from geometry.json, design switcher, synced compare, 2× PNG snapshot; visual QA pending | [T07](evidence/T07.md) |
 | P6-05 | Simulate workspace | Claude | partial: KPIs, convergence, forces, acceptance, 3D flow fields | |
 | P6-06 | Optimize workspace | Claude | todo | |
 | P6-07 | Race workspace | Claude | partial: telemetry + Monte Carlo spread | [evidence](evidence/P6-07-race.md) |

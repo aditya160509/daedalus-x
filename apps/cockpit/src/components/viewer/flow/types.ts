@@ -1,4 +1,4 @@
-import type { CameraPreset } from "../CarViewer";
+import type { CameraPreset } from "../types";
 import type { FlowField, FlowMesh } from "../../../lib/api";
 
 export interface FlowLayers {
