@@ -8,7 +8,7 @@ Remaining work is tracked task-by-task in [docs/build/TASK-BOARD.md](docs/build/
 | P0-02 | Data contracts | Claude | accepted (2 items moved to P1-01/P1-02) | [evidence](evidence/P0-02.md) |
 | P1-01 | Evidence store | Claude | accepted | [evidence](evidence/P1-01.md) |
 | P1-02 | API skeleton | Claude | done: health, race, Monte Carlo, designs, CFD runs, flow-field endpoints | [evidence](evidence/P6-07-race.md) |
-| P1-03 | Job runner | GPT | todo | |
+| P1-03 | Job runner | Codex (GPT-6) | T02 review: durable queue, subprocess worker, cancel/recovery, API and launch drawer | [evidence](evidence/T02.md) |
 | P1-04 | Units and imports | GPT | todo | |
 | P2-01 | Race model M0–M2 | Claude | accepted | [evidence](evidence/P2-01.md) |
 | P2-02 | Calibration and sealed predictions | Claude | sealing/verify/score done (tests/test_predictions.py); calibration needs measured runs | |
