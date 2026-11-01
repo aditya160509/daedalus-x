@@ -41,17 +41,23 @@ export function DesignCamera({
   const applying = useRef(false);
   const camera = useThree((s) => s.camera);
 
+  // Preset changes tween the camera to the new pose (ease-out), or jump when motion is reduced.
+  const goal = useRef<{ position: THREE.Vector3; target: THREE.Vector3 } | null>(null);
   useEffect(() => {
     const centre = new THREE.Vector3(...frame.center);
-    camera.position.copy(
-      new THREE.Vector3(...DIRECTIONS[preset])
-        .normalize()
-        .multiplyScalar(frame.radius * 4.4) // room for dimension lines and the viewport chrome
-        .add(centre),
-    );
-    camera.lookAt(centre);
-    controls.current?.target.copy(centre);
-    controls.current?.update();
+    const position = new THREE.Vector3(...DIRECTIONS[preset])
+      .normalize()
+      .multiplyScalar(frame.radius * 4.4) // room for dimension lines and the viewport chrome
+      .add(centre);
+    if (reducedMotion) {
+      camera.position.copy(position);
+      camera.lookAt(centre);
+      controls.current?.target.copy(centre);
+      controls.current?.update();
+      goal.current = null;
+    } else {
+      goal.current = { position, target: centre };
+    }
     // A repeated preset click intentionally re-frames the same camera pose.
     // oxlint-disable-next-line react/exhaustive-effect-dependencies
   }, [camera, frame, preset, presetNonce]);
@@ -72,6 +78,13 @@ export function DesignCamera({
 
   // OrbitControls' own autoRotate is frame-rate dependent; rotate by delta so it is exactly 6°/s.
   useFrame((_, delta) => {
+    const g = goal.current;
+    if (g && controls.current) {
+      const k = 1 - Math.exp(-delta * 8);
+      camera.position.lerp(g.position, k);
+      controls.current.target.lerp(g.target, k);
+      if (camera.position.distanceTo(g.position) < frame.radius * 1e-3) goal.current = null;
+    }
     if (!turntable || reducedMotion || !controls.current) return;
     const step = THREE.MathUtils.degToRad(TURNTABLE_DEG_PER_S) * Math.min(delta, 0.1);
     controls.current.setAzimuthalAngle(controls.current.getAzimuthalAngle() + step);
