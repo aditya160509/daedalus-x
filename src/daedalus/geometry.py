@@ -15,7 +15,7 @@ import tempfile
 from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, TypedDict, cast
 
 import numpy as np
 import trimesh
@@ -75,6 +75,12 @@ class Part:
     bbox_max_m: tuple[float, float, float]
 
 
+class Axle(TypedDict):
+    axis: tuple[float, float, float]
+    origin: tuple[float, float, float]
+    radius_m: float
+
+
 @dataclass(frozen=True)
 class GeometryReport:
     source_file: str
@@ -87,6 +93,8 @@ class GeometryReport:
     parts: tuple[Part, ...]
     groups: dict[str, list[str]] = field(default_factory=dict)
     warnings: tuple[str, ...] = ()
+    schema_version: int = 2
+    axles: dict[str, Axle] = field(default_factory=dict)
 
     def to_json(self) -> str:
         return json.dumps(asdict(self), indent=2)
@@ -171,6 +179,8 @@ def import_car(
 
     Writes: out_dir/cfd/<group>.stl, out_dir/display.glb, out_dir/geometry.json
     """
+    if (out_dir / "geometry.json").exists():
+        raise FileExistsError(f"{out_dir} already has a geometry revision; choose a new directory")
     if source_units != "mm":
         raise GeometryError("only millimetre STEP sources are supported")
     shape = import_step(step_path)
@@ -182,10 +192,16 @@ def import_car(
 
     rot = rotation_for(forward_axis, up_axis)
     meshes: list[tuple[str, ForceGroup | None, trimesh.Trimesh, float]] = []
+    centres: list[NDArray[np.float64]] = []
+    radii: list[float] = []
     for label, solid in solids:
         mesh = _tessellate(solid, tolerance_mm)
         mesh.vertices = (mesh.vertices @ rot.T) * MM_TO_M
         meshes.append((label, classify(label), mesh, solid.volume * MM_TO_M**3))
+        centres.append((rot @ np.asarray(tuple(solid.center()))) * MM_TO_M)
+        radii.append(
+            float(np.abs(rot[2]) @ np.asarray(tuple(solid.bounding_box().size))) * MM_TO_M / 2
+        )
 
     allv = np.vstack([m.vertices for _, _, m, _ in meshes])
     lo, hi = allv.min(axis=0), allv.max(axis=0)
@@ -228,6 +244,38 @@ def import_car(
         if group is not ForceGroup.INTERNAL:
             groups.setdefault(group.value, []).append(mesh)
 
+    # Keep semantic parts/GLB in the parent wheels group; only CFD surfaces split by axle.
+    # shortcut: two circular axles share a radius per axle; generalise for other wheel layouts.
+    axles: dict[str, Axle] = {}
+    wheel_indices = [i for i, part in enumerate(parts) if part.group is ForceGroup.WHEELS]
+    if wheel_indices:
+        xs = [float(centres[i][0] + shift[0]) for i in wheel_indices]
+        midpoint = (min(xs) + max(xs)) / 2
+        groups.pop("wheels")
+        for name, front in (("wheels_front", True), ("wheels_rear", False)):
+            indices = [i for i in wheel_indices if (centres[i][0] + shift[0] <= midpoint) == front]
+            if not indices:
+                raise GeometryError("wheel solids must identify two distinct axle positions")
+            radius = max(radii[i] for i in indices)
+            if radius <= 0:
+                raise GeometryError(f"{name}: wheel radius must be positive")
+            # Largest wheel solids define the rolling radius; bushes share the axle position.
+            wheel_centres = [
+                float(centres[i][0] + shift[0])
+                for i in indices
+                if np.isclose(
+                    radii[i],
+                    radius,
+                    rtol=1e-3,
+                )
+            ]
+            axles[name] = {
+                "axis": (0.0, 1.0, 0.0),
+                "origin": (float(np.mean(wheel_centres)), 0.0, radius),
+                "radius_m": radius,
+            }
+            groups[name] = [meshes[i][2] for i in indices]
+
     cfd_dir = out_dir / "cfd"
     cfd_dir.mkdir(parents=True, exist_ok=True)
     for name, ms in groups.items():
@@ -248,7 +296,19 @@ def import_car(
         height_m=float(size[2]),
         frontal_area_m2=frontal_area(external),
         parts=tuple(parts),
-        groups={g: [p.label for p in parts if p.group.value == g] for g in groups},
+        groups={
+            **{g: [p.label for p in parts if p.group.value == g] for g in groups if g not in axles},
+            **{
+                g: [
+                    parts[i].label
+                    for i in wheel_indices
+                    if ((centres[i][0] + shift[0] <= midpoint) == (g == "wheels_front"))
+                ]
+                for g in axles
+            },
+            **({"wheels": [parts[i].label for i in wheel_indices]} if wheel_indices else {}),
+        },
+        axles=axles,
         warnings=tuple(warnings),
     )
     (out_dir / "geometry.json").write_text(report.to_json())

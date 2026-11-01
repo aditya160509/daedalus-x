@@ -37,6 +37,11 @@ def main(argv: list[str] | None = None) -> int:
     cr.add_argument("--max-iter", type=int, help="override the fidelity's iteration cap")
     cr.add_argument("--base-cell", type=float, help="override background cell size, m")
     cr.add_argument("--no-early-stop", action="store_true", help="always run to max-iter")
+    cr.add_argument(
+        "--acceptance-mode",
+        choices=("steady", "averaged"),
+        help="default: averaged for wheel geometry, steady otherwise",
+    )
     cr.add_argument("--resume-from", help="re-run an existing case from this step")
 
     cv = c.add_parser("viz", help="export pressure, streamlines and slices for the cockpit")
@@ -67,6 +72,8 @@ def main(argv: list[str] | None = None) -> int:
         overrides["max_iterations"] = a.max_iter
     if a.base_cell is not None:
         overrides["base_cell_m"] = a.base_cell
+    if a.acceptance_mode is not None:
+        overrides["acceptance_mode"] = a.acceptance_mode
     if a.no_early_stop:
         overrides["early_stop_tolerance"] = None
     cfg = cfd.CaseConfig.preset(a.fidelity, **overrides)

@@ -3,7 +3,7 @@
 One versioned template (TEMPLATE_VERSION) defines the domain, numerics, boundary conditions and
 force function objects. Inputs are the per-group STL surfaces written by `geometry.import_car`
 (engineering frame, metres). The case is a half model with a symmetry plane at y = 0, a moving
-ground and stationary wheels; these assumptions are recorded in every run manifest.
+ground and rotating wheels when axle metadata is available. Assumptions are in the manifest.
 """
 
 from __future__ import annotations
@@ -14,13 +14,20 @@ import platform
 import shutil
 import subprocess
 import time
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-TEMPLATE_VERSION = "daedalus-halfcar-v1"
+if TYPE_CHECKING:
+    from daedalus.geometry import Axle
+
+AcceptanceMode = Literal["steady", "averaged"]
+CD_AVERAGING_WINDOW = 500
+CD_BATCHES = 10
+
+TEMPLATE_VERSION = "daedalus-halfcar-v2"
 OPENFOAM_LAUNCHER = "openfoam"  # OpenFOAM.app wrapper: `openfoam -c "<command>"`
 
 HEADER = """/*--------------------------------*- C++ -*----------------------------------*\\
@@ -38,7 +45,7 @@ FoamFile
 ASSUMPTIONS = (
     "half model, symmetryPlane at y = 0 (zero yaw)",
     "steady incompressible RANS, k-omega SST, Spalding wall function",
-    "moving ground at freestream speed; wheels stationary (no rotation)",
+    "moving ground at freestream speed",
     "ground plane raised 0.5 mm into the wheels to avoid zero-thickness contact cells",
     "uniform inlet, turbulence intensity 0.5 %, length scale 10 mm",
 )
@@ -63,12 +70,15 @@ class CaseConfig:
     # Stop early once the windowed Cd average moves less than this (relative). None = run to end.
     early_stop_tolerance: float | None = 0.001
     early_stop_window: int = 200
+    acceptance_mode: AcceptanceMode | None = None
 
     def __post_init__(self) -> None:
         if not (0 < self.speed_m_s < 100):
             raise ValueError("speed must be in (0, 100) m/s")
         if self.n_procs < 1 or self.max_iterations < 50:
             raise ValueError("n_procs >= 1 and max_iterations >= 50 required")
+        if self.acceptance_mode not in (None, "steady", "averaged"):
+            raise ValueError("acceptance_mode must be steady or averaged")
         if self.early_stop_window < 20:
             raise ValueError("early_stop_window must be >= 20")
         if self.early_stop_tolerance is not None and not (0 < self.early_stop_tolerance < 0.1):
@@ -91,7 +101,7 @@ FIDELITY: dict[str, dict[str, Any]] = {
         "near_box_level": 2,
         "wake_box_level": 1,
         "n_layers": 2,
-        "max_iterations": 800,
+        "max_iterations": 1200,
         "early_stop_window": 150,
     },
     "final": {},
@@ -107,6 +117,7 @@ class CarGeometry:
     height_m: float
     frontal_area_m2: float
     groups: tuple[str, ...]
+    axles: dict[str, Axle] = field(default_factory=dict)
 
     @classmethod
     def from_design_dir(cls, design_dir: Path) -> CarGeometry:
@@ -114,7 +125,24 @@ class CarGeometry:
         stls = tuple(sorted(p.stem for p in (design_dir / "cfd").glob("*.stl")))
         if not stls:
             raise FileNotFoundError(f"no CFD surfaces in {design_dir / 'cfd'}")
-        return cls(g["length_m"], g["width_m"], g["height_m"], g["frontal_area_m2"], stls)
+        axles: dict[str, Axle] = g.get("axles", {})
+        for name, axle in axles.items():
+            if name not in ("wheels_front", "wheels_rear") or name not in stls:
+                raise ValueError(f"invalid axle surface {name!r}")
+            axis = np.asarray(axle["axis"], dtype=float)
+            origin = np.asarray(axle["origin"], dtype=float)
+            if axis.shape != (3,) or origin.shape != (3,):
+                raise ValueError(f"{name}: axle axis and origin must have three coordinates")
+            radius = axle["radius_m"]
+            if not math.isfinite(radius) or radius <= 0:
+                raise ValueError(f"{name}: wheel radius must be finite and positive")
+            if (
+                not np.allclose(axis, [0, 1, 0])
+                or not np.all(np.isfinite(origin))
+                or not np.allclose(origin[1:], [0, radius])
+            ):
+                raise ValueError(f"{name}: axle must use axis (0 1 0) and origin (x 0 radius)")
+        return cls(g["length_m"], g["width_m"], g["height_m"], g["frontal_area_m2"], stls, axles)
 
 
 @dataclass(frozen=True)
@@ -156,6 +184,10 @@ def _v(x: float) -> str:
 def write_case(case_dir: Path, design_dir: Path, cfg: CaseConfig) -> dict[str, object]:
     """Create a complete OpenFOAM case directory. Returns the case manifest."""
     car = CarGeometry.from_design_dir(design_dir)
+    mode: AcceptanceMode = cfg.acceptance_mode or (
+        "averaged" if any(g.startswith("wheels") for g in car.groups) else "steady"
+    )
+    cfg = replace(cfg, acceptance_mode=mode)
     dom = Domain.around(car, cfg)
     if case_dir.exists():
         raise FileExistsError(f"{case_dir} already exists; cases are never overwritten")
@@ -166,6 +198,7 @@ def write_case(case_dir: Path, design_dir: Path, cfg: CaseConfig) -> dict[str, o
             design_dir / "cfd" / f"{g}.stl", case_dir / "constant/triSurface" / f"{g}.stl"
         )
 
+    # +y crossed with -z is -x: negative omega matches downstream moving ground.
     U = cfg.speed_m_s
     k = 1.5 * (U * cfg.turbulence_intensity) ** 2
     omega = math.sqrt(k) / (0.09**0.25 * cfg.turbulence_length_m)
@@ -173,7 +206,11 @@ def write_case(case_dir: Path, design_dir: Path, cfg: CaseConfig) -> dict[str, o
     files = {
         "system/controlDict": _control_dict(cfg, car, aref_half),
         "system/fvSchemes": _FV_SCHEMES,
-        "system/fvSolution": _FV_SOLUTION,
+        "system/fvSolution": (
+            _FV_SOLUTION.replace('    residualControl { p 1e-4; U 1e-5; "(k|omega)" 1e-5; }', "")
+            if mode == "averaged"
+            else _FV_SOLUTION
+        ),
         "system/blockMeshDict": _block_mesh(dom, cfg),
         "system/snappyHexMeshDict": _snappy(car, dom, cfg),
         "system/meshQualityDict": _MESH_QUALITY,
@@ -195,6 +232,15 @@ def write_case(case_dir: Path, design_dir: Path, cfg: CaseConfig) -> dict[str, o
                 "outlet": "type inletOutlet; inletValue uniform (0 0 0); value $internalField;",
                 "ground": f"type fixedValue; value uniform ({_v(U)} 0 0);",
                 "_car": "type noSlip;",
+                **{
+                    group: (
+                        "type rotatingWallVelocity; origin ("
+                        + " ".join(_v(v) for v in axle["origin"])
+                        + f"); axis (0 1 0); omega {_v(-U / axle['radius_m'])}; "
+                        "value $internalField;"
+                    )
+                    for group, axle in car.axles.items()
+                },
             },
         ),
         "0/p": _field(
@@ -266,7 +312,30 @@ def write_case(case_dir: Path, design_dir: Path, cfg: CaseConfig) -> dict[str, o
             "Aref_half_m2": aref_half,
         },
         "inlet_turbulence": {"k_m2_s2": k, "omega_1_s": omega},
-        "assumptions": list(ASSUMPTIONS),
+        "assumptions": [
+            *ASSUMPTIONS,
+            *(
+                [
+                    "wheels rotate with ω = U/r (no slip at contact); "
+                    "contact patch modelled by 0.5 mm ground offset"
+                ]
+                if car.axles
+                else []
+            ),
+            *(
+                [
+                    "averaged gate estimates numerical iteration-mean uncertainty; "
+                    "steady RANS iterations are not physical time samples"
+                ]
+                if mode == "averaged"
+                else []
+            ),
+        ],
+        "warnings": [
+            f"{g}: no axle metadata; falling back to stationary noSlip wheels"
+            for g in car.groups
+            if g.startswith("wheels") and g not in car.axles
+        ],
     }
     (case_dir / "daedalus_manifest.json").write_text(json.dumps(manifest, indent=2))
     return manifest
@@ -289,7 +358,9 @@ def _field(
         patches["top"] = patches["side"] = "type zeroGradient;"
     body = '    #includeEtc "caseDicts/setConstraintTypes"\n'
     body += "".join(f"    {p}\n    {{\n        {s}\n    }}\n" for p, s in patches.items())
-    body += f'    "({"|".join(car.groups)})"\n    {{\n        {bc["_car"]}\n    }}\n'
+    walls = [g for g in car.groups if g not in patches]
+    if walls:
+        body += f'    "({"|".join(walls)})"\n    {{\n        {bc["_car"]}\n    }}\n'
     return (
         _dict(name, cls)
         + f"dimensions {dims};\ninternalField {internal};\nboundaryField\n{{\n{body}}}\n"
@@ -372,11 +443,11 @@ castellatedMeshControls
 
 snapControls
 {{
-    nSmoothPatch 3;
+    nSmoothPatch 5;
     tolerance 2.0;
     nSolveIter 50;
-    nRelaxIter 5;
-    nFeatureSnapIter 10;
+    nRelaxIter 8;
+    nFeatureSnapIter 15;
     implicitFeatureSnap false;
     explicitFeatureSnap true;
     multiRegionFeatureSnap false;
@@ -434,10 +505,21 @@ def _control_dict(cfg: CaseConfig, car: CarGeometry, aref_half: float) -> str:
         "        CofR (0 0 0);\n"
         "        writeControl timeStep; writeInterval 1;\n"
     )
+    force_groups = {g: g for g in car.groups if g not in ("wheels_front", "wheels_rear")}
+    wheels = [g for g in car.groups if g in ("wheels_front", "wheels_rear")]
+    if wheels:
+        force_groups["wheels"] = " ".join(wheels)
     per_group = "".join(
         f"    forces_{g}\n    {{\n        type forces; libs (forces);\n"
-        f"        patches ({g});\n{common}    }}\n"
-        for g in car.groups
+        f"        patches ({patches});\n{common}    }}\n"
+        for g, patches in force_groups.items()
+    )
+    minimum_duration = (
+        f"            minimumIterations\n            {{\n"
+        f"                type maxDuration; duration {2 * CD_AVERAGING_WINDOW}; groupID 1;\n"
+        "            }\n"
+        if cfg.acceptance_mode == "averaged"
+        else ""
     )
     early_stop = (
         ""
@@ -451,9 +533,9 @@ def _control_dict(cfg: CaseConfig, car: CarGeometry, aref_half: float) -> str:
             {{
                 type average; functionObject forceCoeffs; fields (Cd);
                 tolerance {_v(cfg.early_stop_tolerance)};
-                window {cfg.early_stop_window}; windowType approximate;
+                window {cfg.early_stop_window}; windowType approximate; groupID 1;
             }}
-        }}
+{minimum_duration}        }}
         satisfiedAction end;
     }}
 """
@@ -548,7 +630,20 @@ cache { grad(U); }
 
 _MESH_QUALITY = (
     HEADER.format(template=TEMPLATE_VERSION, cls="dictionary", obj="meshQualityDict")
-    + """#includeEtc "caseDicts/mesh/generation/meshQualityDict.cfg"
+    + """maxNonOrtho 65;
+maxBoundarySkewness 20;
+maxInternalSkewness 4;
+maxConcave 80;
+minVol 1e-13;
+minTetQuality 1e-15;
+minArea -1;
+minTwist 0.02;
+minDeterminant 0.001;
+minFaceWeight 0.05;
+minVolRatio 0.01;
+minTriangleTwist -1;
+nSmoothScale 4;
+errorReduction 0.75;
 """
 )
 
@@ -582,6 +677,9 @@ class RunResult:
     cd: float | None = None
     cl: float | None = None
     cd_window_spread: float | None = None
+    cd_mean: float | None = None
+    cd_ci95: tuple[float, float] | None = None
+    acceptance_mode: AcceptanceMode = "steady"
     forces_n: dict[str, dict[str, float]] = field(default_factory=dict)
     force_sum_check: dict[str, float] = field(default_factory=dict)
     acceptance: str = "pending_review"
@@ -605,7 +703,14 @@ def run_case(case_dir: Path, n_procs: int, resume_from: str | None = None) -> Ru
     """Mesh, solve and post-process. Never raises for solver failure: returns a failed result."""
     if shutil.which(OPENFOAM_LAUNCHER) is None:
         raise CfdError("OpenFOAM launcher not found; install OpenFOAM.app")
-    res = RunResult(case_dir=str(case_dir), succeeded=False, host=_host_info())
+    mode = json.loads((case_dir / "daedalus_manifest.json").read_text())["config"].get(
+        "acceptance_mode", "steady"
+    )
+    if mode not in ("steady", "averaged"):
+        raise CfdError(f"invalid acceptance mode {mode!r}")
+    res = RunResult(
+        case_dir=str(case_dir), succeeded=False, host=_host_info(), acceptance_mode=mode
+    )
     par = f"mpirun -np {n_procs}" if n_procs > 1 else ""
     pflag = "-parallel" if n_procs > 1 else ""
     steps = [
@@ -635,7 +740,12 @@ def run_case(case_dir: Path, n_procs: int, resume_from: str | None = None) -> Ru
                 _restore_initial_fields(case_dir, res.steps)
             else:
                 _run(case_dir, name, cmd, res.steps)
+                if name == "checkMesh":
+                    _mesh_status(case_dir, res)
+                    if not res.mesh_ok:
+                        raise CfdError("checkMesh rejected mesh: " + "; ".join(res.mesh_failures))
     except CfdError as e:
+        _mesh_status(case_dir, res)
         res.reasons.append(str(e))
         res.acceptance = "rejected"
         _write_result(case_dir, res)
@@ -714,23 +824,55 @@ CD_STABILITY_TOL = 0.01  # max relative spread of Cd over the window
 FORCE_SUM_TOL = 1e-3
 
 
-def evaluate(case_dir: Path, res: RunResult) -> None:
-    """Fill quality fields and decide scientific acceptance (spec §4.2a, §4.4a)."""
-    check = (
-        (case_dir / "log.checkMesh").read_text() if (case_dir / "log.checkMesh").exists() else ""
-    )
+def cd_batch_statistics(values: np.ndarray) -> tuple[float, tuple[float, float]]:
+    """Student-t interval for 10 batch means, inflated for positive lag-1 batch correlation.
+
+    This quantifies numerical iteration means, not physical-time turbulence uncertainty.
+    Negative sample correlation cannot shrink the interval below the independent-batch estimate.
+    """
+    from scipy.stats import t
+
+    if values.ndim != 1 or len(values) != CD_AVERAGING_WINDOW or not np.all(np.isfinite(values)):
+        raise ValueError(f"Cd statistics require {CD_AVERAGING_WINDOW} finite samples")
+    batches = values.reshape(CD_BATCHES, -1).mean(axis=1)
+    mean = float(batches.mean())
+    centred = batches - mean
+    variance = float(np.var(batches, ddof=1))
+    denom = float(centred @ centred)
+    rho = float(centred[:-1] @ centred[1:] / denom) if denom > 0 else 0.0
+    rho = min(max(rho, 0.0), 0.99)
+    correction = (1 + rho) / (1 - rho)
+    half_width = float(t.ppf(0.975, CD_BATCHES - 1)) * math.sqrt(variance * correction / CD_BATCHES)
+    return mean, (mean - half_width, mean + half_width)
+
+
+def _mesh_status(case_dir: Path, res: RunResult) -> None:
+    path = case_dir / "log.checkMesh"
+    check = path.read_text() if path.exists() else ""
+    res.mesh_failures = []
     for line in check.splitlines():
         if line.strip().startswith("cells:"):
             res.cells = int(line.split()[-1])
         if line.strip().startswith("***"):
             res.mesh_failures.append(line.strip())
-    res.mesh_ok = "Mesh OK." in check
+    res.mesh_ok = "Mesh OK." in check and not res.mesh_failures
 
-    solver_log = (case_dir / "log.simpleFoam").read_text()
+
+def evaluate(case_dir: Path, res: RunResult) -> None:
+    """Fill quality fields and decide scientific acceptance (spec §4.2a, §4.4a)."""
+    _mesh_status(case_dir, res)
+    if not res.mesh_ok:
+        res.reasons.append("checkMesh reported failures: " + "; ".join(res.mesh_failures))
+    manifest = json.loads((case_dir / "daedalus_manifest.json").read_text())
+    mode = manifest["config"].get("acceptance_mode", "steady")
+    if mode not in ("steady", "averaged"):
+        raise CfdError(f"invalid acceptance mode {mode!r}")
+    res.acceptance_mode = mode
+    solver_path = case_dir / "log.simpleFoam"
+    solver_log = solver_path.read_text() if solver_path.exists() else ""
     res.converged_by_residuals = (
         "reached convergence criteria" in solver_log or "SIMPLE solution converged" in solver_log
     )
-
     pp = case_dir / "postProcessing"
     coeff = next(iter(sorted(pp.glob("forceCoeffs/*/coefficient.dat"))), None)
     if coeff is None:
@@ -739,17 +881,56 @@ def evaluate(case_dir: Path, res: RunResult) -> None:
         return
     names, data = read_dat(coeff)
     cd_col, cl_col = names.index("Cd"), names.index("Cl")
+    if not np.all(np.isfinite(data[:, [0, cd_col, cl_col]])):
+        res.reasons.append("non-finite coefficient history")
+        res.acceptance = "rejected"
+        return
     res.iterations = int(data[-1, 0])
-    res.cd, res.cl = float(data[-1, cd_col]), float(data[-1, cl_col])
-    window = data[-CD_STABILITY_WINDOW:, cd_col]
-    res.cd_window_spread = float((window.max() - window.min()) / abs(window.mean()))
+    window_size = CD_AVERAGING_WINDOW if mode == "averaged" else CD_STABILITY_WINDOW
+    window = data[-window_size:, cd_col]
+    mean = float(window.mean())
+    if mean <= 0:
+        res.reasons.append("mean Cd must be positive")
+    res.cd_window_spread = float(np.ptp(window) / abs(mean)) if mean != 0 else None
+    res.cd_mean = mean
+    res.cd = mean if mode == "averaged" else float(data[-1, cd_col])
+    res.cl = (
+        float(data[-window_size:, cl_col].mean()) if mode == "averaged" else float(data[-1, cl_col])
+    )
+    if len(window) < window_size:
+        res.reasons.append(f"Cd gate needs a complete {window_size}-sample window")
+    if mode == "averaged":
+        if len(window) < CD_AVERAGING_WINDOW or res.iterations < 2 * CD_AVERAGING_WINDOW:
+            res.reasons.append("averaged gate needs 500 samples after at least 1000 iterations")
+        else:
+            _, res.cd_ci95 = cd_batch_statistics(window)
+            half_width = (res.cd_ci95[1] - res.cd_ci95[0]) / 2
+            if mean > 0 and half_width / mean > CD_STABILITY_TOL:
+                res.reasons.append(f"Cd mean CI not stable: {half_width / mean:.2%} half-width")
+    elif res.cd_window_spread is None or res.cd_window_spread > CD_STABILITY_TOL:
+        res.reasons.append(
+            f"Cd not stable: {res.cd_window_spread} relative spread over the last "
+            f"{CD_STABILITY_WINDOW} iterations"
+        )
 
     total = np.zeros(3)
-    for f in sorted(pp.glob("forces_*/*/force.dat")):
+    force_files = sorted(pp.glob("forces_*/*/force.dat"))
+    for f in force_files:
         group = f.parent.parent.name.removeprefix("forces_")
         _, d = read_dat(f)
-        last = d[-1]
-        # columns: Time total(x y z) pressure(x y z) viscous(x y z); half model -> x2 for full car
+        if mode == "averaged":
+            times = data[-window_size:, 0]
+            selected = d[np.isin(d[:, 0], times)]
+            if len(selected) != len(times) or not np.array_equal(selected[:, 0], times):
+                res.reasons.append(f"{group}: force history does not match Cd averaging window")
+                continue
+            last = selected.mean(axis=0)
+        else:
+            last = d[-1]
+        if not np.all(np.isfinite(last[1:10])):
+            res.reasons.append(f"{group}: non-finite component force")
+            continue
+        # Same window as Cd; half model forces x2 for full-car reporting.
         tot = last[1:4] * 2.0
         res.forces_n[group] = {
             "drag_x": float(tot[0]),
@@ -759,12 +940,16 @@ def evaluate(case_dir: Path, res: RunResult) -> None:
             "viscous_drag_x": float(last[7] * 2.0),
         }
         total += tot
-    if res.forces_n:
-        q = (
-            0.5
-            * json.loads((case_dir / "daedalus_manifest.json").read_text())["config"]["rho_kg_m3"]
-        )
-        manifest = json.loads((case_dir / "daedalus_manifest.json").read_text())
+    expected_groups = {
+        "wheels" if g in ("wheels_front", "wheels_rear") else g for g in manifest["car"]["groups"]
+    }
+    missing = expected_groups - res.forces_n.keys()
+    if missing:
+        res.reasons.append("missing component force histories: " + ", ".join(sorted(missing)))
+    if not res.forces_n:
+        res.reasons.append("no usable component force output")
+    elif res.cd is not None and res.cd > 0:
+        q = 0.5 * manifest["config"]["rho_kg_m3"]
         ref = manifest["reference"]
         cd_from_groups = total[0] / (q * ref["U_m_s"] ** 2 * ref["Aref_full_m2"])
         rel = abs(cd_from_groups - res.cd) / abs(res.cd)
@@ -774,12 +959,4 @@ def evaluate(case_dir: Path, res: RunResult) -> None:
         }
         if rel > FORCE_SUM_TOL:
             res.reasons.append(f"component force sum differs from total by {rel:.2%}")
-
-    if not res.mesh_ok:
-        res.reasons.append("checkMesh reported failures: " + "; ".join(res.mesh_failures))
-    if res.cd_window_spread > CD_STABILITY_TOL:
-        res.reasons.append(
-            f"Cd not stable: {res.cd_window_spread:.2%} spread over the last "
-            f"{CD_STABILITY_WINDOW} iterations"
-        )
     res.acceptance = "pending_review" if not res.reasons else "rejected"
