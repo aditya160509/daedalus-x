@@ -38,7 +38,7 @@ function blobTexture(): THREE.Texture {
 
 /** Ground shadow that travels with a car; cheaper and steadier than a contact-shadow pass. */
 function BlobShadow() {
-  const texture = useMemo(blobTexture, []);
+  const texture = useMemo(() => blobTexture(), []);
   useEffect(() => () => texture.dispose(), [texture]);
   return (
     <mesh rotation-x={-Math.PI / 2} position={[0, 0.0008, 0]} scale={[0.19, 0.11, 1]}>
@@ -94,7 +94,7 @@ function ReplayCar({
   }, [clone, body]);
 
   const x = positionAt(cursor, trace) ?? 0;
-  const { min, max, center } = model.bounds;
+  const { min, center } = model.bounds;
   return (
     <group position={[x, 0, lane]}>
       <group rotation-y={yaw}>
@@ -247,9 +247,21 @@ function SceneContents({
       <directionalLight position={[1.2, 1.4, 0.8]} intensity={2.1} color="#ffffff" />
       <directionalLight position={[-1, 0.6, -0.8]} intensity={0.7} color="#7fb4d8" />
       <Track trackM={trackM} />
-      <ReplayCar model={model} trace={primary} cursor={cursor} lane={PRIMARY_LANE} body={PRIMARY_BODY} />
+      <ReplayCar
+        model={model}
+        trace={primary}
+        cursor={cursor}
+        lane={PRIMARY_LANE}
+        body={PRIMARY_BODY}
+      />
       {ghost && ghostModel && (
-        <ReplayCar model={ghostModel} trace={ghost} cursor={cursor} lane={GHOST_LANE} body={GHOST_BODY} />
+        <ReplayCar
+          model={ghostModel}
+          trace={ghost}
+          cursor={cursor}
+          lane={GHOST_LANE}
+          body={GHOST_BODY}
+        />
       )}
       <FollowCamera x={x} mode={camera} />
     </>

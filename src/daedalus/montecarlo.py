@@ -187,8 +187,6 @@ def velocity_trajectory(
     _, velocities = _integrate(
         thrust, thrust_scale, mass, cda, crr, rho, track_m, model, record_times
     )
-    if velocities is None:  # pragma: no cover - record_times is mandatory here
-        raise RuntimeError("velocity_trajectory needs record times")
     return velocities
 
 
@@ -202,7 +200,7 @@ def _integrate(
     track_m: float,
     model: ModelLevel,
     record_times: FloatArray | None = None,
-) -> tuple[FloatArray, FloatArray | None]:
+) -> tuple[FloatArray, FloatArray]:
     losses = model is ModelLevel.M2
     a = 0.5 * rho * cda / mass if losses else np.zeros_like(mass)
     b = crr * G0 if losses else np.zeros_like(mass)
@@ -219,13 +217,12 @@ def _integrate(
     per_mass = thrust_scale / mass
 
     if record_times is None:
-        v_grid = None
-    else:
-        v_grid = np.zeros((n, record_times.size))
-        # Each record time belongs to one RK4 step; frac is its position inside that step.
-        step_idx = np.clip((record_times / h).astype(int), 0, steps - 1)
-        frac = np.clip((record_times - step_idx * h) / h, 0.0, 1.0)
-        in_burn = record_times <= t_end
+        record_times = np.zeros(0)
+    v_grid = np.zeros((n, record_times.size))
+    # Each record time belongs to one RK4 step; frac is its position inside that step.
+    step_idx = np.clip((record_times / h).astype(int), 0, steps - 1)
+    frac = np.clip((record_times - step_idx * h) / h, 0.0, 1.0)
+    in_burn = record_times <= t_end
 
     def accel(k: int, v_: FloatArray) -> FloatArray:
         f = thrust_grid[k] * per_mass
@@ -250,16 +247,15 @@ def _integrate(
             # Cubic Hermite would be marginally better; linear is < 1e-9 s at this step.
             frac_finish = (track_m - x[crossed]) / (x_new[crossed] - x[crossed])
             t_fin[crossed] = t + frac_finish * h
-        if v_grid is not None:
+        if record_times.size:
             here = in_burn & (step_idx == i)
             if here.any():
                 v_grid[:, here] = v[:, None] + frac[None, here] * (v_new - v)[:, None]
         x, v = x_new, v_new
 
-    if v_grid is not None:
-        beyond = np.flatnonzero(record_times > t_end)
-        for j in beyond:
-            v_grid[:, j] = _coast_velocity(v, a, b, float(record_times[j] - t_end))
+    beyond = np.flatnonzero(record_times > t_end)
+    for j in beyond:
+        v_grid[:, j] = _coast_velocity(v, a, b, float(record_times[j] - t_end))
 
     todo = np.isnan(t_fin)
     d = track_m - x[todo]

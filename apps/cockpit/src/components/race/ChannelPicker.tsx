@@ -60,6 +60,9 @@ export function ChannelPicker({
         {ordered.map((track, index) => {
           const on = visible[track.id] ?? true;
           return (
+            // Native HTML5 drag-and-drop needs the handlers on the draggable item itself;
+            // keyboard reorder toggles live in the buttons inside each item.
+            // oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
             <li
               key={track.id}
               draggable

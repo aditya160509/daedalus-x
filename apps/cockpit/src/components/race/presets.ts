@@ -42,9 +42,8 @@ function numberIn(value: unknown, key: keyof typeof LIMITS): number | null {
 export function sanitizePreset(input: unknown): RacePreset | null {
   if (!isRecord(input)) return null;
   const name = typeof input.name === "string" ? input.name.trim() : "";
-  const id = typeof input.id === "string" && input.id.length > 0 && input.id.length <= 80
-    ? input.id
-    : null;
+  const id =
+    typeof input.id === "string" && input.id.length > 0 && input.id.length <= 80 ? input.id : null;
   const model = input.model === "M1" || input.model === "M2" ? input.model : null;
   const massG = numberIn(input.massG, "massG");
   const cdaCm2 = numberIn(input.cdaCm2, "cdaCm2");
@@ -104,7 +103,10 @@ export function loadPresets(): { presets: RacePreset[]; error: string | null } {
 
 export function savePresets(presets: RacePreset[]): string | null {
   try {
-    globalThis.localStorage?.setItem(PRESET_STORAGE_KEY, JSON.stringify(presets.slice(0, MAX_PRESETS)));
+    globalThis.localStorage?.setItem(
+      PRESET_STORAGE_KEY,
+      JSON.stringify(presets.slice(0, MAX_PRESETS)),
+    );
     return null;
   } catch (cause) {
     return `Could not save presets: ${cause instanceof Error ? cause.message : String(cause)}`;

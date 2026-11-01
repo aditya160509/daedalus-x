@@ -12,7 +12,7 @@ Remaining work is tracked task-by-task in [docs/build/TASK-BOARD.md](docs/build/
 | P1-04 | Units and imports | GPT | todo | |
 | P2-01 | Race model M0–M2 | Claude | accepted | [evidence](evidence/P2-01.md) |
 | P2-02 | Calibration and sealed predictions | Claude | sealing/verify/score done (tests/test_predictions.py); calibration needs measured runs | |
-| P2-03 | Monte Carlo uncertainty | Claude | done: vectorised, 2000 samples in 0.9 s, API + Race panel (tests/test_montecarlo.py) | |
+| P2-03 | Monte Carlo uncertainty | Claude | done: vectorised, 2000 samples in 0.9 s, API + Race panel, trajectory band p5/p50/p95 (tests/test_montecarlo.py) | [T08](evidence/T08.md) |
 | P3-01 | Geometry path decision | GPT + Claude | blocked: car CAD/GLB | |
 | P3-02 | OpenFOAM case template | Claude + Codex | T01 review: axle rotation, explicit mesh quality and averaged CI gate implemented; single v2 quick mesh rejected (51 skew faces), no v2 Cd | [T01](evidence/T01.md), [motorBike](evidence/P3-02-motorbike.md), [orbit](evidence/P3-02-orbit-baseline.md) |
 | P3-03 | Grid study and speed check | Codex (GPT-6) | T03 review: tooling and NASA verification done; 5 quick jobs queued, no campaign executed; Celik table check pending | [evidence](evidence/T03.md) |
@@ -27,7 +27,7 @@ Remaining work is tracked task-by-task in [docs/build/TASK-BOARD.md](docs/build/
 | P6-04 | Design workspace | Claude + DeepSeek | T07 review: studio/engineering modes, exploded view, dimensions and measure, inspector from geometry.json, design switcher, synced compare, 2× PNG snapshot; visual QA pending | [T07](evidence/T07.md) |
 | P6-05 | Simulate workspace | Claude | partial: KPIs, convergence, forces, acceptance, 3D flow fields | |
 | P6-06 | Optimize workspace | Claude | todo | |
-| P6-07 | Race workspace | Claude | partial: telemetry + Monte Carlo spread | [evidence](evidence/P6-07-race.md) |
+| P6-07 | Race workspace | Claude | T08 review: telemetry wall (channel picker, cursor table, A/B delta, per-channel y-zoom, MC p5–p95 band), what-if sliders with sweep sparklines, race replay, ghost race, presets | [T08](evidence/T08.md), [original](evidence/P6-07-race.md) |
 | P6-08 | Inspect workspace | Claude | todo | |
 | P6-09 | Evidence workspace | Claude | todo | |
 | P6-10 | Competition Mode | Claude | todo | |

@@ -5,10 +5,7 @@ import { Slider as SliderPrimitive } from "radix-ui";
 import { cn } from "@/lib/utils";
 
 /** Single-thumb slider on the shared tokens. Every use here is a continuous scalar input. */
-export function Slider({
-  className,
-  ...props
-}: React.ComponentProps<typeof SliderPrimitive.Root>) {
+export function Slider({ className, ...props }: React.ComponentProps<typeof SliderPrimitive.Root>) {
   return (
     <SliderPrimitive.Root
       data-slot="slider"

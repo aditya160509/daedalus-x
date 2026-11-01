@@ -408,8 +408,13 @@ export function TelemetryChart({
   return (
     <div
       ref={wrapper}
-      role="application"
+      role="slider"
+      aria-orientation="horizontal"
       aria-label="Stacked telemetry channels. Left and right arrows move the cursor; shift moves ten samples."
+      aria-valuemin={time[0] ?? 0}
+      aria-valuemax={time[time.length - 1] ?? 1}
+      aria-valuenow={cursor}
+      aria-valuetext={`${cursor.toFixed(3)} seconds`}
       tabIndex={0}
       className="relative h-full w-full touch-none outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
       onPointerMove={move}
@@ -431,11 +436,7 @@ export function TelemetryChart({
         >
           {cursor.toFixed(3)} s
         </div>
-        <div
-          ref={aLine}
-          className="absolute top-2 bottom-10 left-0 w-px bg-risk/80"
-          aria-hidden
-        />
+        <div ref={aLine} className="absolute top-2 bottom-10 left-0 w-px bg-risk/80" aria-hidden />
         <div
           ref={aChip}
           role="slider"
@@ -451,11 +452,7 @@ export function TelemetryChart({
         >
           A
         </div>
-        <div
-          ref={bLine}
-          className="absolute top-2 bottom-10 left-0 w-px bg-ok/80"
-          aria-hidden
-        />
+        <div ref={bLine} className="absolute top-2 bottom-10 left-0 w-px bg-ok/80" aria-hidden />
         <div
           ref={bChip}
           role="slider"

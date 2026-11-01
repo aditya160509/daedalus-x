@@ -34,8 +34,10 @@ export function useRacePlayback({
   onEnd: () => void;
 }): void {
   const state = useRef({ cursor, onTime, onEnd });
-  state.current.onTime = onTime;
-  state.current.onEnd = onEnd;
+  useEffect(() => {
+    state.current.onTime = onTime;
+    state.current.onEnd = onEnd;
+  }, [onTime, onEnd]);
 
   useEffect(() => {
     state.current.cursor = cursor;
