@@ -5,7 +5,7 @@ Take the **first `todo` whose dependencies are `accepted` or `review`**. "Lane" 
 
 | ID | Task | Lane | Depends on | Status | Owner |
 |---|---|---|---|---|---|
-| T01 | [CFD accuracy: rotating wheels, mesh quality, unsteady gate](tasks/T01-cfd-accuracy.md) | backend-cfd | — | todo | |
+| T01 | [CFD accuracy: rotating wheels, mesh quality, unsteady gate](tasks/T01-cfd-accuracy.md) | backend-cfd | — | in-progress | GPT-6.1 |
 | T02 | [Job runner + launch runs from the UI](tasks/T02-job-runner.md) | backend-api | — | todo | |
 | T03 | [Grid study + speed check](tasks/T03-grid-study.md) | backend-cfd | T01 | todo | |
 | T04 | [Flow insight export: Q-criterion, iso-surfaces, oil flow, separation, total-pressure loss, drag build-up](tasks/T04-flow-insight-export.md) | backend-viz | — | todo | |
