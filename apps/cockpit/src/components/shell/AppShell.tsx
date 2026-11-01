@@ -9,6 +9,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Search,
+  Settings,
   type LucideIcon,
   ShieldCheck,
   Target,
@@ -307,6 +308,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </>
             )}
             <ApiStatus compact={collapsed} />
+            <Link
+              href="/settings"
+              aria-current={pathname.startsWith("/settings") ? "page" : undefined}
+              aria-label={collapsed ? "Settings" : undefined}
+              title={collapsed ? "Settings" : undefined}
+              className={cn(
+                "flex h-8 items-center rounded-md text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+                collapsed ? "mx-auto w-8 justify-center" : "w-full gap-2 px-2",
+                pathname.startsWith("/settings") && "bg-accent text-foreground",
+              )}
+            >
+              <Settings className="size-4" aria-hidden />
+              {!collapsed && "Settings"}
+            </Link>
             <button
               type="button"
               onClick={toggleCollapsed}
@@ -335,7 +350,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[13px]">
               <span className="text-muted-foreground">Veloira</span>
               <span className="text-muted-foreground/50">/</span>
-              <span className="font-medium">{active?.label ?? "—"}</span>
+              <span className="font-medium">
+                {active?.label ?? (pathname.startsWith("/settings") ? "Settings" : "—")}
+              </span>
             </nav>
             {active && (
               <span className="rounded-md border bg-secondary/60 px-1.5 py-0.5 font-mono text-[10px] tracking-wider text-muted-foreground">

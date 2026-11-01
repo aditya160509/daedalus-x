@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { listDesigns, listCfdRuns, listJobs, submitCfdJob } from "@/lib/api";
+import { useSettings } from "@/lib/settings";
 import { suggestRunId } from "./jobMath";
 
 export function NewRunDialog() {
@@ -27,6 +28,7 @@ export function NewRunDialog() {
   const [speed, setSpeed] = useState(20);
   const [fidelity, setFidelity] = useState<"quick" | "final">("quick");
   const [procs, setProcs] = useState(8);
+  const { maxRanks } = useSettings();
   const [customId, setCustomId] = useState("");
   const taken = [
     ...(runs.data?.map((r) => r.run_id) ?? []),
@@ -62,7 +64,7 @@ export function NewRunDialog() {
           className="grid gap-4"
           onSubmit={(e) => {
             e.preventDefault();
-            submit.mutate({ design, run, speed, fidelity, procs });
+            submit.mutate({ design, run, speed, fidelity, procs: Math.min(procs, maxRanks) });
           }}
         >
           <div className="grid gap-2">
@@ -109,7 +111,7 @@ export function NewRunDialog() {
                 id="job-procs"
                 type="number"
                 min="1"
-                max="8"
+                max={maxRanks}
                 required
                 value={procs}
                 onChange={(e) => setProcs(e.target.valueAsNumber)}
