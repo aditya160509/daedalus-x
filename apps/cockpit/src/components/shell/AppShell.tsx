@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   PanelLeftClose,
   PanelLeftOpen,
+  Presentation,
   Search,
   Settings,
   type LucideIcon,
@@ -22,6 +23,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { CommandPalette, OPEN_EVENT } from "./CommandPalette";
 import { RunPicker } from "./RunPicker";
 import { EvidenceDrawer, OPEN_EVIDENCE } from "@/components/evidence/EvidenceDrawer";
+import { OPEN_PRESENTER, Presenter } from "@/components/present/Presenter";
 import { Key } from "./Key";
 import { getHealth } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -341,6 +343,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 Evidence
                 <Key>E</Key>
               </button>
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new Event(OPEN_PRESENTER))}
+                className="flex h-8 items-center gap-2 rounded-md bg-brand px-2.5 text-xs font-medium text-black transition-opacity hover:opacity-90"
+              >
+                <Presentation className="size-3.5" aria-hidden />
+                Present
+                <kbd className="text-[10px] opacity-70">P</kbd>
+              </button>
             </div>
           </header>
           <main className="min-h-0 flex-1 overflow-hidden">{children}</main>
@@ -348,6 +359,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
       <CommandPalette items={ALL} />
       <EvidenceDrawer />
+      <Presenter />
       <Toaster
         theme="dark"
         position="bottom-right"
