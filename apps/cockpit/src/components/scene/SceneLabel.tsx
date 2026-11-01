@@ -1,42 +1,32 @@
 "use client";
 
-import { Billboard, Text } from "@react-three/drei";
-
-/** Self-hosted Inter (OFL), so 3D labels render offline with no font request. */
-const SCENE_FONT = "/fonts/inter-latin-500-normal.woff";
+import { Html } from "@react-three/drei";
 
 /**
- * A text label drawn in the 3D scene (troika SDF text). It faces the camera, stays legible through
- * a dark outline, and is sized in scene units so it scales with the model it annotates.
+ * A 3D-anchored text label drawn as a DOM span (drei Html), so it never touches troika SDF text,
+ * which breaks on three 0.187 materials. Stays legible on a dark plate and tracks its point.
  */
 export function SceneLabel({
   children,
-  size,
   color,
   position,
 }: {
   children: string;
-  /** Cap height in scene units (metres for the car and track models). */
-  size: number;
+  /** Kept for call-site compatibility; labels use a fixed screen size. */
+  size?: number;
   color: string;
   position?: [number, number, number];
 }) {
   return (
-    <Billboard position={position}>
-      <Text
-        font={SCENE_FONT}
-        fontSize={size}
-        color={color}
-        anchorX="center"
-        anchorY="middle"
-        outlineWidth={size * 0.12}
-        outlineColor="#0b0b0c"
-        renderOrder={20}
-        material-depthTest={false}
-        material-transparent
-      >
-        {children}
-      </Text>
-    </Billboard>
+    <group position={position}>
+      <Html center zIndexRange={[20, 0]} style={{ pointerEvents: "none" }}>
+        <span
+          className="rounded bg-background/80 px-1.5 py-0.5 font-mono text-[11px] whitespace-nowrap"
+          style={{ color }}
+        >
+          {children}
+        </span>
+      </Html>
+    </group>
   );
 }
