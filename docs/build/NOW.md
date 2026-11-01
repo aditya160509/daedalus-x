@@ -38,7 +38,6 @@ Do (P0/P1 only):
 - No new dependencies. Use only what is already installed.
 
 Dropped from the master plan (bloat, or over the bundle budget):
-- **B6/B8** Dockview
 - **C10** STEP import in the browser, **C11** deviation map, **D3** volume rendering, **D9** video export, **D10** server-side viz, **D12** run wizard
 - **E1** uPlot (ECharts is enough), **E3** motion blur, **A4** a second icon set, **A5** auto-animate, **G2** legendapp list, **G3** nuqs
 
@@ -55,7 +54,7 @@ Rules for Haiku: commit after each item, run only the affected tests plus `tsc`,
 - optuna-dashboard server → draw the charts with **ECharts**.
 - Jinja2 → **Typst** fed JSON.
 - zustand, nuqs, TanStack Table/Virtual, legendapp list → React state and plain tables.
-- uPlot, Dockview, motion, auto-animate, phosphor → none.
+- uPlot, motion, auto-animate, phosphor → none.
 - SSE → existing job polling.
 - AR (`<model-viewer>`/WebXR) → only if time is left at the very end.
 
@@ -64,6 +63,10 @@ Rules for Haiku: commit after each item, run only the affected tests plus `tsc`,
 - `@react-three/postprocessing` → remove unless the bloom visibly helps.
 - `openpyxl` → CSV only.
 - `trimesh` → remove if pyvista covers its use.
+
+**Brought back now that the budget is per page:**
+- **Dockview (B6/B8), on the Pit Wall only:** drag, tab, pop out and save panel layouts, like an ATLAS workbook. The patch is in the scratchpad (`dockview-attempt.patch`). It replaces react-resizable-panels on that page only.
+- **`@react-three/postprocessing`, kept for the Wind Tunnel bloom:** that page alone fits within 800 KB.
 
 **Haiku lane is corrected to match:** skip G1 (TanStack Table) and G4 (zustand).
 
