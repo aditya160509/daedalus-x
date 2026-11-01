@@ -21,7 +21,7 @@ Part 1 (sections A–H) is the build list. Part 2 (R1–R8) names the best exist
 | ID | What | Open source | Replaces | Effort | Pri |
 |---|---|---|---|---|---|
 | A1 ✅ | Component kit on Base UI (T3 Code's exact stack) | **coss ui** (cal.com, MIT) + **@base-ui/react** | Radix-based shadcn primitives | 2 | P0 |
-| A2 | Theme tokens: graphite surfaces, one cyan accent, layered shadows, radii, type scale | coss tokens + **tweakcn** generator | Hand-tuned `globals.css` | 0.5 | P0 |
+| A2 ✅ | Theme tokens: graphite surfaces, one cyan accent, layered shadows, radii, type scale | coss tokens + **tweakcn** generator | Hand-tuned `globals.css` | 0.5 | P0 |
 | A3 | Typography: Inter Display for headings, Geist Mono for numbers, tabular figures everywhere | **Geist** fonts (OFL) via `next/font` | JetBrains Mono | 0.3 | P1 |
 | A4 | Icon set, consistent stroke 1.5 | **lucide** (kept) + **@phosphor-icons/react** for engineering glyphs | Mixed icons | 0.3 | P2 |
 | A5 | Motion primitives: list and layout transitions | **@formkit/auto-animate**, **motion** (Framer Motion) | Ad-hoc CSS | 0.5 | P1 |

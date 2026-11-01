@@ -122,6 +122,8 @@
 
   --text-2xs: 0.6875rem;
   --text-2xs--line-height: 1rem;
+  --text-display: 1.5rem;
+  --text-display--line-height: 2rem;
   --ease-snappy: cubic-bezier(0.2, 0.8, 0.2, 1);
   --shadow-panel: var(--shadow-panel);
   --shadow-float: var(--shadow-float);
@@ -141,6 +143,7 @@
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
     font-feature-settings: "cv11", "ss01";
+    font-variant-numeric: tabular-nums;
     -webkit-font-smoothing: antialiased;
   }
   ::selection {
