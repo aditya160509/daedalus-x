@@ -62,6 +62,10 @@ def main(argv: list[str] | None = None) -> int:
         help="default: averaged for wheel geometry, steady otherwise",
     )
     cr.add_argument("--resume-from", help="re-run an existing case from this step")
+    cr.add_argument("--ground-offset", type=float, help="ground plane rise into the wheels, m")
+    cr.add_argument(
+        "--mesh-only", action="store_true", help="stop after checkMesh (mesh-quality iteration)"
+    )
 
     cv = c.add_parser("viz", help="export pressure, streamlines and slices for the cockpit")
     cv.add_argument("case", type=Path, help="finished, reconstructed case directory")
@@ -97,12 +101,22 @@ def main(argv: list[str] | None = None) -> int:
         overrides["domain_cell_m"] = a.domain_cell
     if a.acceptance_mode is not None:
         overrides["acceptance_mode"] = a.acceptance_mode
+    if a.ground_offset is not None:
+        overrides["ground_offset_m"] = a.ground_offset
     if a.no_early_stop:
         overrides["early_stop_tolerance"] = None
     cfg = cfd.CaseConfig.preset(a.fidelity, **overrides)
     if a.resume_from is None:
         cfd.write_case(a.case, a.design, cfg)
-    res = cfd.run_case(a.case, cfg.n_procs, resume_from=a.resume_from)
+    res = cfd.run_case(
+        a.case,
+        cfg.n_procs,
+        resume_from=a.resume_from,
+        stop_after="checkMesh" if a.mesh_only else None,
+    )
+    if a.mesh_only:
+        print(json.dumps({"mesh_ok": res.mesh_ok, "failures": res.mesh_failures}, indent=2))
+        return 0 if res.mesh_ok else 1
     if res.succeeded:
         from daedalus import viz
 

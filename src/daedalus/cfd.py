@@ -46,7 +46,7 @@ ASSUMPTIONS = (
     "half model, symmetryPlane at y = 0 (zero yaw)",
     "steady incompressible RANS, k-omega SST, Spalding wall function",
     "moving ground at freestream speed",
-    "ground plane raised 0.5 mm into the wheels to avoid zero-thickness contact cells",
+    "ground plane raised 1.5 mm into the wheels so contact-patch cells pass the skewness gate",
     "uniform inlet, turbulence intensity 0.5 %, length scale 10 mm",
 )
 
@@ -67,7 +67,7 @@ class CaseConfig:
     n_procs: int = 6
     turbulence_intensity: float = 0.005
     turbulence_length_m: float = 0.01
-    ground_offset_m: float = 0.0005
+    ground_offset_m: float = 0.0015
     # Stop early once the windowed Cd average moves less than this (relative). None = run to end.
     early_stop_tolerance: float | None = 0.001
     early_stop_window: int = 200
@@ -324,7 +324,7 @@ def write_case(case_dir: Path, design_dir: Path, cfg: CaseConfig) -> dict[str, o
             *(
                 [
                     "wheels rotate with ω = U/r (no slip at contact); "
-                    "contact patch modelled by 0.5 mm ground offset"
+                    "contact patch modelled by 1.5 mm ground offset"
                 ]
                 if car.axles
                 else []
@@ -644,7 +644,7 @@ cache { grad(U); }
 _MESH_QUALITY = (
     HEADER.format(template=TEMPLATE_VERSION, cls="dictionary", obj="meshQualityDict")
     + """maxNonOrtho 65;
-maxBoundarySkewness 20;
+maxBoundarySkewness 4;
 maxInternalSkewness 4;
 maxConcave 80;
 minVol 1e-13;
@@ -712,8 +712,13 @@ def _run(case_dir: Path, name: str, command: str, steps: list[StepLog]) -> None:
         raise CfdError(f"{name} failed (exit {proc.returncode}); see {log}")
 
 
-def run_case(case_dir: Path, n_procs: int, resume_from: str | None = None) -> RunResult:
-    """Mesh, solve and post-process. Never raises for solver failure: returns a failed result."""
+def run_case(
+    case_dir: Path, n_procs: int, resume_from: str | None = None, stop_after: str | None = None
+) -> RunResult:
+    """Mesh, solve and post-process. Never raises for solver failure: returns a failed result.
+
+    `stop_after` ends the run after that step (e.g. "checkMesh") without solving or evaluating.
+    """
     if shutil.which(OPENFOAM_LAUNCHER) is None:
         raise CfdError("OpenFOAM launcher not found; install OpenFOAM.app")
     mode = json.loads((case_dir / "daedalus_manifest.json").read_text())["config"].get(
@@ -757,6 +762,9 @@ def run_case(case_dir: Path, n_procs: int, resume_from: str | None = None) -> Ru
                     _mesh_status(case_dir, res)
                     if not res.mesh_ok:
                         raise CfdError("checkMesh rejected mesh: " + "; ".join(res.mesh_failures))
+            if name == stop_after:
+                _write_result(case_dir, res)
+                return res
     except CfdError as e:
         _mesh_status(case_dir, res)
         res.reasons.append(str(e))

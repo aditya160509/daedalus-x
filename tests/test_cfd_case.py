@@ -200,7 +200,7 @@ def test_mesh_quality_and_snap_controls_are_explicit(tmp_path: Path, design: Pat
     quality: Any = FoamFile(case / "system/meshQualityDict").as_dict()
     expected = dict(
         maxNonOrtho=65,
-        maxBoundarySkewness=20,
+        maxBoundarySkewness=4,  # match the checkMesh gate (T01b)
         maxInternalSkewness=4,
         maxConcave=80,
         minVol=1e-13,
