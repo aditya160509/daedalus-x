@@ -28,3 +28,28 @@ Take the **first `todo` whose dependencies are `accepted` or `review`**. "Lane" 
 - Round 4: **T10**, then **T13**, then **T14**
 
 CPU rule: only **one** task that runs OpenFOAM at a time (T01, T03 and T05 share the `backend-cfd` lane for this reason).
+
+## Build order (2026-11-01): build first, long runs and full QA last
+Build everything first. Each build task runs only its own fast checks (format, types, lint, its unit tests); no CFD and no browser.
+
+| # | Task | Built from (existing open source) | Build hours |
+|---|---|---|---|
+| 1 | UI master plan P0s (Haiku agent, running) | coss ui, T3 Code, cmdk, Dockview, drei | 3–4 |
+| 2 | T09 review and fix (uncommitted, failing checks) | pint, openpyxl, scipy.optimize | 1.5 |
+| 3 | T10 ORACLE | Optuna, BoTorch/Ax, optuna-dashboard charts | 3 |
+| 4 | T11 FORGE | Pydantic rule schema, three-cad-viewer highlight | 2.5 |
+| 5 | T12 ATLAS | TanStack Table, SQLite FTS5 | 2.5 |
+| 6 | T13 report, competition mode, AR | Typst, model-viewer | 3 |
+| 7 | CAD studio and flowing air (UI plan C/D) | three-cad-viewer, webgl-wind | 4 |
+
+**Build total ≈ 20 h.**
+
+### Deferred to the end (only after all builds land)
+| Run | Needs | Time |
+|---|---|---|
+| L1 | New car: import, mesh, quick CFD | new car model | ~20 min |
+| L2 | Final-fidelity CFD → accepted Cd | L1 | ~60–90 min |
+| L3 | T03 grid study (5 runs) | L2 | ~3–4 h |
+| L4 | T05 adjoint sensitivity | L2 | ~45 min |
+| L5 | T10 optimisation loop (CFD-in-the-loop) | L2 | overnight |
+| Q1 | Full QA: browser pass all workspaces, Lighthouse, axe, screenshots, full pytest + pnpm check | all builds | ~2 h |
