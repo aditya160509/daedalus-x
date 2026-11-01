@@ -27,6 +27,15 @@ import { type LoadedModel, loadGlbUrl } from "@/lib/gltf";
 import { estimateThrust } from "@/lib/thrust";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { RaceInputs } from "./RaceInputs";
+import { StatusBar, useTab, WorkspaceTabs } from "@/components/shell/WorkspaceTabs";
+
+const RACE_TABS = [
+  { id: "replay", label: "Replay" },
+  { id: "telemetry", label: "Telemetry" },
+  { id: "spread", label: "Spread" },
+  { id: "ghost", label: "Ghost" },
+  { id: "start", label: "Start" },
+] as const;
 import { SpreadPanel } from "./SpreadPanel";
 import {
   DEFAULT_CAR,
@@ -280,154 +289,215 @@ export function RaceWorkspace() {
   };
 
   const dragging = sim.isFetching || mc.isFetching;
+  const [tab, setTab] = useTab(RACE_TABS);
+  const [inputsOpen, setInputsOpen] = useState(true);
+
+  const p = mc.data?.percentiles_s;
+  const status = [
+    {
+      label: "Time",
+      value:
+        sim.data?.finished && sim.data.time_s != null ? `${sim.data.time_s.toFixed(3)} s` : "DNF",
+    },
+    { label: "p5–p95", value: p?.p50 != null ? `${p.p5.toFixed(3)}–${p.p95.toFixed(3)} s` : "—" },
+    { label: "Peak", value: `${(sim.data?.peak_speed_m_s ?? 0).toFixed(2)} m/s` },
+    {
+      label: "Ghost gap",
+      value: gapMs != null ? `${gapMs > 0 ? "+" : ""}${gapMs.toFixed(0)} ms` : "—",
+    },
+    { label: "Evidence", value: "unvalidated", tone: "risk" as const },
+  ];
 
   return (
-    <div className="grid h-full grid-cols-[340px_1fr] gap-3 p-3">
-      <RaceInputs
-        model={model}
-        onModel={setModel}
-        car={car}
-        onCar={(patch) => setCar((c) => ({ ...c, ...patch }))}
-        thrustScale={thrustScale}
-        onThrustScale={setThrustScale}
-        source={source}
-        onSource={setSource}
-        onFileError={setFileError}
-        curves={curves}
-        running={running}
-        sweep={sweep}
-        thrustProvenance={thrustProvenance}
-        presets={presets}
-        presetNote={fileError ? `${presetNote ?? ""} ${fileError}`.trim() || null : presetNote}
-        onAddPreset={addPreset}
-        onRenamePreset={(id, name) =>
-          persistPresets(presets.map((p) => (p.id === id ? { ...p, name } : p)))
-        }
-        onDeletePreset={deletePreset}
-        onApplyPreset={applyPreset}
-      />
-
-      <div className="flex min-h-0 flex-col gap-3 overflow-y-auto">
-        <MetricsRow sim={sim.data} mc={mc.data} error={sim.error ?? mc.error} valid={valid} />
-
-        <div className="flex min-h-[500px] flex-1 shrink-0 gap-3">
-          <Panel
-            title="Telemetry · time domain"
-            actions={
-              <>
-                {dragging && <span className="text-2xs text-muted-foreground">updating…</span>}
-                <ProvenanceBadge value="predicted" />
-              </>
+    <div className="flex h-full min-h-0">
+      {inputsOpen && (
+        <div className="w-[320px] shrink-0 overflow-y-auto border-r p-3">
+          <RaceInputs
+            model={model}
+            onModel={setModel}
+            car={car}
+            onCar={(patch) => setCar((c) => ({ ...c, ...patch }))}
+            thrustScale={thrustScale}
+            onThrustScale={setThrustScale}
+            source={source}
+            onSource={setSource}
+            onFileError={setFileError}
+            curves={curves}
+            running={running}
+            sweep={sweep}
+            thrustProvenance={thrustProvenance}
+            presets={presets}
+            presetNote={fileError ? `${presetNote ?? ""} ${fileError}`.trim() || null : presetNote}
+            onAddPreset={addPreset}
+            onRenamePreset={(id, name) =>
+              persistPresets(presets.map((p) => (p.id === id ? { ...p, name } : p)))
             }
-            bodyClassName="flex min-h-0 flex-1 flex-col gap-2 p-2"
-            className="min-w-0 flex-1"
-          >
-            {sim.data ? (
-              <>
-                <div className="min-h-0 flex-1">
-                  <TelemetryChart
-                    time={time}
-                    tracks={shownTracks}
-                    markers={markers(sim.data, time)}
-                    band={toBand(mc.data?.trajectory_band)}
-                    bandTrackId="velocity"
-                    yZoom={yZoom}
-                    cursor={cursor}
-                    delta={delta}
-                    onCursor={(next) => setCursor(Math.min(next, tEnd || next))}
-                    onDelta={(which, t) => setDelta((d) => ({ ...d, [which]: t }))}
+            onDeletePreset={deletePreset}
+            onApplyPreset={applyPreset}
+          />
+        </div>
+      )}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <WorkspaceTabs
+          tabs={RACE_TABS}
+          value={tab}
+          onChange={setTab}
+          right={
+            <>
+              {dragging && <span className="text-2xs text-muted-foreground">updating…</span>}
+              <button
+                type="button"
+                onClick={() => setInputsOpen((o) => !o)}
+                className="rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+              >
+                {inputsOpen ? "Hide inputs" : "Show inputs"}
+              </button>
+            </>
+          }
+        />
+        {(!valid || sim.error || mc.error) && (
+          <div className="p-3">
+            <MetricsRow sim={sim.data} mc={mc.data} error={sim.error ?? mc.error} valid={valid} />
+          </div>
+        )}
+        <div className="flex min-h-0 flex-1 gap-3 p-3">
+          {tab === "replay" && (
+            <>
+              <div className="min-w-0 flex-1 [&>section]:h-full">
+                <Panel
+                  title="Race replay"
+                  description="true-scale cars, camera follows the primary lane"
+                  actions={<ProvenanceBadge value="predicted" />}
+                  bodyClassName="p-0"
+                  className="min-h-0"
+                >
+                  {sim.data && design && primaryTrace ? (
+                    <RaceReplay
+                      trackM={car.trackM}
+                      model={design.model}
+                      ghostModel={ghostTrace ? design.model : null}
+                      primary={primaryTrace}
+                      ghost={ghostTrace}
+                      // Unclamped so a slower ghost is shown crossing the line; the telemetry
+                      // readouts clamp to the primary trace themselves.
+                      cursor={cursor}
+                      onCursor={setCursor}
+                      hasGhost={ghostTrace !== null}
+                    />
+                  ) : (
+                    <EmptyState
+                      icon={<AlertTriangle size={18} />}
+                      title={
+                        !design
+                          ? "Replay needs a design display mesh"
+                          : "Replay needs a finished model run"
+                      }
+                    >
+                      {designError
+                        ? `Could not load the display mesh: ${designError}`
+                        : design
+                          ? "The race model is still integrating. The replay appears with the finished telemetry."
+                          : "Run the race model with a design imported in Design first; the chart and metrics still work without it."}
+                    </EmptyState>
+                  )}
+                </Panel>
+              </div>
+              <div className="w-[340px] shrink-0">
+                {primaryTrace && (
+                  <TimingTower
+                    primary={primaryTrace}
+                    ghost={ghostTrace}
+                    lengthM={car.trackM}
+                    primaryTime={primaryTime}
+                    ghostTime={ghost.data?.finished === true ? (ghost.data.time_s ?? null) : null}
                   />
-                </div>
-                <ChannelPicker
-                  tracks={tracks}
-                  order={order}
-                  visible={visible}
-                  yZoom={yZoom}
-                  onToggle={(id) => setVisible((v) => ({ ...v, [id]: !(v[id] ?? true) }))}
-                  onReorder={setOrder}
-                  onZoom={(id, zoom) => setYZoom((z) => ({ ...z, [id]: zoom }))}
-                />
-              </>
-            ) : (
-              <div className="min-h-0 flex-1 animate-pulse rounded-lg bg-surface-2" />
-            )}
-          </Panel>
-          {sim.data && (
-            <Panel title="Cursor" className="w-80 shrink-0" bodyClassName="p-0">
-              <CursorTable time={time} tracks={shownTracks} cursor={cursorT} delta={delta} />
-            </Panel>
+                )}
+              </div>
+            </>
+          )}
+          {tab === "telemetry" && (
+            <>
+              <Panel
+                title="Telemetry · time domain"
+                actions={
+                  <>
+                    {dragging && <span className="text-2xs text-muted-foreground">updating…</span>}
+                    <ProvenanceBadge value="predicted" />
+                  </>
+                }
+                bodyClassName="flex min-h-0 flex-1 flex-col gap-2 p-2"
+                className="min-w-0 flex-1"
+              >
+                {sim.data ? (
+                  <>
+                    <div className="min-h-0 flex-1">
+                      <TelemetryChart
+                        time={time}
+                        tracks={shownTracks}
+                        markers={markers(sim.data, time)}
+                        band={toBand(mc.data?.trajectory_band)}
+                        bandTrackId="velocity"
+                        yZoom={yZoom}
+                        cursor={cursor}
+                        delta={delta}
+                        onCursor={(next) => setCursor(Math.min(next, tEnd || next))}
+                        onDelta={(which, t) => setDelta((d) => ({ ...d, [which]: t }))}
+                      />
+                    </div>
+                    <ChannelPicker
+                      tracks={tracks}
+                      order={order}
+                      visible={visible}
+                      yZoom={yZoom}
+                      onToggle={(id) => setVisible((v) => ({ ...v, [id]: !(v[id] ?? true) }))}
+                      onReorder={setOrder}
+                      onZoom={(id, zoom) => setYZoom((z) => ({ ...z, [id]: zoom }))}
+                    />
+                  </>
+                ) : (
+                  <div className="min-h-0 flex-1 animate-pulse rounded-lg bg-surface-2" />
+                )}
+              </Panel>
+              {sim.data && (
+                <Panel title="Cursor" className="w-80 shrink-0" bodyClassName="p-0">
+                  <CursorTable time={time} tracks={shownTracks} cursor={cursorT} delta={delta} />
+                </Panel>
+              )}
+            </>
+          )}
+          {tab === "spread" && (
+            <div className="mx-auto w-full max-w-4xl overflow-y-auto">
+              <SpreadPanel
+                data={mc.data}
+                error={mc.error}
+                fetching={mc.isFetching}
+                uncertainty={unc}
+                onUncertainty={setUnc}
+              />
+            </div>
+          )}
+          {tab === "ghost" && (
+            <div className="mx-auto w-full max-w-4xl overflow-y-auto">
+              <GhostPanel
+                presets={presets}
+                selectedId={ghostId}
+                onSelect={setGhostId}
+                manualCdaCm2={ghostCdaCm2}
+                onManualCda={setGhostCdaCm2}
+                gapMs={gapMs}
+                gapNote={gapNote}
+                curve={deltaPoints}
+                busy={ghost.isFetching}
+              />
+            </div>
+          )}
+          {tab === "start" && (
+            <div className="mx-auto mt-10 w-full max-w-md">
+              <ReactionTrainer />
+            </div>
           )}
         </div>
-
-        <div className="grid h-[440px] shrink-0 grid-cols-[1.25fr_1fr] gap-3">
-          <Panel
-            title="Race replay"
-            description="true-scale cars, camera follows the primary lane"
-            actions={<ProvenanceBadge value="predicted" />}
-            bodyClassName="p-0"
-            className="min-h-0"
-          >
-            {sim.data && design && primaryTrace ? (
-              <RaceReplay
-                trackM={car.trackM}
-                model={design.model}
-                ghostModel={ghostTrace ? design.model : null}
-                primary={primaryTrace}
-                ghost={ghostTrace}
-                // Unclamped so a slower ghost is shown crossing the line; the telemetry
-                // readouts clamp to the primary trace themselves.
-                cursor={cursor}
-                onCursor={setCursor}
-                hasGhost={ghostTrace !== null}
-              />
-            ) : (
-              <EmptyState
-                icon={<AlertTriangle size={18} />}
-                title={
-                  !design
-                    ? "Replay needs a design display mesh"
-                    : "Replay needs a finished model run"
-                }
-              >
-                {designError
-                  ? `Could not load the display mesh: ${designError}`
-                  : design
-                    ? "The race model is still integrating. The replay appears with the finished telemetry."
-                    : "Run the race model with a design imported in Design first; the chart and metrics still work without it."}
-              </EmptyState>
-            )}
-          </Panel>
-          <div className="flex min-h-0 flex-col gap-3 overflow-y-auto pr-0.5">
-            <SpreadPanel
-              data={mc.data}
-              error={mc.error}
-              fetching={mc.isFetching}
-              uncertainty={unc}
-              onUncertainty={setUnc}
-            />
-            <GhostPanel
-              presets={presets}
-              selectedId={ghostId}
-              onSelect={setGhostId}
-              manualCdaCm2={ghostCdaCm2}
-              onManualCda={setGhostCdaCm2}
-              gapMs={gapMs}
-              gapNote={gapNote}
-              curve={deltaPoints}
-              busy={ghost.isFetching}
-            />
-            {primaryTrace && (
-              <TimingTower
-                primary={primaryTrace}
-                ghost={ghostTrace}
-                lengthM={car.trackM}
-                primaryTime={primaryTime}
-                ghostTime={ghost.data?.finished === true ? (ghost.data.time_s ?? null) : null}
-              />
-            )}
-            <ReactionTrainer />
-          </div>
-        </div>
+        <StatusBar items={status} />
       </div>
     </div>
   );
