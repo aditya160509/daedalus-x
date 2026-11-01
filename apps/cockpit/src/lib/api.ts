@@ -253,6 +253,15 @@ export const VizMeta = z.object({
       drag_relative_error: z.number().nullable().optional(),
     })
     .optional(),
+  adjoint: z
+    .object({
+      status: z.enum(["available", "unavailable"]),
+      reason: z.string().optional(),
+      field: z.string().optional(),
+      assumptions: z.array(z.string()).optional(),
+    })
+    .nullable()
+    .optional(),
   U_m_s: z.number(),
   car: z.object({ length_m: z.number(), width_m: z.number(), height_m: z.number() }),
   acceptance: z.string(),
@@ -270,6 +279,13 @@ export const VizMeta = z.object({
     }).optional(),
     wake_shell: MeshLayer.extend({ definition: z.string() }).optional(),
     oilflow: LineLayer.optional(),
+    sensitivity: MeshLayer.extend({
+      scale_p99: z.number().nonnegative(),
+      field: z.string(),
+      provenance: z.literal("simulated"),
+      assumptions: z.array(z.string()),
+      sign: z.string(),
+    }).optional(),
     separation: z
       .object({
         positions: BufRef,

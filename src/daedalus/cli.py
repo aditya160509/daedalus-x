@@ -11,6 +11,10 @@ from pathlib import Path
 
 def main(argv: list[str] | None = None) -> int:
     args = argv if argv is not None else sys.argv[1:]
+    if args and args[0] == "adjoint":
+        from daedalus.adjoint import main as adjoint_main
+
+        return adjoint_main(args[1:])
     if args and args[0] == "grid":
         from daedalus.gridstudy import main as grid_main
 
@@ -23,6 +27,7 @@ def main(argv: list[str] | None = None) -> int:
 
     p = argparse.ArgumentParser(prog="daedalus")
     sub = p.add_subparsers(dest="area", required=True)
+    sub.add_parser("adjoint", help="prepare, solve or export a frozen-turbulence drag adjoint")
     sub.add_parser("grid", help="queue a mesh/speed study or report its results")
     sub.add_parser("jobs", help="durable job submission, worker and listing")
 

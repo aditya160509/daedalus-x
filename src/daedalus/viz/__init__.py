@@ -24,6 +24,7 @@ from numpy.typing import NDArray
 
 from .binary import _Buffer, _polylines, _robust_range, _triangles, mirror_triangles
 from .insights import add_insights
+from .sensitivity import add_sensitivity
 
 VIZ_VERSION = 2
 CAR_GROUPS = (
@@ -38,14 +39,16 @@ CAR_GROUPS = (
 )
 
 
-def _reader(case: Path, groups: list[str]) -> pv.MultiBlock:
+def _reader(case: Path, groups: list[str], time_value: float | None = None) -> pv.MultiBlock:
     marker = case / "case.foam"
     marker.touch(exist_ok=True)
     r = pv.POpenFOAMReader(str(marker))
     times = [t for t in r.time_values if t > 0]
     if not times:
         raise FileNotFoundError(f"{case} has no solved time directory (run reconstruct first)")
-    r.set_active_time_value(times[-1])
+    if time_value is not None and time_value not in times:
+        raise ValueError(f"{case}: requested field time {time_value} is not available")
+    r.set_active_time_value(times[-1] if time_value is None else time_value)
     r.disable_all_patch_arrays()
     r.enable_patch_array("internalMesh")
     for g in groups:
@@ -174,12 +177,14 @@ def export(case: Path, out_dir: Path | None = None, n_seeds: tuple[int, int] = (
     out = Path(out_dir) if out_dir else case / "viz"
     out.mkdir(parents=True, exist_ok=True)
     diagnostics = add_insights(internal, boundary, manifest, result, buf, layers, out)
+    adjoint = add_sensitivity(case, groups, buf, layers)
     if buf.size > 40 * 1024 * 1024:
         raise ValueError(f"flow export exceeds 40 MiB budget: {buf.size} bytes")
     (out / "viz.bin").write_bytes(b"".join(buf.chunks))
     meta = {
         "version": VIZ_VERSION,
         "diagnostics": diagnostics,
+        "adjoint": adjoint,
         "U_m_s": u_inf,
         "car": {"length_m": length, "width_m": width, "height_m": height},
         "acceptance": result.get("acceptance", "pending"),

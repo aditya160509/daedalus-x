@@ -303,3 +303,14 @@ class GridConvergence(BaseModel):
     extrapolated_cd: float | None = None
     gci_fine_pct: float | None = None
     asymptotic_ratio: float | None = None
+
+
+class AdjointResult(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid", allow_inf_nan=False)
+    succeeded: bool
+    converged: bool
+    field: str | None
+    residual_ratios: dict[str, float]
+    error: str | None
+    n_procs: int = Field(ge=1, le=8)
+    assumptions: tuple[str, ...]
