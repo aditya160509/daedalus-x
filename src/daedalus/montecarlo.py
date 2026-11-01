@@ -156,16 +156,20 @@ def race_times(
     cda: FloatArray,
     crr: FloatArray,
     rho: float,
-    track_m: float,
+    track_m: float | FloatArray,
     model: ModelLevel = ModelLevel.M2,
+    dt_s: float = BURN_DT_S,
 ) -> FloatArray:
     """Race time for every sample at once; NaN for a non-finish.
 
     The burn phase is integrated with fixed-step RK4 across all samples together. After
     burnout the motion  dv/dt = -(a v^2 + b)  has an exact solution, so the coast phase and
     the finish crossing are evaluated in closed form instead of stepped.
+
+    `dt_s` defaults to the Monte Carlo step; calibration passes a coarser step (residuals
+    are measured in milliseconds) to make thousands of bootstrap refits affordable.
     """
-    times, _ = _integrate(thrust, thrust_scale, mass, cda, crr, rho, track_m, model)
+    times, _ = _integrate(thrust, thrust_scale, mass, cda, crr, rho, track_m, model, dt_s=dt_s)
     return times
 
 
@@ -197,9 +201,10 @@ def _integrate(
     cda: FloatArray,
     crr: FloatArray,
     rho: float,
-    track_m: float,
+    track_m: float | FloatArray,
     model: ModelLevel,
     record_times: FloatArray | None = None,
+    dt_s: float = BURN_DT_S,
 ) -> tuple[FloatArray, FloatArray]:
     losses = model is ModelLevel.M2
     a = 0.5 * rho * cda / mass if losses else np.zeros_like(mass)
@@ -209,7 +214,7 @@ def _integrate(
     t_fin = np.full(n, np.nan)
 
     t_end = thrust.burn_end_s
-    steps = max(1, int(np.ceil(t_end / BURN_DT_S)))
+    steps = max(1, int(np.ceil(t_end / dt_s)))
     h = t_end / steps
     # Thrust per unit mass is sampled once on the RK4 half-step grid (index 2*i + j).
     grid = np.linspace(0.0, t_end, 2 * steps + 1)
