@@ -9,7 +9,8 @@ export interface FlowLayers {
   vortices: boolean;
   shell: boolean;
   arrows: boolean;
-  animate: boolean;
+  /** null follows the OS reduced-motion setting; a click on Animate is an explicit choice. */
+  animate: boolean | null;
   banded: boolean;
   density: number;
   slice: number;
@@ -24,7 +25,7 @@ export const DEFAULT_LAYERS: FlowLayers = {
   vortices: false,
   shell: false,
   arrows: false,
-  animate: true,
+  animate: null,
   banded: true,
   density: 0.6,
   slice: 8,

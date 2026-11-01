@@ -197,12 +197,12 @@ export function FlowPanel({ runId, hasViz }: { runId: string; hasViz: boolean })
         setNonce((n) => n + 1);
       } else if (event.code === "Space") {
         event.preventDefault();
-        setLayers((l) => ({ ...l, animate: !l.animate }));
+        setLayers((l) => ({ ...l, animate: !(l.animate ?? !reducedMotion) }));
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [reducedMotion]);
 
   return (
     <Panel
@@ -323,7 +323,12 @@ export function FlowPanel({ runId, hasViz }: { runId: string; hasViz: boolean })
               compare={compareOn}
               onCompare={toggleCompare}
             />
-            <LayerOptions layers={layers} setLayers={setLayers} slices={field.data.xslices} />
+            <LayerOptions
+              layers={layers}
+              animating={layers.animate ?? !reducedMotion}
+              setLayers={setLayers}
+              slices={field.data.xslices}
+            />
             <CameraBar
               preset={preset}
               onPreset={(p) => {

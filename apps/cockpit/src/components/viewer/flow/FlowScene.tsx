@@ -70,7 +70,7 @@ function SceneContents(props: SceneProps) {
     () => scalarMesh(field.centreline, layers.sliceScalar),
     [field, layers.sliceScalar],
   );
-  const animate = layers.animate && !reducedMotion;
+  const animate = layers.animate ?? !reducedMotion;
   return (
     <>
       <color attach="background" args={["#0b0b0c"]} />

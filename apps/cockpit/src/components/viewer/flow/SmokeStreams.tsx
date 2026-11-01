@@ -83,10 +83,12 @@ function PackedStreams({
       m.fragmentShader.replace(
         "gl_FragColor = diffuseColor;",
         `
-      float phase=fract(vFlowArc*18.-uFlowTime*.9);
-      float head=1.-smoothstep(.0,.16,phase);
-      diffuseColor.a*=mix(.85,.2+.75*head,uFlowAnimate)*clamp(1.5/(1.+vFlowDepth*4.),.15,1.);
-      diffuseColor.rgb*=mix(.8,.6+1.8*head,uFlowAnimate);
+      // Comet pulses every 4 cm of arc, advected at ~0.24 m/s of scene length so the stream
+      // reads as continuous moving air; a long exponential tail keeps every line lit.
+      float phase=fract(vFlowArc*25.-uFlowTime*6.);
+      float head=exp(-phase*5.5);
+      diffuseColor.a*=mix(.85,.35+.65*head,uFlowAnimate)*clamp(1.5/(1.+vFlowDepth*4.),.15,1.);
+      diffuseColor.rgb*=mix(.8,.7+1.6*head,uFlowAnimate);
       gl_FragColor=diffuseColor;
     `,
       );

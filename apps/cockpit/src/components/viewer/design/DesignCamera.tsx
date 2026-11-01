@@ -46,7 +46,7 @@ export function DesignCamera({
     camera.position.copy(
       new THREE.Vector3(...DIRECTIONS[preset])
         .normalize()
-        .multiplyScalar(frame.radius * 3.2)
+        .multiplyScalar(frame.radius * 4.4) // room for dimension lines and the viewport chrome
         .add(centre),
     );
     camera.lookAt(centre);

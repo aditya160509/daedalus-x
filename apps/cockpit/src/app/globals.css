@@ -54,6 +54,14 @@
   --chart-3: #e0b85c;
   --chart-4: #5aa8ff;
   --chart-5: #3ccf91;
+
+  /* Elevation: a 1px top highlight plus a tight contact shadow and a soft ambient one. */
+  --shadow-panel:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.035), 0 1px 2px 0 rgb(0 0 0 / 0.35),
+    0 8px 24px -12px rgb(0 0 0 / 0.5);
+  --shadow-float:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.06), 0 0 0 1px rgb(0 0 0 / 0.4),
+    0 4px 8px -2px rgb(0 0 0 / 0.45), 0 18px 40px -12px rgb(0 0 0 / 0.65);
 }
 
 @theme inline {
@@ -115,6 +123,8 @@
   --text-2xs: 0.6875rem;
   --text-2xs--line-height: 1rem;
   --ease-snappy: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --shadow-panel: var(--shadow-panel);
+  --shadow-float: var(--shadow-float);
 }
 
 @layer base {
@@ -143,6 +153,14 @@
   font-feature-settings:
     "tnum" 1,
     "zero" 1;
+}
+
+/* Floating viewport chrome: translucent graphite over the 3D scene. */
+@utility glass {
+  background: color-mix(in oklab, var(--card) 78%, transparent);
+  backdrop-filter: blur(14px) saturate(1.4);
+  border: 1px solid color-mix(in oklab, var(--line-strong) 80%, transparent);
+  box-shadow: var(--shadow-float);
 }
 
 @utility label-caps {

@@ -26,13 +26,15 @@ export function Panel({
   return (
     <section
       className={cn(
-        "flex min-h-0 flex-col overflow-hidden rounded-xl border bg-card shadow-[0_1px_0_0_rgba(255,255,255,0.03)_inset]",
+        "flex min-h-0 flex-col overflow-hidden rounded-xl border bg-card shadow-panel",
         className,
       )}
     >
       <header className="flex min-h-11 shrink-0 items-center gap-3 border-b px-4 py-2">
         <div className="min-w-0">
-          <h2 className="truncate text-[13px] font-medium text-foreground">{title}</h2>
+          <h2 className="truncate text-[13px] font-medium tracking-[-0.005em] text-foreground">
+            {title}
+          </h2>
           {description && <p className="truncate text-xs text-muted-foreground">{description}</p>}
         </div>
         <div className="ml-auto flex shrink-0 items-center gap-2">{actions}</div>

@@ -10,10 +10,12 @@ import type { FlowLayers } from "./types";
  */
 export function LayerOptions({
   layers,
+  animating,
   setLayers,
   slices,
 }: {
   layers: FlowLayers;
+  animating: boolean;
   setLayers: React.Dispatch<React.SetStateAction<FlowLayers>>;
   slices: { x_m: number[] } | undefined;
 }) {
@@ -60,7 +62,7 @@ export function LayerOptions({
         <Toggle
           size="sm"
           variant="outline"
-          pressed={layers.animate}
+          pressed={animating}
           onPressedChange={(animate) => setLayers((l) => ({ ...l, animate }))}
           className="h-6 px-2 text-[11px] data-[state=on]:border-brand/50 data-[state=on]:bg-brand/10"
         >
