@@ -322,3 +322,43 @@ export async function getFlowField(runId: string): Promise<FlowField> {
     },
   };
 }
+
+export const JobState = z.enum(["queued", "running", "succeeded", "failed", "cancelled"]);
+export const Job = z.object({
+  id: z.string(),
+  kind: z.enum(["cfd_run", "cfd_viz", "geometry_import", "montecarlo_batch"]),
+  params: z.record(z.string(), z.unknown()),
+  state: JobState,
+  created_at: z.string(),
+  started_at: z.string().nullable(),
+  finished_at: z.string().nullable(),
+  pid: z.number().nullable(),
+  log_path: z.string(),
+  result_path: z.string().nullable(),
+  error: z.string().nullable(),
+});
+export type Job = z.infer<typeof Job>;
+export const listJobs = () => request("/v1/jobs", z.array(Job));
+export const getJob = (id: string) => request(`/v1/jobs/${encodeURIComponent(id)}`, Job);
+export const cancelJob = (id: string) =>
+  request(`/v1/jobs/${encodeURIComponent(id)}/cancel`, Job, { method: "POST" });
+export const JobLog = z.object({
+  text: z.string(),
+  offset: z.number().int().nonnegative(),
+  has_more: z.boolean(),
+  stage_log: z.string(),
+  iteration: z.number().nullable(),
+  end_time: z.number().nullable(),
+});
+export type JobLog = z.infer<typeof JobLog>;
+export const getJobLog = (id: string, offset: number) =>
+  request(`/v1/jobs/${encodeURIComponent(id)}/log?offset=${offset}`, JobLog);
+export interface CfdJobInput {
+  design: string;
+  run: string;
+  speed: number;
+  fidelity: "quick" | "final";
+  procs: number;
+}
+export const submitCfdJob = (params: CfdJobInput) =>
+  request("/v1/jobs", Job, { method: "POST", body: JSON.stringify({ kind: "cfd_run", params }) });

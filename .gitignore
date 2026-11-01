@@ -13,3 +13,6 @@ data/runs/
 data/reference/
 data/designs/
 data/runs/
+
+data/jobs/
+data/jobs.sqlite*

@@ -6,6 +6,7 @@ revision relevance are independent fields and are never packed into one status.
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Annotated, Literal
@@ -267,3 +268,27 @@ class Artifact(Record):
     coordinate_frame: str | None = None
     provenance: Provenance
     warnings: tuple[str, ...] = ()
+
+
+class LocalJob(BaseModel):
+    """Frozen view of a mutable durable queue row; evidence records remain append-only."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str
+    kind: Literal["cfd_run", "cfd_viz", "geometry_import", "montecarlo_batch"]
+    params_json: str
+    state: JobState
+    created_at: str
+    started_at: str | None
+    finished_at: str | None
+    pid: int | None
+    log_path: str
+    result_path: str | None
+    error: str | None
+
+    def public(self) -> dict[str, object]:
+        return {
+            **self.model_dump(mode="json", exclude={"params_json"}),
+            "params": json.loads(self.params_json),
+        }

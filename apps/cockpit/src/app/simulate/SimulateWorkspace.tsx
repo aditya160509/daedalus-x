@@ -3,6 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, CheckCircle2, CircleDashed, Wind, XCircle } from "lucide-react";
 import { useMemo, useState } from "react";
+import { JobsDrawer } from "@/components/jobs/JobsDrawer";
+import { NewRunDialog } from "@/components/jobs/NewRunDialog";
 import { ForceBars } from "@/components/charts/ForceBars";
 import { HistoryChart } from "@/components/charts/HistoryChart";
 import { EmptyState, Metric, Panel, ProvenanceBadge } from "@/components/ui/primitives";
@@ -33,13 +35,6 @@ export function SimulateWorkspace() {
         Start the API with <code className="font-mono">uv run daedalus-api</code>.
       </EmptyState>
     );
-  if (runs.data && runs.data.length === 0)
-    return (
-      <EmptyState icon={<Wind />} title="No CFD runs yet">
-        Run <code className="font-mono">daedalus cfd run DESIGN CASE</code> to populate the wind
-        tunnel.
-      </EmptyState>
-    );
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4 p-5">
@@ -50,6 +45,8 @@ export function SimulateWorkspace() {
             OpenFOAM simpleFoam · k-ω SST · half model with moving ground
           </p>
         </div>
+        <NewRunDialog />
+        <JobsDrawer />
         <div role="tablist" aria-label="CFD runs" className="flex flex-wrap gap-1.5">
           {runs.data?.map((r) => (
             <button
@@ -71,7 +68,11 @@ export function SimulateWorkspace() {
           ))}
         </div>
       </header>
-      {detail.data ? (
+      {runs.data?.length === 0 ? (
+        <EmptyState icon={<Wind />} title="No CFD runs yet">
+          Import a design, then use New run to queue an approved case.
+        </EmptyState>
+      ) : detail.data ? (
         <RunView
           run={detail.data}
           hasViz={runs.data?.find((r) => r.run_id === runId)?.has_viz ?? false}

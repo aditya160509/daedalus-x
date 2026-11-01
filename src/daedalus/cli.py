@@ -8,12 +8,18 @@ import sys
 from dataclasses import asdict
 from pathlib import Path
 
-from daedalus import cfd, geometry
-
 
 def main(argv: list[str] | None = None) -> int:
+    args = argv if argv is not None else sys.argv[1:]
+    if args and args[0] == "jobs":
+        from daedalus.jobs import main as jobs_main
+
+        return jobs_main(args[1:])
+    from daedalus import cfd
+
     p = argparse.ArgumentParser(prog="daedalus")
     sub = p.add_subparsers(dest="area", required=True)
+    sub.add_parser("jobs", help="durable job submission, worker and listing")
 
     g = sub.add_parser("geometry").add_subparsers(dest="cmd", required=True)
     gi = g.add_parser("import", help="STEP assembly -> engineering frame, CFD STLs, GLB")
@@ -54,6 +60,8 @@ def main(argv: list[str] | None = None) -> int:
         print(viz.export(a.case))
         return 0
     if a.area == "geometry":
+        from daedalus import geometry
+
         r = geometry.import_car(a.step, a.out, forward_axis=a.forward, up_axis=a.up)
         print(
             json.dumps(
