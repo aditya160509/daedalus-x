@@ -4,8 +4,9 @@ export function suggestRunId(design: string, speed: number, fidelity: string, ex
     .toLowerCase()
     .replace(/[^a-z0-9_]/g, "_")
     .slice(0, 54);
+  const taken = new Set(existing);
   let i = 1;
-  while (existing.includes(`${prefix}_${i}`)) i++;
+  while (taken.has(`${prefix}_${i}`)) i++;
   return `${prefix}_${i}`;
 }
 export function progressPercent(iteration: number | null, end: number | null) {

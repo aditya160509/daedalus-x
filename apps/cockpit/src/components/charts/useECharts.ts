@@ -60,9 +60,13 @@ export function useECharts(
   const host = useRef<HTMLDivElement>(null);
   const chart = useRef<echarts.ECharts | null>(null);
   const builder = useRef(build);
-  builder.current = build;
   const handlers = useRef(events);
-  handlers.current = events;
+
+  // Declared first so the refs are current before the effects below read them.
+  useEffect(() => {
+    builder.current = build;
+    handlers.current = events;
+  });
 
   useEffect(() => {
     const el = host.current;

@@ -2,7 +2,7 @@
 
 import { Html, Line } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import * as THREE from "three";
 import type { LoadedModel } from "@/lib/gltf";
 import { carForwardYaw, type LabelledCentroid } from "./raceMath";
@@ -201,22 +201,22 @@ function Track({ trackM }: { trackM: number }) {
   );
 }
 
+const DESIRED = new THREE.Vector3();
+const LOOK_AT = new THREE.Vector3();
+
 function FollowCamera({ x, mode }: { x: number; mode: ReplayCamera }) {
   const { camera } = useThree();
-  const target = useRef(new THREE.Vector3(x, 0.03, 0));
-  const look = useRef(new THREE.Vector3(x, 0.03, 0));
+  const [target] = useState(() => new THREE.Vector3(x, 0.03, 0));
+  const [look] = useState(() => new THREE.Vector3(x, 0.03, 0));
   useFrame((_, delta) => {
     const step = 1 - Math.exp(-6 * Math.min(delta, 0.1));
-    const desired =
-      mode === "side"
-        ? new THREE.Vector3(x + 0.12, 0.13, 0.58)
-        : mode === "chase"
-          ? new THREE.Vector3(x - 0.5, 0.16, 0.1)
-          : new THREE.Vector3(x, 0.62, 0.001);
-    target.current.lerp(desired, step);
-    look.current.lerp(new THREE.Vector3(x + (mode === "chase" ? 0.08 : 0), 0.035, 0), step);
-    camera.position.copy(target.current);
-    camera.lookAt(look.current);
+    if (mode === "side") DESIRED.set(x + 0.12, 0.13, 0.58);
+    else if (mode === "chase") DESIRED.set(x - 0.5, 0.16, 0.1);
+    else DESIRED.set(x, 0.62, 0.001);
+    target.lerp(DESIRED, step);
+    look.lerp(LOOK_AT.set(x + (mode === "chase" ? 0.08 : 0), 0.035, 0), step);
+    camera.position.copy(target);
+    camera.lookAt(look);
   });
   return null;
 }

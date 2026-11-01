@@ -11,7 +11,7 @@ import {
   ProvenanceBadge,
   SegmentedControl,
   Skeleton,
-  viewerFallback,
+  ViewerFallback,
 } from "@/components/ui/primitives";
 import type { CameraPreset } from "@/components/viewer/types";
 import { ControlRail } from "@/components/viewer/flow/ControlRail";
@@ -39,11 +39,11 @@ import { cn } from "@/lib/utils";
 
 const FlowScene = dynamic(
   () => import("@/components/viewer/flow/FlowScene").then((m) => m.FlowScene),
-  { ssr: false, loading: viewerFallback },
+  { ssr: false, loading: ViewerFallback },
 );
 const CompareView = dynamic(
   () => import("@/components/viewer/flow/CompareView").then((m) => m.CompareView),
-  { ssr: false, loading: viewerFallback },
+  { ssr: false, loading: ViewerFallback },
 );
 
 const GPU_BUDGET_MIB = 600;

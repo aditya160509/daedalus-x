@@ -4,6 +4,8 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import type { OrbitControls } from "three-stdlib";
 
+const TARGET = new THREE.Vector3();
+
 export function FlyThrough({
   playing,
   length,
@@ -39,9 +41,9 @@ export function FlyThrough({
     elapsed.current = Math.min(12, elapsed.current + dt);
     const t = elapsed.current / 12;
     camera.position.copy(path.getPointAt(t));
-    const target = new THREE.Vector3(length * (0.2 + 1.2 * t), height * 0.4, 0);
-    camera.lookAt(target);
-    controls.current?.target.copy(target);
+    TARGET.set(length * (0.2 + 1.2 * t), height * 0.4, 0);
+    camera.lookAt(TARGET);
+    controls.current?.target.copy(TARGET);
     publish();
     if (t === 1) onEnd();
   });

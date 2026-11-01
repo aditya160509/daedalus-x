@@ -494,8 +494,10 @@ function decodeFlowField(meta: VizMeta, buf: ArrayBuffer): FlowField {
 
 export async function getFlowField(runId: string): Promise<FlowField> {
   const base = `/v1/cfd/runs/${encodeURIComponent(runId)}`;
-  const meta = await request(`${base}/viz.json`, VizMeta);
-  const res = await fetch(`/api${base}/viz.bin`);
+  const [meta, res] = await Promise.all([
+    request(`${base}/viz.json`, VizMeta),
+    fetch(`/api${base}/viz.bin`),
+  ]);
   if (!res.ok) throw new ApiError(`flow-field data: ${res.statusText}`, res.status);
   return decodeFlowField(meta, await res.arrayBuffer());
 }

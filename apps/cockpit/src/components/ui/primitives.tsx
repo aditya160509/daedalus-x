@@ -256,4 +256,7 @@ export function Skeleton({ className }: { className?: string }) {
   return <div aria-hidden className={cn("animate-pulse bg-surface-2", className)} />;
 }
 
-export const viewerFallback = () => <Skeleton className="h-full" />;
+/** `loading` fallback for dynamically imported 3D viewers. */
+export function ViewerFallback() {
+  return <Skeleton className="h-full" />;
+}

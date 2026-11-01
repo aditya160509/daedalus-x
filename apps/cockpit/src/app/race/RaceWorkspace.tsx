@@ -12,25 +12,15 @@ import { loadPresets, savePresets, type RacePreset } from "@/components/race/pre
 import { deltaTimeCurve, finishGap } from "@/components/race/raceMath";
 import type { RaceTrace } from "@/components/race/useRaceCar";
 import { useWhatIfSweep } from "@/components/race/whatIf";
+import { EmptyState, Panel, ProvenanceBadge, ViewerFallback } from "@/components/ui/primitives";
 import {
-  EmptyState,
-  Metric,
-  Panel,
-  ProvenanceBadge,
-  viewerFallback,
-} from "@/components/ui/primitives";
-import {
-  ApiError,
   designGlbUrl,
   listDesigns,
   raceMonteCarlo,
   simulateRace,
-  type MonteCarlo,
-  type RaceSimulation,
   type RaceSimulationRequest,
   type UncertaintyInput,
 } from "@/lib/api";
-import { SERIES } from "@/lib/colormap";
 import { type LoadedModel, loadGlbUrl } from "@/lib/gltf";
 import { estimateThrust } from "@/lib/thrust";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
@@ -42,18 +32,17 @@ import {
   type CarParamsUi,
   type ThrustSource,
 } from "./raceInputsState";
+import { MetricsRow } from "./MetricsRow";
+import { buildTracks, channelOf, markers, toBand } from "./raceTracks";
 
 const RaceReplay = dynamic(() => import("@/components/race/RaceReplay").then((m) => m.RaceReplay), {
   ssr: false,
-  loading: viewerFallback,
+  loading: ViewerFallback,
 });
 
 const TRACK_IDS = ["velocity", "acceleration", "forces", "distance"];
 const EMPTY_TIME: number[] = [];
 const DEBOUNCE_MS = 120; // spec T08: live race-time and spread update, debounced
-
-const channelOf = (sim: RaceSimulation, name: string): number[] =>
-  sim.channels.find((c) => c.name === name)?.values ?? [];
 
 interface RaceOverrides {
   massG?: number;
@@ -426,148 +415,6 @@ export function RaceWorkspace() {
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-/** The API names its band arrays time_s; the chart wants `time`. Null when the band is missing. */
-function toBand(
-  band: { time_s: number[]; p5: number[]; p50: number[]; p95: number[] } | null | undefined,
-) {
-  return band ? { time: band.time_s, p5: band.p5, p50: band.p50, p95: band.p95 } : null;
-}
-
-function buildTracks(sim: RaceSimulation): TelemetryTrack[] {
-  return [
-    {
-      id: "velocity",
-      name: "Velocity",
-      unit: "m/s",
-      color: "#22d3ee",
-      series: [{ label: "velocity", values: channelOf(sim, "velocity") }],
-    },
-    {
-      id: "acceleration",
-      name: "Accel",
-      unit: "m/s²",
-      color: "#b18cff",
-      series: [{ label: "acceleration", values: channelOf(sim, "acceleration") }],
-    },
-    {
-      id: "forces",
-      name: "Force",
-      unit: "N",
-      color: "#e7ebef",
-      series: [
-        { label: "thrust", values: channelOf(sim, "thrust"), color: "#d8b45a" },
-        { label: "drag", values: channelOf(sim, "drag"), color: SERIES.blue },
-        {
-          label: "rolling",
-          values: channelOf(sim, "rolling_resistance"),
-          color: "#f0525a",
-          dashed: true,
-        },
-      ],
-    },
-    {
-      id: "distance",
-      name: "Distance",
-      unit: "m",
-      color: "#3ccf91",
-      series: [{ label: "position", values: channelOf(sim, "position") }],
-    },
-  ];
-}
-
-function markers(sim: RaceSimulation, time: number[]): Array<{ t: number; label: string }> {
-  const out: Array<{ t: number; label: string }> = [];
-  const burn = channelOf(sim, "thrust");
-  const lastBurn = burn.findLastIndex((v) => v > 0);
-  if (lastBurn > 0 && time[lastBurn] !== undefined) {
-    out.push({ t: time[lastBurn], label: "burn end" });
-  }
-  if (sim.time_s !== null) out.push({ t: sim.time_s, label: "finish" });
-  return out;
-}
-
-function MetricsRow({
-  sim,
-  mc,
-  error,
-  valid,
-}: {
-  sim?: RaceSimulation;
-  mc?: MonteCarlo;
-  error: Error | null;
-  valid: boolean;
-}) {
-  if (!valid) {
-    return (
-      <Panel title="Prediction" className="shrink-0">
-        <EmptyState icon={<AlertTriangle size={18} />} title="Inputs out of range">
-          Fix the highlighted fields to run the race model.
-        </EmptyState>
-      </Panel>
-    );
-  }
-  if (error) {
-    return (
-      <Panel title="Prediction" className="shrink-0">
-        <EmptyState icon={<AlertTriangle size={18} />} title="Simulation unavailable">
-          {error instanceof ApiError ? error.message : String(error)}
-        </EmptyState>
-      </Panel>
-    );
-  }
-  const peakDrag = Math.max(...(sim?.channels.find((c) => c.name === "drag")?.values ?? [0]));
-  const p = mc?.percentiles_s;
-  return (
-    <div className="grid shrink-0 grid-cols-5 gap-3">
-      <Metric
-        label="Travel time"
-        value={sim?.finished && sim.time_s !== null ? sim.time_s.toFixed(3) : "DNF"}
-        unit={sim?.finished ? "s" : undefined}
-        provenance="predicted"
-        tone={sim?.finished ? "default" : "danger"}
-        hint={
-          sim?.finished
-            ? `Model ${sim.model} · inputs ${sim.input_provenance.join(", ")}`
-            : (sim?.stop_reason ?? "Integrating the equations of motion.")
-        }
-      />
-      <Metric
-        label="Race-time spread"
-        value={p?.p50 != null ? p.p50.toFixed(3) : "—"}
-        unit={p?.p50 != null ? "s" : undefined}
-        provenance="predicted"
-        hint={
-          p?.p50 != null
-            ? `p5 ${p.p5.toFixed(3)} · p95 ${p.p95.toFixed(3)} · ${(
-                (mc?.finish_fraction ?? 0) * 100
-              ).toFixed(0)}% finish`
-            : "1000 seeded Monte Carlo samples"
-        }
-      />
-      <Metric
-        label="Peak speed"
-        value={(sim?.peak_speed_m_s ?? 0).toFixed(2)}
-        unit="m/s"
-        provenance="predicted"
-        hint={`${((sim?.peak_speed_m_s ?? 0) * 3.6).toFixed(1)} km/h`}
-      />
-      <Metric
-        label="Peak drag"
-        value={peakDrag.toFixed(3)}
-        unit="N"
-        provenance="predicted"
-        hint="0.5 · ρ · CdA · v²"
-      />
-      <Metric
-        label="Evidence status"
-        value="Unvalidated"
-        tone="risk"
-        hint="No measured race run to compare against yet"
-      />
     </div>
   );
 }

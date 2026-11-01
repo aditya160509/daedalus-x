@@ -10,7 +10,7 @@ import {
   Panel,
   ProvenanceBadge,
   Skeleton,
-  viewerFallback,
+  ViewerFallback,
 } from "@/components/ui/primitives";
 import { CAMERA_PRESETS, type CameraPreset } from "@/components/viewer/types";
 import { DesignControls } from "@/components/viewer/design/DesignControls";
@@ -35,11 +35,11 @@ import { cn } from "@/lib/utils";
 
 const DesignScene = dynamic(
   () => import("@/components/viewer/design/DesignScene").then((m) => m.DesignScene),
-  { ssr: false, loading: viewerFallback },
+  { ssr: false, loading: ViewerFallback },
 );
 const DesignCompare = dynamic(
   () => import("@/components/viewer/design/DesignCompare").then((m) => m.DesignCompare),
-  { ssr: false, loading: viewerFallback },
+  { ssr: false, loading: ViewerFallback },
 );
 
 export function DesignWorkspace() {
