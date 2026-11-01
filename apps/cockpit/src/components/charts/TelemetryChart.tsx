@@ -50,7 +50,7 @@ export function TelemetryChart({
   const render = useRef<() => void>(() => {});
 
   useEffect(() => {
-    if (!host.current) return;
+    if (!host.current) return undefined;
     const instance = echarts.init(host.current, undefined, { renderer: "canvas" });
     chart.current = instance;
     const ro = new ResizeObserver(() => {

@@ -63,7 +63,7 @@ export function useECharts(
 
   useEffect(() => {
     const el = host.current;
-    if (!el) return;
+    if (!el) return undefined;
     const instance = echarts.init(el, undefined, { renderer: "canvas" });
     chart.current = instance;
     const ro = new ResizeObserver(() => {

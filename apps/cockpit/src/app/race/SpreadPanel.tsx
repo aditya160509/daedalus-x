@@ -14,6 +14,12 @@ const LABELS: Record<keyof UncertaintyInput, string> = {
   crr: "Rolling",
 };
 
+const UNCERTAINTY_KEYS = ["thrust", "cda", "mass", "crr"] as const satisfies ReadonlyArray<
+  keyof UncertaintyInput
+>;
+const isUncertaintyKey = (k: string): k is keyof UncertaintyInput =>
+  (UNCERTAINTY_KEYS as ReadonlyArray<string>).includes(k);
+
 /** Race-time spread from input uncertainty (Monte Carlo, 1000 seeded samples). */
 export function SpreadPanel({ request }: { request: RaceSimulationRequest }) {
   const [unc, setUnc] = useState<UncertaintyInput>({
@@ -82,7 +88,7 @@ export function SpreadPanel({ request }: { request: RaceSimulationRequest }) {
       </div>
       <div className="flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-2">
-          {(Object.keys(LABELS) as Array<keyof UncertaintyInput>).map((k) => (
+          {UNCERTAINTY_KEYS.map((k) => (
             <NumberField
               key={k}
               id={`mc-${k}`}
@@ -101,7 +107,7 @@ export function SpreadPanel({ request }: { request: RaceSimulationRequest }) {
           <ul className="space-y-1.5">
             {ranked.map(([k, rho]) => (
               <li key={k} className="grid grid-cols-[64px_1fr_44px] items-center gap-2 text-xs">
-                <span className="text-text-2">{LABELS[k as keyof UncertaintyInput] ?? k}</span>
+                <span className="text-text-2">{isUncertaintyKey(k) ? LABELS[k] : k}</span>
                 <span className="h-1.5 overflow-hidden rounded-full bg-secondary">
                   <span
                     className={cn("block h-full rounded-full", rho < 0 ? "bg-ok" : "bg-risk")}

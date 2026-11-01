@@ -36,7 +36,7 @@ export async function loadGlb(file: File): Promise<LoadedModel> {
     o.traverse((c) => {
       if (c instanceof THREE.Mesh) {
         meshes++;
-        const g = c.geometry as THREE.BufferGeometry;
+        const g: THREE.BufferGeometry = c.geometry;
         tris += (g.index ? g.index.count : g.attributes.position.count) / 3;
       }
     });

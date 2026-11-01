@@ -29,7 +29,7 @@ Daedalus X is a local-first race-engineering cockpit for a STEM Racing (F1 in Sc
 | You do | You don't |
 |---|---|
 | Write production code, unit tests and type-clean code | Browser or visual QA, screenshots, Playwright runs (the reviewer does this) |
-| Run `ruff`, `mypy --strict`, `pytest` (only the tests you touched, plus the full suite once at the end), `npm run check` (TypeScript 7 + oxlint + vitest) | Long CFD campaigns. Run at most **one** `quick` case to prove a pipeline works, in the background |
+| Run `ruff`, `mypy --strict`, `pytest` (only the tests you touched, plus the full suite once at the end), `npm run check` (tsrs + type-aware oxlint + vitest) | Long CFD campaigns. Run at most **one** `quick` case to prove a pipeline works, in the background |
 | Research with TinyFish and record links | Invent features beyond the task file |
 | Update `STATUS.md`, `TASK-BOARD.md` and write an evidence note | Touch other tasks' files unless the task says so |
 

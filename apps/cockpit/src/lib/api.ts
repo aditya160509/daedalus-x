@@ -18,10 +18,9 @@ export class ApiError extends Error {
 async function request<T>(path: string, schema: z.ZodType<T>, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(`/api${path}`, {
-      ...init,
-      headers: { "content-type": "application/json", ...init?.headers },
-    });
+    const headers = new Headers(init?.headers);
+    if (!headers.has("content-type")) headers.set("content-type", "application/json");
+    res = await fetch(`/api${path}`, { ...init, headers });
   } catch {
     throw new ApiError("API unreachable — start it with `uv run daedalus-api`", 0);
   }
@@ -37,7 +36,8 @@ async function request<T>(path: string, schema: z.ZodType<T>, init?: RequestInit
 }
 
 function formatDetail(body: unknown): string | undefined {
-  const detail = (body as { detail?: unknown } | undefined)?.detail;
+  const detail =
+    typeof body === "object" && body !== null && "detail" in body ? body.detail : undefined;
   if (typeof detail === "string") return detail;
   if (Array.isArray(detail)) {
     return detail
@@ -291,15 +291,19 @@ export async function getFlowField(runId: string): Promise<FlowField> {
   if (buf.byteLength !== meta.bytes) {
     throw new ApiError(`flow-field data is ${buf.byteLength} bytes, expected ${meta.bytes}`, 500);
   }
-  const view = (r: BufRef) => {
-    const Ctor = { f32: Float32Array, u32: Uint32Array, u8: Uint8Array }[r.type];
-    return new Ctor(buf, r.offset, r.length);
+  // Typed views check the declared element type, so a mislabelled buffer fails loudly.
+  const expect = (r: BufRef, type: BufRef["type"]) => {
+    if (r.type !== type)
+      throw new ApiError(`flow-field buffer is ${r.type}, expected ${type}`, 500);
   };
+  const f32 = (r: BufRef) => (expect(r, "f32"), new Float32Array(buf, r.offset, r.length));
+  const u32 = (r: BufRef) => (expect(r, "u32"), new Uint32Array(buf, r.offset, r.length));
+  const u8 = (r: BufRef) => (expect(r, "u8"), new Uint8Array(buf, r.offset, r.length));
   const mesh = (l: z.infer<typeof MeshLayer>): FlowMesh => ({
-    positions: view(l.positions) as Float32Array,
-    indices: view(l.indices) as Uint32Array,
-    scalar: view(l.scalar) as Float32Array,
-    group: l.group ? (view(l.group) as Uint8Array) : undefined,
+    positions: f32(l.positions),
+    indices: u32(l.indices),
+    scalar: f32(l.scalar),
+    group: l.group ? u8(l.group) : undefined,
     range: l.range,
     name: l.scalar_name,
   });
@@ -310,9 +314,9 @@ export async function getFlowField(runId: string): Promise<FlowField> {
     wake: mesh(L.wake),
     centreline: mesh(L.centreline),
     streamlines: {
-      positions: view(L.streamlines.positions) as Float32Array,
-      offsets: view(L.streamlines.offsets) as Uint32Array,
-      scalar: view(L.streamlines.scalar) as Float32Array,
+      positions: f32(L.streamlines.positions),
+      offsets: u32(L.streamlines.offsets),
+      scalar: f32(L.streamlines.scalar),
       range: L.streamlines.range,
       name: L.streamlines.scalar_name,
     },

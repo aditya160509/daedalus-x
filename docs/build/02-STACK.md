@@ -18,8 +18,8 @@ Everything here is free and open source. Pin to these versions or newer compatib
 | 3D | three 0.180, @react-three/fiber 9.3, @react-three/drei 10.7 | |
 | Charts | ECharts 6 | via `useECharts` |
 | Data | TanStack Query 5, Zod 4 | |
-| Type check | **TypeScript 7.0 (native Go port)**, installed as `typescript-native` | `npm run typecheck`, about 3× faster than tsc 5. `typescript@5.9` stays only because Next 15 loads `next.config.ts` through the TS JS API, which TS 7 doesn't ship yet. Never import `typescript` in app code. |
-| Lint | **oxlint 1.90** (`.oxlintrc.json`: typescript, react, react-hooks, nextjs, jsx-a11y, import, unicorn, oxc) | `npm run lint`, about 0.2 s. ESLint is removed; Next builds skip it (`eslint.ignoreDuringBuilds`). |
+| Type check | **tsrs** (Rust port of TypeScript 7, oxc-project) via `npm run typecheck`, about 0.07 s. **TypeScript 7.0.2** (Go, Microsoft) via `npm run typecheck:ref` is the reference | Benchmarked 2026-11-01 on this repo (5-run average): tsc 5.9 1.26 s, TS 7 0.17 s, tsrs `--fast` 0.07 s, with identical diagnostics on an injected-error probe. tsrs is pre-1.0 (0.20, tracking TS 7.1), so **the reviewer runs `typecheck:ref` before accepting**. `typescript@5.9` stays only for Next 15's `next.config.ts` loader (Next ≥16 drives the TS 7 CLI directly, so the Next 16 upgrade can drop it). Never import `typescript` in app code. |
+| Lint | **oxlint 1.90 `--type-aware`** (`.oxlintrc.json`; type-aware rules via oxlint-tsgolint). Plugins: typescript, react, react-hooks, nextjs, jsx-a11y, import, unicorn, oxc | `npm run lint`, about 0.36 s with type info (0.08 s without). Biome lint measured 0.34 s with fewer rules and no type awareness, so it isn't used. ESLint is removed. |
 | Format | Prettier 3 | `npm run format` (oxfmt is still beta; revisit when it reaches 1.0) |
 | Tests (web) | Vitest 3 | Playwright exists but is reviewer-only |
 

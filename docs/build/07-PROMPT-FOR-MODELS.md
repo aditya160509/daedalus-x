@@ -18,7 +18,7 @@ You are a senior engineer on the Daedalus X repo at `~/Documents/f1/daedalus-x` 
 
 ## Reviewer checklist (Claude)
 - [ ] Pull and read the diff (`git log --stat`, then the full diff per commit).
-- [ ] Run all the checks, plus `-m slow` tests.
+- [ ] Run all the checks, plus `-m slow` tests and `npm run typecheck:ref` (official TS 7, the reference for tsrs).
 - [ ] Do one browser pass of the affected workspace at 1440×900 with servers started and stopped together. Check the console for errors.
 - [ ] Visual QA against the references listed in the task.
 - [ ] Verify provenance badges, honest empty states and acceptance banners.

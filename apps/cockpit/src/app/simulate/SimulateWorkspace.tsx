@@ -22,7 +22,7 @@ export function SimulateWorkspace() {
   const runId = picked ?? runs.data?.[0]?.run_id ?? null;
   const detail = useQuery({
     queryKey: ["cfd-run", runId],
-    queryFn: () => getCfdRun(runId as string),
+    queryFn: () => (runId ? getCfdRun(runId) : Promise.reject(new Error("no run selected"))),
     enabled: runId != null,
     refetchInterval: (q) => (q.state.data?.state === "running" ? 10_000 : false),
   });
