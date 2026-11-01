@@ -633,3 +633,27 @@ export const scorePrediction = (id: string, measured_s: number) =>
     method: "POST",
     body: JSON.stringify({ measured_value: measured_s, unit: "s" }),
   });
+
+// FORGE (T11)
+export const RuleCheck = z.object({
+  rule_id: z.string(),
+  name: z.string(),
+  page: z.number(),
+  unit: z.string(),
+  value: z.number().nullable(),
+  min: z.number().nullable(),
+  max: z.number().nullable(),
+  margin: z.number().nullable(),
+  state: z.enum(["pass_cad_only", "at_risk", "fail_cad", "manual_review"]),
+  penalty: z.string(),
+  parts: z.array(z.string()),
+  note: z.string(),
+});
+export type RuleCheck = z.infer<typeof RuleCheck>;
+export const ForgeChecks = z.object({
+  revision: z.string(),
+  is_reference_only: z.boolean(),
+  checks: z.array(RuleCheck),
+});
+export const getForgeChecks = (design: string) =>
+  request(`/v1/forge/checks?design=${encodeURIComponent(design)}`, ForgeChecks);

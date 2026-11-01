@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { AeroMap, BenchmarkChart, cm2, ScoreGauge } from "@/components/pitwall/PitCharts";
+import { LegalPanel } from "@/components/pitwall/LegalPanel";
 import { SealedReveal } from "@/components/pitwall/SealedReveal";
 import { Metric, Panel, ProvenanceBadge, Skeleton } from "@/components/ui/primitives";
 import { getOracleState } from "@/lib/api";
@@ -50,7 +51,7 @@ export function PitWall() {
       <Panel
         title="Aero map"
         actions={s && <ProvenanceBadge value={prov} />}
-        className="min-h-80 lg:col-span-7 lg:row-span-2 lg:min-h-0"
+        className="min-h-80 lg:col-span-5 lg:row-span-2 lg:min-h-0"
         bodyClassName="p-2"
       >
         {s ? <AeroMap s={s} /> : <Skeleton className="size-full" />}
@@ -58,7 +59,7 @@ export function PitWall() {
 
       <Panel
         title="Next run · ORACLE"
-        className="min-h-56 lg:col-span-5 lg:min-h-0"
+        className="min-h-56 lg:col-span-4 lg:min-h-0"
         bodyClassName="p-4"
       >
         {s ? (
@@ -88,7 +89,7 @@ export function PitWall() {
 
       <Panel
         title="ORACLE vs random"
-        className="min-h-56 lg:col-span-3 lg:min-h-0"
+        className="min-h-56 lg:col-span-2 lg:min-h-0"
         bodyClassName="p-2"
       >
         {s ? <BenchmarkChart s={s} /> : <Skeleton className="size-full" />}
@@ -97,6 +98,9 @@ export function PitWall() {
         <SealedReveal />
       </Panel>
 
+      <div className="min-h-72 lg:col-start-10 lg:col-span-3 lg:row-span-2 lg:row-start-2 lg:min-h-0 [&>section]:h-full">
+        <LegalPanel />
+      </div>
       <nav className="grid grid-cols-3 gap-3 lg:col-span-12" aria-label="Deep workspaces">
         {[
           ["/simulate", "Wind Tunnel"],

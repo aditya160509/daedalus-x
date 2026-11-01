@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Daedalus X — Veloira autonomous race engineering system"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "pyyaml>=6",
     "build123d>=0.13.0",
     "fastapi>=0.162.0",
     "foamlib>=1.10.0",

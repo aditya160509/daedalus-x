@@ -272,7 +272,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="space-y-2 border-t border-sidebar-border p-3">
             {!collapsed && (
               <>
-                <ContextRow label="Rulebook" value="Not loaded" tone="risk" />
+                <ContextRow label="Rulebook" value="Dev 26/27 · ref" />
                 <ContextRow label="Design" value="Reference car" />
               </>
             )}
