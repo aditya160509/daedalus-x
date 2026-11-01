@@ -64,7 +64,7 @@ export function LayerOptions({
           variant="outline"
           pressed={animating}
           onPressedChange={(animate) => setLayers((l) => ({ ...l, animate }))}
-          className="h-6 px-2 text-[11px] data-[state=on]:border-brand/50 data-[state=on]:bg-brand/10"
+          className="h-6 px-2 text-[11px] data-[pressed]:border-brand/50 data-[pressed]:bg-brand/10"
         >
           Animate
         </Toggle>
