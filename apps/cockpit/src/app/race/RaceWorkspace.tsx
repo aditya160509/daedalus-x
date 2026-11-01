@@ -8,6 +8,7 @@ import { TelemetryChart, type TelemetryTrack } from "@/components/charts/Telemet
 import { ChannelPicker } from "@/components/race/ChannelPicker";
 import { CursorTable } from "@/components/race/CursorTable";
 import { GhostPanel } from "@/components/race/GhostPanel";
+import { ReactionTrainer } from "@/components/race/ReactionTrainer";
 import { loadPresets, savePresets, type RacePreset } from "@/components/race/presets";
 import { deltaTimeCurve, finishGap } from "@/components/race/raceMath";
 import type { RaceTrace } from "@/components/race/useRaceCar";
@@ -414,6 +415,7 @@ export function RaceWorkspace() {
               curve={deltaPoints}
               busy={ghost.isFetching}
             />
+            <ReactionTrainer />
           </div>
         </div>
       </div>
