@@ -12,6 +12,21 @@ Legend: 🧪 automated test · 🌐 browser check · 🖥 command/log · 👁 vi
 - [ ] 🧪 Vitest passes · `tsc --noEmit` 0 errors · Pyrefly 0 errors · ruff/oxlint clean
 - [ ] 🖥 size-limit: every page is ≤ 800 KB gzip
 
+## 0b. Merged open-source code must be CONNECTED (rule for every merge)
+Copying a repo is not done until it reads and writes **our** data. Check each one:
+- [ ] 🌐 **No foreign branding** anywhere: no logo, name, version, welcome page, AI or API-key prompts, tracking, or external links. Credit only in `THIRD_PARTY.md`.
+- [ ] 🌐 **Our look:** dark theme and the same fonts/colours as the cockpit; it fits inside the workspace tab with no double headers.
+- [ ] 🌐 **CAD (Chili3D):** opens our current car (Design picker) automatically; saving sends STEP to `/v1/designs`; the new design appears in Inspect, Rules (FORGE re-runs) and Wind Tunnel "New run"; FORGE fails are highlighted on the CAD model.
+- [ ] 🌐 **CAD ↔ ORACLE:** ORACLE's "next design" opens in CAD with the 4 variables set (wing AoA, taper, nose height, rear-wing chord); editing them updates the prediction.
+- [ ] 🌐 **vtk.js viewer:** loads the run picked in the header (not a demo file); its colour scales match the PDF report and hero render.
+- [ ] 🖥 **F3D renders:** come from the selected run and appear in the Wind Tunnel, Pit Wall, Presenter and PDF.
+- [ ] 🖥 **CadQuery:** ORACLE's next point → STEP → mesh → CFD job runs end-to-end, and the result lands back in ORACLE observations.
+- [ ] 🌐 **FoamPilot wizard:** starts a real job on our jobs worker; logs and residuals stream into the Convergence tab.
+- [ ] 🌐 **dockview / xyflow:** show live Pit Wall data and real evidence records, with no placeholder nodes.
+- [ ] 🧪 **Evidence:** every merged action (CAD save, render, run) writes an evidence record with hashes.
+- [ ] 🖥 **Rebuild:** `patches/*.patch` applies cleanly to the pinned upstream commit, and the rebuilt output matches what's committed.
+- [ ] 🖥 **Performance:** heavy bundles (CAD, vtk.js) load only on their own tab; other pages stay ≤ 800 KB.
+
 ## 1. Pit Wall (home `/`)
 - [ ] 🌐 Every panel loads real data; skeletons while loading, no blank panels
 - [ ] 🌐 Score gauge: the number matches the best CdA's position in the aero map's range
