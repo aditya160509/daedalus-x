@@ -270,14 +270,23 @@ export function TelemetryChart({
               gridIndex: i,
               min: range.min,
               max: range.max,
+              // Horizontal label inside the top-left of each lane: rotated names overlap
+              // once lanes get short.
               name: `${track.name} [${track.unit}]`,
-              nameLocation: "middle",
-              nameGap: 46,
-              nameTextStyle: { color: t.text2, fontSize: 10 },
+              nameLocation: "end",
+              nameRotate: 0,
+              nameGap: -12,
+              nameTextStyle: { color: t.text2, fontSize: 10, align: "left", padding: [0, 0, 0, 8] },
               axisLine: { show: false },
               splitNumber: 3,
               splitLine: { lineStyle: { color: t.line, opacity: 0.5 } },
-              axisLabel: { color: t.muted, fontSize: 10 },
+              // The padded max is an arbitrary float and sits under the lane name.
+              axisLabel: {
+                color: t.muted,
+                fontSize: 10,
+                showMaxLabel: false,
+                formatter: (v: number) => String(Number(v.toPrecision(3))),
+              },
             };
           }),
           dataZoom: [

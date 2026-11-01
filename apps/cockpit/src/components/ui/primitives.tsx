@@ -68,7 +68,8 @@ export function ProvenanceBadge({ value, title }: { value: Provenance; title?: s
           className="inline-flex h-6 items-center gap-1.5 rounded-full border bg-secondary/60 px-2 text-[11px] font-medium text-secondary-foreground capitalize outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
         >
           <span className={cn("size-1.5 rounded-full", PROV_DOT[value])} aria-hidden />
-          {value}
+          {/* Narrow metric cards keep the dot and move the word to screen readers. */}
+          <span className="@max-[230px]:sr-only">{value}</span>
         </span>
       </TooltipTrigger>
       <TooltipContent side="bottom">{title ?? PROV_HELP[value]}</TooltipContent>
@@ -94,7 +95,7 @@ export function Metric({
   icon?: React.ReactNode;
 }) {
   return (
-    <div className="flex min-w-0 flex-col gap-3 rounded-xl border bg-card p-4">
+    <div className="@container flex min-w-0 flex-col gap-3 rounded-xl border bg-card p-4">
       <div className="flex items-center justify-between gap-2">
         <span className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
           {icon && <span className="text-muted-foreground [&_svg]:size-3.5">{icon}</span>}
@@ -105,7 +106,7 @@ export function Metric({
       <div className="flex items-baseline gap-1.5">
         <span
           className={cn(
-            "tabular font-mono text-[28px] leading-none font-medium tracking-tight",
+            "tabular font-mono text-[28px] leading-none font-medium tracking-tight @max-[230px]:text-[22px]",
             tone === "risk" && "text-risk",
             tone === "danger" && "text-destructive",
           )}

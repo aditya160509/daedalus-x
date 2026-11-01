@@ -305,10 +305,10 @@ export function RaceWorkspace() {
         onApplyPreset={applyPreset}
       />
 
-      <div className="flex min-h-0 flex-col gap-3 overflow-hidden">
+      <div className="flex min-h-0 flex-col gap-3 overflow-y-auto">
         <MetricsRow sim={sim.data} mc={mc.data} error={sim.error ?? mc.error} valid={valid} />
 
-        <div className="flex min-h-0 flex-1 gap-3">
+        <div className="flex min-h-[500px] flex-1 shrink-0 gap-3">
           <Panel
             title="Telemetry · time domain"
             actions={
@@ -351,7 +351,7 @@ export function RaceWorkspace() {
             )}
           </Panel>
           {sim.data && (
-            <Panel title="Cursor" className="w-60 shrink-0" bodyClassName="p-0">
+            <Panel title="Cursor" className="w-80 shrink-0" bodyClassName="p-0">
               <CursorTable time={time} tracks={shownTracks} cursor={cursorT} delta={delta} />
             </Panel>
           )}
@@ -372,7 +372,9 @@ export function RaceWorkspace() {
                 ghostModel={ghostTrace ? design.model : null}
                 primary={primaryTrace}
                 ghost={ghostTrace}
-                cursor={cursorT}
+                // Unclamped so a slower ghost is shown crossing the line; the telemetry
+                // readouts clamp to the primary trace themselves.
+                cursor={cursor}
                 onCursor={setCursor}
                 hasGhost={ghostTrace !== null}
               />

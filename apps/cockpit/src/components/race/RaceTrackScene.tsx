@@ -210,7 +210,7 @@ function FollowCamera({ x, mode }: { x: number; mode: ReplayCamera }) {
   const [look] = useState(() => new THREE.Vector3(x, 0.03, 0));
   useFrame((_, delta) => {
     const step = 1 - Math.exp(-6 * Math.min(delta, 0.1));
-    if (mode === "side") DESIRED.set(x + 0.12, 0.13, 0.58);
+    if (mode === "side") DESIRED.set(x + 0.15, 0.16, 0.8);
     else if (mode === "chase") DESIRED.set(x - 0.5, 0.16, 0.1);
     else DESIRED.set(x, 0.62, 0.001);
     target.lerp(DESIRED, step);
