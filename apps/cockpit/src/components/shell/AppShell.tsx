@@ -21,6 +21,7 @@ import { useEffect, useSyncExternalStore } from "react";
 import { Toaster } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { CommandPalette, OPEN_EVENT } from "./CommandPalette";
+import { RunPicker } from "./RunPicker";
 import { Key } from "./Key";
 import { getHealth } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -359,8 +360,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 {active.capability}
               </span>
             )}
-            <div className="ml-auto text-xs text-muted-foreground">
-              SI units · provenance on every value
+            <div className="ml-auto flex items-center gap-4">
+              <RunPicker />
+              <span className="text-xs text-muted-foreground">
+                SI units · provenance on every value
+              </span>
             </div>
           </header>
           <main className="min-h-0 flex-1 overflow-hidden">{children}</main>

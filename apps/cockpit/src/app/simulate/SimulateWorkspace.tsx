@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, CheckCircle2, CircleDashed, Wind, XCircle } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { JobsDrawer } from "@/components/jobs/JobsDrawer";
 import { NewRunDialog } from "@/components/jobs/NewRunDialog";
 import { ForceBars } from "@/components/charts/ForceBars";
@@ -10,6 +10,7 @@ import { HistoryChart } from "@/components/charts/HistoryChart";
 import { EmptyState, Metric, Panel, ProvenanceBadge } from "@/components/ui/primitives";
 import { type CfdRunDetail, getCfdRun, listCfdRuns } from "@/lib/api";
 import { SERIES, SERIES_CYCLE } from "@/lib/colormap";
+import { useSelectedRun } from "@/lib/runSelection";
 import { cn } from "@/lib/utils";
 import { FlowPanel } from "./FlowPanel";
 import { GridStudyPanel } from "./GridStudyPanel";
@@ -22,8 +23,11 @@ const fmt = (v: number | null | undefined, digits = 4) =>
 
 export function SimulateWorkspace() {
   const runs = useQuery({ queryKey: ["cfd-runs"], queryFn: listCfdRuns, refetchInterval: 15_000 });
-  const [picked, setPicked] = useState<string | null>(null);
-  const runId = picked ?? runs.data?.[0]?.run_id ?? null;
+  const [picked, setPicked] = useSelectedRun();
+  const runId =
+    (picked && runs.data?.some((r) => r.run_id === picked) ? picked : null) ??
+    runs.data?.[0]?.run_id ??
+    null;
   const detail = useQuery({
     queryKey: ["cfd-run", runId],
     queryFn: () => (runId ? getCfdRun(runId) : Promise.reject(new Error("no run selected"))),

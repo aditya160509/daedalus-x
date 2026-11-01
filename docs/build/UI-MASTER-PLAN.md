@@ -35,7 +35,7 @@ Part 1 (sections A–H) is the build list. Part 2 (R1–R8) names the best exist
 |---|---|---|---|---|---|
 | B1 ✅ | Collapsible sidebar with search (`/`), sections, status dots, project switcher, collapsed icon rail | port **T3 Code** `sidebar.tsx` (coss) | Custom `AppShell` nav | 1 | P0 |
 | B2 ✅ | ⌘K command palette: go to workspace, run CFD, open design, switch run, toggle layers, with ↑↓ / Enter / Esc footer | coss **Command** (cmdk-style) | None | 1 | P0 |
-| B3 | Breadcrumb top bar with run picker, units and provenance chips | coss **Breadcrumb / Menu / Badge** | Custom header | 0.5 | P0 |
+| B3 ✅ | Breadcrumb top bar with run picker, units and provenance chips | coss **Breadcrumb / Menu / Badge** | Custom header | 0.5 | P0 |
 | B4 ✅ | Settings page in T3-style grouped rows (units, solver presets, CPU limits, theme, data paths) | coss **Field / Switch / Select / NumberField / Group** | None | 1 | P1 |
 | B5 ✅ | Global job tray: running CFD jobs, progress, cancel, logs | coss **Popover / Progress** + `@legendapp/list` | "Jobs 5" button | 1 | P0 |
 | B6 | Resizable, dockable workspace layout (tabs, split, float, save layout) | **Dockview** (MIT) | Fixed CSS grids | 2 | P0 |
@@ -50,7 +50,7 @@ Part 1 (sections A–H) is the build list. Part 2 (R1–R8) names the best exist
 | C2 | Auto-fit framing and smooth camera tweens | drei **Bounds**, **CameraControls** (camera-controls) | Fixed distance | 0.5 | P0 |
 | C3 | Fast picking on big meshes | **three-mesh-bvh** (drei `Bvh`) | Raw raycast | 0.3 | P0 |
 | C4 | Selection outline and hover highlight | **postprocessing** `OutlineEffect` / drei `Outlines` | Colour swap | 0.5 | P0 |
-| C5 | Model tree with groups, visibility eye, isolate, search, virtual scroll | port **three-cad-viewer** tree (or **@pierre/trees**, as T3 Code uses) | Flat part list | 1 | P0 |
+| C5 ✅ | Model tree with groups, visibility eye, isolate, search, virtual scroll | port **three-cad-viewer** tree (or **@pierre/trees**, as T3 Code uses) | Flat part list | 1 | P0 |
 | C6 | Section / clipping plane with cap fill | port **three-cad-viewer** stencil-capped clipping | None | 1 | P1 |
 | C7 | Measure: point-to-point, edge length, angle, with snapping | **three-mesh-bvh** closest-point + custom HUD | Point-only measure | 1 | P1 |
 | C8 | Studio lighting: HDRI, contact shadows, AO, reflective floor | drei **Environment** (local HDR), `AccumulativeShadows`, **N8AO** | Basic lights | 0.7 | P1 |
