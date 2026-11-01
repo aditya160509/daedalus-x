@@ -932,6 +932,10 @@ All features run on data the pipeline already exports (`viz.json`/`viz.bin`, for
 5. ATLAS, the report and Competition Mode.
 6. AR last.
 
+### B.7 Implementation source of truth
+
+The component-level build list and the open-source apps to borrow from for B.1–B.6 are in [docs/build/UI-MASTER-PLAN.md](build/UI-MASTER-PLAN.md). Use permissive (MIT/BSD/ISC/Apache) code only; GPL and AGPL apps are layout references only.
+
 ## Appendix A — Revision note
 
 v1.0–v1.7 (25–26 October 2026) consolidated the original Daedalus brief into one application, one backlog (Section 13) and G0–G5 gates. v1.8 removed duplicated sections, renamed-feature studios, revision logs and illustrative savings arithmetic, and adopted CfdOF; v2.0 replaced it with a free local path (OpenFOAM.app + foamlib case template), CfdOF optional. v1.9 adopted Ax for experiment selection and Tracker for video analysis, and cut light/tablet modes, the M3 model, mass-loss and stand-transfer investigations, complex job recovery, restore drills, tolerance/sensitivity Tier 1 items and multi-level readiness labels. No implementation or measurement has been performed; Section 18 lists outstanding intake.
