@@ -12,11 +12,15 @@ const KEY = "daedalus:settings";
 const DEFAULTS: Settings = { maxRanks: 8 };
 const listeners = new Set<() => void>();
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
 function parse(raw: string | null): Settings {
   if (!raw) return DEFAULTS;
   try {
-    const value = JSON.parse(raw) as Partial<Settings>;
-    const maxRanks = Number(value.maxRanks);
+    const value: unknown = JSON.parse(raw);
+    const maxRanks = isRecord(value) ? Number(value.maxRanks) : Number.NaN;
     return Number.isInteger(maxRanks) && maxRanks >= 1 && maxRanks <= 8
       ? { ...DEFAULTS, maxRanks }
       : DEFAULTS;

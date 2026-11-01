@@ -48,6 +48,8 @@ export interface DesignSceneProps {
   mode: ViewMode;
   selected: string | null;
   onSelect: (uuid: string | null) => void;
+  /** Part uuids hidden from the model tree's eye toggles. */
+  hidden?: ReadonlySet<string>;
   preset: CameraPreset;
   presetNonce: number;
   explode: number;

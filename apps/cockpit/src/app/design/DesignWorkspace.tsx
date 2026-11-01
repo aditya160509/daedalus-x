@@ -52,6 +52,7 @@ export function DesignWorkspace() {
   const loading = !local && remote.loading;
 
   const [selected, setSelected] = useState<string | null>(null);
+  const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
   const [preset, setPreset] = useState<CameraPreset>("iso");
   const [nonce, setNonce] = useState(0);
   const [maximised, setMaximised] = useState(false);
@@ -275,6 +276,7 @@ export function DesignWorkspace() {
                   frame={frame}
                   mode={mode}
                   selected={selected}
+                  hidden={hidden}
                   onSelect={setSelected}
                   preset={preset}
                   presetNonce={nonce}
@@ -390,6 +392,8 @@ export function DesignWorkspace() {
               summary={summary}
               selected={selected}
               onSelect={setSelected}
+              hidden={hidden}
+              onHiddenChange={setHidden}
             />
           </ResizablePanel>
         </>

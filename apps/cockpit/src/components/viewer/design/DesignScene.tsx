@@ -68,6 +68,7 @@ function SceneContents(props: DesignSceneProps) {
         mode={props.mode}
         explode={props.explode}
         selected={props.selected}
+        hidden={props.hidden}
         measureOn={props.measureOn}
         onSelect={props.onSelect}
         onMeasurePoint={props.onMeasurePoint}

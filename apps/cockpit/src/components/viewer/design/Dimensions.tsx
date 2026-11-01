@@ -1,6 +1,7 @@
 "use client";
 
-import { Html, Line } from "@react-three/drei";
+import { Line } from "@react-three/drei";
+import { SceneLabel } from "@/components/scene/SceneLabel";
 import { useMemo } from "react";
 import * as THREE from "three";
 import { dimensionLines, measure, type Vec3 } from "./designMath";
@@ -33,11 +34,9 @@ export function Dimensions({ min, max, radius }: { min: Vec3; max: Vec3; radius:
             <Arrowhead at={line.start} towards={line.end} size={arrow} />
             <Arrowhead at={line.end} towards={line.start} size={arrow} />
             <group position={middle}>
-              <Html center style={{ pointerEvents: "none" }} zIndexRange={[15, 0]}>
-                <span className="rounded-sm border border-brand/30 bg-card/85 px-1.5 py-0.5 font-mono text-[10px] whitespace-nowrap text-brand backdrop-blur">
-                  {(line.value * 1000).toFixed(1)} mm
-                </span>
-              </Html>
+              <SceneLabel size={radius * 0.05} color="#3dd6f0">
+                {`${(line.value * 1000).toFixed(1)} mm`}
+              </SceneLabel>
             </group>
           </group>
         );
@@ -65,16 +64,13 @@ export function MeasureGraphic({ measureState }: { measureState: MeasureState | 
             dashSize={0.004}
             gapSize={0.002}
           />
-          <Html
+          <SceneLabel
+            size={Math.max(measure(a, b).distance * 0.12, 0.004)}
+            color="#f5a524"
             position={[(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2]}
-            center
-            style={{ pointerEvents: "none" }}
-            zIndexRange={[25, 0]}
           >
-            <span className="rounded-sm border border-risk/40 bg-card/90 px-1.5 py-0.5 font-mono text-[10px] whitespace-nowrap text-risk backdrop-blur">
-              {(measure(a, b).distance * 1000).toFixed(1)} mm
-            </span>
-          </Html>
+            {`${(measure(a, b).distance * 1000).toFixed(1)} mm`}
+          </SceneLabel>
         </>
       )}
     </>

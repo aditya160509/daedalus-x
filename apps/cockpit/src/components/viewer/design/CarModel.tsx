@@ -1,6 +1,6 @@
 "use client";
 
-import { Edges, Html } from "@react-three/drei";
+import { Edges } from "@react-three/drei";
 import { type ThreeEvent, useFrame } from "@react-three/fiber";
 import { damp3 } from "maath/easing";
 import { useLayoutEffect, useMemo, useRef } from "react";
@@ -9,6 +9,7 @@ import type { LoadedModel, PartNode } from "@/lib/gltf";
 import { explodeOffset, nearestVertex, type Vec3 } from "./designMath";
 import { createPartMaterial, partGroup, type MaterialMode } from "./studio";
 import type { MeasurePoint } from "./types";
+import { SceneLabel } from "@/components/scene/SceneLabel";
 
 const HIGHLIGHT = new THREE.Color("#22d3ee");
 
@@ -27,6 +28,7 @@ export function CarModel({
   mode,
   explode,
   selected,
+  hidden,
   measureOn,
   onSelect,
   onMeasurePoint,
@@ -36,6 +38,7 @@ export function CarModel({
   mode: MaterialMode;
   explode: number;
   selected: string | null;
+  hidden?: ReadonlySet<string>;
   measureOn: boolean;
   onSelect: (uuid: string | null) => void;
   onMeasurePoint: (point: MeasurePoint) => void;
@@ -58,6 +61,7 @@ export function CarModel({
     return list;
   }, [scene]);
   const carCentre = model.bounds.center;
+  const labelSize = Math.max(model.extents.x, model.extents.y, model.extents.z) * 0.035;
 
   useLayoutEffect(() => {
     const created: THREE.Material[] = [];
@@ -99,6 +103,14 @@ export function CarModel({
     // oxlint-disable-next-line react/exhaustive-effect-dependencies
   }, [scene, selected, mode]);
 
+  // Visibility is a scene-graph flag, so hiding a parent also hides its children.
+  useLayoutEffect(() => {
+    for (const part of model.parts) {
+      const node = scene.getObjectByProperty("uuid", part.uuid);
+      if (node) node.visible = !hidden?.has(part.uuid);
+    }
+  }, [model.parts, scene, hidden]);
+
   useFrame((_, delta) => {
     for (const { part, node, base } of nodes) {
       const offset = explodeOffset(part.centroid, carCentre, explode);
@@ -136,7 +148,7 @@ export function CarModel({
     <>
       <primitive object={scene} onClick={onClick} />
       {mode === "engineering" && meshes.map((mesh) => <PartEdges key={mesh.uuid} mesh={mesh} />)}
-      <ExplodeLabels nodes={nodes} explode={explode} />
+      <ExplodeLabels nodes={nodes} explode={explode} labelSize={labelSize} />
     </>
   );
 }
@@ -179,7 +191,15 @@ function PartEdges({ mesh }: { mesh: THREE.Mesh }) {
   );
 }
 
-function ExplodeLabels({ nodes, explode }: { nodes: PartNodeRef[]; explode: number }) {
+function ExplodeLabels({
+  nodes,
+  explode,
+  labelSize,
+}: {
+  nodes: PartNodeRef[];
+  explode: number;
+  labelSize: number;
+}) {
   const groups = useRef<Array<THREE.Group | null>>([]);
   useFrame(() => {
     nodes.forEach((entry, index) => {
@@ -200,11 +220,9 @@ function ExplodeLabels({ nodes, explode }: { nodes: PartNodeRef[]; explode: numb
         groups.current[index] = element;
       }}
     >
-      <Html center style={{ pointerEvents: "none" }} zIndexRange={[20, 0]}>
-        <span className="rounded-md border border-border/80 bg-card/90 px-1.5 py-0.5 font-mono text-[10px] whitespace-nowrap text-text-2 backdrop-blur">
-          {entry.part.label}
-        </span>
-      </Html>
+      <SceneLabel size={labelSize} color="#d4d4d8">
+        {entry.part.label}
+      </SceneLabel>
     </group>
   ));
 }

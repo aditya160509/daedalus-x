@@ -1,6 +1,8 @@
 "use client";
 
-import { Panel } from "@/components/ui/primitives";
+import { Eye, EyeOff, Focus, Search } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Button, Panel } from "@/components/ui/primitives";
 import { matchCadPart, notWatertight } from "@/components/viewer/design/designMath";
 import type { DesignGeometry, DesignSummary } from "@/lib/api";
 import type { LoadedModel } from "@/lib/gltf";
@@ -13,13 +15,34 @@ export function DesignSidebar({
   summary,
   selected,
   onSelect,
+  hidden,
+  onHiddenChange,
 }: {
   model: LoadedModel | null;
   geometry: DesignGeometry | null;
   summary: DesignSummary | null;
   selected: string | null;
   onSelect: (uuid: string | null) => void;
+  hidden: ReadonlySet<string>;
+  onHiddenChange: (next: ReadonlySet<string>) => void;
 }) {
+  const [query, setQuery] = useState("");
+  const visibleParts = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    return (model?.parts ?? []).filter(
+      (part) => !needle || part.label.toLowerCase().includes(needle),
+    );
+  }, [model, query]);
+  const isolate = (uuid: string) => {
+    const others = (model?.parts ?? []).filter((part) => part.depth === 0 && part.uuid !== uuid);
+    onHiddenChange(new Set(others.map((part) => part.uuid)));
+  };
+  const toggle = (uuid: string) => {
+    const next = new Set(hidden);
+    if (next.has(uuid)) next.delete(uuid);
+    else next.add(uuid);
+    onHiddenChange(next);
+  };
   const selectedPart = model?.parts.find((part) => part.uuid === selected) ?? null;
   const cadPart =
     selectedPart && geometry
@@ -137,33 +160,90 @@ export function DesignSidebar({
         )}
       </Panel>
 
-      <Panel title="Parts" bodyClassName="overflow-y-auto py-1" className="min-h-0 flex-1">
+      <Panel
+        title="Model tree"
+        actions={
+          hidden.size > 0 ? (
+            <Button variant="ghost" onClick={() => onHiddenChange(new Set())}>
+              Show all
+            </Button>
+          ) : undefined
+        }
+        bodyClassName="flex min-h-0 flex-col"
+        className="min-h-0 flex-1"
+      >
         {model?.parts.length ? (
-          <ul aria-label="Parts">
-            {model.parts.map((part) => (
-              <li key={part.uuid}>
-                <button
-                  type="button"
-                  aria-pressed={part.uuid === selected}
-                  onClick={() => onSelect(part.uuid === selected ? null : part.uuid)}
-                  className={cn(
-                    "relative flex h-8 w-full items-center gap-2 pr-3 text-left text-xs text-text-2 transition-colors hover:bg-white/[0.04] hover:text-text",
-                    part.uuid === selected &&
-                      "bg-brand/[0.08] text-brand before:absolute before:inset-y-1.5 before:left-0 before:w-0.5 before:rounded-full before:bg-brand",
-                  )}
-                  style={{ paddingLeft: 12 + part.depth * 12 }}
-                >
-                  <span className="truncate">{part.label}</span>
-                  <span className="ml-auto shrink-0 font-mono text-[10px] text-muted-foreground">
-                    {part.group}
-                  </span>
-                  <span className="tabular w-14 shrink-0 text-right font-mono text-[10px] text-muted-foreground">
-                    {part.triangles.toLocaleString()}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
+          <>
+            <div className="relative border-b p-2">
+              <Search
+                className="pointer-events-none absolute top-1/2 left-4 size-3.5 -translate-y-1/2 text-muted-foreground"
+                aria-hidden
+              />
+              <input
+                type="search"
+                aria-label="Search model parts"
+                placeholder="Search parts"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="h-7 w-full rounded-md border bg-background pr-2 pl-7 text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+              />
+            </div>
+            <ul aria-label="Parts" className="min-h-0 flex-1 overflow-y-auto py-1">
+              {visibleParts.map((part) => {
+                const off = hidden.has(part.uuid);
+                return (
+                  <li key={part.uuid} className="group flex items-center pr-1">
+                    <button
+                      type="button"
+                      aria-pressed={part.uuid === selected}
+                      onClick={() => onSelect(part.uuid === selected ? null : part.uuid)}
+                      className={cn(
+                        "relative flex h-8 min-w-0 flex-1 items-center gap-2 pr-2 text-left text-xs text-text-2 transition-colors hover:bg-white/[0.04] hover:text-text",
+                        off && "opacity-45",
+                        part.uuid === selected &&
+                          "bg-brand/[0.08] text-brand before:absolute before:inset-y-1.5 before:left-0 before:w-0.5 before:rounded-full before:bg-brand",
+                      )}
+                      style={{ paddingLeft: 12 + part.depth * 12 }}
+                    >
+                      <span className="truncate">{part.label}</span>
+                      <span className="ml-auto shrink-0 font-mono text-[10px] text-muted-foreground">
+                        {part.group}
+                      </span>
+                      <span className="tabular w-14 shrink-0 text-right font-mono text-[10px] text-muted-foreground">
+                        {part.triangles.toLocaleString()}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => toggle(part.uuid)}
+                      aria-label={`${off ? "Show" : "Hide"} ${part.label}`}
+                      aria-pressed={off}
+                      className="flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 outline-none"
+                    >
+                      {off ? (
+                        <EyeOff className="size-3.5" aria-hidden />
+                      ) : (
+                        <Eye className="size-3.5" aria-hidden />
+                      )}
+                    </button>
+                    {part.depth === 0 && (
+                      <button
+                        type="button"
+                        onClick={() => isolate(part.uuid)}
+                        aria-label={`Isolate ${part.label}`}
+                        className="flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-0 hover:text-foreground focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring/50 outline-none group-hover:opacity-100"
+                      >
+                        <Focus className="size-3.5" aria-hidden />
+                      </button>
+                    )}
+                  </li>
+                );
+              })}
+              {visibleParts.length === 0 && (
+                <li className="px-3 py-2 text-xs text-muted-foreground">No part matches.</li>
+              )}
+            </ul>
+          </>
         ) : (
           <p className="px-3 py-2 text-xs text-muted-foreground">
             {model ? "No named parts in this file." : "—"}

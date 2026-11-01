@@ -1,6 +1,7 @@
 "use client";
 
-import { Html, Line } from "@react-three/drei";
+import { Line } from "@react-three/drei";
+import { SceneLabel } from "@/components/scene/SceneLabel";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import * as THREE from "three";
@@ -132,11 +133,9 @@ function Gate({
         <boxGeometry args={[0.006, 0.006, TRACK_HALF_WIDTH * 2 + 0.046]} />
         <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.5} />
       </mesh>
-      <Html center position={[0, 0.2, 0]} zIndexRange={[20, 0]} style={{ pointerEvents: "none" }}>
-        <span className="rounded-sm border border-border/70 bg-card/90 px-1.5 py-0.5 font-mono text-[9px] tracking-wide whitespace-nowrap text-text-2 uppercase backdrop-blur">
-          {start ? "start" : label}
-        </span>
-      </Html>
+      <SceneLabel size={0.035} color="#ececee" position={[0, 0.2, 0]}>
+        {(start ? "start" : label).toUpperCase()}
+      </SceneLabel>
     </group>
   );
 }
@@ -183,16 +182,9 @@ function Track({ trackM }: { trackM: number }) {
             <boxGeometry args={[0.004, 0.0006, TRACK_HALF_WIDTH * 2]} />
             <meshBasicMaterial color="#4a525c" />
           </mesh>
-          <Html
-            center
-            position={[0, 0.012, -TRACK_HALF_WIDTH - 0.05]}
-            zIndexRange={[20, 0]}
-            style={{ pointerEvents: "none" }}
-          >
-            <span className="font-mono text-[9px] whitespace-nowrap text-muted-foreground">
-              {x} m
-            </span>
-          </Html>
+          <SceneLabel size={0.028} color="#8a8a93" position={[0, 0.012, -TRACK_HALF_WIDTH - 0.05]}>
+            {`${x} m`}
+          </SceneLabel>
         </group>
       ))}
       <Gate x={0} label="start" color="#3dd6f0" start />
