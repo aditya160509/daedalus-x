@@ -51,5 +51,5 @@ uv run daedalus geometry import <STEP> data/designs/<id> --forward -Y --up +Z
 uv run daedalus cfd run data/designs/<id> data/runs/<run> --fidelity quick --procs 8
 uv run daedalus cfd viz data/runs/<run>
 uv run daedalus-api                     # API on :8000
-npm --prefix apps/cockpit run dev       # UI on :3000 (proxy /api → :8000)
+pnpm --dir apps/cockpit dev            # UI on :3000 (proxy /api → :8000)
 ```

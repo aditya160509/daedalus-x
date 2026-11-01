@@ -29,13 +29,13 @@ Daedalus X is a local-first race-engineering cockpit for a STEM Racing (F1 in Sc
 | You do | You don't |
 |---|---|
 | Write production code, unit tests and type-clean code | Browser or visual QA, screenshots, Playwright runs (the reviewer does this) |
-| Run `ruff`, `mypy --strict`, `pytest` (only the tests you touched, plus the full suite once at the end), `npm run check` (tsrs + type-aware oxlint + vitest) | Long CFD campaigns. Run at most **one** `quick` case to prove a pipeline works, in the background |
+| Run `ruff`, `pyrefly check`, `pytest` (only the tests you touched, plus the full suite once at the end), `npm run check` (tsrs + type-aware oxlint + vitest) | Long CFD campaigns. Run at most **one** `quick` case to prove a pipeline works, in the background |
 | Research with TinyFish and record links | Invent features beyond the task file |
 | Update `STATUS.md`, `TASK-BOARD.md` and write an evidence note | Touch other tasks' files unless the task says so |
 
 ## 5. Definition of done (every task)
 1. Every acceptance item in the task file is met.
-2. Checks are green: `uv run ruff check . && uv run mypy src tests && uv run pytest -q`, and in `apps/cockpit`: `npm run check`.
+2. Checks are green: `uv run ruff check . && uv run pyrefly check && uv run pytest -q`, and in `apps/cockpit`: `pnpm check`.
 3. `evidence/<TASK-ID>.md` is written: what was built, files, commands run with output, decisions, known gaps.
 4. `TASK-BOARD.md` row set to `review`, and the `STATUS.md` row updated.
 5. Committed and pushed to `origin main`.

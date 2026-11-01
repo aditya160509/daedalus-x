@@ -93,7 +93,7 @@ def test_import_asymmetric_car_frame_and_outputs(tmp_path: Path) -> None:
 def test_import_splits_axles_but_keeps_parent_wheels(tmp_path: Path) -> None:
     body = Box(60, 200, 15).moved(Location((0, 0, 15)))
     body.label = "Body"
-    parts = [body]
+    parts: list[Box | Cylinder] = [body]
     for y in (-60, 65):
         for x in (-30, 30):
             wheel = Cylinder(15, 10, rotation=(0, 90, 0)).moved(Location((x, y, 15)))

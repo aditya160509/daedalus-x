@@ -5,23 +5,24 @@ Everything here is free and open source. Pin to these versions or newer compatib
 ## Installed and in use
 | Layer | Tool | Notes |
 |---|---|---|
-| Python env | **uv** | `uv add <pkg>`, `uv run <cmd>`. Never pip install globally. |
-| Lint / types / tests | ruff, mypy (strict), pytest | configured in `pyproject.toml` |
+| Python env | **uv 0.13** | `uv add <pkg>`, `uv run <cmd>`. Never pip install globally. Run `uv self update` if older. |
+| Lint / types / tests | **ruff 0.17**, **Pyrefly 1.4** (strict preset; replaced mypy), pytest 9 | Pyrefly: 0.65 s cold vs mypy 8.0 s, more spec-conformant, and it found real bugs mypy missed. ty is still 0.0.x, so not used. pytest-xdist was measured slower on this suite (heavy imports), so not used. |
 | API | FastAPI, Pydantic v2, uvicorn | `uv run daedalus-api` → 127.0.0.1:8000 |
 | Numerics | NumPy ≥2.5, SciPy ≥1.18 | |
 | Units | Pint | parsing user input |
 | CAD | build123d 0.13, trimesh | STEP import, tessellation via `export_stl` |
 | CFD | **OpenFOAM v2606 (ESI)** via OpenFOAM.app | call as `openfoam -c "<cmd>"`; MPI ≤ 8 ranks |
 | CFD I/O | foamlib (dict parsing), PyVista ≥0.49 / VTK 9.7 (`POpenFOAMReader`) | field post-processing in `viz.py` |
-| Frontend | Next.js 15.5, React 19.1, TypeScript 5, Tailwind 4 | `apps/cockpit` |
-| UI kit | shadcn/ui (new-york), radix-ui 1.4, lucide-react, cva, tailwind-merge | add components with `npx shadcn@latest add <name>` |
-| 3D | three 0.180, @react-three/fiber 9.3, @react-three/drei 10.7 | |
-| Charts | ECharts 6 | via `useECharts` |
-| Data | TanStack Query 5, Zod 4 | |
-| Type check | **tsrs** (Rust port of TypeScript 7, oxc-project) via `npm run typecheck`, about 0.07 s. **TypeScript 7.0.2** (Go, Microsoft) via `npm run typecheck:ref` is the reference | Benchmarked 2026-11-01 on this repo (5-run average): tsc 5.9 1.26 s, TS 7 0.17 s, tsrs `--fast` 0.07 s, with identical diagnostics on an injected-error probe. tsrs is pre-1.0 (0.20, tracking TS 7.1), so **the reviewer runs `typecheck:ref` before accepting**. `typescript@5.9` stays only for Next 15's `next.config.ts` loader (Next ≥16 drives the TS 7 CLI directly, so the Next 16 upgrade can drop it). Never import `typescript` in app code. |
+| Package manager | **pnpm 12** (Rust rewrite) | `pnpm install` about 28 s cold. Bun was not chosen because it swaps the Node runtime under Next. `packageManager` is pinned in `package.json`. |
+| Frontend | **Next.js 16.4** (Turbopack), **React 19.3**, Tailwind 4.3 | `apps/cockpit`; `pnpm build` about 6 s. Next 16 runs the TS 7 `tsc` CLI itself, so no TypeScript 5 remains. |
+| UI kit | shadcn/ui (new-york), radix-ui 1.8, lucide-react 1.x, cva, tailwind-merge 3.7 | add components with `pnpm dlx shadcn@latest add <name>` |
+| 3D | three 0.187, @react-three/fiber 9.8, @react-three/drei 10.7.9 | |
+| Charts | ECharts 6.1 | via `useECharts` |
+| Data | TanStack Query 5.105, Zod 4.6 | |
+| Type check | **tsrs** (Rust port of TS 7) via `pnpm typecheck`, about 0.07 s. **TypeScript 7.0.2** via `pnpm typecheck:ref` is the reference (also used by `next build`) | Benchmarked 2026-11-01: tsc 5.9 1.26 s, TS 7 0.17 s, tsrs 0.07 s, with identical diagnostics. tsrs is pre-1.0, so the reviewer runs `typecheck:ref` before accepting. |
 | Lint | **oxlint 1.90 `--type-aware`** (`.oxlintrc.json`; type-aware rules via oxlint-tsgolint). Plugins: typescript, react, react-hooks, nextjs, jsx-a11y, import, unicorn, oxc | `npm run lint`, about 0.36 s with type info (0.08 s without). Biome lint measured 0.34 s with fewer rules and no type awareness, so it isn't used. ESLint is removed. |
-| Format | Prettier 3 | `npm run format` (oxfmt is still beta; revisit when it reaches 1.0) |
-| Tests (web) | Vitest 3 | Playwright exists but is reviewer-only |
+| Format | **oxfmt 0.75** (`.oxfmtrc.json`, printWidth 100) | Output was byte-identical to Prettier 3.9 on this codebase. Prettier is removed. |
+| Tests (web) | **Vitest 5** | Playwright 1.64 exists but is reviewer-only |
 
 ## To add when the task requires it
 | Task | Package | Why |

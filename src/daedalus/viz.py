@@ -104,10 +104,16 @@ def export(case: Path, out_dir: Path | None = None, n_seeds: tuple[int, int] = (
     layers: dict[str, Any] = {}
 
     # --- surface Cp ------------------------------------------------------------------------
-    pts_all, tris_all, cp_all, grp_all = [], [], [], []
+    pts_all: list[NDArray[np.float64]] = []
+    tris_all: list[NDArray[np.int64]] = []
+    cp_all: list[NDArray[np.float64]] = []
+    grp_all: list[NDArray[np.uint8]] = []
     offset = 0
     for gi, g in enumerate(groups):
-        patch = boundary[g].extract_surface(algorithm="dataset_surface")
+        block = boundary[g]
+        if block is None:
+            raise ValueError(f"{case}: car patch {g!r} missing from the OpenFOAM mesh")
+        patch = block.extract_surface(algorithm="dataset_surface")
         pts, tris, tri_mesh = _triangles(patch)
         cp = np.asarray(tri_mesh.point_data["p"], float) / q
         pts_all.append(pts)

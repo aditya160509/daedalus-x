@@ -247,6 +247,7 @@ def import_car(
     # Keep semantic parts/GLB in the parent wheels group; only CFD surfaces split by axle.
     # shortcut: two circular axles share a radius per axle; generalise for other wheel layouts.
     axles: dict[str, Axle] = {}
+    axle_members: dict[str, list[int]] = {}
     wheel_indices = [i for i, part in enumerate(parts) if part.group is ForceGroup.WHEELS]
     if wheel_indices:
         xs = [float(centres[i][0] + shift[0]) for i in wheel_indices]
@@ -275,6 +276,7 @@ def import_car(
                 "radius_m": radius,
             }
             groups[name] = [meshes[i][2] for i in indices]
+            axle_members[name] = indices
 
     cfd_dir = out_dir / "cfd"
     cfd_dir.mkdir(parents=True, exist_ok=True)
@@ -298,14 +300,7 @@ def import_car(
         parts=tuple(parts),
         groups={
             **{g: [p.label for p in parts if p.group.value == g] for g in groups if g not in axles},
-            **{
-                g: [
-                    parts[i].label
-                    for i in wheel_indices
-                    if ((centres[i][0] + shift[0] <= midpoint) == (g == "wheels_front"))
-                ]
-                for g in axles
-            },
+            **{g: [parts[i].label for i in members] for g, members in axle_members.items()},
             **({"wheels": [parts[i].label for i in wheel_indices]} if wheel_indices else {}),
         },
         axles=axles,

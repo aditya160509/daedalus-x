@@ -20,8 +20,16 @@ dependencies = [
 daedalus = "daedalus.cli:main"
 daedalus-api = "daedalus.api.__main__:main"
 
+[tool.pyrefly.errors]
+implicit-any = "error"
+method-assign = "error"
+implicit-any-parameter = "error"
+no-any-return = "error"
+redundant-cast = "warn"
+unannotated-return = "error"
+
 [build-system]
-requires = ["uv_build>=0.10.6,<0.11.0"]
+requires = ["uv_build>=0.13.6,<0.14.0"]
 build-backend = "uv_build"
 
 [tool.ruff]
@@ -35,29 +43,27 @@ select = ["E", "F", "W", "I", "B", "UP", "N", "SIM", "RUF"]
 # physics symbols (U, L, W, H) follow engineering convention
 "src/daedalus/cfd.py" = ["N806"]
 
-[tool.mypy]
-strict = true
-python_version = "3.12"
-plugins = ["pydantic.mypy"]
-
-[[tool.mypy.overrides]]
-module = ["scipy.*", "pint.*", "trimesh.*"]
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = ["daedalus.geometry"]
-disallow_untyped_calls = false
-
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q --strict-markers"
 markers = ["slow: long-running (CFD) tests"]
 
+[tool.pyrefly]
+python-version = "3.12.0"
+preset = "strict"
+ignore-missing-imports = [
+    "scipy.*",
+    "pint.*",
+    "trimesh.*",
+]
+check-unannotated-defs = true
+infer-return-types = "never"
+
 [dependency-groups]
 dev = [
     "httpx>=0.28.1",
     "httpx2>=2.16.0",
-    "mypy>=2.4.1",
+    "pyrefly>=1.4.0",
     "pytest>=9.2.0",
     "pytest-cov>=7.1.0",
     "ruff>=0.17.3",

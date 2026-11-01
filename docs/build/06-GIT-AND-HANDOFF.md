@@ -19,8 +19,8 @@
   Areas: `CFD`, `Viz`, `API`, `Race`, `Oracle`, `Forge`, `Atlas`, `UI`, `Docs`, `Infra`.
 - Before every commit:
   ```bash
-  uv run ruff format . && uv run ruff check . && uv run mypy src tests && uv run pytest -q -m "not slow"
-  cd apps/cockpit && npm run format && npm run check   # tsrs typecheck (~0.1 s) + type-aware oxlint (~0.4 s) + vitest
+  uv run ruff format . && uv run ruff check . && uv run pyrefly check && uv run pytest -q -m "not slow"
+  cd apps/cockpit && pnpm format && pnpm check   # oxfmt check + tsrs + type-aware oxlint + vitest (~1 s)
   ```
 - Then `git add -A && git commit && git pull --rebase origin main && git push origin main`.
 

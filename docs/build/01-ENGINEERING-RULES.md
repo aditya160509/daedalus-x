@@ -9,21 +9,21 @@
 - **Units.** SI internally (m, s, kg, N, Pa). Convert only at the UI edge. Pint is available for parsing user units.
 
 ## Python (src/daedalus)
-- Python 3.12, `from __future__ import annotations`, `ruff` (configured), `mypy --strict` must pass. Type third-party gaps narrowly (cast or isinstance), never with a blanket `Any`.
+- Python 3.12, `from __future__ import annotations`, `ruff` (configured), and **Pyrefly** (strict preset, `uv run pyrefly check`) must pass. Type third-party gaps narrowly (cast or isinstance), never with a blanket `Any`.
 - Data records are frozen Pydantic v2 models in `contracts.py`, and API request/response models live next to their router.
 - Heavy imports (pyvista/vtk, torch, botorch) are imported lazily inside the function or CLI branch that needs them, so the API boots fast.
 - Tests in `tests/test_<module>.py` with pytest. Test real behaviour on small real inputs (tiny meshes, synthetic fields with known answers), not mocks of our own code. Each test runs in under 2 s, apart from one integration test per pipeline, which is marked `@pytest.mark.slow`.
 - OpenFOAM: all dictionaries are generated from code in `cfd.py` (template version string bumps on any change). Parse outputs with `read_dat` and foamlib. Every assumption goes into the manifest's `assumptions` list.
 
 ## TypeScript / React (apps/cockpit)
-- Next.js 15 App Router, React 19, TypeScript strict. `"use client"` only where needed.
+- Next.js 16 App Router (Turbopack), React 19.3, TypeScript 7 strict. Use **pnpm** only; never npm or yarn (the lockfile is `pnpm-lock.yaml`). `"use client"` only where needed.
 - Server data goes through `src/lib/api.ts`: one Zod schema per response, parsed and never trusted raw, plus TanStack Query hooks. No `fetch` in components.
 - Components: `src/components/<area>/<Name>.tsx`, and workspaces in `src/app/<route>/<Name>Workspace.tsx`. A component file holds about 300 lines at most; split beyond that.
 - Styling: Tailwind 4 with the tokens in `globals.css` and shadcn/ui primitives (`src/components/ui`). **No raw hex colours in components**, except data colormaps (`src/lib/colormap.ts`) and three.js material constants.
 - 3D: React Three Fiber plus drei. Dispose geometries and materials on unmount. Use `dpr={[1, 1.5]}`, keep the context-loss recovery (see `FlowViewer.tsx`), and keep draw calls under 200 by merging static meshes.
 - Charts: ECharts through `useECharts` (tree-shaken registration in `useECharts.ts`; register new components there).
 - Accessibility: every interactive element is keyboard-reachable with a visible focus ring, and `aria-label`s go on icon buttons and charts. Respect `prefers-reduced-motion`: animations pause.
-- Formatting: `npm run format` (prettier) before committing.
+- Formatting: `pnpm format` (oxfmt, Prettier-compatible, printWidth 100) before committing. `pnpm check` fails on unformatted files.
 - Lint is oxlint with type-aware rules (no unsafe `as` assertions; narrow with type guards instead). Fix findings rather than disabling them. A per-line `// oxlint-disable-next-line <rule>` needs a comment on the line above saying why (see the camera `nonce` effects).
 - TypeScript 7 is strict about side-effect imports. Asset declarations live in `src/global.d.ts`.
 

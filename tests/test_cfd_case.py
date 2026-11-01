@@ -126,8 +126,8 @@ def test_early_stop_function_object_and_presets(tmp_path: Path, design: Path) ->
     assert cd["endTime"] == 1200
 
     write_case(tmp_path / "b", design, CaseConfig(early_stop_tolerance=None))
-    cd = FoamFile(tmp_path / "b/system/controlDict").as_dict()
-    assert "earlyStop" not in cd["functions"]
+    cd_b: Any = FoamFile(tmp_path / "b/system/controlDict").as_dict()
+    assert "earlyStop" not in cd_b["functions"]
 
     with pytest.raises(ValueError):
         CaseConfig.preset("ultra")
