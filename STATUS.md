@@ -15,7 +15,7 @@ Remaining work is tracked task-by-task in [docs/build/TASK-BOARD.md](docs/build/
 | P2-03 | Monte Carlo uncertainty | Claude | done: vectorised, 2000 samples in 0.9 s, API + Race panel (tests/test_montecarlo.py) | |
 | P3-01 | Geometry path decision | GPT + Claude | blocked: car CAD/GLB | |
 | P3-02 | OpenFOAM case template | Claude + Codex | T01 review: axle rotation, explicit mesh quality and averaged CI gate implemented; single v2 quick mesh rejected (51 skew faces), no v2 Cd | [T01](evidence/T01.md), [motorBike](evidence/P3-02-motorbike.md), [orbit](evidence/P3-02-orbit-baseline.md) |
-| P3-03 | Grid study and speed check | GPT | todo | |
+| P3-03 | Grid study and speed check | Codex (GPT-6) | T03 review: tooling and NASA verification done; 5 quick jobs queued, no campaign executed; Celik table check pending | [evidence](evidence/T03.md) |
 | P3-04 | Component forces and field export | Claude | done: Cp surface, streamlines, wake/centreline slices in cockpit | [evidence](evidence/P3-04-flow-fields.md) |
 | P4-01 | Surrogate | GPT | todo | |
 | P4-02 | Next-experiment recommendation | GPT | todo | |
