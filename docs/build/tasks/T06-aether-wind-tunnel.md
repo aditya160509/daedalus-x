@@ -34,7 +34,7 @@ The current viewer works but is basic (`evidence/P3-04-flow-fields.md`). Make it
 - Heavy CPU work (delta mapping, streak subsampling) runs in a Web Worker (`new Worker(new URL(...), {type: 'module'})`).
 
 ## Acceptance
-- [ ] `tsc`, `eslint` and `vitest` are green. Unit-test the contour band function, the slice indexing and the nearest-vertex delta mapper (worker logic as a pure function).
+- [ ] `npm run check` is green (TypeScript 7, oxlint, vitest). Unit-test the contour band function, the slice indexing and the nearest-vertex delta mapper (worker logic as a pure function).
 - [ ] Respect `prefers-reduced-motion`.
 - [ ] Evidence note lists every layer and its source data key. The reviewer does the visual QA.
 

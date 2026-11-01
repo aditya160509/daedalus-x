@@ -32,7 +32,7 @@ export function SpreadPanel({ request }: { request: RaceSimulationRequest }) {
   });
   const d = mc.data;
   const p = d?.percentiles_s ?? {};
-  const ranked = Object.entries(d?.sensitivity ?? {}).sort(
+  const ranked = Object.entries(d?.sensitivity ?? {}).toSorted(
     (a, b) => Math.abs(b[1]) - Math.abs(a[1]),
   );
 

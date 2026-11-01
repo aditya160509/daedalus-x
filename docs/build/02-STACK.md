@@ -18,6 +18,9 @@ Everything here is free and open source. Pin to these versions or newer compatib
 | 3D | three 0.180, @react-three/fiber 9.3, @react-three/drei 10.7 | |
 | Charts | ECharts 6 | via `useECharts` |
 | Data | TanStack Query 5, Zod 4 | |
+| Type check | **TypeScript 7.0 (native Go port)**, installed as `typescript-native` | `npm run typecheck`, about 3× faster than tsc 5. `typescript@5.9` stays only because Next 15 loads `next.config.ts` through the TS JS API, which TS 7 doesn't ship yet. Never import `typescript` in app code. |
+| Lint | **oxlint 1.90** (`.oxlintrc.json`: typescript, react, react-hooks, nextjs, jsx-a11y, import, unicorn, oxc) | `npm run lint`, about 0.2 s. ESLint is removed; Next builds skip it (`eslint.ignoreDuringBuilds`). |
+| Format | Prettier 3 | `npm run format` (oxfmt is still beta; revisit when it reaches 1.0) |
 | Tests (web) | Vitest 3 | Playwright exists but is reviewer-only |
 
 ## To add when the task requires it

@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { colorize, sample } from "./colormap";
 
+const close = (a: number[], b: number[]) => a.forEach((v, i) => expect(v).toBeCloseTo(b[i], 9));
+
 describe("colormap", () => {
   it("clamps and hits the end stops", () => {
-    const close = (a: number[], b: number[]) => a.forEach((v, i) => expect(v).toBeCloseTo(b[i], 9));
     close(sample("coolwarm", -5), [0.23, 0.299, 0.754]);
     close(sample("coolwarm", 9), [0.706, 0.016, 0.15]);
     expect(sample("turbo", Number.NaN)).toEqual(sample("turbo", 0));

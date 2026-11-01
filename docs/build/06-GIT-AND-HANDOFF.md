@@ -20,7 +20,7 @@
 - Before every commit:
   ```bash
   uv run ruff format . && uv run ruff check . && uv run mypy src tests && uv run pytest -q -m "not slow"
-  cd apps/cockpit && npm run format && npm run typecheck && npm run lint && npm test
+  cd apps/cockpit && npm run format && npm run check   # TS 7 typecheck (~0.3 s) + oxlint (~0.2 s) + vitest
   ```
 - Then `git add -A && git commit && git pull --rebase origin main && git push origin main`.
 

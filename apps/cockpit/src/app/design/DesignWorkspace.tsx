@@ -212,13 +212,12 @@ export function DesignWorkspace() {
           </Panel>
           <Panel title="Parts" bodyClassName="overflow-y-auto py-1">
             {model?.parts.length ? (
-              <ul role="listbox" aria-label="Parts">
+              <ul aria-label="Parts">
                 {model.parts.map((p) => (
                   <li key={p.uuid}>
                     <button
                       type="button"
-                      role="option"
-                      aria-selected={p.uuid === selected}
+                      aria-pressed={p.uuid === selected}
                       onClick={() => setSelected(p.uuid === selected ? null : p.uuid)}
                       className={cn(
                         "flex w-full items-center gap-2 py-1 pr-3 text-left text-xs text-text-2 hover:bg-surface-3 hover:text-text",

@@ -34,10 +34,12 @@ const css = (name: string) =>
  * Stacked telemetry tracks sharing one time axis, one cursor and one zoom range —
  * the motorsport channel view (spec §7.7).
  */
+const NO_MARKERS: Array<{ t: number; label: string }> = [];
+
 export function TelemetryChart({
   time,
   tracks,
-  markers = [],
+  markers = NO_MARKERS,
 }: {
   time: number[];
   tracks: TelemetryTrack[];

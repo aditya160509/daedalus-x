@@ -24,6 +24,8 @@
 - Charts: ECharts through `useECharts` (tree-shaken registration in `useECharts.ts`; register new components there).
 - Accessibility: every interactive element is keyboard-reachable with a visible focus ring, and `aria-label`s go on icon buttons and charts. Respect `prefers-reduced-motion`: animations pause.
 - Formatting: `npm run format` (prettier) before committing.
+- Lint is oxlint. Fix findings rather than disabling them. A per-line `// oxlint-disable-next-line <rule>` needs a comment on the line above saying why (see the camera `nonce` effects).
+- TypeScript 7 is strict about side-effect imports. Asset declarations live in `src/global.d.ts`.
 
 ## Honesty rules (from spec §1.1, §9.3)
 - A UI number shows its provenance badge. CFD numbers show the run's acceptance state.

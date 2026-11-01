@@ -283,6 +283,8 @@ function CameraPresets({ preset, nonce }: { preset: CameraPreset; nonce: number 
     const [x, y, z] = PRESET_DIR[preset];
     const dir = new THREE.Vector3(x, y, z).normalize().multiplyScalar(dist);
     bounds.moveTo(box.center.clone().add(dir)).lookAt({ target: box.center });
+    // `nonce` is a deliberate trigger: re-clicking the same preset must re-frame the camera.
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies
   }, [bounds, preset, nonce]);
   return null;
 }
