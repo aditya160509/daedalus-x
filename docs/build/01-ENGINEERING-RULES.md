@@ -5,7 +5,7 @@
 - **Small, complete units.** Each function does one thing, is fully implemented, and is typed. No `TODO`, `pass`, `NotImplementedError` or commented-out code in commits.
 - **Fail loudly and early.** Validate inputs at boundaries (API models, CLI, file readers). Raise specific exceptions with actionable messages. Never swallow errors, except where an optional step must not mask a primary result; then log a warning, as `cli.py` does around `viz.export`.
 - **No hidden state.** Pure functions where possible. File outputs go only under the case or design directory passed in. Never overwrite a case (`write_case` refuses, and keep it that way).
-- **Performance by default.** Vectorise with NumPy, and never loop per cell in Python. Stream or downsample large arrays before JSON (≤2000 points for charts). Binary typed arrays for 3D data (see `viz.py` `_Buffer`). Cache expensive reads.
+- **Performance by default.** Vectorise with NumPy, and never loop per cell in Python. Stream or downsample large arrays before JSON (≤2000 points for charts). Binary typed arrays for 3D data (see `viz/binary.py`). Cache expensive reads.
 - **Units.** SI internally (m, s, kg, N, Pa). Convert only at the UI edge. Pint is available for parsing user units.
 
 ## Python (src/daedalus)

@@ -12,7 +12,7 @@ Everything here is free and open source. Pin to these versions or newer compatib
 | Units | Pint | parsing user input |
 | CAD | build123d 0.13, trimesh | STEP import, tessellation via `export_stl` |
 | CFD | **OpenFOAM v2606 (ESI)** via OpenFOAM.app | call as `openfoam -c "<cmd>"`; MPI ≤ 8 ranks |
-| CFD I/O | foamlib (dict parsing), PyVista ≥0.49 / VTK 9.7 (`POpenFOAMReader`) | field post-processing in `viz.py` |
+| CFD I/O | foamlib (dict parsing), PyVista ≥0.49 / VTK 9.7 (`POpenFOAMReader`) | field post-processing in `viz/` |
 | Package manager | **pnpm 12** (Rust rewrite) | `pnpm install` about 28 s cold. Bun was not chosen because it swaps the Node runtime under Next. `packageManager` is pinned in `package.json`. |
 | Frontend | **Next.js 16.4** (Turbopack), **React 19.3**, Tailwind 4.3 | `apps/cockpit`; `pnpm build` about 6 s. Next 16 runs the TS 7 `tsc` CLI itself, so no TypeScript 5 remains. |
 | UI kit | shadcn/ui (new-york), radix-ui 1.8, lucide-react 1.x, cva, tailwind-merge 3.7 | add components with `pnpm dlx shadcn@latest add <name>` |
@@ -22,6 +22,10 @@ Everything here is free and open source. Pin to these versions or newer compatib
 | Type check | **tsrs** (Rust port of TS 7) via `pnpm typecheck`, about 0.07 s. **TypeScript 7.0.2** via `pnpm typecheck:ref` is the reference (also used by `next build`) | Benchmarked 2026-11-01: tsc 5.9 1.26 s, TS 7 0.17 s, tsrs 0.07 s, with identical diagnostics. tsrs is pre-1.0, so the reviewer runs `typecheck:ref` before accepting. |
 | Lint | **oxlint 1.90 `--type-aware`** (`.oxlintrc.json`; type-aware rules via oxlint-tsgolint). Plugins: typescript, react, react-hooks, nextjs, jsx-a11y, import, unicorn, oxc | `npm run lint`, about 0.36 s with type info (0.08 s without). Biome lint measured 0.34 s with fewer rules and no type awareness, so it isn't used. ESLint is removed. |
 | Format | **oxfmt 0.75** (`.oxfmtrc.json`, printWidth 100) | Output was byte-identical to Prettier 3.9 on this codebase. Prettier is removed. |
+| Quality gates (web) | **React Compiler** (`reactCompiler: true`, babel-plugin-react-compiler 1.0; `pnpm compiler:check` reports 115/115 components compile), **knip** (unused files/exports/deps, in `pnpm check`), **jscpd** (duplication, threshold 1%, in `pnpm check`), **size-limit** (`pnpm size`, 1 MB gzip budget over `.next/static/chunks`, run after build), **react-doctor** (`npx react-doctor@latest .`, advisory; some rules are false positives for worker/R3F code) | oxlint 1.90 has no compiler rules, so the compiler's own bail-outs (healthcheck) are the check. |
+| Quality gates (py) | ruff `S` (bandit) and `C901` (max 20), **deptry** (`uv run deptry .`), **vulture** (`uv run vulture src --min-confidence 80`; below 80 it flags every FastAPI route) | `S603` ignored: subprocess is always called with argument lists. |
+| Security | **pip-audit** (`uv export --no-hashes --no-emit-project`, then `uvx pip-audit -r … --no-deps --disable-pip`), `pnpm audit --prod`, **gitleaks** (history + staged), osv-scanner (manual) | Last run: 0 production CVEs, no secrets in 44 commits. |
+| Hooks | **lefthook** (`lefthook.yml`, `lefthook install` once): ruff, pyrefly, cockpit format/typecheck/lint and gitleaks on staged files | |
 | Tests (web) | **Vitest 5** | Playwright 1.64 exists but is reviewer-only |
 
 ## To add when the task requires it

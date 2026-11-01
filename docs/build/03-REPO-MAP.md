@@ -12,13 +12,16 @@ daedalus-x/
 │   ├── predictions.py         sealed predictions: canonical hash, verify, score
 │   ├── geometry.py            STEP → engineering frame, force groups, cfd/*.stl, display.glb
 │   ├── cfd.py                 OpenFOAM half-car case writer, runner, evaluator (acceptance gates)
-│   ├── viz.py                 field export → viz/viz.json + viz/viz.bin (Cp, streamlines, slices)
+│   ├── jobs.py                durable SQLite job queue + subprocess worker (T02)
+│   ├── gridstudy.py           grid/speed study planning and GCI (T03)
+│   ├── adjoint.py             gated frozen-turbulence adjoint tooling (T05)
+│   ├── viz/                   field export package: Cp, streamlines, Q, oil flow, separation, drag build-up
 │   ├── cli.py                 `daedalus geometry import`, `daedalus cfd run|viz`
 │   └── api/
 │       ├── __init__.py        create_app(): mounts routers, /v1/health
 │       ├── race.py            POST /v1/race/simulate, POST /v1/race/montecarlo
 │       └── engineering.py     /v1/designs, /v1/designs/{id}/display.glb, /v1/cfd/runs[...], viz.json/bin
-├── tests/                     pytest per module (70 passing)
+├── tests/                     pytest per module (121 passing, run `uv run pytest`)
 ├── apps/cockpit/              Next.js UI
 │   └── src/
 │       ├── app/               routes: design, simulate, race, optimize, inspect, evidence

@@ -1,0 +1,16 @@
+# Install once with `lefthook install` (brew install lefthook). Runs only on staged files.
+pre-commit:
+  parallel: true
+  commands:
+    ruff:
+      glob: "*.py"
+      run: uv run ruff check {staged_files} && uv run ruff format --check {staged_files}
+    pyrefly:
+      glob: "*.py"
+      run: uv run pyrefly check {staged_files}
+    cockpit:
+      root: apps/cockpit/
+      glob: "*.{ts,tsx,mts}"
+      run: pnpm format:check && pnpm typecheck && pnpm lint
+    secrets:
+      run: gitleaks git --staged --redact --no-banner

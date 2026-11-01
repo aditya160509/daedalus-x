@@ -35,3 +35,5 @@ Remaining work is tracked task-by-task in [docs/build/TASK-BOARD.md](docs/build/
 | P7-01 | Initial + holdout CFD runs | GPT | todo | |
 | P7-02 | ORACLE loop live | GPT | todo | |
 | P9-01 | Freeze and rehearse | Claude | todo | |
+
+Cleanup review 2026-11-01: dead code removed, React Compiler on, knip/jscpd/size-limit/deptry/vulture/ruff S+C901 gates, 0 prod CVEs, no secrets; per-task verdicts in [REVIEW-cleanup](evidence/REVIEW-cleanup.md).
