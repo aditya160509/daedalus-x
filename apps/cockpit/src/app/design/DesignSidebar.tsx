@@ -33,7 +33,7 @@ export function DesignSidebar({
       : [];
 
   return (
-    <aside className="flex min-h-0 flex-col gap-3">
+    <aside className="flex h-full min-h-0 flex-col gap-3">
       <Panel
         title="Model"
         actions={

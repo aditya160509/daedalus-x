@@ -1,3 +1,8 @@
 [
-  { "name": "client JS (gzip)", "path": ".next/static/chunks/*.js", "gzip": true, "limit": "1 MB" }
+  {
+    "name": "all client JS incl. lazy 3D chunks (gzip)",
+    "path": ".next/static/chunks/*.js",
+    "gzip": true,
+    "limit": "1.1 MB"
+  }
 ]

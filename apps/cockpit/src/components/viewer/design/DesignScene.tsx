@@ -1,6 +1,6 @@
 "use client";
 
-import { GizmoHelper, GizmoViewport } from "@react-three/drei";
+import { GizmoHelper, GizmoViewcube } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { useState } from "react";
 import * as THREE from "three";
@@ -91,8 +91,15 @@ function SceneContents(props: DesignSceneProps) {
         reducedMotion={props.reducedMotion}
       />
       <SnapshotBridge register={props.onSnapshot} />
-      <GizmoHelper alignment="bottom-left" margin={[64, 64]}>
-        <GizmoViewport axisColors={["#f0525a", "#3ccf91", "#5aa8ff"]} labelColor="#090b0e" />
+      {/* Clickable faces, edges and corners snap the camera, as in Fusion or Onshape. */}
+      <GizmoHelper alignment="bottom-left" margin={[72, 72]}>
+        <GizmoViewcube
+          color="#1c1c1f"
+          hoverColor="#3dd6f0"
+          textColor="#d4d4d8"
+          strokeColor="#3a3a42"
+          opacity={0.95}
+        />
       </GizmoHelper>
     </>
   );

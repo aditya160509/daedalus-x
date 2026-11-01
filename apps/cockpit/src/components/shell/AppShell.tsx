@@ -6,6 +6,7 @@ import {
   ChevronsUpDown,
   FileStack,
   Gauge,
+  Search,
   type LucideIcon,
   ShieldCheck,
   Target,
@@ -14,7 +15,10 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { CommandPalette, OPEN_EVENT } from "./CommandPalette";
+import { Key } from "./Key";
 import { getHealth } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -134,6 +138,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <ChevronsUpDown className="size-3.5 text-muted-foreground" aria-hidden />
           </div>
 
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new Event(OPEN_EVENT))}
+            className="mx-3 mb-1 flex h-9 items-center gap-2.5 rounded-lg px-2.5 text-[13px] text-muted-foreground transition-colors hover:bg-white/[0.04] hover:text-foreground"
+          >
+            <Search size={15} aria-hidden />
+            Search
+            <span className="ml-auto flex gap-1">
+              <Key>⌘</Key>
+              <Key>K</Key>
+            </span>
+          </button>
+
           <nav aria-label="Workspaces" className="flex-1 overflow-y-auto px-3 py-2">
             {SECTIONS.map((section) => (
               <div key={section.title} className="mb-4">
@@ -209,6 +226,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <main className="min-h-0 flex-1 overflow-hidden">{children}</main>
         </div>
       </div>
+      <CommandPalette items={ALL} />
+      <Toaster
+        theme="dark"
+        position="bottom-right"
+        toastOptions={{
+          className: "!bg-popover !border-line-strong !text-foreground !shadow-float",
+        }}
+      />
     </TooltipProvider>
   );
 }

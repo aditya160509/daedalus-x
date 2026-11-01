@@ -3,6 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, Box, FileUp, Maximize2, Minimize2 } from "lucide-react";
 import dynamic from "next/dynamic";
+import { Group, Panel as ResizablePanel, Separator } from "react-resizable-panels";
+import { toast } from "sonner";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   Button,
@@ -176,6 +178,7 @@ export function DesignWorkspace() {
       .toISOString()
       .replace(/[:.]/g, "-")}.png`;
     link.click();
+    toast.success("Snapshot saved", { description: link.download });
   };
 
   const toggleCompare = () => {
@@ -189,195 +192,207 @@ export function DesignWorkspace() {
   };
 
   return (
-    <div
-      className={cn("grid h-full gap-3 p-3", maximised ? "grid-cols-1" : "grid-cols-[1fr_360px]")}
-    >
-      <Panel
-        title={local ? local.fileName : (activeId ?? "Viewport")}
-        description={summary?.source_file ?? (local ? "local GLB" : undefined)}
-        actions={
-          <>
-            <ProvenanceBadge value="estimated" title="display mesh, not canonical CAD" />
-            <Button onClick={() => input.current?.click()} disabled={busy}>
-              <FileUp size={13} /> {model ? "Replace" : "Import GLB"}
-            </Button>
-            {model && (
-              <Button
-                variant="ghost"
-                aria-label={maximised ? "Restore layout" : "Maximise viewport"}
-                onClick={() => setMaximised((value) => !value)}
-              >
-                {maximised ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+    <Group orientation="horizontal" className="h-full p-3">
+      <ResizablePanel id="viewport" minSize="45" className="min-h-0">
+        <Panel
+          title={local ? local.fileName : (activeId ?? "Viewport")}
+          description={summary?.source_file ?? (local ? "local GLB" : undefined)}
+          actions={
+            <>
+              <ProvenanceBadge value="estimated" title="display mesh, not canonical CAD" />
+              <Button onClick={() => input.current?.click()} disabled={busy}>
+                <FileUp size={13} /> {model ? "Replace" : "Import GLB"}
               </Button>
-            )}
-            <input
-              ref={input}
-              type="file"
-              accept=".glb,model/gltf-binary"
-              className="hidden"
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                if (file) void open(file);
-                event.target.value = "";
-              }}
-            />
-          </>
-        }
-        bodyClassName="relative"
-        className="min-h-0"
-      >
-        <div
-          className={cn(
-            "absolute inset-0 transition-colors",
-            dragOver && "bg-brand/5 ring-2 ring-brand ring-inset",
-          )}
-          onDragOver={(event) => {
-            event.preventDefault();
-            setDragOver(true);
-          }}
-          onDragLeave={() => setDragOver(false)}
-          onDrop={(event) => {
-            event.preventDefault();
-            setDragOver(false);
-            const file = event.dataTransfer.files[0];
-            if (file) void open(file);
-          }}
+              {model && (
+                <Button
+                  variant="ghost"
+                  aria-label={maximised ? "Restore layout" : "Maximise viewport"}
+                  onClick={() => setMaximised((value) => !value)}
+                >
+                  {maximised ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+                </Button>
+              )}
+              <input
+                ref={input}
+                type="file"
+                accept=".glb,model/gltf-binary"
+                className="hidden"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (file) void open(file);
+                  event.target.value = "";
+                }}
+              />
+            </>
+          }
+          bodyClassName="relative"
+          className="h-full min-h-0"
         >
-          {model && frame ? (
-            compareActive && comparison.model ? (
-              <DesignCompare
-                primary={model}
-                comparison={comparison.model}
-                primaryLabel={activeId ?? model.fileName}
-                comparisonLabel={effectiveCompareId ?? "comparison"}
-                frame={frame}
-                mode={mode}
-                selected={selected}
-                onSelect={setSelected}
-                preset={preset}
-                presetNonce={nonce}
-                explode={explode}
-                turntable={turntable}
-                dimensions={dimensions}
-                measureOn={measureOn}
-                measure={measureState}
-                onMeasurePoint={addMeasurePoint}
-                onSnapshot={registerSnapshot}
-                bus={bus}
-                reducedMotion={reducedMotion}
-              />
+          <div
+            className={cn(
+              "absolute inset-0 transition-colors",
+              dragOver && "bg-brand/5 ring-2 ring-brand ring-inset",
+            )}
+            onDragOver={(event) => {
+              event.preventDefault();
+              setDragOver(true);
+            }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={(event) => {
+              event.preventDefault();
+              setDragOver(false);
+              const file = event.dataTransfer.files[0];
+              if (file) void open(file);
+            }}
+          >
+            {model && frame ? (
+              compareActive && comparison.model ? (
+                <DesignCompare
+                  primary={model}
+                  comparison={comparison.model}
+                  primaryLabel={activeId ?? model.fileName}
+                  comparisonLabel={effectiveCompareId ?? "comparison"}
+                  frame={frame}
+                  mode={mode}
+                  selected={selected}
+                  onSelect={setSelected}
+                  preset={preset}
+                  presetNonce={nonce}
+                  explode={explode}
+                  turntable={turntable}
+                  dimensions={dimensions}
+                  measureOn={measureOn}
+                  measure={measureState}
+                  onMeasurePoint={addMeasurePoint}
+                  onSnapshot={registerSnapshot}
+                  bus={bus}
+                  reducedMotion={reducedMotion}
+                />
+              ) : (
+                <DesignScene
+                  id="primary"
+                  model={model}
+                  frame={frame}
+                  mode={mode}
+                  selected={selected}
+                  onSelect={setSelected}
+                  preset={preset}
+                  presetNonce={nonce}
+                  explode={explode}
+                  turntable={turntable}
+                  dimensions={dimensions}
+                  measureOn={measureOn}
+                  measure={measureState}
+                  onMeasurePoint={addMeasurePoint}
+                  onSnapshot={registerSnapshot}
+                  bus={bus}
+                  reducedMotion={reducedMotion}
+                />
+              )
+            ) : busy ? (
+              <Skeleton className="h-full" />
+            ) : remote.error ? (
+              <EmptyState icon={<AlertTriangle size={20} />} title="Could not load the design">
+                {remote.error}
+                <div className="mt-3">
+                  <Button onClick={() => input.current?.click()}>
+                    <FileUp size={13} /> Import GLB instead
+                  </Button>
+                </div>
+              </EmptyState>
             ) : (
-              <DesignScene
-                id="primary"
-                model={model}
-                frame={frame}
-                mode={mode}
-                selected={selected}
-                onSelect={setSelected}
-                preset={preset}
-                presetNonce={nonce}
-                explode={explode}
-                turntable={turntable}
-                dimensions={dimensions}
-                measureOn={measureOn}
-                measure={measureState}
-                onMeasurePoint={addMeasurePoint}
-                onSnapshot={registerSnapshot}
-                bus={bus}
-                reducedMotion={reducedMotion}
-              />
-            )
-          ) : busy ? (
-            <Skeleton className="h-full" />
-          ) : remote.error ? (
-            <EmptyState icon={<AlertTriangle size={20} />} title="Could not load the design">
-              {remote.error}
-              <div className="mt-3">
-                <Button onClick={() => input.current?.click()}>
-                  <FileUp size={13} /> Import GLB instead
-                </Button>
-              </div>
-            </EmptyState>
-          ) : (
-            <EmptyState
-              icon={<Box size={20} />}
-              title="No car model loaded"
-              action={
-                <Button variant="primary" onClick={() => input.current?.click()}>
-                  <FileUp size={13} /> Import GLB
-                </Button>
-              }
-            >
-              {designs.isError
-                ? "The local API is unreachable, so imported designs cannot be listed. Drop a .glb here or start daedalus-api."
-                : "Drop a .glb here or import one. GLB is for display and part selection; CFD and rule checks need the STEP or native CAD file."}
-            </EmptyState>
-          )}
-
-          {model && frame && (
-            <DesignControls
-              designs={designs.data ?? []}
-              activeId={activeId}
-              localName={local?.fileName ?? null}
-              onDesign={chooseDesign}
-              mode={mode}
-              onMode={setMode}
-              preset={preset}
-              onPreset={choosePreset}
-              explode={explode}
-              onExplode={setExplode}
-              turntable={turntable}
-              onTurntable={() => setTurntable((value) => !value)}
-              dimensions={dimensions}
-              onDimensions={() => setDimensions((value) => !value)}
-              measureOn={measureOn}
-              onMeasure={toggleMeasure}
-              onSnapshot={takeSnapshot}
-              compareOn={compareActive}
-              onCompare={toggleCompare}
-              compareId={effectiveCompareId}
-              onCompareId={setCompareId}
-              compareOptions={compareOptions}
-              busy={busy}
-            />
-          )}
-
-          {measureOn && <MeasureHud state={measureState} onClear={() => setMeasureState(null)} />}
-
-          {compareActive && !comparison.model && (
-            <div className="glass pointer-events-none absolute top-16 right-3 z-10 rounded-lg px-2.5 py-1.5 text-[11px] text-muted-foreground">
-              {comparison.error
-                ? `Comparison failed: ${comparison.error}`
-                : "Loading comparison design…"}
-            </div>
-          )}
-
-          {error && (
-            <div
-              role="alert"
-              className="glass absolute top-16 left-1/2 z-20 flex max-w-lg -translate-x-1/2 items-center gap-2 rounded-xl px-3 py-2 text-xs text-danger"
-            >
-              <AlertTriangle size={13} /> {error}
-              <button
-                type="button"
-                onClick={() => setError(null)}
-                className="ml-2 text-[11px] text-muted-foreground underline"
+              <EmptyState
+                icon={<Box size={20} />}
+                title="No car model loaded"
+                action={
+                  <Button variant="primary" onClick={() => input.current?.click()}>
+                    <FileUp size={13} /> Import GLB
+                  </Button>
+                }
               >
-                dismiss
-              </button>
-            </div>
-          )}
-        </div>
-      </Panel>
+                {designs.isError
+                  ? "The local API is unreachable, so imported designs cannot be listed. Drop a .glb here or start daedalus-api."
+                  : "Drop a .glb here or import one. GLB is for display and part selection; CFD and rule checks need the STEP or native CAD file."}
+              </EmptyState>
+            )}
 
+            {model && frame && (
+              <DesignControls
+                designs={designs.data ?? []}
+                activeId={activeId}
+                localName={local?.fileName ?? null}
+                onDesign={chooseDesign}
+                mode={mode}
+                onMode={setMode}
+                preset={preset}
+                onPreset={choosePreset}
+                explode={explode}
+                onExplode={setExplode}
+                turntable={turntable}
+                onTurntable={() => setTurntable((value) => !value)}
+                dimensions={dimensions}
+                onDimensions={() => setDimensions((value) => !value)}
+                measureOn={measureOn}
+                onMeasure={toggleMeasure}
+                onSnapshot={takeSnapshot}
+                compareOn={compareActive}
+                onCompare={toggleCompare}
+                compareId={effectiveCompareId}
+                onCompareId={setCompareId}
+                compareOptions={compareOptions}
+                busy={busy}
+              />
+            )}
+
+            {measureOn && <MeasureHud state={measureState} onClear={() => setMeasureState(null)} />}
+
+            {compareActive && !comparison.model && (
+              <div className="glass pointer-events-none absolute top-16 right-3 z-10 rounded-lg px-2.5 py-1.5 text-[11px] text-muted-foreground">
+                {comparison.error
+                  ? `Comparison failed: ${comparison.error}`
+                  : "Loading comparison design…"}
+              </div>
+            )}
+
+            {error && (
+              <div
+                role="alert"
+                className="glass absolute top-16 left-1/2 z-20 flex max-w-lg -translate-x-1/2 items-center gap-2 rounded-xl px-3 py-2 text-xs text-danger"
+              >
+                <AlertTriangle size={13} /> {error}
+                <button
+                  type="button"
+                  onClick={() => setError(null)}
+                  className="ml-2 text-[11px] text-muted-foreground underline"
+                >
+                  dismiss
+                </button>
+              </div>
+            )}
+          </div>
+        </Panel>
+      </ResizablePanel>
       {!maximised && (
-        <DesignSidebar
-          model={model}
-          geometry={geometry}
-          summary={summary}
-          selected={selected}
-          onSelect={setSelected}
-        />
+        <>
+          <Separator className="group mx-1 flex w-1.5 items-center justify-center rounded-full outline-none data-[separator=hover]:bg-white/[0.04] data-[separator=active]:bg-brand/20">
+            <span className="h-10 w-0.5 rounded-full bg-line-strong transition-colors group-data-[separator=active]:bg-brand group-data-[separator=hover]:bg-text-2" />
+          </Separator>
+          <ResizablePanel
+            id="sidebar"
+            defaultSize="360px"
+            minSize="280px"
+            maxSize="560px"
+            className="min-h-0"
+          >
+            <DesignSidebar
+              model={model}
+              geometry={geometry}
+              summary={summary}
+              selected={selected}
+              onSelect={setSelected}
+            />
+          </ResizablePanel>
+        </>
       )}
 
       {measureOn && measurement && (
@@ -385,6 +400,6 @@ export function DesignWorkspace() {
           Measured {(measurement.distance * 1000).toFixed(1)} millimetres.
         </span>
       )}
-    </div>
+    </Group>
   );
 }
