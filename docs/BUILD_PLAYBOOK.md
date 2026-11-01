@@ -377,3 +377,6 @@ and stop. Do not start another step. If anything is unclear or blocked, write it
 2. GPT: P0-01 backend half → P1-01 → P1-02 → P1-03 → P2-01.
 3. Claude: P0-01 frontend half → P0-02 → P6-01 → P6-02 → P6-03.
 4. When T-01 arrives: P3-01 → P3-02 (first real CFD run).
+
+---
+**2026-11-01:** remaining work is specified task-by-task in `docs/build/` (start with `docs/build/00-START-HERE.md`). That pack supersedes the phase list above for everything not yet accepted.

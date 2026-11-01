@@ -1,5 +1,7 @@
 # Status
 
+Remaining work is tracked task-by-task in [docs/build/TASK-BOARD.md](docs/build/TASK-BOARD.md) (T01–T14). Mapping: T01→P3-02, T02→P1-03, T03→P3-03, T04/T05/T06→P3-04+Appendix B, T07→P6-04, T08→P6-07, T09→P1-04/P2-02, T10→P4-*/P7-*, T11→P5-01/P6-08, T12→P6-09, T13→P6-10, T14→P6-11.
+
 | ID | Title | Owner | Status | Evidence |
 |---|---|---|---|---|
 | P0-01 | Repo and toolchain | Claude | accepted | [evidence](evidence/P0-01.md) |
