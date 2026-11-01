@@ -1,7 +1,7 @@
-import { DesignWorkspace } from "./DesignWorkspace";
+import { DesignStudio } from "./DesignStudio";
 
 export const metadata = { title: "Design · Daedalus X" };
 
 export default function DesignPage() {
-  return <DesignWorkspace />;
+  return <DesignStudio />;
 }

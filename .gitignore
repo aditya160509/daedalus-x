@@ -17,3 +17,4 @@ data/runs/
 data/jobs/
 data/jobs.sqlite*
 data/studies/
+vendor/
