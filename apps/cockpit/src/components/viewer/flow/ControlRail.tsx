@@ -59,7 +59,7 @@ export function ControlRail({
     () =>
       setLayers((l) => ({ ...l, surface: l.surface === value && value !== "cp" ? "cp" : value }));
   const volume =
-    (key: "streamlines" | "vortices" | "shell"): (() => void) =>
+    (key: "streamlines" | "particles" | "vortices" | "shell"): (() => void) =>
     () =>
       setLayers((l) => ({ ...l, [key]: !l[key] }));
   const planes =
@@ -129,6 +129,14 @@ export function ControlRail({
           icon: Wind,
           active: layers.streamlines,
           onClick: volume("streamlines"),
+        },
+        {
+          key: "particles",
+          label: "Air",
+          hint: "Air particles flowing along the streamlines",
+          icon: Wind,
+          active: layers.particles,
+          onClick: volume("particles"),
         },
         {
           key: "vortices",

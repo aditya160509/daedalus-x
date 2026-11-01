@@ -4,6 +4,8 @@ import type { FlowField, FlowMesh } from "@/lib/api";
 export interface FlowLayers {
   surface: "cp" | "oil" | "sensitivity" | "plain" | "off";
   streamlines: boolean;
+  /** Air particles advected along the streamlines. */
+  particles: boolean;
   wake: boolean;
   centreline: boolean;
   vortices: boolean;
@@ -20,6 +22,7 @@ export interface FlowLayers {
 export const DEFAULT_LAYERS: FlowLayers = {
   surface: "cp",
   streamlines: true,
+  particles: false,
   wake: false,
   centreline: false,
   vortices: false,

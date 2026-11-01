@@ -18,6 +18,7 @@ import { GroundBelt } from "./GroundBelt";
 import { OilFlow } from "./OilFlow";
 import { PressureSkin } from "./PressureSkin";
 import { SensitivityMap } from "./SensitivityMap";
+import AirParticles from "./AirParticles";
 import { SmokeStreams } from "./SmokeStreams";
 import { SourceStamp } from "./SourceStamp";
 import { VortexCores } from "./VortexCores";
@@ -133,6 +134,9 @@ function SceneContents(props: SceneProps) {
             density={layers.density}
             onError={onError}
           />
+        )}
+        {layers.particles && field.streamlines && (
+          <AirParticles lines={field.streamlines} animate={animate} density={layers.density} />
         )}
         {layers.vortices && field.vortices && (
           <VortexCores mesh={field.vortices} level={layers.qLevel} />
