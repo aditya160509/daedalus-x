@@ -27,7 +27,7 @@ Part 1 (sections A–H) is the build list. Part 2 (R1–R8) names the best exist
 | A5 | Motion primitives: list and layout transitions | **@formkit/auto-animate**, **motion** (Framer Motion) | Ad-hoc CSS | 0.5 | P1 |
 | A6 ✅ | Toasts and notifications (job done, CFD rejected) | coss **Toast** (Base UI) | None today | 0.3 | P0 |
 | A7 ✅ | Kbd hints everywhere (`/`, ⌘K, F, R, Space) | coss **Kbd** | Plain text | 0.2 | P1 |
-| A8 | Empty, loading and error states | coss **Empty**, **Skeleton**, **Spinner** | Custom `EmptyState` | 0.3 | P0 |
+| A8 ✅ | Empty, loading and error states | coss **Empty**, **Skeleton**, **Spinner** | Custom `EmptyState` | 0.3 | P0 |
 
 ## B. App shell
 
