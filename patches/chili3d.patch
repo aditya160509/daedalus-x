@@ -1,0 +1,161 @@
+diff --git a/packages/app/src/commands/application/newDocument.ts b/packages/app/src/commands/application/newDocument.ts
+index c20d26e..9e6dd98 100644
+--- a/packages/app/src/commands/application/newDocument.ts
++++ b/packages/app/src/commands/application/newDocument.ts
+@@ -12,6 +12,6 @@ let count = 1;
+ })
+ export class NewDocument implements ICommand {
+     async execute(app: IApplication): Promise<void> {
+-        await app.newDocument(`undefined ${count++}`);
++        await app.newDocument(`Car design ${count++}`);
+     }
+ }
+diff --git a/packages/builder/src/ribbon.ts b/packages/builder/src/ribbon.ts
+index 938ba8c..96a9d45 100644
+--- a/packages/builder/src/ribbon.ts
++++ b/packages/builder/src/ribbon.ts
+@@ -120,10 +120,6 @@ export const DefaultRibbon: RibbonTabProfile[] = [
+                 groupName: "ribbon.group.importExport",
+                 items: ["file.import", "file.export"],
+             },
+-            {
+-                groupName: "ribbon.group.other",
+-                items: ["wechat.group", "ai.toggleChat"],
+-            },
+         ],
+     },
+     {
+@@ -227,7 +223,7 @@ export const ParametricRibbonProfiles: RibbonProfileExtra[] = [
+             },
+             {
+                 groupName: "ribbon.group.other",
+-                items: ["feature.variable", "wechat.group", "ai.toggleChat"],
++                items: ["feature.variable"],
+             },
+         ],
+     },
+diff --git a/packages/core/src/config.ts b/packages/core/src/config.ts
+index d454d29..6d02b8c 100644
+--- a/packages/core/src/config.ts
++++ b/packages/core/src/config.ts
+@@ -170,7 +170,7 @@ export class Config extends Observable {
+ 
+     @serialize()
+     get themeMode() {
+-        return this.getPrivateValue("themeMode", "system");
++        return this.getPrivateValue("themeMode", "dark");
+     }
+     set themeMode(value: "light" | "dark" | "system") {
+         this.setProperty("themeMode", value, () => this.applyTheme(value));
+diff --git a/packages/i18n/src/en.ts b/packages/i18n/src/en.ts
+index 050629c..8115ac4 100644
+--- a/packages/i18n/src/en.ts
++++ b/packages/i18n/src/en.ts
+@@ -453,7 +453,7 @@ export default {
+         "home.videos.recent": "Updates",
+         "home.videos.cases": "Case Studies",
+         "home.videos.more": "More",
+-        "home.welcome": "Welcome to chili3d",
++        "home.welcome": "Car designs",
+         "home.welcome.subtitle": "Design and model in 3D, right in your browser.",
+         "items.header": "Items",
+         "items.tool.delete": "Delete",
+diff --git a/packages/ui/src/editor.ts b/packages/ui/src/editor.ts
+index 74f1747..5dff488 100644
+--- a/packages/ui/src/editor.ts
++++ b/packages/ui/src/editor.ts
+@@ -47,7 +47,6 @@ export class Editor extends HTMLElement {
+         viewport.classList.add(style.viewport);
+         this._viewportContainer = div({ className: style.viewportContainer }, viewport);
+         this.render();
+-        this.showChat();
+     }
+ 
+     private render() {
+diff --git a/packages/ui/src/home/home.ts b/packages/ui/src/home/home.ts
+index 2a165c2..bcfbdb7 100644
+--- a/packages/ui/src/home/home.ts
++++ b/packages/ui/src/home/home.ts
+@@ -105,19 +105,13 @@ export class Home extends HTMLElement {
+             ),
+ 
+             this.settings(),
+-            this.links(),
+         );
+     }
+ 
+     private logoSection() {
+         return div(
+             { className: style.logo },
+-            svg({ icon: "icon-chili" }),
+-            div(
+-                { className: style.logoText },
+-                span({ className: style.wordmark, textContent: "CHILI3D" }),
+-                span({ className: style.version, textContent: `v${__APP_VERSION__}` }),
+-            ),
++            div({ className: style.logoText }, span({ className: style.wordmark, textContent: "DESIGNS" })),
+         );
+     }
+ 
+diff --git a/packages/ui/src/mainWindow.ts b/packages/ui/src/mainWindow.ts
+index 6535739..1f2909d 100644
+--- a/packages/ui/src/mainWindow.ts
++++ b/packages/ui/src/mainWindow.ts
+@@ -68,7 +68,6 @@ export class MainWindow extends HTMLElement implements IWindow {
+         await this.fetchIconFont();
+ 
+         this.applyTheme();
+-        await this._initHome(app);
+         this._initEditor(app);
+         this._initEventHandlers(app);
+     }
+diff --git a/packages/ui/src/ribbon/ribbon.ts b/packages/ui/src/ribbon/ribbon.ts
+index 10d6c60..65e0ba2 100644
+--- a/packages/ui/src/ribbon/ribbon.ts
++++ b/packages/ui/src/ribbon/ribbon.ts
+@@ -94,8 +94,7 @@ export class RibbonUI extends HTMLElement {
+             { className: style.left },
+             div(
+                 { className: style.appIcon, onclick: () => PubSub.default.pub("displayHome", true) },
+-                svg({ className: style.icon, icon: "icon-chili" }),
+-                span({ id: "appName", textContent: `Chili3D - v${__APP_VERSION__}` }),
++                span({ id: "appName", textContent: "CAD" }),
+             ),
+             div(
+                 { className: style.ribbonTitlePanel },
+diff --git a/packages/web/src/index.ts b/packages/web/src/index.ts
+index a12af54..70dc508 100644
+--- a/packages/web/src/index.ts
++++ b/packages/web/src/index.ts
+@@ -51,6 +51,9 @@ async function handleApplicaionBuilt(app: IApplication) {
+         if (fileUrl) {
+             Logger.info(`loading file from: ${fileUrl}`);
+             await app.loadFileFromUrl(fileUrl);
++        } else {
++            // Daedalus X: open straight into a design, no welcome screen.
++            PubSub.default.pub("executeCommand", "doc.new" as never);
+         }
+     } finally {
+         released();
+diff --git a/public/index.html b/public/index.html
+index 9ff9b75..ee5b48f 100644
+--- a/public/index.html
++++ b/public/index.html
+@@ -6,16 +6,9 @@
+         <meta name="description" content="A 3D CAD application that runs directly in your browser for online model design and editing。一款直接在浏览器中运行的3D CAD应用程序，实现在线模型设计与编辑" />
+         <meta name="keywords" content="Web CAD, WebAssembly, WASM, Three.js, OCCT, Opencascade, 3D CAD, 在线 CAD, 在线建模" />
+         <meta name="author" content="仙阁" />
+-        <title>Chili3D</title>
++        <title>Daedalus CAD</title>
+         <link rel="icon" href="favicon.svg">
+         <link rel="stylesheet" type="text/css" href="index.css" />
+-        <script type="text/javascript">
+-            (function(c,l,a,r,i,t,y){
+-                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+-                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+-                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+-            })(window, document, "clarity", "script", "k1qrtibhcl");
+-        </script>
+     </head>
+     <body>
+         <noscript>You need to enable JavaScript to run this app.</noscript>

@@ -18,27 +18,14 @@ export function DesignStudio() {
   const [tab, setTab] = useTab(TABS);
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <WorkspaceTabs
-        tabs={TABS}
-        value={tab}
-        onChange={setTab}
-        right={
-          <a
-            href="https://github.com/xiangechen/chili3d"
-            target="_blank"
-            rel="noreferrer"
-            className="px-2 text-[11px] text-muted-foreground hover:text-foreground"
-          >
-            CAD: Chili3D · AGPL-3.0
-          </a>
-        }
-      />
+      <WorkspaceTabs tabs={TABS} value={tab} onChange={setTab} />
       <div className="min-h-0 flex-1">
         {tab === "cad" && (
+          // Same-origin first-party CAD (needs IndexedDB + WASM), so no sandbox.
+          // oxlint-disable-next-line react/iframe-missing-sandbox
           <iframe
-            title="Chili3D CAD"
+            title="CAD"
             src="/cad/index.html"
-            sandbox="allow-scripts allow-same-origin allow-downloads allow-modals allow-popups allow-forms"
             className="size-full border-0"
           />
         )}
