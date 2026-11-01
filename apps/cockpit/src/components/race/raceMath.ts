@@ -168,3 +168,15 @@ export function ghostCdaFromArea(baseCda: number, baseArea: number, ghostArea: n
   }
   return (baseCda * ghostArea) / baseArea;
 }
+
+/** Split times (s) for `n` equal mini-sectors of a run; null where the run doesn't reach it. */
+export function miniSectorTimes(trace: DistanceTrace, lengthM: number, n = 8): (number | null)[] {
+  const out: (number | null)[] = [];
+  let prev = 0;
+  for (let i = 1; i <= n; i++) {
+    const t = timeAtDistance((lengthM * i) / n, trace.time, trace.position);
+    out.push(t == null ? null : t - prev);
+    if (t != null) prev = t;
+  }
+  return out;
+}

@@ -9,6 +9,7 @@ import { ChannelPicker } from "@/components/race/ChannelPicker";
 import { CursorTable } from "@/components/race/CursorTable";
 import { GhostPanel } from "@/components/race/GhostPanel";
 import { ReactionTrainer } from "@/components/race/ReactionTrainer";
+import { TimingTower } from "@/components/race/TimingTower";
 import { loadPresets, savePresets, type RacePreset } from "@/components/race/presets";
 import { deltaTimeCurve, finishGap } from "@/components/race/raceMath";
 import type { RaceTrace } from "@/components/race/useRaceCar";
@@ -415,6 +416,15 @@ export function RaceWorkspace() {
               curve={deltaPoints}
               busy={ghost.isFetching}
             />
+            {primaryTrace && (
+              <TimingTower
+                primary={primaryTrace}
+                ghost={ghostTrace}
+                lengthM={car.trackM}
+                primaryTime={primaryTime}
+                ghostTime={ghost.data?.finished === true ? (ghost.data.time_s ?? null) : null}
+              />
+            )}
             <ReactionTrainer />
           </div>
         </div>

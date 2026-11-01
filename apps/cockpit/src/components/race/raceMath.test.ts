@@ -10,6 +10,7 @@ import {
   sampleAt,
   stepCursor,
   timeAtDistance,
+  miniSectorTimes,
 } from "./raceMath";
 
 const times = [0, 1, 2, 3];
@@ -91,5 +92,16 @@ describe("race cursor maths", () => {
     expect(ghostCdaFromArea(0.0015, 0.01, 0.02)).toBeCloseTo(0.003);
     expect(() => ghostCdaFromArea(0.0015, 0, 0.02)).toThrow(/positive/);
     expect(() => ghostCdaFromArea(-1, 0.01, 0.02)).toThrow(/non-negative/);
+  });
+});
+
+describe("miniSectorTimes", () => {
+  it("splits a constant-speed run into equal sectors", () => {
+    const trace = { time: [0, 1, 2], position: [0, 10, 20] };
+    const s = miniSectorTimes(trace, 20, 4);
+    expect(s.map((v) => v?.toFixed(3))).toEqual(["0.500", "0.500", "0.500", "0.500"]);
+  });
+  it("is null past the end of a short run", () => {
+    expect(miniSectorTimes({ time: [0, 1], position: [0, 10] }, 20, 2)).toEqual([1, null]);
   });
 });

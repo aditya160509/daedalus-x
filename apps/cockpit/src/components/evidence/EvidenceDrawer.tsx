@@ -106,6 +106,8 @@ export function EvidenceDrawer() {
                     <button
                       type="button"
                       onClick={() => setSel(sel?.id === r.id ? null : r)}
+                      aria-label={`${r.kind} ${time(r.created_at)}, show details`}
+                      aria-expanded={sel?.id === r.id}
                       className="group relative w-full rounded-md py-1.5 pr-2 pl-4 text-left hover:bg-accent"
                     >
                       <span
