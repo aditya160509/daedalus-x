@@ -72,9 +72,12 @@ def test_running_run_has_history_but_no_result(client: TestClient) -> None:
 
 
 def test_viz_files_served_when_exported(client: TestClient, tmp_path: Path) -> None:
+    assert client.get("/v1/cfd/runs/run_1/buildup.json").status_code == 404
     assert client.get("/v1/cfd/runs/run_1/viz.json").status_code == 404
     v = tmp_path / "runs/run_1/viz"
     v.mkdir()
+    (v / "buildup.json").write_text('{"wall_shear": "unavailable"}')
+    assert client.get("/v1/cfd/runs/run_1/buildup.json").json()["wall_shear"] == "unavailable"
     (v / "viz.json").write_text('{"version": 1}')
     (v / "viz.bin").write_bytes(b"\x00\x01\x02\x03")
     assert client.get("/v1/cfd/runs/run_1/viz.json").json() == {"version": 1}

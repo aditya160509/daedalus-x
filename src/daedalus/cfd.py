@@ -27,7 +27,7 @@ AcceptanceMode = Literal["steady", "averaged"]
 CD_AVERAGING_WINDOW = 500
 CD_BATCHES = 10
 
-TEMPLATE_VERSION = "daedalus-halfcar-v3"
+TEMPLATE_VERSION = "daedalus-halfcar-v4"
 OPENFOAM_LAUNCHER = "openfoam"  # OpenFOAM.app wrapper: `openfoam -c "<command>"`
 
 HEADER = """/*--------------------------------*- C++ -*----------------------------------*\\
@@ -577,7 +577,13 @@ functions
         Aref {_v(aref_half)};
         dragDir (1 0 0); liftDir (0 0 1); pitchAxis (0 1 0);
     }}
-{per_group}    yPlus
+{per_group}    wallShearStress
+    {{
+        type wallShearStress; libs (fieldFunctionObjects);
+        patches ({groups});
+        writeControl writeTime;
+    }}
+    yPlus
     {{
         type yPlus; libs (fieldFunctionObjects);
         writeControl writeTime;

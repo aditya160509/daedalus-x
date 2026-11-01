@@ -1,6 +1,6 @@
 """Flow-field export for the Virtual Wind Tunnel (spec §4.4, P3-04).
 
-Reads a finished half-model OpenFOAM case and writes three visual layers, mirrored about the
+Reads a finished half-model OpenFOAM case and writes versioned flow layers, mirrored about the
 symmetry plane so the viewer shows the full car:
 
 - ``surface``: car surface with pressure coefficient Cp = p / (0.5 U^2) per vertex
@@ -15,7 +15,6 @@ buffer of typed arrays) so the browser maps arrays without parsing numbers.
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
 
@@ -23,49 +22,20 @@ import numpy as np
 import pyvista as pv
 from numpy.typing import NDArray
 
-VIZ_VERSION = 1
-CAR_GROUPS = ("body", "front_wing", "rear_wing", "wheels", "cartridge", "internal")
+from .binary import _Buffer, _polylines, _robust_range, _triangles, mirror_triangles
+from .insights import add_insights
 
-
-@dataclass
-class _Buffer:
-    """Accumulates typed arrays into one 4-byte-aligned binary blob."""
-
-    chunks: list[bytes] = field(default_factory=list)
-    size: int = 0
-
-    def add(self, arr: NDArray[Any]) -> dict[str, Any]:
-        dtype = {
-            np.dtype(np.float32): "f32",
-            np.dtype(np.uint32): "u32",
-            np.dtype(np.uint8): "u8",
-        }[arr.dtype]
-        data = np.ascontiguousarray(arr).astype(arr.dtype.newbyteorder("<"), copy=False)
-        ref = {"offset": self.size, "length": int(data.size), "type": dtype}
-        raw = data.tobytes()
-        pad = (-len(raw)) % 4
-        self.chunks.append(raw + b"\0" * pad)
-        self.size += len(raw) + pad
-        return ref
-
-
-def mirror_triangles(
-    points: NDArray[np.float64], tris: NDArray[np.int64]
-) -> tuple[NDArray[np.float64], NDArray[np.int64]]:
-    """Append the y -> -y mirror image; mirrored triangles are re-wound to keep normals outward."""
-    n = points.shape[0]
-    mirrored = points * np.array([1.0, -1.0, 1.0])
-    return np.vstack([points, mirrored]), np.vstack([tris, tris[:, ::-1] + n])
-
-
-def _triangles(
-    mesh: pv.PolyData,
-) -> tuple[NDArray[np.float64], NDArray[np.int64], pv.PolyData]:
-    tri = mesh.triangulate().clean()
-    faces = np.asarray(tri.faces).reshape(-1, 4)
-    if faces.size and not np.all(faces[:, 0] == 3):
-        raise ValueError("triangulation left non-triangle faces")
-    return np.asarray(tri.points, float), faces[:, 1:].astype(np.int64), tri
+VIZ_VERSION = 2
+CAR_GROUPS = (
+    "body",
+    "front_wing",
+    "rear_wing",
+    "wheels",
+    "wheels_front",
+    "wheels_rear",
+    "cartridge",
+    "internal",
+)
 
 
 def _reader(case: Path, groups: list[str]) -> pv.MultiBlock:
@@ -179,25 +149,37 @@ def export(case: Path, out_dir: Path | None = None, n_seeds: tuple[int, int] = (
     for name, (normal, origin, box) in slices.items():
         sl = internal.slice(normal=normal, origin=origin).clip_box(box, invert=False)
         s_pts, s_tris, s_mesh = _triangles(sl.extract_surface(algorithm="dataset_surface"))
-        ux = np.asarray(s_mesh.point_data["U"], float)[:, 0] / u_inf
+        velocity = np.asarray(s_mesh.point_data["U"], float)
+        ux = velocity[:, 0] / u_inf
+        cp0 = (np.asarray(s_mesh.point_data["p"], float) + 0.5 * np.sum(velocity**2, axis=1)) / q
         if name == "wake":
             s_pts, s_tris = mirror_triangles(s_pts, s_tris)
             ux = np.concatenate([ux, ux])
+            cp0 = np.concatenate([cp0, cp0])
         else:
             s_pts[:, 1] = 0.0  # draw exactly on the symmetry plane
         layers[name] = {
             "positions": buf.add(s_pts.astype(np.float32).ravel()),
             "indices": buf.add(s_tris.astype(np.uint32).ravel()),
             "scalar": buf.add(ux.astype(np.float32)),
+            "scalars": {
+                "Ux/U∞": buf.add(ux.astype(np.float32)),
+                "Cp0": buf.add(cp0.astype(np.float32)),
+            },
+            "ranges": {"Ux/U∞": [-0.2, 1.2], "Cp0": _robust_range(cp0)},
             "scalar_name": "Ux/U∞",
             "range": [-0.2, 1.2],
         }
 
     out = Path(out_dir) if out_dir else case / "viz"
     out.mkdir(parents=True, exist_ok=True)
+    diagnostics = add_insights(internal, boundary, manifest, result, buf, layers, out)
+    if buf.size > 40 * 1024 * 1024:
+        raise ValueError(f"flow export exceeds 40 MiB budget: {buf.size} bytes")
     (out / "viz.bin").write_bytes(b"".join(buf.chunks))
     meta = {
         "version": VIZ_VERSION,
+        "diagnostics": diagnostics,
         "U_m_s": u_inf,
         "car": {"length_m": length, "width_m": width, "height_m": height},
         "acceptance": result.get("acceptance", "pending"),
@@ -209,33 +191,11 @@ def export(case: Path, out_dir: Path | None = None, n_seeds: tuple[int, int] = (
         "notes": [
             "Half-model fields mirrored about y = 0 for display.",
             "Cp uses kinematic p with p = 0 at the outlet; values are from the last iteration.",
+            "Cp0 is total pressure relative to outlet static pressure, not a loss coefficient.",
+            "Low-shear sign changes are a separation/reattachment heuristic, not physical proof.",
+            "Q surfaces and oil streaks derive from the RANS snapshot and inherit its acceptance.",
+            "Wall traction vector is -wallShearStress in m²/s²; its scalar magnitude is in Pa.",
         ],
     }
     (out / "viz.json").write_text(json.dumps(meta, indent=1))
     return out
-
-
-def _polylines(
-    lines: pv.PolyData, u_inf: float
-) -> tuple[NDArray[np.float64], NDArray[np.int64], NDArray[np.float64]]:
-    """Flatten VTK polylines to (points, start offsets + end sentinel, speed per point)."""
-    if lines.n_points == 0:
-        return np.zeros((0, 3)), np.zeros(1, np.int64), np.zeros(0)
-    pts = np.asarray(lines.points, float)
-    speed = np.linalg.norm(np.asarray(lines.point_data["U"], float), axis=1) / u_inf
-    conn = np.asarray(lines.lines)
-    order: list[NDArray[np.int64]] = []
-    i = 0
-    while i < conn.size:
-        n = int(conn[i])
-        if n >= 2:
-            order.append(conn[i + 1 : i + 1 + n].astype(np.int64))
-        i += n + 1
-    idx = np.concatenate(order) if order else np.zeros(0, np.int64)
-    offsets = np.concatenate([[0], np.cumsum([o.size for o in order])]).astype(np.int64)
-    return pts[idx], offsets, speed[idx]
-
-
-def _robust_range(v: NDArray[np.float64]) -> list[float]:
-    lo, hi = np.percentile(v, [1, 99])
-    return [float(lo), float(hi)]

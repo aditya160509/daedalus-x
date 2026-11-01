@@ -227,6 +227,10 @@ const MeshLayer = z.object({
   indices: BufRef,
   scalar: BufRef,
   group: BufRef.optional(),
+  scalars: z.record(z.string(), BufRef).optional(),
+  ranges: z.record(z.string(), z.tuple([z.number(), z.number()])).optional(),
+  separation: BufRef.optional(),
+  wall_traction: BufRef.optional(),
   groups: z.array(z.string()).optional(),
   scalar_name: z.string(),
   range: z.tuple([z.number(), z.number()]),
@@ -239,7 +243,16 @@ const LineLayer = z.object({
   range: z.tuple([z.number(), z.number()]),
 });
 export const VizMeta = z.object({
-  version: z.literal(1),
+  version: z.union([z.literal(1), z.literal(2)]),
+  diagnostics: z
+    .object({
+      wall_shear: z.enum(["available", "unavailable"]),
+      missing_patches: z.array(z.string()).optional(),
+      instruction: z.string().optional(),
+      drag_check: z.boolean().nullable().optional(),
+      drag_relative_error: z.number().nullable().optional(),
+    })
+    .optional(),
   U_m_s: z.number(),
   car: z.object({ length_m: z.number(), width_m: z.number(), height_m: z.number() }),
   acceptance: z.string(),
@@ -251,12 +264,51 @@ export const VizMeta = z.object({
     streamlines: LineLayer,
     wake: MeshLayer,
     centreline: MeshLayer,
+    vortices: MeshLayer.extend({
+      levels: z.array(z.number()),
+      level_definition: z.string(),
+    }).optional(),
+    wake_shell: MeshLayer.extend({ definition: z.string() }).optional(),
+    oilflow: LineLayer.optional(),
+    separation: z
+      .object({
+        positions: BufRef,
+        scalar: BufRef,
+        scalar_name: z.string(),
+        range: z.tuple([z.number(), z.number()]),
+        definition: z.string(),
+      })
+      .optional(),
+    xslices: MeshLayer.extend({ offsets: BufRef, x_m: z.array(z.number()) }).optional(),
   }),
   provenance: z.literal("simulated"),
   notes: z.array(z.string()),
 });
 export type VizMeta = z.infer<typeof VizMeta>;
 type BufRef = z.infer<typeof BufRef>;
+
+export const DragBuildup = z.discriminatedUnion("wall_shear", [
+  z.object({
+    wall_shear: z.literal("unavailable"),
+    missing_patches: z.array(z.string()),
+    instruction: z.string(),
+  }),
+  z.object({
+    wall_shear: z.literal("available"),
+    x_m: z.array(z.number()),
+    groups: z.record(z.string(), z.array(z.number())),
+    total_cd: z.number(),
+    reference_cd: z.number().nullable(),
+    relative_error: z.number().nullable(),
+    within_2_percent: z.boolean().nullable(),
+    provenance: z.literal("simulated"),
+    acceptance: z.string(),
+    method: z.string(),
+  }),
+]);
+export type DragBuildup = z.infer<typeof DragBuildup>;
+export const getDragBuildup = (id: string) =>
+  request(`/v1/cfd/runs/${encodeURIComponent(id)}/buildup.json`, DragBuildup);
 
 export interface FlowMesh {
   positions: Float32Array;

@@ -37,6 +37,7 @@ def test_case_dicts_parse_and_carry_parameters(tmp_path: Path, design: Path) -> 
     for rel in ("system/controlDict", "system/blockMeshDict", "system/fvSolution", "0/U"):
         FoamFile(case / rel).as_dict()  # parses as valid OpenFOAM syntax
     cd: Any = FoamFile(case / "system/controlDict").as_dict()
+    assert cd["functions"]["wallShearStress"]["type"] == "wallShearStress"
     fc = cd["functions"]["forceCoeffs"]
     assert fc["magUInf"] == pytest.approx(18.0)
     assert fc["Aref"] == pytest.approx(0.0012)  # half model
@@ -44,7 +45,7 @@ def test_case_dicts_parse_and_carry_parameters(tmp_path: Path, design: Path) -> 
     assert FoamFile(case / "system/decomposeParDict")["numberOfSubdomains"] == 4
     assert (case / "constant/triSurface/front_wing.stl").exists()
     meta: Any = m
-    assert meta["template"] == "daedalus-halfcar-v3"
+    assert meta["template"] == "daedalus-halfcar-v4"
     assert any("symmetryPlane" in a for a in meta["assumptions"])
 
 
