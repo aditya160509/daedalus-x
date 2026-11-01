@@ -257,6 +257,15 @@ export function EmptyState({
   );
 }
 
+/** Keyboard hint: a small key cap, shown next to the control it triggers. */
+export function Kbd({ children }: { children: React.ReactNode }) {
+  return (
+    <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border bg-secondary px-1 font-mono text-[11px] text-text-2">
+      {children}
+    </kbd>
+  );
+}
+
 /** Placeholder block shaped like the content it stands in for. */
 export function Skeleton({ className }: { className?: string }) {
   return <div aria-hidden className={cn("animate-pulse bg-surface-2", className)} />;

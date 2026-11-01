@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DragBuildupChart } from "@/components/charts/DragBuildupChart";
 import {
   EmptyState,
+  Kbd,
   Panel,
   ProvenanceBadge,
   SegmentedControl,
@@ -217,9 +218,10 @@ export function FlowPanel({ runId, hasViz }: { runId: string; hasViz: boolean })
             type="button"
             aria-label={max ? "Exit full screen" : "Full screen"}
             onClick={() => setMax((m) => !m)}
-            className="rounded-md p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
+            className="flex items-center gap-1.5 rounded-md p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
           >
             {max ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
+            <Kbd>F</Kbd>
           </button>
         </>
       }
