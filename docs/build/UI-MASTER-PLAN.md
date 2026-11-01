@@ -49,9 +49,9 @@ Part 1 (sections A–H) is the build list. Part 2 (R1–R8) names the best exist
 | C1 ✅ | Clickable view cube (faces, edges, corners) | drei **GizmoHelper + GizmoViewcube** | Text Iso/Front/Side/Top buttons | 0.5 | P0 |
 | C2 | Auto-fit framing and smooth camera tweens | drei **Bounds**, **CameraControls** (camera-controls) | Fixed distance | 0.5 | P0 |
 | C3 | Fast picking on big meshes | **three-mesh-bvh** (drei `Bvh`) | Raw raycast | 0.3 | P0 |
-| C4 | Selection outline and hover highlight | **postprocessing** `OutlineEffect` / drei `Outlines` | Colour swap | 0.5 | P0 |
+| C4 ✅ | Selection outline and hover highlight | **postprocessing** `OutlineEffect` / drei `Outlines` | Colour swap | 0.5 | P0 |
 | C5 | Model tree with groups, visibility eye, isolate, search, virtual scroll | port **three-cad-viewer** tree (or **@pierre/trees**, as T3 Code uses) | Flat part list | 1 | P0 |
-| C6 | Section / clipping plane with cap fill | port **three-cad-viewer** stencil-capped clipping | None | 1 | P1 |
+| C6 ✅ | Section / clipping plane with cap fill | port **three-cad-viewer** stencil-capped clipping | None | 1 | P1 |
 | C7 | Measure: point-to-point, edge length, angle, with snapping | **three-mesh-bvh** closest-point + custom HUD | Point-only measure | 1 | P1 |
 | C8 | Studio lighting: HDRI, contact shadows, AO, reflective floor | drei **Environment** (local HDR), `AccumulativeShadows`, **N8AO** | Basic lights | 0.7 | P1 |
 | C9 | Engineering mode: edges, wireframe, x-ray, draft and thickness heatmaps | drei `Edges`, custom shaders | Studio/Engineering only | 1 | P1 |
@@ -63,7 +63,7 @@ Part 1 (sections A–H) is the build list. Part 2 (R1–R8) names the best exist
 
 | ID | What | Open source | Replaces | Effort | Pri |
 |---|---|---|---|---|---|
-| D1 | GPU particle advection through the velocity field (air visibly flowing, smoke and dye) | port **mapbox/webgl-wind** to 3D with three.js `GPUComputationRenderer` | Pulses on static streamlines | 2 | P0 |
+| D1 ✅ | GPU particle advection through the velocity field (air visibly flowing, smoke and dye) | port **mapbox/webgl-wind** to 3D with three.js `GPUComputationRenderer` | Pulses on static streamlines | 2 | P0 |
 | D2 | Streamtubes / ribbons with speed colouring, seed rake you can drag | three `TubeGeometry` + drei `TransformControls` | Fixed seeds | 1 | P1 |
 | D3 | Volume rendering of the wake (total-pressure loss, vorticity) | **vtk.js** volume mapper, or a three `Data3DTexture` ray-march | Slice planes | 1.5 | P1 |
 | D4 | Q-criterion iso-surfaces, smooth, transparent | Exported meshes (T04) + `MeshTransmissionMaterial` | Existing vortex cores | 0.5 | P1 |

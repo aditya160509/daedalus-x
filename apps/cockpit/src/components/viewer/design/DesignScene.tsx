@@ -7,6 +7,7 @@ import * as THREE from "three";
 import { CarModel } from "./CarModel";
 import { DesignCamera } from "./DesignCamera";
 import { Dimensions, MeasureGraphic } from "./Dimensions";
+import { SectionPlane } from "./SectionPlane";
 import { SnapshotBridge } from "./SnapshotBridge";
 import { StudioStage } from "./StudioStage";
 import type { DesignSceneProps } from "./types";
@@ -35,7 +36,10 @@ export function DesignScene(props: DesignSceneProps) {
         antialias: true,
         preserveDrawingBuffer: true,
         toneMapping: THREE.ACESFilmicToneMapping,
+        stencil: true,
+        localClippingEnabled: true,
       }}
+
       style={{ cursor: props.measureOn ? "crosshair" : "grab" }}
       onCreated={({ gl }) => {
         gl.outputColorSpace = THREE.SRGBColorSpace;
@@ -80,6 +84,9 @@ function SceneContents(props: DesignSceneProps) {
           max={props.model.bounds.max}
           radius={props.frame.radius}
         />
+      )}
+      {props.section != null && (
+        <SectionPlane model={props.model} position={props.section} mode={props.mode} />
       )}
       <MeasureGraphic measureState={props.measure} />
       <DesignCamera

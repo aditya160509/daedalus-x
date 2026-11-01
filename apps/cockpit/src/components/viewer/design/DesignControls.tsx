@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, Crosshair, GitCompare, Layers3, RotateCw, Ruler } from "lucide-react";
+import { Camera, Crosshair, GitCompare, Layers3, RotateCw, Ruler, Scissors } from "lucide-react";
 import { SegmentedControl } from "@/components/ui/primitives";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { CAMERA_PRESETS, type CameraPreset } from "@/components/viewer/types";
@@ -30,6 +30,8 @@ export function DesignControls({
   onTurntable,
   dimensions,
   onDimensions,
+  section,
+  onSection,
   measureOn,
   onMeasure,
   onSnapshot,
@@ -54,6 +56,8 @@ export function DesignControls({
   onTurntable: () => void;
   dimensions: boolean;
   onDimensions: () => void;
+  section: number | null;
+  onSection: (position: number | null) => void;
   measureOn: boolean;
   onMeasure: () => void;
   onSnapshot: () => void;
@@ -154,6 +158,30 @@ export function DesignControls({
         <Divider />
         <Tool label="Turntable" pressed={turntable} onClick={onTurntable}>
           <RotateCw size={15} />
+        </Tool>
+        {section != null && (
+          <label className="flex h-9 items-center gap-2.5 rounded-xl bg-white/[0.04] pr-3 pl-2.5 text-[11px] text-muted-foreground">
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.01}
+              value={section}
+              onChange={(event) => onSection(event.target.valueAsNumber)}
+              aria-label="Section plane position"
+              className="h-1 w-24 accent-brand"
+            />
+            <span className="tabular w-8 text-right font-mono text-text-2">
+              {Math.round(section * 100)}%
+            </span>
+          </label>
+        )}
+        <Tool
+          label="Section plane with cap"
+          pressed={section != null}
+          onClick={() => onSection(section == null ? 0.5 : null)}
+        >
+          <Scissors size={15} />
         </Tool>
         <Tool
           label="Dimensions (approximate, from the display mesh)"

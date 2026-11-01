@@ -48,6 +48,8 @@ export interface DesignSceneProps {
   mode: ViewMode;
   selected: string | null;
   onSelect: (uuid: string | null) => void;
+  /** Section plane position along X (0 to 1), or null when no section is cut. */
+  section?: number | null;
   /** Part uuids hidden from the model tree's eye toggles. */
   hidden?: ReadonlySet<string>;
   preset: CameraPreset;

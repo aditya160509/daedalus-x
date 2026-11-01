@@ -1,17 +1,15 @@
 "use client";
 
-import { Edges } from "@react-three/drei";
-import { type ThreeEvent, useFrame } from "@react-three/fiber";
+import { Edges, Outlines } from "@react-three/drei";
+import { createPortal, type ThreeEvent, useFrame } from "@react-three/fiber";
 import { damp3 } from "maath/easing";
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { Fragment, useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { LoadedModel, PartNode } from "@/lib/gltf";
 import { explodeOffset, nearestVertex, type Vec3 } from "./designMath";
 import { createPartMaterial, partGroup, type MaterialMode } from "./studio";
 import type { MeasurePoint } from "./types";
 import { SceneLabel } from "@/components/scene/SceneLabel";
-
-const HIGHLIGHT = new THREE.Color("#22d3ee");
 
 interface PartNodeRef {
   part: PartNode;
@@ -56,7 +54,7 @@ export function CarModel({
   const meshes = useMemo(() => {
     const list: THREE.Mesh[] = [];
     scene.traverse((o) => {
-      if (o instanceof THREE.Mesh) list.push(o);
+      if (o instanceof THREE.Mesh && !o.userData.sectionCap) list.push(o);
     });
     return list;
   }, [scene]);
@@ -67,7 +65,7 @@ export function CarModel({
     const created: THREE.Material[] = [];
     const replaced: THREE.Material[] = [];
     scene.traverse((o) => {
-      if (!(o instanceof THREE.Mesh)) return;
+      if (!(o instanceof THREE.Mesh) || o.userData.sectionCap) return;
       for (const m of Array.isArray(o.material) ? o.material : [o.material]) replaced.push(m);
       const material = createPartMaterial(partGroup(o.name), mode);
       o.material = material;
@@ -79,29 +77,15 @@ export function CarModel({
     };
   }, [scene, mode]);
 
-  useLayoutEffect(() => {
-    if (!selected) return undefined;
-    const touched: Array<[THREE.MeshStandardMaterial, THREE.Color, number]> = [];
+  // The selected part is outlined with an inverted-hull shell, so the highlight never changes its material.
+  const selectedMeshes = useMemo(() => {
+    const list: THREE.Mesh[] = [];
+    if (!selected) return list;
     scene.getObjectByProperty("uuid", selected)?.traverse((o) => {
-      if (!(o instanceof THREE.Mesh)) return;
-      const mats = Array.isArray(o.material) ? o.material : [o.material];
-      for (const m of mats) {
-        if (m instanceof THREE.MeshStandardMaterial) {
-          touched.push([m, m.emissive.clone(), m.emissiveIntensity]);
-          m.emissive.copy(HIGHLIGHT);
-          m.emissiveIntensity = 0.45;
-        }
-      }
+      if (o instanceof THREE.Mesh) list.push(o);
     });
-    return () => {
-      for (const [m, colour, intensity] of touched) {
-        m.emissive.copy(colour);
-        m.emissiveIntensity = intensity;
-      }
-    };
-    // A mode switch replaces every material, so the highlight must be re-applied.
-    // oxlint-disable-next-line react/exhaustive-effect-dependencies
-  }, [scene, selected, mode]);
+    return list;
+  }, [scene, selected]);
 
   // Visibility is a scene-graph flag, so hiding a parent also hides its children.
   useLayoutEffect(() => {
@@ -147,6 +131,14 @@ export function CarModel({
   return (
     <>
       <primitive object={scene} onClick={onClick} />
+      {selectedMeshes.map((mesh) => (
+        <Fragment key={mesh.uuid}>
+          {createPortal(
+            <Outlines screenspace thickness={2} color="#22d3ee" renderOrder={5} />,
+            mesh,
+          )}
+        </Fragment>
+      ))}
       {mode === "engineering" && meshes.map((mesh) => <PartEdges key={mesh.uuid} mesh={mesh} />)}
       <ExplodeLabels nodes={nodes} explode={explode} labelSize={labelSize} />
     </>

@@ -60,6 +60,7 @@ export function DesignWorkspace() {
   const [explode, setExplode] = useState(0);
   const [turntable, setTurntable] = useState(false);
   const [dimensions, setDimensions] = useState(true);
+  const [section, setSection] = useState<number | null>(null);
   const [measureOn, setMeasureOn] = useState(false);
   const [measureState, setMeasureState] = useState<MeasureState | null>(null);
   const [compareOn, setCompareOn] = useState(false);
@@ -283,6 +284,7 @@ export function DesignWorkspace() {
                   explode={explode}
                   turntable={turntable}
                   dimensions={dimensions}
+                  section={section}
                   measureOn={measureOn}
                   measure={measureState}
                   onMeasurePoint={addMeasurePoint}
@@ -334,6 +336,8 @@ export function DesignWorkspace() {
                 onTurntable={() => setTurntable((value) => !value)}
                 dimensions={dimensions}
                 onDimensions={() => setDimensions((value) => !value)}
+                section={section}
+                onSection={setSection}
                 measureOn={measureOn}
                 onMeasure={toggleMeasure}
                 onSnapshot={takeSnapshot}
