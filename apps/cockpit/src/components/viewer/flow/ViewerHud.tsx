@@ -136,9 +136,11 @@ export function LegendStack({ legends }: { legends: LegendSpec[] }) {
           </div>
           <div className="h-2 rounded-full" style={{ background: cssGradient(legend.map) }} />
           <div className="tabular mt-1 flex justify-between text-[11px] text-text-2">
-            <span>{legend.range[0].toFixed(2)}</span>
-            <span>{((legend.range[0] + legend.range[1]) / 2).toFixed(2)}</span>
-            <span>{legend.range[1].toFixed(2)}</span>
+            {[0, 0.25, 0.5, 0.75, 1].map((f) => (
+              <span key={f}>
+                {(legend.range[0] + (legend.range[1] - legend.range[0]) * f).toFixed(2)}
+              </span>
+            ))}
           </div>
           {legend.note && (
             <div className="mt-1 text-[10px] leading-tight text-muted-foreground">

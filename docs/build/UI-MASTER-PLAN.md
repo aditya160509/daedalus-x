@@ -67,7 +67,7 @@ Part 1 (sections A–H) is the build list. Part 2 (R1–R8) names the best exist
 | D2 | Streamtubes / ribbons with speed colouring, seed rake you can drag | three `TubeGeometry` + drei `TransformControls` | Fixed seeds | 1 | P1 |
 | D3 | Volume rendering of the wake (total-pressure loss, vorticity) | **vtk.js** volume mapper, or a three `Data3DTexture` ray-march | Slice planes | 1.5 | P1 |
 | D4 | Q-criterion iso-surfaces, smooth, transparent | Exported meshes (T04) + `MeshTransmissionMaterial` | Existing vortex cores | 0.5 | P1 |
-| D5 | Scientific colormaps (viridis, turbo, cool-warm), legend with ticks | **cmocean / colorcet** LUTs, **d3-scale-chromatic** | Custom map | 0.3 | P0 |
+| D5 ✅ | Scientific colormaps (viridis, turbo, cool-warm), legend with ticks | **cmocean / colorcet** LUTs, **d3-scale-chromatic** | Custom map | 0.3 | P0 |
 | D6 | Probe tooltip and line probe chart (Cp along the centreline) | ECharts linked to the 3D cursor | Point probe | 0.7 | P1 |
 | D7 | Live solver monitor: residuals and Cd streaming as the job runs | **SSE** from FastAPI + ECharts `appendData` | Poll after run | 1 | P0 |
 | D8 | Run compare: delta Cp map, split slider before/after | Existing delta + **react-compare-slider** | Toggle | 0.5 | P1 |
