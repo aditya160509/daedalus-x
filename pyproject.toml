@@ -37,11 +37,26 @@ line-length = 100
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "B", "UP", "N", "SIM", "RUF"]
+select = ["E", "F", "W", "I", "B", "UP", "N", "SIM", "RUF", "S", "C901"]
+# S603: subprocess is only ever called with argument lists, never a shell
+ignore = ["S603"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 20
 
 [tool.ruff.lint.per-file-ignores]
 # physics symbols (U, L, W, H) follow engineering convention
 "src/daedalus/cfd.py" = ["N806"]
+# job submission is one transactional state machine
+"src/daedalus/jobs.py" = ["C901"]
+# enum values such as "pass_measured" are not credentials
+"src/daedalus/contracts.py" = ["S105"]
+"tests/*" = ["S101"]
+
+[tool.deptry]
+known_first_party = ["daedalus"]
+# pint is consumed by the T09 unit importers
+per_rule_ignores = { DEP002 = ["pint"] }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -61,10 +76,12 @@ infer-return-types = "never"
 
 [dependency-groups]
 dev = [
+    "deptry>=0.25.1",
     "httpx>=0.28.1",
     "httpx2>=2.16.0",
     "pyrefly>=1.4.0",
     "pytest>=9.2.0",
     "pytest-cov>=7.1.0",
     "ruff>=0.17.3",
+    "vulture>=2.16",
 ]

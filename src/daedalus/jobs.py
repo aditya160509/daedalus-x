@@ -186,12 +186,11 @@ class JobQueue:
 
     def list(self, state: JobState | None = None) -> list[Job]:
         with self.connection() as db:
-            rows = db.execute(
-                "SELECT * FROM jobs"
-                + (" WHERE state=?" if state else "")
-                + " ORDER BY created_at DESC, id",
-                (state,) if state else (),
-            ).fetchall()
+            if state:
+                query = "SELECT * FROM jobs WHERE state=? ORDER BY created_at DESC, id"
+                rows = db.execute(query, (state,)).fetchall()
+            else:
+                rows = db.execute("SELECT * FROM jobs ORDER BY created_at DESC, id").fetchall()
         return [Job(**dict(row)) for row in rows]
 
     def claim(self) -> Job | None:
