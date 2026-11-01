@@ -1,4 +1,4 @@
-"""ORACLE endpoints (T10): campaign state, aero map, next-best run and the budget-matched benchmark."""
+"""ORACLE endpoints (T10): campaign state, aero map, next-best run, benchmark."""
 
 from __future__ import annotations
 

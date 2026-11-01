@@ -140,7 +140,7 @@ class Observation:
 
 
 class Campaign:
-    """Observations in data/oracle/observations.json; seeded with a SYNTHETIC LHS until CFD arrives."""
+    """Observations on disk; a SYNTHETIC Latin-hypercube seed until CFD results arrive."""
 
     def __init__(self, root: Path) -> None:
         self.path = root / "oracle" / "observations.json"

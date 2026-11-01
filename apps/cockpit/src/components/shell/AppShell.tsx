@@ -4,15 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Box,
   ChevronsUpDown,
-  FileStack,
   Gauge,
+  LayoutDashboard,
   PanelLeftClose,
   PanelLeftOpen,
   Search,
   Settings,
   type LucideIcon,
-  ShieldCheck,
-  Target,
   Wind,
 } from "lucide-react";
 import Link from "next/link";
@@ -42,42 +40,12 @@ interface Section {
 
 const SECTIONS: Section[] = [
   {
-    title: "Engineering",
+    title: "Workspaces",
     items: [
-      { href: "/design", label: "Design", capability: "AETHER", icon: Box, status: "partial" },
-      { href: "/simulate", label: "Simulate", capability: "AETHER", icon: Wind, status: "pending" },
-      {
-        href: "/optimize",
-        label: "Optimize",
-        capability: "ORACLE",
-        icon: Target,
-        status: "pending",
-      },
-    ],
-  },
-  {
-    title: "Validation",
-    items: [
+      { href: "/", label: "Pit Wall", capability: "ATLAS", icon: LayoutDashboard, status: "live" },
+      { href: "/simulate", label: "Wind Tunnel", capability: "AETHER", icon: Wind, status: "live" },
+      { href: "/design", label: "Design Studio", capability: "AETHER", icon: Box, status: "live" },
       { href: "/race", label: "Race", capability: "TITAN", icon: Gauge, status: "live" },
-      {
-        href: "/inspect",
-        label: "Inspect",
-        capability: "FORGE",
-        icon: ShieldCheck,
-        status: "pending",
-      },
-    ],
-  },
-  {
-    title: "Record",
-    items: [
-      {
-        href: "/evidence",
-        label: "Evidence",
-        capability: "ATLAS",
-        icon: FileStack,
-        status: "pending",
-      },
     ],
   },
 ];
@@ -136,7 +104,7 @@ function isTyping(target: EventTarget | null): boolean {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const active = ALL.find((w) => pathname.startsWith(w.href));
+  const active = ALL.find((w) => (w.href === "/" ? pathname === "/" : pathname.startsWith(w.href)));
   const collapsed = useSyncExternalStore(subscribeCollapsed, readCollapsed, () => false);
   const toggleCollapsed = () => writeCollapsed(!collapsed);
 

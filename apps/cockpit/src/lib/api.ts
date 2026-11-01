@@ -581,3 +581,55 @@ export const GridStudy = z.object({
 });
 export type GridStudy = z.infer<typeof GridStudy>;
 export const listStudies = () => request("/v1/studies", z.array(GridStudy));
+
+// ORACLE (T10)
+const OracleVariable = z.object({
+  name: z.string(),
+  unit: z.string(),
+  low: z.number(),
+  high: z.number(),
+});
+export const OracleState = z.object({
+  variables: z.array(OracleVariable),
+  observations: z.array(
+    z.object({ unit: z.array(z.number()), cda_m2: z.number(), provenance: Provenance }),
+  ),
+  best: z.object({ index: z.number(), cda_m2: z.number(), race_time_s: z.number() }),
+  next: z.object({
+    params: z.record(z.string(), z.number()),
+    unit: z.array(z.number()),
+    expected_improvement_m2: z.number(),
+    cda_m2: z.number(),
+    cda_sd_m2: z.number(),
+    race_time_s: z.number(),
+  }),
+  aero_map: z.object({
+    x: z.string(),
+    y: z.string(),
+    axis: z.array(z.number()),
+    cda_m2: z.array(z.array(z.number())),
+  }),
+  benchmark: z.object({ gp: z.array(z.number()), lhs: z.array(z.number()) }),
+  provenance: z.enum(["synthetic", "mixed"]),
+});
+export type OracleState = z.infer<typeof OracleState>;
+export const getOracleState = () => request("/v1/oracle/state", OracleState);
+
+// Sealed predictions (T09)
+const Qty = z.object({ value: z.number(), unit: z.string() });
+export const SealedPrediction = z.looseObject({
+  prediction_id: z.string(),
+  predicted: Qty,
+  interval_low: Qty,
+  interval_high: Qty,
+  sealed_at: z.string().nullable(),
+  manifest_hash: z.string().nullable(),
+});
+export type SealedPrediction = z.infer<typeof SealedPrediction>;
+export const listPredictions = () => request("/v1/predictions", z.array(SealedPrediction));
+export const ScoreResult = z.looseObject({ inside_interval: z.boolean() });
+export const scorePrediction = (id: string, measured_s: number) =>
+  request(`/v1/predictions/${id}/score`, ScoreResult, {
+    method: "POST",
+    body: JSON.stringify({ measured_value: measured_s, unit: "s" }),
+  });
