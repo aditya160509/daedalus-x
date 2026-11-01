@@ -48,32 +48,41 @@ export function DesignSidebar({
         className="shrink-0"
       >
         {model ? (
-          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-xs">
-            <Row k="Length (x)" v={`${mm(geometry?.length_m ?? model.extents.x)} mm`} />
-            <Row k="Height (y)" v={`${mm(geometry?.height_m ?? model.extents.y)} mm`} />
-            <Row k="Width (z)" v={`${mm(geometry?.width_m ?? model.extents.z)} mm`} />
-            {geometry && (
-              <Row k="Frontal area" v={`${(geometry.frontal_area_m2 * 1e4).toFixed(1)} cm²`} />
-            )}
-            <Row k="Triangles" v={model.triangles.toLocaleString()} />
-            <Row k="Parts" v={String(model.parts.length)} />
-            <dt className="text-muted-foreground">Source</dt>
-            <dd className="truncate font-mono text-[10px] text-text-2" title={summary?.source_file}>
-              {geometry?.source_file ?? model.fileName}
-            </dd>
-            <dt className="text-muted-foreground">SHA-256</dt>
-            <dd
-              className="truncate font-mono text-[10px] text-text-2"
-              title={geometry?.source_sha256 ?? model.sha256}
-            >
-              {(geometry?.source_sha256 ?? model.sha256).slice(0, 20)}…
-            </dd>
-            <dd className="col-span-2 pt-1 text-2xs text-muted-foreground">
+          <>
+            <dl className="divide-y overflow-hidden rounded-lg border text-xs">
+              <Row k="Length (x)" v={`${mm(geometry?.length_m ?? model.extents.x)} mm`} />
+              <Row k="Height (y)" v={`${mm(geometry?.height_m ?? model.extents.y)} mm`} />
+              <Row k="Width (z)" v={`${mm(geometry?.width_m ?? model.extents.z)} mm`} />
+              {geometry && (
+                <Row k="Frontal area" v={`${(geometry.frontal_area_m2 * 1e4).toFixed(1)} cm²`} />
+              )}
+              <Row k="Triangles" v={model.triangles.toLocaleString()} />
+              <Row k="Parts" v={String(model.parts.length)} />
+              <div className="grid grid-cols-[auto_1fr] gap-x-4 px-3 py-1.5">
+                <dt className="text-muted-foreground">Source</dt>
+                <dd
+                  className="truncate font-mono text-[10px] text-text-2"
+                  title={summary?.source_file}
+                >
+                  {geometry?.source_file ?? model.fileName}
+                </dd>
+              </div>
+              <div className="grid grid-cols-[auto_1fr] gap-x-4 px-3 py-1.5">
+                <dt className="text-muted-foreground">SHA-256</dt>
+                <dd
+                  className="truncate font-mono text-[10px] text-text-2"
+                  title={geometry?.source_sha256 ?? model.sha256}
+                >
+                  {(geometry?.source_sha256 ?? model.sha256).slice(0, 20)}…
+                </dd>
+              </div>
+            </dl>
+            <p className="mt-2 text-2xs text-muted-foreground">
               {geometry
                 ? "Dimensions come from the import record; the viewer draws the tessellated display mesh. Not valid for scrutineering."
                 : "Bounding box of the display mesh, assuming glTF metres. Not valid for scrutineering."}
-            </dd>
-          </dl>
+            </p>
+          </>
         ) : (
           <p className="text-xs text-muted-foreground">Import a model to see its dimensions.</p>
         )}
@@ -96,7 +105,7 @@ export function DesignSidebar({
                 </span>
               </div>
             </div>
-            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
+            <dl className="divide-y overflow-hidden rounded-lg border">
               <Row k="BBox Δx" v={`${mm(selectedPart.bboxMax[0] - selectedPart.bboxMin[0])} mm`} />
               <Row k="BBox Δy" v={`${mm(selectedPart.bboxMax[1] - selectedPart.bboxMin[1])} mm`} />
               <Row k="BBox Δz" v={`${mm(selectedPart.bboxMax[2] - selectedPart.bboxMin[2])} mm`} />
@@ -167,7 +176,7 @@ export function DesignSidebar({
 
 function Row({ k, v, tone }: { k: string; v: string; tone?: "danger" }) {
   return (
-    <>
+    <div className="grid grid-cols-[auto_1fr] items-baseline gap-x-4 px-3 py-1.5">
       <dt className="text-muted-foreground">{k}</dt>
       <dd
         className={cn(
@@ -177,7 +186,7 @@ function Row({ k, v, tone }: { k: string; v: string; tone?: "danger" }) {
       >
         {v}
       </dd>
-    </>
+    </div>
   );
 }
 
