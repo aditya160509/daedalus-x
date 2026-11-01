@@ -6,6 +6,7 @@ Take the **first `todo` whose dependencies are `accepted` or `review`**. "Lane" 
 | ID | Task | Lane | Depends on | Status | Owner |
 |---|---|---|---|---|---|
 | T01 | [CFD accuracy: rotating wheels, mesh quality, unsteady gate](tasks/T01-cfd-accuracy.md) | backend-cfd | — | review | Codex (GPT-6) |
+| T01b | Contact-patch mesh fix: raise `ground_offset_m` 0.5 mm → 1.5–2 mm (plinth fallback, contact refinement boxes) until checkMesh has 0 failures. Mesh-check only, no CFD run until the new car model lands | backend-cfd | T01 | todo | |
 | T02 | [Job runner + launch runs from the UI](tasks/T02-job-runner.md) | backend-api | — | review | Codex (GPT-6) |
 | T03 | [Grid study + speed check](tasks/T03-grid-study.md) | backend-cfd | T01 | review | Codex (GPT-6) |
 | T04 | [Flow insight export: Q-criterion, iso-surfaces, oil flow, separation, total-pressure loss, drag build-up](tasks/T04-flow-insight-export.md) | backend-viz | — | review | Codex (GPT-6) |
