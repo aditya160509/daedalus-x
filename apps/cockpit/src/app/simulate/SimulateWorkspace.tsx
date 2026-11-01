@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, CheckCircle2, CircleDashed, Wind, XCircle } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import { JobsDrawer } from "@/components/jobs/JobsDrawer";
 import { NewRunDialog } from "@/components/jobs/NewRunDialog";
@@ -18,10 +19,17 @@ import { StatusBar, useTab, WorkspaceTabs } from "@/components/shell/WorkspaceTa
 
 const TUNNEL_TABS = [
   { id: "flow", label: "Flow" },
+  { id: "flow3d", label: "3D Flow" },
   { id: "forces", label: "Forces" },
   { id: "convergence", label: "Convergence" },
   { id: "mesh", label: "Mesh" },
 ] as const;
+
+// vtk.js is heavy: load it only when the 3D Flow tab opens.
+const FlowViewer3D = dynamic(() => import("./FlowViewer3D").then((m) => m.FlowViewer3D), {
+  ssr: false,
+  loading: () => <p className="p-4 text-xs text-muted-foreground">Loading 3D viewer…</p>,
+});
 
 const RHO = 1.204; // kg/m³, matches the case template
 const CD_WINDOW = 200; // iterations used by the acceptance gate
@@ -161,6 +169,16 @@ function RunView({ run, hasViz }: { run: CfdRunDetail; hasViz: boolean }) {
             <FlowPanel runId={run.run_id} hasViz={hasViz} />
           </div>
         )}
+        {tab === "flow3d" &&
+          (hasViz ? (
+            <div className="min-h-0 min-w-0 flex-1">
+              <FlowViewer3D runId={run.run_id} />
+            </div>
+          ) : (
+            <EmptyState icon={<Wind className="size-5" />} title="No flow field for this run">
+              Pick a solved run with flow data.
+            </EmptyState>
+          ))}
         {tab === "forces" && (
           <>
             <Panel

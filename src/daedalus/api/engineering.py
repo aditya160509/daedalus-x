@@ -239,3 +239,23 @@ def run_drag_buildup(run_id: str) -> FileResponse:
     if not path.exists():
         raise HTTPException(404, "no drag build-up; export flow with wallShearStress first")
     return FileResponse(path, media_type="application/json")
+
+
+@router.get("/cfd/runs/{run_id}/vtk/{filename}")
+def run_vtk_layer(run_id: str, filename: str) -> FileResponse:
+    """Decimated, zlib-compressed VTK XML layer for the 3D flow viewer (cached under viz/vtk)."""
+    from daedalus.viz.vtkexport import LAYERS, export_layer
+
+    layer, _, ext = filename.partition(".")
+    if LAYERS.get(layer) != ext:
+        raise HTTPException(404, f"unknown layer {filename!r}")
+    run = _safe_dir("runs", run_id)
+    try:
+        path = export_layer(run, layer)
+    except FileNotFoundError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    return FileResponse(
+        path, media_type="text/xml", headers={"Cache-Control": "private, max-age=300"}
+    )
