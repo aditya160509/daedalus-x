@@ -17,6 +17,7 @@ dependencies = [
     "scipy>=1.18.1",
     "trimesh>=5.2.0",
     "uvicorn[standard]>=0.54.0",
+    "typst>=0.15.0",
 ]
 
 [project.scripts]

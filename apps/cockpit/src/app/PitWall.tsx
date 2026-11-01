@@ -101,7 +101,7 @@ export function PitWall() {
       <div className="min-h-72 lg:col-start-10 lg:col-span-3 lg:row-span-2 lg:row-start-2 lg:min-h-0 [&>section]:h-full">
         <LegalPanel />
       </div>
-      <nav className="grid grid-cols-3 gap-3 lg:col-span-12" aria-label="Deep workspaces">
+      <nav className="grid grid-cols-4 gap-3 lg:col-span-12" aria-label="Deep workspaces">
         {[
           ["/simulate", "Wind Tunnel"],
           ["/design", "Design Studio"],
@@ -115,6 +115,14 @@ export function PitWall() {
             {label} →
           </Link>
         ))}
+        <a
+          href="/api/v1/report/pdf"
+          target="_blank"
+          rel="noreferrer"
+          className="rounded-xl border bg-card px-4 py-3 text-sm shadow-panel transition-colors hover:bg-accent"
+        >
+          Engineering report (PDF) ↗
+        </a>
       </nav>
       {q.error && <p className="text-xs text-destructive lg:col-span-12">{q.error.message}</p>}
     </div>
