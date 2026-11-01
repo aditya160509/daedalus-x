@@ -1,10 +1,12 @@
 """Monte Carlo race spread tests."""
 
+import time
+
 import numpy as np
 import pytest
 
 from daedalus.dynamics import CarParams, ModelLevel, ThrustCurve, simulate
-from daedalus.montecarlo import Uncertainty, run
+from daedalus.montecarlo import BAND_POINTS, Uncertainty, run
 
 
 def _car() -> CarParams:
@@ -57,3 +59,37 @@ def test_rejects_bad_inputs() -> None:
         Uncertainty(cda=0.6)
     with pytest.raises(ValueError):
         run(_car(), Uncertainty(), n=5)
+
+
+def test_trajectory_band_is_the_deterministic_velocity_at_zero_uncertainty() -> None:
+    car = _car()
+    ref = simulate(car, ModelLevel.M2)
+    mc = run(car, Uncertainty(mass=0, cda=0, crr=0, thrust=0), n=10, trajectory_band=True)
+    band = mc.band
+    assert band is not None
+    assert band.time_s.size == BAND_POINTS
+    assert band.time_s[0] == 0.0
+    assert ref.time_s is not None
+    assert band.time_s[-1] == pytest.approx(ref.time_s, abs=2e-4)
+    # Zero input spread means a zero-width fan: p5 == p50 == p95 everywhere.
+    np.testing.assert_allclose(band.p5, band.p50, atol=1e-12)
+    np.testing.assert_allclose(band.p95, band.p50, atol=1e-12)
+    expected = np.interp(band.time_s, ref.t, ref.v)
+    np.testing.assert_allclose(band.p50, expected, atol=2e-3)
+
+
+def test_trajectory_band_orders_percentiles_and_is_absent_by_default() -> None:
+    car = _car()
+    assert run(car, Uncertainty(), n=50, seed=2).band is None
+    band = run(car, Uncertainty(), n=200, seed=2, trajectory_band=True).band
+    assert band is not None
+    assert np.all(band.p5 <= band.p50 + 1e-12)
+    assert np.all(band.p50 <= band.p95 + 1e-12)
+    assert np.all(np.diff(band.time_s) > 0)
+    assert np.all(band.p95 >= 0)
+
+
+def test_trajectory_band_runtime_for_1000_samples() -> None:
+    start = time.perf_counter()
+    run(_car(), Uncertainty(), n=1000, seed=0, trajectory_band=True)
+    assert time.perf_counter() - start < 1.2

@@ -124,6 +124,7 @@ export function NumberField({
   unit,
   value,
   onChange,
+  onCommit,
   min,
   max,
   step,
@@ -133,6 +134,8 @@ export function NumberField({
   unit: string;
   value: number;
   onChange: (v: number) => void;
+  /** Fires on blur, so a sweep can run once the user has finished typing. */
+  onCommit?: () => void;
   min: number;
   max: number;
   step: number;
@@ -156,6 +159,7 @@ export function NumberField({
           aria-invalid={invalid}
           aria-describedby={invalid ? `${id}-err` : undefined}
           onChange={(e) => onChange(e.target.valueAsNumber)}
+          onBlur={onCommit}
           className="tabular h-8 pr-11 text-right font-mono text-[13px]"
         />
         <span className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 font-mono text-[11px] text-muted-foreground">

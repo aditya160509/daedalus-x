@@ -96,8 +96,17 @@ export const MonteCarlo = z.object({
   percentiles_s: z.record(z.string(), z.number()),
   sensitivity: z.record(z.string(), z.number()),
   histogram: z.object({ edges_s: z.array(z.number()), counts: z.array(z.number()) }),
+  trajectory_band: z
+    .object({
+      time_s: z.array(z.number()),
+      p5: z.array(z.number()),
+      p50: z.array(z.number()),
+      p95: z.array(z.number()),
+    })
+    .nullable(),
 });
 export type MonteCarlo = z.infer<typeof MonteCarlo>;
+export type TrajectoryBand = NonNullable<MonteCarlo["trajectory_band"]>;
 export interface UncertaintyInput {
   mass: number;
   cda: number;
@@ -109,10 +118,11 @@ export const raceMonteCarlo = (
   uncertainty: UncertaintyInput,
   n = 1000,
   seed = 0,
+  trajectoryBand = false,
 ) =>
   request("/v1/race/montecarlo", MonteCarlo, {
     method: "POST",
-    body: JSON.stringify({ race, uncertainty, n, seed }),
+    body: JSON.stringify({ race, uncertainty, n, seed, trajectory_band: trajectoryBand }),
   });
 
 export const DesignSummary = z.object({

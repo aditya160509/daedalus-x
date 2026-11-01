@@ -130,11 +130,21 @@ class MonteCarloRequest(BaseModel):
     uncertainty: UncertaintyInput = UncertaintyInput()
     n: int = Field(default=1000, ge=10, le=5000)
     seed: int = Field(default=0, ge=0)
+    trajectory_band: bool = Field(
+        default=False, description="return p5/p50/p95 of v(t) on a common 200-point grid"
+    )
 
 
 class Histogram(BaseModel):
     edges_s: list[float]
     counts: list[int]
+
+
+class TrajectoryBand(BaseModel):
+    time_s: list[float]
+    p5: list[float]
+    p50: list[float]
+    p95: list[float]
 
 
 class MonteCarloResponse(BaseModel):
@@ -147,6 +157,7 @@ class MonteCarloResponse(BaseModel):
     percentiles_s: dict[str, float]
     sensitivity: dict[str, float]
     histogram: Histogram
+    trajectory_band: TrajectoryBand | None = None
 
 
 @router.post("/montecarlo")
@@ -166,9 +177,20 @@ def race_montecarlo(req: MonteCarloRequest) -> MonteCarloResponse:
         n=req.n,
         seed=req.seed,
         model=ModelLevel(r.model),
+        trajectory_band=req.trajectory_band,
     )
     counts, edges = (
         np.histogram(res.times_s, bins=40) if res.times_s.size else (np.zeros(0), np.zeros(0))
+    )
+    band = (
+        TrajectoryBand(
+            time_s=res.band.time_s.tolist(),
+            p5=res.band.p5.tolist(),
+            p50=res.band.p50.tolist(),
+            p95=res.band.p95.tolist(),
+        )
+        if res.band is not None
+        else None
     )
     return MonteCarloResponse(
         n=res.n,
@@ -179,4 +201,5 @@ def race_montecarlo(req: MonteCarloRequest) -> MonteCarloResponse:
         percentiles_s=res.percentiles_s,
         sensitivity=res.sensitivity,
         histogram=Histogram(edges_s=edges.tolist(), counts=[int(c) for c in counts]),
+        trajectory_band=band,
     )

@@ -16,6 +16,7 @@ from scipy.stats import spearmanr
 from daedalus.dynamics import G0, CarParams, ModelLevel, ThrustCurve
 
 BURN_DT_S = 5e-5  # RK4 step during the thrust phase; error < 1e-6 s on race time
+BAND_POINTS = 200  # common time grid for the v(t) percentile fan
 FloatArray = NDArray[np.float64]
 INPUTS = ("mass", "cda", "crr", "thrust")
 
@@ -36,6 +37,16 @@ class Uncertainty:
 
 
 @dataclass(frozen=True)
+class TrajectoryBand:
+    """Velocity percentiles on one shared time grid; all arrays have BAND_POINTS samples."""
+
+    time_s: FloatArray
+    p5: FloatArray
+    p50: FloatArray
+    p95: FloatArray
+
+
+@dataclass(frozen=True)
 class MonteCarloResult:
     n: int
     seed: int
@@ -45,6 +56,7 @@ class MonteCarloResult:
     std_s: float | None
     percentiles_s: dict[str, float]  # p5, p50, p95
     sensitivity: dict[str, float]  # Spearman rho with time; NaN-free, 0 when input fixed
+    band: TrajectoryBand | None = None
 
 
 def run(
@@ -53,6 +65,7 @@ def run(
     n: int = 500,
     seed: int = 0,
     model: ModelLevel = ModelLevel.M2,
+    trajectory_band: bool = False,
 ) -> MonteCarloResult:
     if car.thrust is None:
         raise ValueError("Monte Carlo needs a thrust curve")
@@ -90,6 +103,13 @@ def run(
         if t.size
         else {}
     )
+    band = (
+        _velocity_band(
+            car.thrust, factors[:, 3], mass, cda, crr, car.rho_kg_m3, car.track_length_m, model, t
+        )
+        if trajectory_band
+        else None
+    )
     return MonteCarloResult(
         n=n,
         seed=seed,
@@ -99,7 +119,34 @@ def run(
         std_s=float(t.std(ddof=1)) if t.size > 1 else None,
         percentiles_s=pct,
         sensitivity=sens,
+        band=band,
     )
+
+
+def _velocity_band(
+    thrust: ThrustCurve,
+    thrust_scale: FloatArray,
+    mass: FloatArray,
+    cda: FloatArray,
+    crr: FloatArray,
+    rho: float,
+    track_m: float,
+    model: ModelLevel,
+    times: FloatArray,
+) -> TrajectoryBand:
+    """v(t) percentiles across samples on a common grid from 0 to the slowest finish.
+
+    The grid ends at the slowest finishing sample. Samples that cross the line earlier keep
+    coasting on the same analytic solution, so every sample has a velocity at every grid time.
+    """
+    finite = times[np.isfinite(times)]
+    end = float(finite.max()) if finite.size else thrust.burn_end_s
+    grid = np.linspace(0.0, end, BAND_POINTS)
+    velocities = velocity_trajectory(
+        thrust, thrust_scale, mass, cda, crr, rho, track_m, model, grid
+    )
+    p5, p50, p95 = np.percentile(velocities, [5, 50, 95], axis=0)
+    return TrajectoryBand(time_s=grid, p5=p5, p50=p50, p95=p95)
 
 
 def race_times(
@@ -118,6 +165,44 @@ def race_times(
     burnout the motion  dv/dt = -(a v^2 + b)  has an exact solution, so the coast phase and
     the finish crossing are evaluated in closed form instead of stepped.
     """
+    times, _ = _integrate(thrust, thrust_scale, mass, cda, crr, rho, track_m, model)
+    return times
+
+
+def velocity_trajectory(
+    thrust: ThrustCurve,
+    thrust_scale: FloatArray,
+    mass: FloatArray,
+    cda: FloatArray,
+    crr: FloatArray,
+    rho: float,
+    track_m: float,
+    model: ModelLevel,
+    record_times: FloatArray,
+) -> FloatArray:
+    """Velocity of every sample at `record_times`, shape (n_samples, record_times.size).
+
+    Reuses the same RK4 burn integration as `race_times`; the coast phase is analytic.
+    """
+    _, velocities = _integrate(
+        thrust, thrust_scale, mass, cda, crr, rho, track_m, model, record_times
+    )
+    if velocities is None:  # pragma: no cover - record_times is mandatory here
+        raise RuntimeError("velocity_trajectory needs record times")
+    return velocities
+
+
+def _integrate(
+    thrust: ThrustCurve,
+    thrust_scale: FloatArray,
+    mass: FloatArray,
+    cda: FloatArray,
+    crr: FloatArray,
+    rho: float,
+    track_m: float,
+    model: ModelLevel,
+    record_times: FloatArray | None = None,
+) -> tuple[FloatArray, FloatArray | None]:
     losses = model is ModelLevel.M2
     a = 0.5 * rho * cda / mass if losses else np.zeros_like(mass)
     b = crr * G0 if losses else np.zeros_like(mass)
@@ -132,6 +217,15 @@ def race_times(
     grid = np.linspace(0.0, t_end, 2 * steps + 1)
     thrust_grid = np.interp(grid, thrust.t_s, thrust.force_n, left=0.0, right=0.0)
     per_mass = thrust_scale / mass
+
+    if record_times is None:
+        v_grid = None
+    else:
+        v_grid = np.zeros((n, record_times.size))
+        # Each record time belongs to one RK4 step; frac is its position inside that step.
+        step_idx = np.clip((record_times / h).astype(int), 0, steps - 1)
+        frac = np.clip((record_times - step_idx * h) / h, 0.0, 1.0)
+        in_burn = record_times <= t_end
 
     def accel(k: int, v_: FloatArray) -> FloatArray:
         f = thrust_grid[k] * per_mass
@@ -154,14 +248,45 @@ def race_times(
         crossed = np.isnan(t_fin) & (x_new >= track_m)
         if crossed.any():
             # Cubic Hermite would be marginally better; linear is < 1e-9 s at this step.
-            frac = (track_m - x[crossed]) / (x_new[crossed] - x[crossed])
-            t_fin[crossed] = t + frac * h
+            frac_finish = (track_m - x[crossed]) / (x_new[crossed] - x[crossed])
+            t_fin[crossed] = t + frac_finish * h
+        if v_grid is not None:
+            here = in_burn & (step_idx == i)
+            if here.any():
+                v_grid[:, here] = v[:, None] + frac[None, here] * (v_new - v)[:, None]
         x, v = x_new, v_new
+
+    if v_grid is not None:
+        beyond = np.flatnonzero(record_times > t_end)
+        for j in beyond:
+            v_grid[:, j] = _coast_velocity(v, a, b, float(record_times[j] - t_end))
 
     todo = np.isnan(t_fin)
     d = track_m - x[todo]
     t_fin[todo] = t_end + _coast_time(v[todo], a[todo], b[todo], d)
-    return t_fin
+    return t_fin, v_grid
+
+
+def _coast_velocity(v0: FloatArray, a: FloatArray, b: FloatArray, dt: float) -> FloatArray:
+    """Speed dt seconds after burnout under dv/dt = -(a v^2 + b); 0 once the car stops."""
+    out = np.zeros_like(v0)
+    eps = 1e-14
+    moving = v0 > 0
+
+    m = moving & (a > eps) & (b > eps)
+    if m.any():
+        phase = np.arctan(v0[m] * np.sqrt(a[m] / b[m])) - np.sqrt(a[m] * b[m]) * dt
+        out[m] = np.where(phase > 0, np.sqrt(b[m] / a[m]) * np.tan(np.maximum(phase, 0.0)), 0.0)
+
+    m = moving & (a > eps) & (b <= eps)
+    if m.any():
+        out[m] = v0[m] / (1.0 + a[m] * v0[m] * dt)
+
+    m = moving & (a <= eps)
+    if m.any():
+        out[m] = np.maximum(v0[m] - b[m] * dt, 0.0)
+
+    return out
 
 
 def _coast_time(v0: FloatArray, a: FloatArray, b: FloatArray, d: FloatArray) -> FloatArray:

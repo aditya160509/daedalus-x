@@ -99,3 +99,15 @@ def test_montecarlo_endpoint() -> None:
     assert sum(d["histogram"]["counts"]) == 200
     assert d["percentiles_s"]["p5"] < d["percentiles_s"]["p95"]
     assert d["sensitivity"]["thrust"] < 0
+    assert d["trajectory_band"] is None
+
+    body["trajectory_band"] = True
+    r = TestClient(create_app()).post("/v1/race/montecarlo", json=body)
+    assert r.status_code == 200, r.text
+    band = r.json()["trajectory_band"]
+    assert len(band["time_s"]) == len(band["p5"]) == len(band["p50"]) == len(band["p95"]) == 200
+    assert band["time_s"][0] == 0.0 and band["time_s"][-1] > 0.5
+    assert all(
+        lo <= mid <= hi
+        for lo, mid, hi in zip(band["p5"], band["p50"], band["p95"], strict=True)
+    )
