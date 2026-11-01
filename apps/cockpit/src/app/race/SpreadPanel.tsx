@@ -2,8 +2,8 @@
 
 import type { MonteCarlo, UncertaintyInput } from "@/lib/api";
 import { SpreadChart } from "@/components/charts/SpreadChart";
+import { chartTheme, useECharts } from "@/components/charts/useECharts";
 import { NumberField, Panel, ProvenanceBadge } from "@/components/ui/primitives";
-import { cn } from "@/lib/utils";
 
 const LABELS: Record<keyof UncertaintyInput, string> = {
   thrust: "Thrust",
@@ -116,23 +116,62 @@ export function SpreadPanel({
           </div>
           <div>
             <p className="mb-1 text-xs text-muted-foreground">What drives the spread</p>
-            <ul className="space-y-1">
-              {ranked.map(([k, rho]) => (
-                <li key={k} className="grid grid-cols-[64px_1fr_44px] items-center gap-2 text-xs">
-                  <span className="text-text-2">{isUncertaintyKey(k) ? LABELS[k] : k}</span>
-                  <span className="h-1.5 overflow-hidden rounded-full bg-secondary">
-                    <span
-                      className={cn("block h-full rounded-full", rho < 0 ? "bg-ok" : "bg-risk")}
-                      style={{ width: `${Math.min(Math.abs(rho), 1) * 100}%` }}
-                    />
-                  </span>
-                  <span className="tabular text-right text-muted-foreground">{rho.toFixed(2)}</span>
-                </li>
-              ))}
-            </ul>
+            <Tornado ranked={ranked} />
           </div>
         </div>
       )}
     </Panel>
+  );
+}
+
+/** Tornado chart: rank-correlation of each input with race time, sorted by strength. */
+function Tornado({ ranked }: { ranked: Array<[string, number]> }) {
+  const host = useECharts(() => {
+    const t = chartTheme();
+    const rows = [...ranked].reverse();
+    return {
+      animation: false,
+      textStyle: { fontFamily: t.mono },
+      grid: { left: 64, right: 40, top: 4, bottom: 4 },
+      tooltip: {
+        trigger: "axis",
+        backgroundColor: t.popover,
+        borderColor: t.lineStrong,
+        textStyle: { color: t.text, fontSize: 11 },
+      },
+      xAxis: { type: "value", min: -1, max: 1, show: false },
+      yAxis: {
+        type: "category",
+        data: rows.map(([k]) => (isUncertaintyKey(k) ? LABELS[k] : k)),
+        axisLine: { show: false },
+        axisTick: { show: false },
+        axisLabel: { color: t.text2, fontSize: 11 },
+      },
+      series: [
+        {
+          type: "bar",
+          barWidth: 8,
+          data: rows.map(([, rho]) => ({
+            value: rho,
+            itemStyle: { color: rho < 0 ? "#3ccf91" : "#f5a524", borderRadius: 2 },
+          })),
+          label: {
+            show: true,
+            position: "right",
+            color: t.muted,
+            fontSize: 10,
+            formatter: (p: { value: number }) => p.value.toFixed(2),
+          },
+        },
+      ],
+    };
+  }, [ranked]);
+  return (
+    <div
+      ref={host}
+      className="h-32 w-full"
+      role="img"
+      aria-label="Input sensitivity, tornado chart"
+    />
   );
 }
