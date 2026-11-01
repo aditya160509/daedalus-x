@@ -98,3 +98,40 @@ def test_viz_files_served_when_exported(client: TestClient, tmp_path: Path) -> N
     assert client.get("/v1/cfd/runs/run_1/viz.json").json() == {"version": 1}
     assert client.get("/v1/cfd/runs/run_1/viz.bin").content == b"\x00\x01\x02\x03"
     assert client.get("/v1/cfd/runs").json()[0]["has_viz"] is True
+
+
+def test_render_rejects_bad_view_and_unknown_run(client: TestClient) -> None:
+    assert client.get("/v1/cfd/runs/nope/render").status_code == 404
+    assert client.get("/v1/cfd/runs/nope/render?view=bogus").status_code == 422
+
+
+def test_render_serves_cached_png(client: TestClient, tmp_path: Path) -> None:
+    run = tmp_path / "runs/cached"
+    (run / "render").mkdir(parents=True)
+    (run / "render/side.png").write_bytes(b"\x89PNG\r\n\x1a\nfake")
+    r = client.get("/v1/cfd/runs/cached/render?view=side")
+    assert r.status_code == 200
+    assert r.headers["content-type"] == "image/png"
+    assert r.content.startswith(b"\x89PNG")
+
+
+@pytest.mark.slow
+def test_render_generates_baseline_png(monkeypatch: pytest.MonkeyPatch) -> None:
+    import os
+
+    root = Path(
+        os.environ.get("DAEDALUS_BASELINE_DATA", Path(__file__).resolve().parents[1] / "data")
+    )
+    run = root / "runs/orbit_baseline_20ms"
+    if not (run / "daedalus_result.json").exists():
+        pytest.skip("baseline run not present")
+    monkeypatch.setenv("DAEDALUS_DATA", str(root))
+    out = run / "render/front.png"
+    backup = out.read_bytes() if out.exists() else None
+    out.unlink(missing_ok=True)
+    try:
+        r = TestClient(app).get("/v1/cfd/runs/orbit_baseline_20ms/render?view=front")
+        assert r.status_code == 200 and r.content.startswith(b"\x89PNG")
+    finally:
+        if backup is not None:
+            out.write_bytes(backup)

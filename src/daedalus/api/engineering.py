@@ -5,13 +5,15 @@ from __future__ import annotations
 import json
 import os
 import re
+import threading
 from pathlib import Path
 from typing import Any
 
 import numpy as np
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
+from starlette.concurrency import run_in_threadpool
 
 from daedalus.cfd import CfdError, read_dat
 
@@ -259,3 +261,30 @@ def run_vtk_layer(run_id: str, filename: str) -> FileResponse:
     return FileResponse(
         path, media_type="text/xml", headers={"Cache-Control": "private, max-age=300"}
     )
+
+
+_RENDER_LOCK = threading.Lock()  # one offscreen render at a time (memory-heavy)
+
+
+@router.get("/cfd/runs/{run_id}/render")
+async def run_render(
+    run_id: str, view: str = Query("iso", pattern="^(iso|side|top|front)$")
+) -> FileResponse:
+    """Photo-style hero still (car Cp + streamtubes), cached under runs/<id>/render/."""
+    run = _safe_dir("runs", run_id)
+    out = run / "render" / f"{view}.png"
+    if not out.exists():
+        if not (run / "daedalus_result.json").exists():
+            raise HTTPException(409, "run has not finished; no field to render")
+
+        def _go() -> Path:
+            from daedalus.viz.render import cached_render
+
+            with _RENDER_LOCK:
+                return cached_render(run, view)
+
+        try:
+            out = await run_in_threadpool(_go)
+        except Exception as exc:  # surface renderer failure as 500 detail
+            raise HTTPException(500, f"render failed: {exc}") from exc
+    return FileResponse(out, media_type="image/png", headers={"Cache-Control": "max-age=3600"})

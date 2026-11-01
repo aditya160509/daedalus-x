@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { LegalPanel } from "@/components/pitwall/LegalPanel";
 import { AeroMap, BenchmarkChart, cm2, ScoreGauge } from "@/components/pitwall/PitCharts";
 import { SealedReveal } from "@/components/pitwall/SealedReveal";
+import { HeroImage, useHeroRun } from "@/components/render/HeroRender";
 import { getOracleState } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -47,6 +48,7 @@ export function Presenter() {
     enabled: open,
   });
   const s = q.data;
+  const heroRun = useHeroRun();
 
   const demo = (href: string) => {
     setOpen(false);
@@ -88,6 +90,11 @@ export function Presenter() {
           </div>
         </div>
       ),
+    },
+    {
+      title: "The flow",
+      note: "Real CFD on our car: surface pressure (red pushes, blue sucks) and streamlines by speed.",
+      body: heroRun && <HeroImage runId={heroRun} className="aspect-video w-full max-w-6xl" />,
     },
     {
       title: "Aero map",

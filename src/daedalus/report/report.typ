@@ -10,6 +10,11 @@
 = Daedalus X — engineering report
 #text(11pt, fill: gray)[Team Veloira · #d.generated]
 
+#if d.at("hero_run", default: none) != none [
+  #figure(image("hero.png", width: 100%),
+    caption: [Surface Cp and streamtubes coloured by U/U#sub[∞], run #raw(d.hero_run)])
+]
+
 == Summary
 #table(columns: (1fr, auto), stroke: 0.4pt + luma(200), inset: 6pt,
   [Best drag area (CdA)], [#calc.round(d.oracle.best.cda_m2 * 10000, digits: 2) cm²],

@@ -13,6 +13,7 @@ import { type CfdRunDetail, getCfdRun, listCfdRuns } from "@/lib/api";
 import { SERIES, SERIES_CYCLE } from "@/lib/colormap";
 import { useSelectedRun } from "@/lib/runSelection";
 import { cn } from "@/lib/utils";
+import { RenderPanel } from "@/components/render/HeroRender";
 import { FlowPanel } from "./FlowPanel";
 import { GridStudyPanel } from "./GridStudyPanel";
 import { StatusBar, useTab, WorkspaceTabs } from "@/components/shell/WorkspaceTabs";
@@ -20,6 +21,7 @@ import { StatusBar, useTab, WorkspaceTabs } from "@/components/shell/WorkspaceTa
 const TUNNEL_TABS = [
   { id: "flow", label: "Flow" },
   { id: "flow3d", label: "3D Flow" },
+  { id: "render", label: "Render" },
   { id: "forces", label: "Forces" },
   { id: "convergence", label: "Convergence" },
   { id: "mesh", label: "Mesh" },
@@ -179,6 +181,11 @@ function RunView({ run, hasViz }: { run: CfdRunDetail; hasViz: boolean }) {
               Pick a solved run with flow data.
             </EmptyState>
           ))}
+        {tab === "render" && (
+          <div className="min-h-0 min-w-0 flex-1">
+            <RenderPanel runId={run.run_id} />
+          </div>
+        )}
         {tab === "forces" && (
           <>
             <Panel

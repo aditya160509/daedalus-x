@@ -22,6 +22,18 @@ VIEWS = {
 }
 
 
+def cached_render(case: Path, view: str) -> Path:
+    """Return <case>/render/<view>.png, rendering it on first use."""
+    if view not in VIEWS:
+        raise ValueError(f"unknown view {view!r}")
+    out = Path(case) / "render" / f"{view}.png"
+    if not out.exists():
+        tmp = out.with_suffix(".tmp.png")
+        render(case, tmp, view)
+        tmp.replace(out)
+    return out
+
+
 def render(case: Path, out: Path, view: str = "iso", size: tuple[int, int] = (2400, 1350)) -> Path:
     case = Path(case)
     manifest = json.loads((case / "daedalus_manifest.json").read_text())
@@ -81,8 +93,8 @@ def render(case: Path, out: Path, view: str = "iso", size: tuple[int, int] = (24
         show_scalar_bar=False,
         ambient=0.25,
     )
-    floor = pv.Plane(center=(0.11, 0, -0.0005), direction=(0, 0, 1), i_size=0.9, j_size=0.6)
-    pl.add_mesh(floor, color="#15171c", pbr=True, roughness=0.18, metallic=0.0)
+    floor = pv.Plane(center=(0.11, 0, -0.0005), direction=(0, 0, 1), i_size=1.6, j_size=1.0)
+    pl.add_mesh(floor, color="#0f1115", pbr=True, roughness=0.45, metallic=0.0)
     pl.add_scalar_bar(
         "Cp",
         mapper=car_actor.mapper,
@@ -96,7 +108,7 @@ def render(case: Path, out: Path, view: str = "iso", size: tuple[int, int] = (24
         label_font_size=18,
     )
     pl.add_scalar_bar(
-        "U/U∞",
+        "U/Uinf",
         mapper=flow_actor.mapper,
         vertical=True,
         position_x=0.85,

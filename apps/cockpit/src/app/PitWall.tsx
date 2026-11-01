@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { LegalPanel } from "@/components/pitwall/LegalPanel";
 import { AeroMap, BenchmarkChart, cm2, ScoreGauge } from "@/components/pitwall/PitCharts";
 import { SealedReveal } from "@/components/pitwall/SealedReveal";
+import { HeroImage, useHeroRun } from "@/components/render/HeroRender";
 import { StatusBar, useTab, WorkspaceTabs } from "@/components/shell/WorkspaceTabs";
 import { Panel, ProvenanceBadge, Skeleton } from "@/components/ui/primitives";
 import { getOracleState } from "@/lib/api";
@@ -19,6 +20,7 @@ const prettify = (n: string) => n.replace(/_/g, " ");
 export function PitWall() {
   const [tab, setTab] = useTab(TABS);
   const q = useQuery({ queryKey: ["oracle"], queryFn: getOracleState, staleTime: 60_000 });
+  const heroRun = useHeroRun();
   const s = q.data;
   const prov = s?.provenance === "synthetic" ? "synthetic" : "simulated";
   const gain = s ? s.best.race_time_s - s.next.race_time_s : 0;
@@ -56,7 +58,12 @@ export function PitWall() {
       />
       <div className="min-h-0 flex-1 overflow-y-auto p-3">
         {tab === "overview" && (
-          <div className="mx-auto grid h-full max-w-6xl grid-cols-1 gap-3 lg:grid-cols-[1fr_1fr] lg:grid-rows-[auto_1fr]">
+          <div className="mx-auto grid max-w-6xl grid-cols-1 gap-3 lg:h-full lg:grid-cols-[1fr_1fr] lg:grid-rows-[auto_auto_1fr]">
+            {heroRun && (
+              <Panel title={`Flow · ${heroRun}`} className="lg:col-span-2" bodyClassName="p-0">
+                <HeroImage runId={heroRun} className="aspect-[16/6] rounded-none" />
+              </Panel>
+            )}
             <Panel title="Car" bodyClassName="flex items-center gap-8 p-4">
               {s ? (
                 <>

@@ -179,6 +179,12 @@ const CfdRunSummary = z.object({
 type CfdRunSummary = z.infer<typeof CfdRunSummary>;
 export const listCfdRuns = () => request("/v1/cfd/runs", z.array(CfdRunSummary));
 
+export const RENDER_VIEWS = ["iso", "side", "top", "front"] as const;
+export type RenderView = (typeof RENDER_VIEWS)[number];
+/** Server-rendered hero still (PNG, cached on disk after the first request). */
+export const renderUrl = (runId: string, view: RenderView = "iso") =>
+  `/api/v1/cfd/runs/${encodeURIComponent(runId)}/render?view=${view}`;
+
 const Series = z.object({
   iteration: z.array(z.number()),
   values: z.record(z.string(), z.array(z.number())),
