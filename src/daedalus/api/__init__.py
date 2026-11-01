@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
-from daedalus.api import data, engineering, jobs, race
+from daedalus.api import data, engineering, jobs, oracle, race
 
 
 def create_app() -> FastAPI:
@@ -13,6 +13,7 @@ def create_app() -> FastAPI:
     app.include_router(engineering.router)
     app.include_router(jobs.router)
     app.include_router(data.router)
+    app.include_router(oracle.router)
 
     @app.get("/v1/health")
     def health() -> dict[str, str]:
