@@ -9,6 +9,7 @@ import { ForceBars } from "@/components/charts/ForceBars";
 import { HistoryChart } from "@/components/charts/HistoryChart";
 import { EmptyState, Metric, Panel, ProvenanceBadge } from "@/components/ui/primitives";
 import { type CfdRunDetail, getCfdRun, listCfdRuns } from "@/lib/api";
+import { SERIES, SERIES_CYCLE } from "@/lib/colormap";
 import { cn } from "@/lib/utils";
 import { FlowPanel } from "./FlowPanel";
 import { GridStudyPanel } from "./GridStudyPanel";
@@ -123,13 +124,16 @@ function RunView({ run, hasViz }: { run: CfdRunDetail; hasViz: boolean }) {
       })),
     [result],
   );
-  const cdHistory = useMemo(() => [{ name: "Cd", values: cdSeries, color: "#3dd6f0" }], [cdSeries]);
+  const cdHistory = useMemo(
+    () => [{ name: "Cd", values: cdSeries, color: SERIES.cyan }],
+    [cdSeries],
+  );
   const residualHistory = useMemo(
     () =>
       Object.entries(residuals?.values ?? {}).map(([k, v], i) => ({
         name: k.replace("_initial", ""),
         values: v,
-        color: ["#5aa8ff", "#3dd6f0", "#b18cff", "#f5a524", "#7ee787", "#ff7b72"][i % 6],
+        color: SERIES_CYCLE[i % SERIES_CYCLE.length],
       })),
     [residuals],
   );

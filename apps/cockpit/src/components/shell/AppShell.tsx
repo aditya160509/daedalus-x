@@ -12,7 +12,8 @@ import {
   Wind,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { getHealth } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -86,9 +87,28 @@ const STATUS_LABEL: Record<Workspace["status"], string> = {
   pending: "Not built yet",
 };
 
+function isTyping(target: EventTarget | null): boolean {
+  return (
+    target instanceof HTMLElement &&
+    (target.isContentEditable || ["INPUT", "SELECT", "TEXTAREA"].includes(target.tagName))
+  );
+}
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const active = ALL.find((w) => pathname.startsWith(w.href));
+
+  // Keys 1-6 jump to a workspace (04-UI-QUALITY-BAR).
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey || isTyping(event.target)) return;
+      const target = ALL[Number(event.key) - 1];
+      if (target) router.push(target.href);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [router]);
 
   return (
     <TooltipProvider delayDuration={250}>
@@ -124,11 +144,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   {section.items.map((w) => {
                     const isActive = active?.href === w.href;
                     const Icon = w.icon;
+                    const shortcut = String(ALL.indexOf(w) + 1);
                     return (
                       <li key={w.href}>
                         <Link
                           href={w.href}
                           aria-current={isActive ? "page" : undefined}
+                          aria-keyshortcuts={shortcut}
                           className={cn(
                             "group flex h-9 items-center gap-3 rounded-lg px-2.5 text-[13px] text-sidebar-foreground transition-colors",
                             "hover:bg-accent hover:text-foreground",
@@ -148,6 +170,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                           </span>
                           <span
                             className={cn("size-1.5 rounded-full", STATUS_DOT[w.status])}
+                            role="img"
                             title={STATUS_LABEL[w.status]}
                             aria-label={STATUS_LABEL[w.status]}
                           />
@@ -200,12 +223,12 @@ function ContextRow({ label, value, tone }: { label: string; value: string; tone
 }
 
 function ApiStatus() {
-  const { isSuccess, isError, isPending } = useQuery({
+  const { isSuccess, isPending } = useQuery({
     queryKey: ["health"],
     queryFn: getHealth,
     refetchInterval: 10_000,
   });
-  const state = isPending ? "Checking" : isSuccess ? "Online" : isError ? "Offline" : "Unknown";
+  const state = isPending ? "Checking" : isSuccess ? "Online" : "Offline";
   return (
     <div
       className="flex items-center justify-between px-1 text-xs"

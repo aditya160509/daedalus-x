@@ -1,9 +1,8 @@
 "use client";
 
 import type { DragBuildup } from "@/lib/api";
+import { SERIES_CYCLE } from "@/lib/colormap";
 import { chartTheme, useECharts } from "./useECharts";
-
-const GROUP_COLOURS = ["#5aa8ff", "#3dd6f0", "#b18cff", "#f5a524", "#7ee787", "#ff7b72"];
 
 type Available = Extract<DragBuildup, { wall_shear: "available" }>;
 
@@ -81,8 +80,8 @@ export function DragBuildupChart({
           stack: "cd",
           symbol: "none",
           smooth: false,
-          lineStyle: { width: 1, color: GROUP_COLOURS[index % GROUP_COLOURS.length] },
-          itemStyle: { color: GROUP_COLOURS[index % GROUP_COLOURS.length] },
+          lineStyle: { width: 1, color: SERIES_CYCLE[index % SERIES_CYCLE.length] },
+          itemStyle: { color: SERIES_CYCLE[index % SERIES_CYCLE.length] },
           areaStyle: { opacity: 0.34 },
           data: cumulative(values).map((value, i) => [mm[i], value]),
         })),

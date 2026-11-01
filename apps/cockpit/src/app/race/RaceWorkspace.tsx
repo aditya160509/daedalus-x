@@ -30,8 +30,8 @@ import {
   type RaceSimulationRequest,
   type UncertaintyInput,
 } from "@/lib/api";
-import type { LoadedModel } from "@/lib/gltf";
-import { loadGlbUrl } from "@/lib/gltf";
+import { SERIES } from "@/lib/colormap";
+import { type LoadedModel, loadGlbUrl } from "@/lib/gltf";
 import { estimateThrust } from "@/lib/thrust";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { RaceInputs } from "./RaceInputs";
@@ -460,7 +460,7 @@ function buildTracks(sim: RaceSimulation): TelemetryTrack[] {
       color: "#e7ebef",
       series: [
         { label: "thrust", values: channelOf(sim, "thrust"), color: "#d8b45a" },
-        { label: "drag", values: channelOf(sim, "drag"), color: "#5aa8ff" },
+        { label: "drag", values: channelOf(sim, "drag"), color: SERIES.blue },
         {
           label: "rolling",
           values: channelOf(sim, "rolling_resistance"),

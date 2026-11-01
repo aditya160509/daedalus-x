@@ -1,5 +1,6 @@
 "use client";
 
+import { SERIES } from "@/lib/colormap";
 import { chartTheme, useECharts } from "./useECharts";
 
 export interface ComponentForce {
@@ -57,7 +58,7 @@ export function ForceBars({ data, unit }: { data: ComponentForce[]; unit: string
           type: "bar",
           stack: "d",
           barWidth: 14,
-          itemStyle: { color: "#5aa8ff", borderRadius: 2 },
+          itemStyle: { color: SERIES.blue, borderRadius: 2 },
           data: data.map((d) => d.pressure),
         },
         {
@@ -65,7 +66,7 @@ export function ForceBars({ data, unit }: { data: ComponentForce[]; unit: string
           type: "bar",
           stack: "d",
           barWidth: 14,
-          itemStyle: { color: "#b18cff", borderRadius: 2 },
+          itemStyle: { color: SERIES.violet, borderRadius: 2 },
           data: data.map((d) => d.viscous),
         },
       ],

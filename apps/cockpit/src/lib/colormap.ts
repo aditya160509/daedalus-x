@@ -62,3 +62,14 @@ export function cssGradient(name: ColormapName, direction = "to right"): string 
     .join(", ");
   return `linear-gradient(${direction}, ${stops})`;
 }
+
+/** Categorical series colours for charts, in assignment order. */
+export const SERIES = {
+  blue: "#5aa8ff",
+  cyan: "#3dd6f0",
+  violet: "#b18cff",
+  amber: "#f5a524",
+  green: "#7ee787",
+  red: "#ff7b72",
+} as const;
+export const SERIES_CYCLE = Object.values(SERIES);
