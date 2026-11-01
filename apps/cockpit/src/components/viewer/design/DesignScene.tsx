@@ -1,6 +1,6 @@
 "use client";
 
-import { GizmoHelper, GizmoViewcube } from "@react-three/drei";
+import { Bvh, GizmoHelper, GizmoViewcube } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { useState } from "react";
 import * as THREE from "three";
@@ -67,17 +67,20 @@ function SceneContents(props: DesignSceneProps) {
   return (
     <>
       <StudioStage mode={props.mode} frame={props.frame} floorY={floorY} maxDim={maxDim} />
-      <CarModel
-        model={props.model}
-        mode={props.mode}
-        explode={props.explode}
-        selected={props.selected}
-        hidden={props.hidden}
-        measureOn={props.measureOn}
-        onSelect={props.onSelect}
-        onMeasurePoint={props.onMeasurePoint}
-        reducedMotion={props.reducedMotion}
-      />
+      {/* BVH-accelerated raycasting keeps picking fast on dense CAD meshes. */}
+      <Bvh firstHitOnly>
+        <CarModel
+          model={props.model}
+          mode={props.mode}
+          explode={props.explode}
+          selected={props.selected}
+          hidden={props.hidden}
+          measureOn={props.measureOn}
+          onSelect={props.onSelect}
+          onMeasurePoint={props.onMeasurePoint}
+          reducedMotion={props.reducedMotion}
+        />
+      </Bvh>
       {props.dimensions && (
         <Dimensions
           min={props.model.bounds.min}

@@ -48,7 +48,7 @@ Part 1 (sections A–H) is the build list. Part 2 (R1–R8) names the best exist
 |---|---|---|---|---|---|
 | C1 ✅ | Clickable view cube (faces, edges, corners) | drei **GizmoHelper + GizmoViewcube** | Text Iso/Front/Side/Top buttons | 0.5 | P0 |
 | C2 ✅ | Auto-fit framing and smooth camera tweens | drei **Bounds**, **CameraControls** (camera-controls) | Fixed distance | 0.5 | P0 |
-| C3 | Fast picking on big meshes | **three-mesh-bvh** (drei `Bvh`) | Raw raycast | 0.3 | P0 |
+| C3 ✅ | Fast picking on big meshes | **three-mesh-bvh** (drei `Bvh`) | Raw raycast | 0.3 | P0 |
 | C4 ✅ | Selection outline and hover highlight | **postprocessing** `OutlineEffect` / drei `Outlines` | Colour swap | 0.5 | P0 |
 | C5 | Model tree with groups, visibility eye, isolate, search, virtual scroll | port **three-cad-viewer** tree (or **@pierre/trees**, as T3 Code uses) | Flat part list | 1 | P0 |
 | C6 ✅ | Section / clipping plane with cap fill | port **three-cad-viewer** stencil-capped clipping | None | 1 | P1 |
