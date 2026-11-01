@@ -21,9 +21,9 @@ const limit = (c: RuleCheck) =>
       : `≤ ${c.max}`;
 
 /** FORGE: CAD-only rule checks with margins; non-computable rules stay "Measure", never green. */
-export function LegalPanel() {
+export function LegalPanel({ design: picked }: { design?: string } = {}) {
   const designs = useQuery({ queryKey: ["designs"], queryFn: listDesigns });
-  const design = designs.data?.[0]?.design_id;
+  const design = picked ?? designs.data?.[0]?.design_id;
   const q = useQuery({
     queryKey: ["forge", design],
     queryFn: () => getForgeChecks(design!),

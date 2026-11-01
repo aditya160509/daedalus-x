@@ -19,7 +19,9 @@ async function request<T>(path: string, schema: z.ZodType<T>, init?: RequestInit
   let res: Response;
   try {
     const headers = new Headers(init?.headers);
-    if (!headers.has("content-type")) headers.set("content-type", "application/json");
+    if (!headers.has("content-type") && !(init?.body instanceof FormData)) {
+      headers.set("content-type", "application/json");
+    }
     res = await fetch(`/api${path}`, { ...init, headers });
   } catch {
     throw new ApiError("API unreachable — start it with `uv run daedalus-api`", 0);
@@ -669,3 +671,19 @@ export const EvidenceRow = z.object({
 export type EvidenceRow = z.infer<typeof EvidenceRow>;
 export const listEvidence = (q?: string) =>
   request(`/v1/evidence/records${q ? `?q=${encodeURIComponent(q)}` : ""}`, z.array(EvidenceRow));
+
+export const CadImport = z.object({
+  design_id: z.string(),
+  artifact_id: z.string(),
+  warnings: z.array(z.string()),
+  checks: z.array(RuleCheck),
+});
+export type CadImport = z.infer<typeof CadImport>;
+
+/** Save the in-browser CAD's parts (one named STEP each) as a new, rule-checked car design. */
+export const importCadStep = (parts: { name: string; blob: Blob }[], name: string) => {
+  const body = new FormData();
+  for (const p of parts) body.append("files", p.blob, `${p.name}.step`);
+  body.append("name", name);
+  return request("/v1/designs/import", CadImport, { method: "POST", body });
+};

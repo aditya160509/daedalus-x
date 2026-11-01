@@ -4,12 +4,13 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
-from daedalus.api import data, engineering, evidence, forge, jobs, oracle, race, report
+from daedalus.api import cad, data, engineering, evidence, forge, jobs, oracle, race, report
 
 
 def create_app() -> FastAPI:
     app = FastAPI(title="Daedalus X API", version="0.1.0")
     app.include_router(race.router)
+    app.include_router(cad.router)
     app.include_router(engineering.router)
     app.include_router(jobs.router)
     app.include_router(data.router)

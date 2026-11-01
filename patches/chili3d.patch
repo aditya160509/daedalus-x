@@ -10,6 +10,19 @@ index c20d26e..9e6dd98 100644
 +        await app.newDocument(`Car design ${count++}`);
      }
  }
+diff --git a/packages/builder/src/appBuilder.ts b/packages/builder/src/appBuilder.ts
+index d435ee3..b49ac0b 100644
+--- a/packages/builder/src/appBuilder.ts
++++ b/packages/builder/src/appBuilder.ts
+@@ -168,6 +168,8 @@ export class AppBuilder {
+             .filter((x) => x.length > 0);
+         if (pathParts.at(-1)?.endsWith(".html")) pathParts.pop();
+         urlObj.pathname = `${pathParts.join("/")}/`;
++        urlObj.search = "";
++        urlObj.hash = "";
+         const folderUrl = `${urlObj.href}plugins/`;
+         try {
+             const response = await fetch(`${folderUrl}plugins.json`);
 diff --git a/packages/builder/src/ribbon.ts b/packages/builder/src/ribbon.ts
 index 938ba8c..96a9d45 100644
 --- a/packages/builder/src/ribbon.ts
@@ -123,20 +136,95 @@ index 10d6c60..65e0ba2 100644
              ),
              div(
                  { className: style.ribbonTitlePanel },
+diff --git a/packages/web/src/daedalusBridge.ts b/packages/web/src/daedalusBridge.ts
+new file mode 100644
+index 0000000..ed8b2c8
+--- /dev/null
++++ b/packages/web/src/daedalusBridge.ts
+@@ -0,0 +1,52 @@
++// Part of the Chili3d Project, under the AGPL-3.0 License.
++// See LICENSE file in the project root for full license information.
++
++import { type IApplication, type INode, Logger, VisualNode } from "@chili3d/core";
++
++/**
++ * Daedalus X host bridge. The cockpit embeds this page in an iframe on the same origin and asks,
++ * by postMessage, for the open design as STEP so it can import it as a car design.
++ *
++ *   host -> cad: { type: "daedalus:export" }
++ *   cad -> host: { type: "daedalus:exported", name, parts: [{ name, blob }] } | { ..., error }
++ *
++ * One STEP per part: the kernel's STEP writer drops node names, and the importer needs them
++ * (wheel / front wing / body ...) to split force groups and run the rules.
++ */
++export function installDaedalusBridge(app: IApplication): void {
++    if (window.parent === window) return;
++    window.addEventListener("message", async (event: MessageEvent) => {
++        if (event.origin !== window.location.origin || event.data?.type !== "daedalus:export") return;
++        const reply = (body: Record<string, unknown>) =>
++            window.parent.postMessage({ type: "daedalus:exported", ...body }, window.location.origin);
++        try {
++            const document = app.activeView?.document;
++            if (!document) return reply({ error: "No design is open." });
++            const nodes = visualNodes(document.modelManager.rootNode);
++            if (nodes.length === 0) return reply({ error: "The design is empty." });
++            const parts = [];
++            for (const node of nodes) {
++                const data = await app.dataExchange.export(".step", [node]);
++                if (!data) return reply({ error: `STEP export failed for ${node.name}.` });
++                parts.push({ name: node.name, blob: new Blob(data, { type: "model/step" }) });
++            }
++            reply({ name: document.name, parts });
++        } catch (err) {
++            Logger.error(err);
++            reply({ error: err instanceof Error ? err.message : String(err) });
++        }
++    });
++    window.parent.postMessage({ type: "daedalus:ready" }, window.location.origin);
++}
++
++function visualNodes(root: INode): VisualNode[] {
++    const out: VisualNode[] = [];
++    const walk = (node: INode | undefined) => {
++        for (let n = node; n; n = n.nextSibling) {
++            if (n instanceof VisualNode) out.push(n);
++            else walk((n as { firstChild?: INode }).firstChild);
++        }
++    };
++    walk((root as { firstChild?: INode }).firstChild);
++    return out;
++}
 diff --git a/packages/web/src/index.ts b/packages/web/src/index.ts
-index a12af54..70dc508 100644
+index a12af54..32801d8 100644
 --- a/packages/web/src/index.ts
 +++ b/packages/web/src/index.ts
-@@ -51,6 +51,9 @@ async function handleApplicaionBuilt(app: IApplication) {
+@@ -3,6 +3,7 @@
+ 
+ import { AppBuilder } from "@chili3d/builder";
+ import { type IApplication, Logger, PubSub, pendingWork, quietFrames } from "@chili3d/core";
++import { installDaedalusBridge } from "./daedalusBridge";
+ import { installApplicationErrorCapture } from "./errorCapture";
+ import { Loading } from "./loading";
+ import { parseStartupParams } from "./startupParams";
+@@ -36,6 +37,7 @@ function exposeTestSurface(): void {
+ 
+ async function handleApplicaionBuilt(app: IApplication) {
+     document.body.removeChild(loading);
++    installDaedalusBridge(app);
+ 
+     const { plugins, fileUrl } = parseStartupParams(window.location.search);
+     // A `?url=`/`?plugin=` load is async work like a command's, so it is marked BEFORE the
+@@ -48,6 +50,10 @@ async function handleApplicaionBuilt(app: IApplication) {
+             Logger.info(`loading plugin from: ${plugin}`);
+             await app.pluginManager.loadFromUrl(plugin);
+         }
++        // Daedalus X: always open straight into a design (no welcome screen); a `?url=` STEP
++        // is imported into it, named by `?name=`.
++        const name = new URLSearchParams(window.location.search).get("name") ?? "Car design 1";
++        await app.newDocument(name);
          if (fileUrl) {
              Logger.info(`loading file from: ${fileUrl}`);
              await app.loadFileFromUrl(fileUrl);
-+        } else {
-+            // Daedalus X: open straight into a design, no welcome screen.
-+            PubSub.default.pub("executeCommand", "doc.new" as never);
-         }
-     } finally {
-         released();
 diff --git a/public/index.html b/public/index.html
 index 9ff9b75..ee5b48f 100644
 --- a/public/index.html
