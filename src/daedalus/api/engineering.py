@@ -13,7 +13,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
-from daedalus.cfd import read_dat
+from daedalus.cfd import CfdError, read_dat
 
 router = APIRouter(prefix="/v1", tags=["engineering"])
 
@@ -139,7 +139,7 @@ def _series(path: Path | None, columns: list[str]) -> Series | None:
         return None
     try:
         names, data = read_dat(path)
-    except Exception:
+    except (CfdError, OSError, ValueError, IndexError):  # a history file being written mid-read
         return None
     idx = _downsample(len(data))
     vals: dict[str, list[float]] = {}
