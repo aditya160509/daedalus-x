@@ -30,7 +30,10 @@ class Check:
 
 
 def load_rulebook(path: Path) -> dict[str, object]:
-    return yaml.safe_load(path.read_text())
+    book = yaml.safe_load(path.read_text())
+    if not isinstance(book, dict):
+        raise TypeError(f"{path} is not a rulebook mapping")
+    return {str(k): v for k, v in book.items()}
 
 
 def measures(geometry: dict[str, object]) -> dict[str, tuple[float, tuple[str, ...]]]:

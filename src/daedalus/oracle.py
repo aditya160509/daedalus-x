@@ -99,7 +99,8 @@ class GP:
 def expected_improvement(gp: GP, xs: FloatArray, best: float) -> FloatArray:
     mean, sd = gp.predict(xs)
     z = (best - mean) / sd
-    return (best - mean) * norm.cdf(z) + sd * norm.pdf(z)
+    ei: FloatArray = (best - mean) * norm.cdf(z) + sd * norm.pdf(z)
+    return ei
 
 
 def candidates(n: int = 2000, seed: int = 0) -> FloatArray:
@@ -116,7 +117,8 @@ def next_best(x: FloatArray, y: FloatArray, seed: int = 0) -> tuple[FloatArray, 
 
 def benchmark(budget: int = 20, n_init: int = 8, seeds: int = 5) -> dict[str, list[float]]:
     """Best CdA found vs runs used: GP-EI against Latin hypercube, same budget, averaged."""
-    gp_curves, lhs_curves = [], []
+    gp_curves: list[FloatArray] = []
+    lhs_curves: list[FloatArray] = []
     for s in range(seeds):
         x = qmc.LatinHypercube(d=DIM, seed=100 + s).random(n_init)
         y = synthetic_cda(x)
