@@ -231,6 +231,7 @@ const MeshLayer = z.object({
   ranges: z.record(z.string(), z.tuple([z.number(), z.number()])).optional(),
   separation: BufRef.optional(),
   wall_traction: BufRef.optional(),
+  vectors: BufRef.optional(),
   groups: z.array(z.string()).optional(),
   scalar_name: z.string(),
   range: z.tuple([z.number(), z.number()]),
@@ -331,6 +332,9 @@ export interface FlowMesh {
   indices: Uint32Array;
   scalar: Float32Array;
   group?: Uint8Array;
+  vectors?: Float32Array;
+  scalars?: Record<string, Float32Array>;
+  ranges?: Record<string, [number, number]>;
   range: [number, number];
   name: string;
 }
@@ -341,54 +345,125 @@ export interface FlowLines {
   range: [number, number];
   name: string;
 }
+export interface FlowPoints {
+  positions: Float32Array;
+  scalar: Float32Array;
+  name: string;
+}
+export interface FlowSlices extends FlowMesh {
+  offsets: Uint32Array;
+  x_m: number[];
+}
 export interface FlowField {
   meta: VizMeta;
   surface: FlowMesh;
   streamlines: FlowLines;
   wake: FlowMesh;
   centreline: FlowMesh;
+  vortices?: FlowMesh;
+  wake_shell?: FlowMesh;
+  sensitivity?: FlowMesh;
+  oilflow?: FlowLines;
+  separation?: FlowPoints;
+  xslices?: FlowSlices;
 }
 
-/** Fetch the flow-field export and map typed-array views onto one binary buffer (no copies). */
-export async function getFlowField(runId: string): Promise<FlowField> {
-  const base = `/v1/cfd/runs/${encodeURIComponent(runId)}`;
-  const meta = await request(`${base}/viz.json`, VizMeta);
-  const res = await fetch(`/api${base}/viz.bin`);
-  if (!res.ok) throw new ApiError(`flow-field data: ${res.statusText}`, res.status);
-  const buf = await res.arrayBuffer();
+/** Views share one immutable binary buffer; GPU geometry is created only by mounted layers. */
+export function decodeFlowField(meta: VizMeta, buf: ArrayBuffer): FlowField {
   if (buf.byteLength !== meta.bytes) {
     throw new ApiError(`flow-field data is ${buf.byteLength} bytes, expected ${meta.bytes}`, 500);
   }
-  // Typed views check the declared element type, so a mislabelled buffer fails loudly.
-  const expect = (r: BufRef, type: BufRef["type"]) => {
-    if (r.type !== type)
-      throw new ApiError(`flow-field buffer is ${r.type}, expected ${type}`, 500);
+  const expect = (r: BufRef, type: BufRef["type"], size: number) => {
+    if (r.type !== type || r.offset % size || r.offset + r.length * size > buf.byteLength)
+      throw new ApiError("Invalid flow-field buffer type, alignment or extent", 500);
   };
-  const f32 = (r: BufRef) => (expect(r, "f32"), new Float32Array(buf, r.offset, r.length));
-  const u32 = (r: BufRef) => (expect(r, "u32"), new Uint32Array(buf, r.offset, r.length));
-  const u8 = (r: BufRef) => (expect(r, "u8"), new Uint8Array(buf, r.offset, r.length));
-  const mesh = (l: z.infer<typeof MeshLayer>): FlowMesh => ({
-    positions: f32(l.positions),
-    indices: u32(l.indices),
-    scalar: f32(l.scalar),
-    group: l.group ? u8(l.group) : undefined,
-    range: l.range,
-    name: l.scalar_name,
-  });
+  const f32 = (r: BufRef) => (expect(r, "f32", 4), new Float32Array(buf, r.offset, r.length));
+  const u32 = (r: BufRef) => (expect(r, "u32", 4), new Uint32Array(buf, r.offset, r.length));
+  const u8 = (r: BufRef) => (expect(r, "u8", 1), new Uint8Array(buf, r.offset, r.length));
+  const mesh = (l: z.infer<typeof MeshLayer>): FlowMesh => {
+    const positions = f32(l.positions);
+    const scalar = f32(l.scalar);
+    const indices = u32(l.indices);
+    if (positions.length % 3 || scalar.length * 3 !== positions.length || indices.length % 3)
+      throw new ApiError("Misaligned flow mesh arrays", 500);
+    for (const index of indices)
+      if (index >= scalar.length) throw new ApiError("Flow mesh index outside vertices", 500);
+    const scalars = Object.fromEntries(
+      Object.entries(l.scalars ?? {}).map(([key, ref]) => [key, f32(ref)]),
+    );
+    if (Object.values(scalars).some((values) => values.length !== scalar.length))
+      throw new ApiError("Misaligned flow scalar arrays", 500);
+    const vectors = l.vectors ? f32(l.vectors) : undefined;
+    if (vectors && vectors.length !== positions.length)
+      throw new ApiError("Misaligned velocity vectors", 500);
+    return {
+      positions,
+      indices,
+      scalar,
+      scalars,
+      vectors,
+      group: l.group ? u8(l.group) : undefined,
+      ranges: l.ranges,
+      range: l.range,
+      name: l.scalar_name,
+    };
+  };
+  const offsets = (ref: BufRef, end: number) => {
+    const out = u32(ref);
+    if (!out.length || out[0] !== 0 || out[out.length - 1] !== end)
+      throw new ApiError("Invalid flow offset sentinels", 500);
+    for (let i = 1; i < out.length; i++)
+      if (out[i] < out[i - 1]) throw new ApiError("Flow offsets must be monotone", 500);
+    return out;
+  };
+  const lines = (l: z.infer<typeof LineLayer>): FlowLines => {
+    const positions = f32(l.positions),
+      scalar = f32(l.scalar);
+    if (positions.length !== scalar.length * 3) throw new ApiError("Misaligned flow lines", 500);
+    return {
+      positions,
+      scalar,
+      offsets: offsets(l.offsets, scalar.length),
+      range: l.range,
+      name: l.scalar_name,
+    };
+  };
   const L = meta.layers;
+  const slices = L.xslices ? mesh(L.xslices) : undefined;
+  const sliceOffsets =
+    L.xslices && slices ? offsets(L.xslices.offsets, slices.indices.length) : undefined;
+  if (L.xslices && sliceOffsets && sliceOffsets.length !== L.xslices.x_m.length + 1)
+    throw new ApiError("Plane offsets and positions disagree", 500);
   return {
     meta,
     surface: mesh(L.surface),
     wake: mesh(L.wake),
     centreline: mesh(L.centreline),
-    streamlines: {
-      positions: f32(L.streamlines.positions),
-      offsets: u32(L.streamlines.offsets),
-      scalar: f32(L.streamlines.scalar),
-      range: L.streamlines.range,
-      name: L.streamlines.scalar_name,
-    },
+    streamlines: lines(L.streamlines),
+    oilflow: L.oilflow ? lines(L.oilflow) : undefined,
+    vortices: L.vortices ? mesh(L.vortices) : undefined,
+    wake_shell: L.wake_shell ? mesh(L.wake_shell) : undefined,
+    sensitivity: L.sensitivity ? mesh(L.sensitivity) : undefined,
+    separation: L.separation
+      ? {
+          positions: f32(L.separation.positions),
+          scalar: f32(L.separation.scalar),
+          name: L.separation.scalar_name,
+        }
+      : undefined,
+    xslices:
+      slices && sliceOffsets && L.xslices
+        ? { ...slices, offsets: sliceOffsets, x_m: L.xslices.x_m }
+        : undefined,
   };
+}
+
+export async function getFlowField(runId: string): Promise<FlowField> {
+  const base = `/v1/cfd/runs/${encodeURIComponent(runId)}`;
+  const meta = await request(`${base}/viz.json`, VizMeta);
+  const res = await fetch(`/api${base}/viz.bin`);
+  if (!res.ok) throw new ApiError(`flow-field data: ${res.statusText}`, res.status);
+  return decodeFlowField(meta, await res.arrayBuffer());
 }
 
 export const JobState = z.enum(["queued", "running", "succeeded", "failed", "cancelled"]);

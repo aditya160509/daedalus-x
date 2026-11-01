@@ -27,18 +27,27 @@ def _bounded(mesh: pv.PolyData, max_triangles: int) -> pv.PolyData:
     return tri
 
 
-def _mesh_layer(mesh: pv.PolyData, buf: _Buffer, scalar: str, limit: int) -> dict[str, Any]:
+def _mesh_layer(
+    mesh: pv.PolyData, buf: _Buffer, scalar: str, limit: int, other_scalar: str | None = None
+) -> dict[str, Any]:
     tri = _bounded(mesh, limit // 2)
     pts, faces, tri = _triangles(tri)
     positions, indices = mirror_triangles(pts, faces)
     values = np.asarray(tri.point_data[scalar], float) if tri.n_points else np.zeros(0)
-    return {
+    layer = {
         "positions": buf.add(positions.astype(np.float32).ravel()),
         "indices": buf.add(indices.astype(np.uint32).ravel()),
         "scalar": buf.add(np.tile(values, 2).astype(np.float32)),
         "scalar_name": scalar,
         "range": _robust_range(values),
     }
+    if other_scalar is not None:
+        other = np.asarray(tri.point_data[other_scalar], float) if tri.n_points else np.zeros(0)
+        layer["scalars"] = {
+            scalar: layer["scalar"],
+            other_scalar: buf.add(np.tile(other, 2).astype(np.float32)),
+        }
+    return layer
 
 
 def add_insights(
@@ -62,10 +71,13 @@ def add_insights(
         np.asarray(internal.point_data["p"], float) + 0.5 * np.sum(velocity**2, axis=1)
     ) / q
     derived = internal.compute_derivative(scalars="U", gradient=False, qcriterion=True)
+    derived.point_data["Q_level"] = (
+        np.asarray(derived.point_data["qcriterion"], float) / (speed / length) ** 2
+    )
     vortex = derived.contour(
         [50 * (speed / length) ** 2, 200 * (speed / length) ** 2], scalars="qcriterion"
     )
-    layers["vortices"] = _mesh_layer(vortex, buf, "speed_ratio", 150_000)
+    layers["vortices"] = _mesh_layer(vortex, buf, "speed_ratio", 150_000, "Q_level")
     layers["vortices"]["levels"] = [50, 200]
     layers["vortices"]["level_definition"] = "Q / (U∞/L)²"
     shell = internal.contour([0.5], scalars="ux_ratio")
@@ -78,6 +90,7 @@ def add_insights(
     indices: list[NDArray[np.int64]] = []
     scalars: list[NDArray[np.float64]] = []
     pressure: list[NDArray[np.float64]] = []
+    vectors: list[NDArray[np.float64]] = []
     offsets = [0]
     vertex_offset = 0
     for x in xs:
@@ -93,6 +106,8 @@ def add_insights(
         indices.append(faces + vertex_offset)
         scalars.append(np.tile(np.asarray(tri.point_data["ux_ratio"], float), 2))
         pressure.append(np.tile(np.asarray(tri.point_data["Cp0"], float), 2))
+        velocity = np.asarray(tri.point_data["U"], float)
+        vectors.append(np.vstack([velocity, velocity * np.array([1.0, -1.0, 1.0])]))
         vertex_offset += len(pts)
         offsets.append(offsets[-1] + faces.size)
     ux = np.concatenate(scalars).astype(np.float32)
@@ -101,6 +116,7 @@ def add_insights(
         "positions": buf.add(np.vstack(positions).astype(np.float32).ravel()),
         "indices": buf.add(np.vstack(indices).astype(np.uint32).ravel()),
         "offsets": buf.add(np.asarray(offsets, np.uint32)),
+        "vectors": buf.add(np.vstack(vectors).astype(np.float32).ravel()),
         "x_m": xs.tolist(),
         "scalar": buf.add(ux),
         "scalars": {"Ux/U∞": buf.add(ux), "Cp0": buf.add(cp0)},

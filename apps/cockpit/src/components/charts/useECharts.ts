@@ -55,17 +55,26 @@ export function chartTheme() {
 export function useECharts(
   build: (el: HTMLDivElement) => echarts.EChartsCoreOption,
   deps: ReadonlyArray<unknown>,
+  events?: Record<string, (params: unknown) => void>,
 ) {
   const host = useRef<HTMLDivElement>(null);
   const chart = useRef<echarts.ECharts | null>(null);
   const builder = useRef(build);
   builder.current = build;
+  const handlers = useRef(events);
+  handlers.current = events;
 
   useEffect(() => {
     const el = host.current;
     if (!el) return undefined;
     const instance = echarts.init(el, undefined, { renderer: "canvas" });
     chart.current = instance;
+    const names = Object.keys(handlers.current ?? {});
+    const bound = names.map((name) => {
+      const listener = (params: unknown) => handlers.current?.[name]?.(params);
+      instance.on(name, listener);
+      return [name, listener] as const;
+    });
     const ro = new ResizeObserver(() => {
       instance.resize();
       instance.setOption(builder.current(el), { notMerge: true });
@@ -73,6 +82,7 @@ export function useECharts(
     ro.observe(el);
     return () => {
       ro.disconnect();
+      for (const [name, listener] of bound) instance.off(name, listener);
       instance.dispose();
       chart.current = null;
     };

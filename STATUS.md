@@ -16,7 +16,7 @@ Remaining work is tracked task-by-task in [docs/build/TASK-BOARD.md](docs/build/
 | P3-01 | Geometry path decision | GPT + Claude | blocked: car CAD/GLB | |
 | P3-02 | OpenFOAM case template | Claude + Codex | T01 review: axle rotation, explicit mesh quality and averaged CI gate implemented; single v2 quick mesh rejected (51 skew faces), no v2 Cd | [T01](evidence/T01.md), [motorBike](evidence/P3-02-motorbike.md), [orbit](evidence/P3-02-orbit-baseline.md) |
 | P3-03 | Grid study and speed check | Codex (GPT-6) | T03 review: tooling and NASA verification done; 5 quick jobs queued, no campaign executed; Celik table check pending | [evidence](evidence/T03.md) |
-| P3-04 | Component forces and field export | Claude + Codex | T04 review: v2 Q/shell/oilflow/separation/Cp0/slices and drag build-up exported in 32.2 s, 29.5 MB; source rejected; viewer additions T06; T05 tooling built, runtime gated by rejected primal | [T04](evidence/T04.md), [original](evidence/P3-04-flow-fields.md) |
+| P3-04 | Component forces and field export | Claude + Codex | T04 review: v2 Q/shell/oilflow/separation/Cp0/slices and drag build-up exported in 32.2 s, 29.5 MB; source rejected; viewer additions T06 review: full layer rail, compare, delta, drag build-up; T05 tooling built, runtime gated by rejected primal | [T04](evidence/T04.md), [T06](evidence/T06.md), [original](evidence/P3-04-flow-fields.md) |
 | P4-01 | Surrogate | GPT | todo | |
 | P4-02 | Next-experiment recommendation | GPT | todo | |
 | P4-03 | LHS benchmark harness | GPT | todo | |
