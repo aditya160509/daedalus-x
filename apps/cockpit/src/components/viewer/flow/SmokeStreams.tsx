@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { LineMaterial, LineSegments2, LineSegmentsGeometry } from "three-stdlib";
 import * as THREE from "three";
-import type { FlowLines } from "../../../lib/api";
+import type { FlowLines } from "@/lib/api";
 import type { PackedLines, WorkerResult } from "./flowMath";
 
 /** Worker packing keeps dense oil traces and density changes off the render thread. */

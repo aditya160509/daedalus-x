@@ -1,18 +1,24 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import dynamic from "next/dynamic";
 import { AlertTriangle } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { TelemetryChart, type TelemetryTrack } from "@/components/charts/TelemetryChart";
 import { ChannelPicker } from "@/components/race/ChannelPicker";
 import { CursorTable } from "@/components/race/CursorTable";
 import { GhostPanel } from "@/components/race/GhostPanel";
-import { RaceReplay } from "@/components/race/RaceReplay";
 import { loadPresets, savePresets, type RacePreset } from "@/components/race/presets";
 import { deltaTimeCurve, finishGap } from "@/components/race/raceMath";
 import type { RaceTrace } from "@/components/race/useRaceCar";
 import { useWhatIfSweep } from "@/components/race/whatIf";
-import { EmptyState, Metric, Panel, ProvenanceBadge } from "@/components/ui/primitives";
+import {
+  EmptyState,
+  Metric,
+  Panel,
+  ProvenanceBadge,
+  viewerFallback,
+} from "@/components/ui/primitives";
 import {
   ApiError,
   designGlbUrl,
@@ -36,6 +42,11 @@ import {
   type CarParamsUi,
   type ThrustSource,
 } from "./raceInputsState";
+
+const RaceReplay = dynamic(() => import("@/components/race/RaceReplay").then((m) => m.RaceReplay), {
+  ssr: false,
+  loading: viewerFallback,
+});
 
 const TRACK_IDS = ["velocity", "acceleration", "forces", "distance"];
 const EMPTY_TIME: number[] = [];

@@ -1,5 +1,5 @@
-import { sample } from "../../../lib/colormap";
-import type { FlowLines, FlowMesh } from "../../../lib/api";
+import { sample } from "@/lib/colormap";
+import type { FlowLines, FlowMesh } from "@/lib/api";
 
 export function contourBand(value: number, range: readonly [number, number], bands = 16): number {
   if (!Number.isFinite(value) || range[1] <= range[0] || bands < 2)

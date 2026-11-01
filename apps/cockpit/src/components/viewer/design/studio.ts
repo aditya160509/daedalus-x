@@ -1,17 +1,17 @@
 import * as THREE from "three";
 
 /** Team paint. Change here, not in components. */
-export const TEAM_COLOUR = "#18b8c9";
-export const BODY_CLEARCOAT = 1;
-export const BODY_CLEARCOAT_ROUGHNESS = 0.08;
-export const BODY_METALNESS = 0.1;
-export const BODY_ROUGHNESS = 0.28;
-export const WING_ROUGHNESS = 0.55;
-export const WING_METALNESS = 0.15;
-export const TYRE_ROUGHNESS = 0.9;
-export const TYRE_METALNESS = 0.02;
-export const CARTRIDGE_METALNESS = 0.85;
-export const CARTRIDGE_ROUGHNESS = 0.32;
+const TEAM_COLOUR = "#18b8c9";
+const BODY_CLEARCOAT = 1;
+const BODY_CLEARCOAT_ROUGHNESS = 0.08;
+const BODY_METALNESS = 0.1;
+const BODY_ROUGHNESS = 0.28;
+const WING_ROUGHNESS = 0.55;
+const WING_METALNESS = 0.15;
+const TYRE_ROUGHNESS = 0.9;
+const TYRE_METALNESS = 0.02;
+const CARTRIDGE_METALNESS = 0.85;
+const CARTRIDGE_ROUGHNESS = 0.32;
 export const TURNTABLE_DEG_PER_S = 6;
 export const SNAPSHOT_SCALE = 2;
 
@@ -73,7 +73,7 @@ export const STUDIO_LIGHTFORMERS: readonly LightformerSpec[] = [
   },
 ];
 
-export const ENGINEERING_COLOURS: Record<string, string> = {
+const ENGINEERING_COLOURS: Record<string, string> = {
   body: "#8b949e",
   front_wing: "#3dd6f0",
   rear_wing: "#b18cff",
@@ -135,8 +135,4 @@ export function createPartMaterial(group: string, mode: MaterialMode): THREE.Mes
     clearcoat: BODY_CLEARCOAT,
     clearcoatRoughness: BODY_CLEARCOAT_ROUGHNESS,
   });
-}
-
-export function disposeMaterial(material: THREE.Material | THREE.Material[]): void {
-  for (const m of Array.isArray(material) ? material : [material]) m.dispose();
 }

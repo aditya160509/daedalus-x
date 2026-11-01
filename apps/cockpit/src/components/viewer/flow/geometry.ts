@@ -2,7 +2,7 @@
 import { useEffect, useMemo } from "react";
 import type { ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
-import type { FlowMesh } from "../../../lib/api";
+import type { FlowMesh } from "@/lib/api";
 import type { Probe } from "./types";
 
 export function useFlowGeometry(mesh: FlowMesh, colors?: Float32Array) {

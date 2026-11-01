@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { chartTheme, echarts } from "./useECharts";
 import { nearestIndex, stepCursor } from "@/components/race/raceMath";
 
-export interface TelemetrySeries {
+interface TelemetrySeries {
   label: string;
   values: number[];
   color?: string;

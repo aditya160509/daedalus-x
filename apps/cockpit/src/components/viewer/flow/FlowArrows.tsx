@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import type { FlowSlices } from "../../../lib/api";
-import { sample } from "../../../lib/colormap";
+import type { FlowSlices } from "@/lib/api";
+import { sample } from "@/lib/colormap";
 import { arrowSamples } from "./flowMath";
 
 export function FlowArrows({

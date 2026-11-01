@@ -1,5 +1,5 @@
 import type { CameraPreset } from "../types";
-import type { LoadedModel } from "../../../lib/gltf";
+import type { LoadedModel } from "@/lib/gltf";
 import type { Vec3 } from "./designMath";
 
 export type ViewMode = "studio" | "engineering";

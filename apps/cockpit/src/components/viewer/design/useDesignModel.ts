@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { designGlbUrl, getDesignGeometry, type DesignGeometry } from "../../../lib/api";
-import { type LoadedModel, loadGlbUrl } from "../../../lib/gltf";
+import { designGlbUrl, getDesignGeometry, type DesignGeometry } from "@/lib/api";
+import { type LoadedModel, loadGlbUrl } from "@/lib/gltf";
 
 interface State {
   id: string | null;

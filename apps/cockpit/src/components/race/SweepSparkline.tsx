@@ -50,7 +50,7 @@ function finishingRuns(count: number, isFiniteTime: (i: number) => boolean): num
   return runs;
 }
 
-export function sweepSummary(points: { timeS: number | null }[]): string {
+function sweepSummary(points: { timeS: number | null }[]): string {
   const times = points.flatMap((p) => (p.timeS === null ? [] : [p.timeS]));
   if (times.length === 0) return "no DNF-free median yet";
   const min = Math.min(...times);

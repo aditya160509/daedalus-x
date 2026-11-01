@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
-import type { FlowMesh } from "../../../lib/api";
-import { colorize } from "../../../lib/colormap";
+import type { FlowMesh } from "@/lib/api";
+import { colorize } from "@/lib/colormap";
 import { useFlowGeometry } from "./geometry";
 
 export function VortexCores({ mesh, level }: { mesh: FlowMesh; level: number }) {

@@ -5,7 +5,14 @@ import { AlertTriangle, Maximize2, Minimize2, Wind } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DragBuildupChart } from "@/components/charts/DragBuildupChart";
-import { EmptyState, Panel, ProvenanceBadge, SegmentedControl } from "@/components/ui/primitives";
+import {
+  EmptyState,
+  Panel,
+  ProvenanceBadge,
+  SegmentedControl,
+  Skeleton,
+  viewerFallback,
+} from "@/components/ui/primitives";
 import type { CameraPreset } from "@/components/viewer/types";
 import { ControlRail } from "@/components/viewer/flow/ControlRail";
 import { LayerOptions } from "@/components/viewer/flow/LayerOptions";
@@ -32,11 +39,11 @@ import { cn } from "@/lib/utils";
 
 const FlowScene = dynamic(
   () => import("@/components/viewer/flow/FlowScene").then((m) => m.FlowScene),
-  { ssr: false, loading: () => <div className="h-full animate-pulse bg-surface-2" /> },
+  { ssr: false, loading: viewerFallback },
 );
 const CompareView = dynamic(
   () => import("@/components/viewer/flow/CompareView").then((m) => m.CompareView),
-  { ssr: false, loading: () => <div className="h-full animate-pulse bg-surface-2" /> },
+  { ssr: false, loading: viewerFallback },
 );
 
 const GPU_BUDGET_MIB = 600;
@@ -227,7 +234,7 @@ export function FlowPanel({ runId, hasViz }: { runId: string; hasViz: boolean })
           {field.error.message}
         </EmptyState>
       ) : !field.data ? (
-        <div className="h-full animate-pulse bg-surface-2" />
+        <Skeleton className="h-full" />
       ) : (
         <div className="flex h-full min-h-0 flex-col">
           <div className="relative min-h-0 flex-1">
@@ -417,7 +424,7 @@ export function FlowPanel({ runId, hasViz }: { runId: string; hasViz: boolean })
                   cumulative ΔCd by component.
                 </div>
               ) : (
-                <div className="h-full animate-pulse bg-surface-2" />
+                <Skeleton className="h-full" />
               )}
             </div>
           </section>

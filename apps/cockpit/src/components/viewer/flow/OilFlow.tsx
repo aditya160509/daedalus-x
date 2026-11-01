@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
-import type { FlowLines, FlowPoints } from "../../../lib/api";
+import type { FlowLines, FlowPoints } from "@/lib/api";
 import { SmokeStreams } from "./SmokeStreams";
 
 export function OilFlow({

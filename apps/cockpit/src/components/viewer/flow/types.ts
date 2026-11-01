@@ -1,5 +1,5 @@
 import type { CameraPreset } from "../types";
-import type { FlowField, FlowMesh } from "../../../lib/api";
+import type { FlowField, FlowMesh } from "@/lib/api";
 
 export interface FlowLayers {
   surface: "cp" | "oil" | "sensitivity" | "plain" | "off";

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { contourBand, deltaRange, nearestDelta, packLines, sliceRange } from "./flowMath";
-import type { FlowMesh } from "../../../lib/api";
+import type { FlowMesh } from "@/lib/api";
 
 const mesh = (x: number[], cp: number[]): FlowMesh => ({
   positions: new Float32Array(x.flatMap((v) => [v, 0, 0])),

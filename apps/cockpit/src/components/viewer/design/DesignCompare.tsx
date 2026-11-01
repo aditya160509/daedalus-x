@@ -3,7 +3,7 @@
 import type { CameraPreset } from "../types";
 import { DesignScene } from "./DesignScene";
 import type { CameraBus, Frame, MeasurePoint, MeasureState, ViewMode } from "./types";
-import type { LoadedModel } from "../../../lib/gltf";
+import type { LoadedModel } from "@/lib/gltf";
 
 /** Side-by-side designs sharing one orbit bus. The left canvas owns turntable, measure and capture. */
 export function DesignCompare({

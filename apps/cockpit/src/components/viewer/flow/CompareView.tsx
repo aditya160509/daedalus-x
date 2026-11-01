@@ -1,7 +1,7 @@
 "use client";
 
-import type { FlowField } from "../../../lib/api";
-import { cn } from "../../../lib/utils";
+import type { FlowField } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import type { CameraPreset } from "../types";
 import { FlowScene } from "./FlowScene";
 import type { CameraBus, DeltaSurface, FlowLayers, Probe, ViewStats } from "./types";

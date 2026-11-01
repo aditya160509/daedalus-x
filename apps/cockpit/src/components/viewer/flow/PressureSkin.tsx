@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
-import type { FlowMesh } from "../../../lib/api";
+import type { FlowMesh } from "@/lib/api";
 import { probe, useFlowGeometry } from "./geometry";
 import type { Probe } from "./types";
 

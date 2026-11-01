@@ -12,7 +12,7 @@ export const WHAT_IF_DOMAINS: Record<WhatIfParam, { min: number; max: number }> 
   thrustScale: { min: 0.05, max: 5 },
 };
 
-export interface WhatIfPoint {
+interface WhatIfPoint {
   value: number;
   /** Median Monte Carlo race time; null when no sample finished. */
   timeS: number | null;
@@ -33,7 +33,7 @@ const NO_CURVES: WhatIfCurves = {
 };
 
 /** `count` evenly spaced values from min to max, both ends included. */
-export function sweepValues(min: number, max: number, count = 15): number[] {
+function sweepValues(min: number, max: number, count = 15): number[] {
   if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) return [min];
   if (count < 2) return [min, max];
   const step = (max - min) / (count - 1);

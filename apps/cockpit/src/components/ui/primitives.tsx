@@ -250,3 +250,10 @@ export function EmptyState({
     </div>
   );
 }
+
+/** Placeholder block shaped like the content it stands in for. */
+export function Skeleton({ className }: { className?: string }) {
+  return <div aria-hidden className={cn("animate-pulse bg-surface-2", className)} />;
+}
+
+export const viewerFallback = () => <Skeleton className="h-full" />;

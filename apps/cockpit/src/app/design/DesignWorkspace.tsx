@@ -4,7 +4,14 @@ import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, Box, FileUp, Maximize2, Minimize2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Button, EmptyState, Panel, ProvenanceBadge } from "@/components/ui/primitives";
+import {
+  Button,
+  EmptyState,
+  Panel,
+  ProvenanceBadge,
+  Skeleton,
+  viewerFallback,
+} from "@/components/ui/primitives";
 import { CAMERA_PRESETS, type CameraPreset } from "@/components/viewer/types";
 import { DesignControls } from "@/components/viewer/design/DesignControls";
 import {
@@ -28,11 +35,11 @@ import { cn } from "@/lib/utils";
 
 const DesignScene = dynamic(
   () => import("@/components/viewer/design/DesignScene").then((m) => m.DesignScene),
-  { ssr: false, loading: () => <div className="h-full animate-pulse bg-surface-2" /> },
+  { ssr: false, loading: viewerFallback },
 );
 const DesignCompare = dynamic(
   () => import("@/components/viewer/design/DesignCompare").then((m) => m.DesignCompare),
-  { ssr: false, loading: () => <div className="h-full animate-pulse bg-surface-2" /> },
+  { ssr: false, loading: viewerFallback },
 );
 
 export function DesignWorkspace() {
@@ -300,7 +307,7 @@ export function DesignWorkspace() {
               />
             )
           ) : busy ? (
-            <div className="h-full animate-pulse bg-surface-2" />
+            <Skeleton className="h-full" />
           ) : remote.error ? (
             <EmptyState icon={<AlertTriangle size={20} />} title="Could not load the design">
               {remote.error}

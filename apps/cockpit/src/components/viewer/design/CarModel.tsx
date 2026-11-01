@@ -5,7 +5,7 @@ import { type ThreeEvent, useFrame } from "@react-three/fiber";
 import { damp3 } from "maath/easing";
 import { useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import type { LoadedModel, PartNode } from "../../../lib/gltf";
+import type { LoadedModel, PartNode } from "@/lib/gltf";
 import { explodeOffset, nearestVertex, type Vec3 } from "./designMath";
 import { createPartMaterial, partGroup, type MaterialMode } from "./studio";
 import type { MeasurePoint } from "./types";

@@ -2,7 +2,7 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import type { FlowField } from "../../../lib/api";
+import type { FlowField } from "@/lib/api";
 
 /** HTML overlays are absent from captureStream, so a recorded frame carries its own provenance. */
 export function SourceStamp({ field, label }: { field: FlowField; label: string }) {

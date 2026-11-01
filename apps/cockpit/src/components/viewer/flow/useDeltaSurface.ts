@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { FlowMesh } from "../../../lib/api";
+import type { FlowMesh } from "@/lib/api";
 import { deltaRange, type WorkerResult } from "./flowMath";
 import type { DeltaSurface } from "./types";
 

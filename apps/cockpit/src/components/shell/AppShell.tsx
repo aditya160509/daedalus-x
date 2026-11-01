@@ -31,7 +31,7 @@ interface Section {
   items: Workspace[];
 }
 
-export const SECTIONS: Section[] = [
+const SECTIONS: Section[] = [
   {
     title: "Engineering",
     items: [

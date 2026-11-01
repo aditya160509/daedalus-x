@@ -49,15 +49,15 @@ function formatDetail(body: unknown): string | undefined {
   return undefined;
 }
 
-export const Health = z.object({ status: z.literal("ok") });
+const Health = z.object({ status: z.literal("ok") });
 export const getHealth = () => request("/v1/health", Health);
 
-export const Channel = z.object({
+const Channel = z.object({
   name: z.string(),
   unit: z.string(),
   values: z.array(z.number()),
 });
-export type Channel = z.infer<typeof Channel>;
+type Channel = z.infer<typeof Channel>;
 
 export const RaceSimulation = z.object({
   model: z.string(),
@@ -106,7 +106,6 @@ export const MonteCarlo = z.object({
     .nullable(),
 });
 export type MonteCarlo = z.infer<typeof MonteCarlo>;
-export type TrajectoryBand = NonNullable<MonteCarlo["trajectory_band"]>;
 export interface UncertaintyInput {
   mass: number;
   cda: number;
@@ -141,14 +140,14 @@ export type DesignSummary = z.infer<typeof DesignSummary>;
 export const listDesigns = () => request("/v1/designs", z.array(DesignSummary));
 export const designGlbUrl = (id: string) => `/api/v1/designs/${encodeURIComponent(id)}/display.glb`;
 
-export const DesignPart = z.object({
+const DesignPart = z.object({
   label: z.string(),
   group: z.string(),
   volume_m3: z.number(),
   bbox_min_m: z.tuple([z.number(), z.number(), z.number()]),
   bbox_max_m: z.tuple([z.number(), z.number(), z.number()]),
 });
-export type DesignPart = z.infer<typeof DesignPart>;
+type DesignPart = z.infer<typeof DesignPart>;
 export const DesignGeometry = z.object({
   design_id: z.string(),
   source_file: z.string(),
@@ -166,8 +165,8 @@ export type DesignGeometry = z.infer<typeof DesignGeometry>;
 export const getDesignGeometry = (id: string) =>
   request(`/v1/designs/${encodeURIComponent(id)}/geometry.json`, DesignGeometry);
 
-export const RunState = z.enum(["running", "succeeded", "failed"]);
-export const CfdRunSummary = z.object({
+const RunState = z.enum(["running", "succeeded", "failed"]);
+const CfdRunSummary = z.object({
   run_id: z.string(),
   state: RunState,
   speed_m_s: z.number(),
@@ -175,14 +174,14 @@ export const CfdRunSummary = z.object({
   acceptance: z.string().nullable(),
   has_viz: z.boolean().default(false),
 });
-export type CfdRunSummary = z.infer<typeof CfdRunSummary>;
+type CfdRunSummary = z.infer<typeof CfdRunSummary>;
 export const listCfdRuns = () => request("/v1/cfd/runs", z.array(CfdRunSummary));
 
 const Series = z.object({
   iteration: z.array(z.number()),
   values: z.record(z.string(), z.array(z.number())),
 });
-export type Series = z.infer<typeof Series>;
+type Series = z.infer<typeof Series>;
 
 const GroupForce = z.object({
   drag_x: z.number(),
@@ -404,7 +403,7 @@ export interface FlowField {
 }
 
 /** Views share one immutable binary buffer; GPU geometry is created only by mounted layers. */
-export function decodeFlowField(meta: VizMeta, buf: ArrayBuffer): FlowField {
+function decodeFlowField(meta: VizMeta, buf: ArrayBuffer): FlowField {
   if (buf.byteLength !== meta.bytes) {
     throw new ApiError(`flow-field data is ${buf.byteLength} bytes, expected ${meta.bytes}`, 500);
   }
@@ -501,7 +500,7 @@ export async function getFlowField(runId: string): Promise<FlowField> {
   return decodeFlowField(meta, await res.arrayBuffer());
 }
 
-export const JobState = z.enum(["queued", "running", "succeeded", "failed", "cancelled"]);
+const JobState = z.enum(["queued", "running", "succeeded", "failed", "cancelled"]);
 export const Job = z.object({
   id: z.string(),
   kind: z.enum(["cfd_run", "cfd_viz", "geometry_import", "montecarlo_batch"]),
@@ -517,10 +516,9 @@ export const Job = z.object({
 });
 export type Job = z.infer<typeof Job>;
 export const listJobs = () => request("/v1/jobs", z.array(Job));
-export const getJob = (id: string) => request(`/v1/jobs/${encodeURIComponent(id)}`, Job);
 export const cancelJob = (id: string) =>
   request(`/v1/jobs/${encodeURIComponent(id)}/cancel`, Job, { method: "POST" });
-export const JobLog = z.object({
+const JobLog = z.object({
   text: z.string(),
   offset: z.number().int().nonnegative(),
   has_more: z.boolean(),
@@ -528,7 +526,7 @@ export const JobLog = z.object({
   iteration: z.number().nullable(),
   end_time: z.number().nullable(),
 });
-export type JobLog = z.infer<typeof JobLog>;
+type JobLog = z.infer<typeof JobLog>;
 export const getJobLog = (id: string, offset: number) =>
   request(`/v1/jobs/${encodeURIComponent(id)}/log?offset=${offset}`, JobLog);
 export interface CfdJobInput {
@@ -581,4 +579,3 @@ export const GridStudy = z.object({
 });
 export type GridStudy = z.infer<typeof GridStudy>;
 export const listStudies = () => request("/v1/studies", z.array(GridStudy));
-export const getStudy = (id: string) => request(`/v1/studies/${encodeURIComponent(id)}`, GridStudy);

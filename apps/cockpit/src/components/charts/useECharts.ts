@@ -30,7 +30,7 @@ echarts.use([
 export { echarts };
 
 /** Read a design token (CSS custom property on :root) for chart styling. */
-export function token(name: string): string {
+function token(name: string): string {
   if (typeof document === "undefined") return "#888";
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || "#888";
 }

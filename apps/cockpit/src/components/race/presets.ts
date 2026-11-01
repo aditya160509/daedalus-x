@@ -15,7 +15,7 @@ export interface RacePreset {
   model: "M1" | "M2";
 }
 
-export const PRESET_STORAGE_KEY = "daedalus.race.presets.v1";
+const PRESET_STORAGE_KEY = "daedalus.race.presets.v1";
 const MAX_PRESETS = 50;
 
 const LIMITS = {

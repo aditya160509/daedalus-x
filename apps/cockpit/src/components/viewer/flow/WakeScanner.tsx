@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
-import type { FlowMesh, FlowSlices } from "../../../lib/api";
-import { colorize } from "../../../lib/colormap";
+import type { FlowMesh, FlowSlices } from "@/lib/api";
+import { colorize } from "@/lib/colormap";
 import { sliceRange } from "./flowMath";
 import { probe, useFlowGeometry } from "./geometry";
 import type { Probe } from "./types";
