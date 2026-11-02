@@ -530,3 +530,15 @@ Owner resumed implementation, prioritising suitable prebuilt open source, fast c
 | f1-dash `d21607a`, `dashboard/src/components/driver/DriverMiniSectors.tsx` | `components/race/timing/DriverMiniSectors.tsx` | Full sector presentation; eight equal-distance sectors in a compact grid; local adapter replaces settings/data stores |
 
 **Fit decisions:** Racing-game's road-course GLB, Cannon driving physics, keyboard/audio controls and Supabase authentication are not imported: the required product is a straight STEM track replaying TITAN results, not an interactive road-driving game or a foreign score service. The real car, domain-specific track geometry and trajectory interpolation remain. This is component reuse, not a claim that the complete upstream applications were imported.
+
+## 24. Scope decision (2026-11-02): cut list
+**Do NOT build these** (camera/hardware/external-data features, not needed):
+- T30 virtual scrutineer from photos
+- T31 video test lab (wobble/snag from phone video)
+- T32 as-built twin / photogrammetry
+- T35 community calibration across teams
+- T28 competitor/field intelligence scraping
+- T26 exhaust base-bleed study
+- AR car view
+
+**Everything else stays in scope and gets built.** Open source: add SALib (Sobol/Morris sensitivity); CalculiX only with real material data; skip BoTorch, OpenMDAO, trame.

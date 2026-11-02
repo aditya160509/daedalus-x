@@ -230,7 +230,7 @@ export function RaceWorkspace() {
   useEffect(() => {
     if (seeded.current || time.length < 2) return;
     seeded.current = true;
-    setDelta({ a: time[0], b: time[Math.floor(time.length / 2)] });
+    setDelta({ a: time[0], b: (time[0] + time[time.length - 1]) / 2 });
   }, [time]);
 
   const primaryTrace: RaceTrace | null = useMemo(

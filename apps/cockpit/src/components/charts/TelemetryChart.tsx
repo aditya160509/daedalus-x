@@ -1,8 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
-import { chartTheme, echarts } from "./useECharts";
-import { nearestIndex, stepCursor } from "@/components/race/raceMath";
+import uPlot from "uplot";
+import "uplot/dist/uPlot.min.css";
+import "./TelemetryChart.css";
+import { chartTheme } from "./useECharts";
+import { nearestIndex, stepCursor, sampleAt } from "@/components/race/raceMath";
 
 interface TelemetrySeries {
   label: string;
@@ -32,33 +35,22 @@ export interface DeltaCursors {
 }
 
 const TOP = 8;
-const BOTTOM = 46;
-const GAP = 14;
 const LEFT = 64;
 const RIGHT = 16;
 
 const NO_MARKERS: Array<{ t: number; label: string }> = [];
 const NO_ZOOM: Record<string, number> = {};
 
-/** Pixel position for a time on the shared x axis; null when ECharts has no layout yet. */
-function pixelForTime(chart: echarts.ECharts, t: number): number | null {
-  const value: unknown = chart.convertToPixel({ xAxisIndex: 0 }, [t, 0]);
-  return firstNumber(value);
+/** uPlot values use plot-relative CSS pixels; overlay lines use the whole lane. */
+function pixelForTime(chart: uPlot, t: number): number | null {
+  const offset = chart.over.getBoundingClientRect().left - chart.root.getBoundingClientRect().left;
+  const value = chart.valToPos(t, "x") + offset;
+  return Number.isFinite(value) ? value : null;
 }
-
-function timeForPixel(chart: echarts.ECharts, x: number, y: number): number | null {
-  const value: unknown = chart.convertFromPixel({ xAxisIndex: 0 }, [x, y]);
-  return firstNumber(value);
-}
-
-function firstNumber(value: unknown): number | null {
-  if (typeof value === "number") return Number.isFinite(value) ? value : null;
-  if (Array.isArray(value)) {
-    const list = value as unknown[];
-    const head = list[0];
-    return typeof head === "number" && Number.isFinite(head) ? head : null;
-  }
-  return null;
+function timeForPixel(chart: uPlot, x: number, _y: number): number | null {
+  const offset = chart.over.getBoundingClientRect().left - chart.root.getBoundingClientRect().left;
+  const value = chart.posToVal(x - offset, "x");
+  return Number.isFinite(value) ? value : null;
 }
 
 function yRange(track: TelemetryTrack, zoom: number, band?: TelemetryBand | null) {
@@ -89,7 +81,7 @@ function yRange(track: TelemetryTrack, zoom: number, band?: TelemetryBand | null
 
 /**
  * ATLAS-style stacked channels on one shared time axis. The cursor, A and B lines are DOM
- * overlays so moving them never re-parses 12k points; ECharts only redraws when the data,
+ * overlays so moving them never re-parses 12k points; uPlot only redraws when the data,
  * channel order or y-zoom changes.
  */
 export function TelemetryChart({
@@ -117,7 +109,12 @@ export function TelemetryChart({
 }) {
   const wrapper = useRef<HTMLDivElement>(null);
   const host = useRef<HTMLDivElement>(null);
-  const chart = useRef<echarts.ECharts | null>(null);
+  const chart = useRef<uPlot | null>(null);
+  const plots = useRef<uPlot[]>([]);
+  const callbacks = useRef(onCursor);
+  useEffect(() => {
+    callbacks.current = onCursor;
+  }, [onCursor]);
   const cursorLine = useRef<HTMLDivElement>(null);
   const cursorChip = useRef<HTMLDivElement>(null);
   const aLine = useRef<HTMLDivElement>(null);
@@ -136,180 +133,160 @@ export function TelemetryChart({
 
   useEffect(() => {
     const el = host.current;
-    if (!el) return undefined;
-    const instance = echarts.init(el, undefined, { renderer: "canvas" });
-    chart.current = instance;
-    const onZoom = () => placeRef.current();
-    instance.on("dataZoom", onZoom);
-    const ro = new ResizeObserver(() => {
-      instance.resize();
-      drawRef.current();
-      placeRef.current();
-    });
-    ro.observe(el);
-    return () => {
-      ro.disconnect();
-      instance.off("dataZoom", onZoom);
-      instance.dispose();
-      chart.current = null;
-    };
-  }, []);
-
-  useEffect(() => {
-    drawRef.current = () => {
-      const instance = chart.current;
-      const el = host.current;
-      if (!instance || !el) return;
-      const t = chartTheme();
-      const n = tracks.length;
-      if (n === 0) {
-        instance.clear();
-        return;
+    if (!el || time.length < 2 || tracks.length === 0) return;
+    const theme = chartTheme();
+    const instances: uPlot[] = [];
+    const observers: ResizeObserver[] = [];
+    el.style.display = "grid";
+    el.style.gridTemplateRows = `repeat(${tracks.length}, minmax(110px, 1fr))`;
+    el.style.gap = "10px";
+    tracks.forEach((track, laneIndex) => {
+      const lane = document.createElement("div");
+      lane.className = "daedalus-telemetry min-w-0 overflow-hidden";
+      el.appendChild(lane);
+      const data: uPlot.AlignedData = [time, ...track.series.map((series) => series.values)];
+      const series: uPlot.Series[] = [
+        {},
+        ...track.series.map((item) => ({
+          label: `${item.label} [${track.unit}]`,
+          stroke: item.color ?? track.color,
+          width: 1.5,
+          dash: item.dashed ? [4, 3] : undefined,
+          points: { show: false },
+          spanGaps: false,
+        })),
+      ];
+      const bands: uPlot.Band[] = [];
+      if (band && track.id === bandTrackId) {
+        const lower = data.length;
+        data.push(time.map((t) => sampleAt(t, band.time, band.p5)));
+        data.push(time.map((t) => sampleAt(t, band.time, band.p95)));
+        series.push(
+          { label: "p5", stroke: "transparent", width: 0, points: { show: false } },
+          { label: "p95", stroke: "transparent", width: 0, points: { show: false } },
+        );
+        bands.push({ series: [lower + 1, lower], fill: "rgba(61,214,240,0.14)" });
       }
-      const height = Math.max(40, (el.clientHeight - TOP - BOTTOM - GAP * (n - 1)) / n);
-      const all = tracks.map((_, i) => i);
-      const series = tracks.flatMap((track, i) => {
-        const out: Record<string, unknown>[] = [];
-        if (band && track.id === bandTrackId) {
-          out.push({
-            name: `${track.name} p5`,
-            type: "line",
-            xAxisIndex: i,
-            yAxisIndex: i,
-            data: band.time.map((x, k) => [x, band.p5[k]]),
-            stack: "fan",
-            showSymbol: false,
-            silent: true,
-            lineStyle: { opacity: 0 },
-            areaStyle: { opacity: 0 },
-            z: 0,
-          });
-          out.push({
-            name: `${track.name} p5–p95`,
-            type: "line",
-            xAxisIndex: i,
-            yAxisIndex: i,
-            data: band.time.map((x, k) => [x, band.p95[k] - band.p5[k]]),
-            stack: "fan",
-            showSymbol: false,
-            silent: true,
-            lineStyle: { opacity: 0 },
-            areaStyle: { color: t.brand, opacity: 0.16 },
-            z: 0,
-          });
-        }
-        track.series.forEach((s, j) => {
-          out.push({
-            name: `${s.label} [${track.unit}]`,
-            type: "line",
-            xAxisIndex: i,
-            yAxisIndex: i,
-            showSymbol: false,
-            sampling: "lttb",
-            lineStyle: {
-              width: 1.5,
-              color: s.color ?? track.color,
-              type: s.dashed ? "dashed" : "solid",
-            },
-            itemStyle: { color: s.color ?? track.color },
-            data: time.map((x, k) => [x, s.values[k]]),
-            z: 3,
-            markLine:
-              j === 0 && markers.length
-                ? {
-                    silent: true,
-                    symbol: "none",
-                    lineStyle: { color: t.muted, type: "dotted" },
-                    label: {
-                      show: i === 0,
-                      color: t.text2,
-                      fontSize: 10,
-                      formatter: (p: { name?: string }) => p.name ?? "",
-                    },
-                    data: markers.map((m) => ({ xAxis: m.t, name: m.label })),
-                  }
-                : undefined,
-          });
-        });
-        return out;
-      });
-
-      instance.setOption(
+      const range = yRange(
+        track,
+        yZoom[track.id] ?? 1,
+        band && track.id === bandTrackId ? band : null,
+      );
+      const instance = new uPlot(
         {
-          animation: false,
-          textStyle: { fontFamily: t.mono },
-          grid: tracks.map((_, i) => ({
-            left: LEFT,
-            right: RIGHT,
-            top: TOP + i * (height + GAP),
-            height,
-          })),
-          xAxis: tracks.map((_, i) => ({
-            type: "value",
-            gridIndex: i,
-            min: time[0],
-            max: time[time.length - 1],
-            axisLine: { lineStyle: { color: t.line } },
-            axisTick: { show: false },
-            splitLine: { lineStyle: { color: t.line, opacity: 0.5 } },
-            axisLabel: {
-              show: i === n - 1,
-              color: t.muted,
-              fontSize: 10,
-              formatter: (v: number) => `${v.toFixed(2)} s`,
-            },
-          })),
-          yAxis: tracks.map((track, i) => {
-            const range = yRange(
-              track,
-              yZoom[track.id] ?? 1,
-              band && track.id === bandTrackId ? band : null,
-            );
-            return {
-              type: "value",
-              gridIndex: i,
-              min: range.min,
-              max: range.max,
-              // Horizontal label inside the top-left of each lane: rotated names overlap
-              // once lanes get short.
-              name: `${track.name} [${track.unit}]`,
-              nameLocation: "end",
-              nameRotate: 0,
-              nameGap: -12,
-              nameTextStyle: { color: t.text2, fontSize: 10, align: "left", padding: [0, 0, 0, 8] },
-              axisLine: { show: false },
-              splitNumber: 3,
-              splitLine: { lineStyle: { color: t.line, opacity: 0.5 } },
-              // The padded max is an arbitrary float and sits under the lane name.
-              axisLabel: {
-                color: t.muted,
-                fontSize: 10,
-                showMaxLabel: false,
-                formatter: (v: number) => String(Number(v.toPrecision(3))),
-              },
-            };
-          }),
-          dataZoom: [
-            { type: "inside", xAxisIndex: all, filterMode: "none" },
+          title: `${track.name} [${track.unit}]`,
+          width: Math.max(150, el.clientWidth),
+          height: Math.max(92, (el.clientHeight - 10 * (tracks.length - 1)) / tracks.length - 16),
+          padding: [4, RIGHT, 0, 0],
+          legend: { show: false },
+          scales: {
+            x: { time: false, range: [time[0], time[time.length - 1]] },
+            y: { range: [range.min, range.max] },
+          },
+          series,
+          bands,
+          cursor: {
+            sync: { key: "daedalus-telemetry", scales: ["x", null] },
+            drag: { x: true, y: false, setScale: true },
+            points: { show: false },
+          },
+          axes: [
             {
-              type: "slider",
-              xAxisIndex: all,
-              height: 18,
-              bottom: 6,
-              borderColor: t.line,
-              fillerColor: "rgba(34,211,238,0.12)",
-              handleStyle: { color: t.brand },
-              textStyle: { color: t.muted, fontSize: 10 },
-              dataBackground: { lineStyle: { color: t.line }, areaStyle: { color: t.line } },
+              show: laneIndex === tracks.length - 1,
+              stroke: theme.muted,
+              size: 28,
+              grid: { stroke: theme.line, width: 0.5 },
+              ticks: { show: false },
+              font: "10px monospace",
+              values: (_u, ticks) => ticks.map((value) => `${value.toFixed(2)} s`),
+            },
+            {
+              stroke: theme.muted,
+              size: LEFT,
+              grid: { stroke: theme.line, width: 0.5 },
+              ticks: { show: false },
+              font: "10px monospace",
+              values: (_u, ticks) => ticks.map((value) => String(Number(value.toPrecision(3)))),
             },
           ],
-          series,
+          hooks: {
+            setCursor: [
+              (u) => {
+                if (u.cursor.left == null || u.cursor.left < 0) return;
+                const value = u.posToVal(u.cursor.left, "x");
+                if (Number.isFinite(value)) {
+                  latest.current = Math.min(time[time.length - 1], Math.max(time[0], value));
+                  if (pending.current === null)
+                    pending.current = requestAnimationFrame(() => {
+                      pending.current = null;
+                      callbacks.current(latest.current);
+                    });
+                }
+              },
+            ],
+            setScale: [
+              (u, key) => {
+                if (key !== "x") return;
+                const { min, max } = u.scales.x;
+                if (min == null || max == null) return;
+                for (const other of instances)
+                  if (other !== u && (other.scales.x.min !== min || other.scales.x.max !== max))
+                    other.setScale("x", { min, max });
+                placeRef.current();
+              },
+            ],
+            draw: [
+              (u) => {
+                const ctx = u.ctx,
+                  ratio = window.devicePixelRatio || 1;
+                ctx.save();
+                ctx.strokeStyle = theme.muted;
+                ctx.fillStyle = theme.muted;
+                ctx.lineWidth = ratio * 0.5;
+                ctx.setLineDash([ratio * 3, ratio * 3]);
+                ctx.font = `${9 * ratio}px monospace`;
+                for (const marker of markers) {
+                  const x = u.valToPos(marker.t, "x", true) + u.bbox.left;
+                  if (x < u.bbox.left || x > u.bbox.left + u.bbox.width) continue;
+                  ctx.beginPath();
+                  ctx.moveTo(x, u.bbox.top);
+                  ctx.lineTo(x, u.bbox.top + u.bbox.height);
+                  ctx.stroke();
+                  if (laneIndex === 0)
+                    ctx.fillText(marker.label, x + 3 * ratio, u.bbox.top + 10 * ratio);
+                }
+                ctx.restore();
+              },
+            ],
+          },
         },
-        { notMerge: true },
+        data,
+        lane,
       );
-      placeRef.current();
+      instances.push(instance);
+      const observer = new ResizeObserver(() => {
+        instance.setSize({
+          width: Math.max(150, el.clientWidth),
+          height: Math.max(92, (el.clientHeight - 10 * (tracks.length - 1)) / tracks.length - 16),
+        });
+        placeRef.current();
+      });
+      observer.observe(el);
+      observers.push(observer);
+    });
+    plots.current = instances;
+    chart.current = instances[0] ?? null;
+    drawRef.current = () => {
+      for (const instance of instances) instance.redraw();
     };
-    drawRef.current();
+    placeRef.current();
+    return () => {
+      for (const observer of observers) observer.disconnect();
+      for (const instance of instances) instance.destroy();
+      el.replaceChildren();
+      plots.current = [];
+      chart.current = null;
+    };
   }, [time, tracks, markers, band, bandTrackId, yZoom]);
 
   useEffect(() => {
@@ -431,7 +408,7 @@ export function TelemetryChart({
       onPointerCancel={endDrag}
       onKeyDown={key}
     >
-      <div ref={host} className="h-full w-full" />
+      <div ref={host} className="h-full min-h-110 w-full" />
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
           ref={cursorLine}

@@ -41,3 +41,61 @@ def verify() -> dict[str, object]:
         return {"ok": not broken, "broken": broken}
     finally:
         store.close()
+
+
+@router.get("/lineage")
+def lineage(limit: int = Query(500, ge=1, le=2000)) -> dict[str, object]:
+    """Read-only graph of actual stored references, parent → dependent record.
+
+    Never synthesize placeholder nodes for references outside the returned window.
+    """
+    store = EvidenceStore(data_root())
+    try:
+        timeline = store.timeline(limit + 1)
+        broken = set(store.verify_all())
+        nodes = [
+            {
+                "id": rid,
+                "kind": kind,
+                "created_at": stamp,
+                "body": json.loads(body),
+                "verified": rid not in broken,
+            }
+            for rid, kind, stamp, body in timeline[:limit]
+        ]
+        visible = {str(node["id"]) for node in nodes}
+        edges: list[dict[str, str]] = []
+        outside: set[str] = set()
+        missing: set[str] = set()
+        for node in nodes:
+            for field, value in node["body"].items():
+                references = []
+                if field.endswith("_id") and isinstance(value, str):
+                    references = [value]
+                elif field.endswith("_ids") and isinstance(value, list):
+                    references = [v for v in value if isinstance(v, str)]
+                for parent in references:
+                    if parent == node["id"]:
+                        continue
+                    if parent in visible:
+                        edges.append(
+                            {
+                                "id": f"{parent}:{node['id']}:{field}",
+                                "source": parent,
+                                "target": str(node["id"]),
+                                "field": field,
+                            }
+                        )
+                    elif store.exists(parent):
+                        outside.add(parent)
+                    else:
+                        missing.add(parent)
+        return {
+            "nodes": nodes,
+            "edges": edges,
+            "truncated": len(timeline) > limit,
+            "outside_window": len(outside),
+            "missing_references": sorted(missing),
+        }
+    finally:
+        store.close()

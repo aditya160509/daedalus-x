@@ -554,6 +554,18 @@ export const EvidenceRow = z.object({
   verified: z.boolean(),
 });
 export type EvidenceRow = z.infer<typeof EvidenceRow>;
+const EvidenceLineage = z.object({
+  nodes: z.array(EvidenceRow),
+  edges: z.array(
+    z.object({ id: z.string(), source: z.string(), target: z.string(), field: z.string() }),
+  ),
+  truncated: z.boolean(),
+  outside_window: z.number(),
+  missing_references: z.array(z.string()),
+});
+export type EvidenceLineage = z.infer<typeof EvidenceLineage>;
+export const getEvidenceLineage = () => request("/v1/evidence/lineage", EvidenceLineage);
+
 export const listEvidence = (q?: string) =>
   request(`/v1/evidence/records${q ? `?q=${encodeURIComponent(q)}` : ""}`, z.array(EvidenceRow));
 
