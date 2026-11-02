@@ -245,6 +245,20 @@ class TimestampVerification(Record):
     gen_time: str | None = None
 
 
+class CalibrationStudy(Record):
+    """A saved calibration: exact inputs, results and source files, all as artifacts (T17)."""
+
+    study_id: str = Field(default_factory=lambda: new_id("cal"))
+    method: Literal["bayesian"]
+    model_id: str
+    inputs_artifact_id: str
+    results_artifact_id: str
+    source_artifact_ids: tuple[str, ...] = ()
+    source_labels: tuple[str, ...] = ()
+    n_runs: int = Field(ge=1)
+    n_held_out: int = Field(ge=0)
+
+
 class ValidationProtocol(Record):
     protocol_id: str = Field(default_factory=lambda: new_id("prot"))
     hypothesis: str

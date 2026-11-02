@@ -1,12 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DEFAULT_CAR, DEFAULT_ESTIMATE } from "@/app/race/raceInputsState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NumberField, Panel, ProvenanceBadge, Skeleton } from "@/components/ui/primitives";
-import { calibrateBayesian, previewTimingImport, type TimingImport } from "@/lib/api";
+import {
+  calibrateBayesian,
+  getCalibrationStudy,
+  listCalibrationStudies,
+  previewTimingImport,
+  type CalibrationStudyDetail,
+  type TimingImport,
+} from "@/lib/api";
 import { estimateThrust, parseThrustCsv, type ThrustTrace } from "@/lib/thrust";
 
 const LABELS: Record<string, { label: string; unit: string; scale: number }> = {
@@ -17,13 +24,48 @@ const LABELS: Record<string, { label: string; unit: string; scale: number }> = {
   offset_s: { label: "Model offset", unit: "ms", scale: 1000 },
 };
 
+async function fileToBase64(file: File): Promise<string> {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  }
+  return btoa(binary);
+}
+
+function pointsToImport(
+  filename: string,
+  points: CalibrationStudyDetail["inputs"]["points"],
+): TimingImport {
+  return {
+    filename,
+    units: {},
+    warnings: [],
+    rows: points.map((point, index) => ({
+      run_no: index + 1,
+      lane: "",
+      time_s: point.time_s,
+      reaction_s: null,
+      mass_kg: point.mass_kg,
+      notes: "",
+    })),
+  };
+}
+
+
 export function CalibrationPanel() {
+  const queryClient = useQueryClient();
   const [training, setTraining] = useState<TimingImport | null>(null);
   const [held, setHeld] = useState<TimingImport | null>(null);
   const [curve, setCurve] = useState<ThrustTrace | null>(null);
   const [curveName, setCurveName] = useState("");
   const [curveError, setCurveError] = useState("");
   const [confirmed, setConfirmed] = useState(false);
+  const [files, setFiles] = useState<{ training: File | null; held: File | null }>({
+    training: null,
+    held: null,
+  });
+  const [openedStudy, setOpenedStudy] = useState<string | null>(null);
   const [values, setValues] = useState({
     mass: DEFAULT_CAR.massG,
     track: DEFAULT_CAR.trackM,
@@ -37,7 +79,51 @@ export function CalibrationPanel() {
     offset: 20,
     rho: DEFAULT_CAR.rho,
   });
-  const fit = useMutation({ mutationFn: calibrateBayesian });
+  const studies = useQuery({
+    queryKey: ["calibration-studies"],
+    queryFn: listCalibrationStudies,
+  });
+  const fit = useMutation({
+    mutationFn: calibrateBayesian,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["calibration-studies"] });
+      void queryClient.invalidateQueries({ queryKey: ["evidence"] });
+    },
+  });
+  const open = useMutation({
+    mutationFn: (studyId: string) => getCalibrationStudy(studyId),
+    onSuccess: (detail) => {
+      const inputs = detail.inputs;
+      const points = inputs.points;
+      const first = points[0];
+      setValues({
+        mass: first ? first.mass_kg * 1000 : values.mass,
+        track: first ? first.track_m : values.track,
+        heldTrack: inputs.held_out[0] ? inputs.held_out[0].track_m : values.heldTrack,
+        sigma: first ? first.sigma_s * 1000 : values.sigma,
+        cda: inputs.cda_m2 * 10000,
+        crr: inputs.crr,
+        scale: inputs.thrust_scale,
+        logSd: inputs.log_sd,
+        noise: inputs.extra_noise_scale_s * 1000,
+        offset: inputs.offset_sd_s * 1000,
+        rho: inputs.rho_kg_m3,
+      });
+      setTraining(pointsToImport(detail.study.source_labels[0] ?? "saved calibration", points));
+      setHeld(
+        inputs.held_out.length
+          ? pointsToImport(detail.study.source_labels[1] ?? "saved held-out", inputs.held_out)
+          : null,
+      );
+      setCurve({ t_s: inputs.thrust_t_s, force_n: inputs.thrust_force_n });
+      setCurveName("stored thrust curve");
+      setCurveError("");
+      setConfirmed(false);
+      setFiles({ training: null, held: null });
+      setOpenedStudy(detail.study.study_id);
+      fit.reset();
+    },
+  });
   const upload = useMutation({
     mutationFn: ({ file }: { file: File; target: "training" | "held" }) =>
       previewTimingImport(file),
@@ -45,6 +131,7 @@ export function CalibrationPanel() {
       if (variables.target === "training") setTraining(data);
       else setHeld(data);
       fit.reset();
+      setOpenedStudy(null);
     },
   });
   const fields = [
@@ -159,8 +246,8 @@ export function CalibrationPanel() {
           <p className="text-xs leading-relaxed text-muted-foreground">
             Upload measured car-only finish times (CSV or XLSX). Header <code>time [s]</code> is
             required; optional <code>mass [g]</code>, run, lane and reaction columns are previewed.
-            Reaction is not subtracted by the model. Files are parsed for this calculation and not
-            saved to the evidence store.
+            Reaction is not subtracted by the model. Running the calibration stores the exact
+            inputs, results and uploaded files (with hashes) in the evidence store.
           </p>
           {(["training", "held"] as const).map((target) => (
             <div key={target} className="space-y-1">
@@ -177,6 +264,8 @@ export function CalibrationPanel() {
                   const file = e.target.files?.[0];
                   if (target === "training") setTraining(null);
                   else setHeld(null);
+                  setFiles((f) => ({ ...f, [target]: file ?? null }));
+                  setOpenedStudy(null);
                   fit.reset();
                   upload.reset();
                   if (file) upload.mutate({ file, target });
@@ -259,9 +348,16 @@ export function CalibrationPanel() {
           </label>
           <Button
             disabled={!valid || fit.isPending}
-            onClick={() => {
+            onClick={async () => {
               if (!training) return;
               const thrust = curve ?? estimateThrust(DEFAULT_ESTIMATE);
+              const chosen = [files.training, files.held].filter((f): f is File => !!f);
+              const source_files = await Promise.all(
+                chosen.map(async (file) => ({
+                  label: file.name,
+                  content_b64: await fileToBase64(file),
+                })),
+              );
               fit.mutate({
                 points: runRows(training, values.track),
                 held_out: held ? runRows(held, values.heldTrack) : [],
@@ -275,6 +371,7 @@ export function CalibrationPanel() {
                 offset_sd_s: values.offset / 1000,
                 rho_kg_m3: values.rho,
                 seed: 0,
+                source_files,
               });
             }}
           >
@@ -282,6 +379,74 @@ export function CalibrationPanel() {
           </Button>
         </fieldset>
         <div className="min-w-0 space-y-4 p-4">
+          <section aria-label="Saved calibrations" className="space-y-2">
+            <div className="flex items-baseline justify-between gap-2">
+              <h3 className="font-medium">Saved calibrations</h3>
+              {studies.data && (
+                <span className="text-xs tabular-nums text-muted-foreground">
+                  {studies.data.length} stored
+                </span>
+              )}
+            </div>
+            {studies.isPending ? (
+              <Skeleton className="h-16" />
+            ) : studies.isError ? (
+              <p role="alert" className="text-xs text-destructive">
+                {studies.error.message}{" "}
+                <Button size="sm" variant="link" onClick={() => void studies.refetch()}>
+                  Retry
+                </Button>
+              </p>
+            ) : !studies.data.length ? (
+              <p className="text-xs text-muted-foreground">
+                No calibration has been saved yet. Running one stores its inputs, results and
+                source files as evidence.
+              </p>
+            ) : (
+              <ul className="divide-y rounded-lg border text-xs">
+                {studies.data.map((study) => (
+                  <li key={study.study_id} className="space-y-1 p-2">
+                    <div className="flex flex-wrap items-baseline justify-between gap-2">
+                      <span className="tabular-nums text-muted-foreground">
+                        {new Date(study.created_at).toLocaleString()}
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={open.isPending}
+                        onClick={() => open.mutate(study.study_id)}
+                      >
+                        {openedStudy === study.study_id ? "Reopen" : "Open"}
+                      </Button>
+                    </div>
+                    <div className="tabular-nums">
+                      {study.n_runs} runs
+                      {study.n_held_out ? ` · ${study.n_held_out} held out` : ""}
+                      {study.medians
+                        ? ` · CdA ${(study.medians.cda_m2 * 10000).toFixed(2)} cm² · Crr ${study.medians.crr.toFixed(4)}`
+                        : " · medians unavailable"}
+                    </div>
+                    <div className="truncate text-muted-foreground">
+                      {study.source_labels.length
+                        ? study.source_labels.join(", ")
+                        : "no source file stored"}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {open.isError && (
+              <p role="alert" className="text-xs text-destructive">
+                Could not open that calibration: {open.error.message}
+              </p>
+            )}
+            {openedStudy && (
+              <p className="text-xs text-muted-foreground">
+                Loaded inputs from {openedStudy}. Confirm the timing definition before
+                recalculating; a new run saves a new study.
+              </p>
+            )}
+          </section>
           <p className="text-sm text-muted-foreground">
             Posterior estimates depend on the supplied runs, thrust curve and priors. Timing alone
             may not identify drag and rolling separately. No physical validation is implied.

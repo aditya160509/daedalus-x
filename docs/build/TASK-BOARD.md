@@ -22,7 +22,7 @@ Take the **first `todo` whose dependencies are `accepted` or `review`**. "Lane" 
 | T14 | [App-wide polish pass](tasks/T14-polish.md) | frontend | all UI tasks | todo | |
 | T15 | Outcome objective: expected India NF points, knock-out win probability, tail risk (MASTER-PLAN 22.3) | backend-ml | T10 | review | Claude Sonnet 5.5 (branch next-wave; outcome.py, no API or UI yet) |
 | T16 | Third-party timestamps for sealed predictions | backend-api | P2-02 | review | Claude (persisted verification records + history UI connected; real trusted authority response pending) |
-| T17 | Bayesian calibration, information gain, out-of-sample validation | backend-ml | T09 | review | Terra + Codex (API/UI and separate held-out scoring; evidence persistence and physical validation pending) |
+| T17 | Bayesian calibration, information gain, out-of-sample validation | backend-ml | T09 | review | Claude (API/UI, separate held-out scoring, saved studies with exact inputs/results/source files and reopening; physical validation pending) |
 | T18 | Cartridge thrust model (gas type to be confirmed) | backend-ml | gas confirmed | todo | |
 | T19 | Energy-loss audit | backend-ml | - | review | Claude Sonnet 5.5 (branch next-wave; energy.py, no API or UI yet) |
 | T20 | FORGE v2: missing measures, pass probability, points at risk | backend-api + frontend-2d | T11 | todo | |

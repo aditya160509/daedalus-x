@@ -8,6 +8,9 @@ Monte Carlo request as the manifest, so a prediction cannot be quietly adjusted 
 
 from __future__ import annotations
 
+import base64
+import binascii
+import json
 from dataclasses import asdict
 from pathlib import Path
 from threading import Lock
@@ -38,6 +41,7 @@ from daedalus.store import (
     EvidenceStore,
     IntegrityError,
     MissingReferenceError,
+    sha256_of,
 )
 
 router = APIRouter(prefix="/v1", tags=["data", "calibration"])
@@ -316,6 +320,41 @@ def list_calibrations() -> list[dict[str, Any]]:
 
 _BAYESIAN_LOCK = Lock()
 
+# A source file only needs to travel inside the calibration request, so keep it small.
+MAX_SOURCE_BYTES = 4 * 1024 * 1024
+
+
+class SourceFile(BaseModel):
+    """A timing or thrust file the user uploaded, sent with the calculation it fed."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    label: str = Field(min_length=1, max_length=120)
+    content_b64: str = Field(min_length=1)
+
+
+def _decode_sources(files: list[SourceFile]) -> list[tuple[str, bytes]]:
+    decoded: list[tuple[str, bytes]] = []
+    for source in files:
+        label = Path(source.label).name
+        if not label.lower().endswith(ALLOWED_EXTENSIONS):
+            raise HTTPException(
+                415,
+                f"unsupported source file {label!r}; allowed: {', '.join(ALLOWED_EXTENSIONS)}",
+            )
+        try:
+            data = base64.b64decode(source.content_b64, validate=True)
+        except (binascii.Error, ValueError) as exc:
+            raise HTTPException(422, f"source file {label!r} is not valid base64") from exc
+        if not data:
+            raise HTTPException(422, f"source file {label!r} is empty")
+        if len(data) > MAX_SOURCE_BYTES:
+            raise HTTPException(
+                413, f"source file {label!r} exceeds the {MAX_SOURCE_BYTES // (1 << 20)} MB limit"
+            )
+        decoded.append((label, data))
+    return decoded
+
 
 class BayesianCalibrationRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
@@ -332,11 +371,82 @@ class BayesianCalibrationRequest(BaseModel):
     offset_sd_s: float = Field(default=0.02, gt=0, le=1)
     rho_kg_m3: float = Field(default=1.204, gt=0.5, lt=1.5)
     seed: int = Field(default=0, ge=0, le=2**32 - 1)
+    source_files: list[SourceFile] = Field(default_factory=list, max_length=4)
+
+
+def _json_bytes(payload: object) -> bytes:
+    return json.dumps(
+        payload, sort_keys=True, separators=(",", ":"), allow_nan=False, default=float
+    ).encode()
+
+
+def _save_study(
+    req: BayesianCalibrationRequest,
+    sources: list[tuple[str, bytes]],
+    results: dict[str, object],
+) -> tuple[c.CalibrationStudy, c.Model]:
+    """Append the model, the exact inputs, the results and any uploaded source files."""
+    summaries = results["summaries"]
+    if not isinstance(summaries, dict):
+        raise HTTPException(500, "calibration results have no summaries")
+    inputs = req.model_dump(mode="json", exclude={"source_files"})
+    inputs_bytes = _json_bytes(inputs)
+    config: dict[str, str | float | int | bool] = {"method": "bayesian", "seed": req.seed}
+    for key in ("cda_m2", "crr", "thrust_scale"):
+        summary = summaries.get(key)
+        if isinstance(summary, dict) and isinstance(summary.get("median"), (int, float)):
+            config[key] = float(summary["median"])
+    store = _store()
+    try:
+        model = store.add(
+            c.Model(
+                kind="titan",
+                training_data_hash=sha256_of(inputs_bytes),
+                config=config,
+                domain=f"{len(req.points)} calibration runs, {len(req.held_out)} held out",
+            )
+        )
+        inputs_art = store.put_artifact(
+            inputs_bytes,
+            kind="calibration_inputs",
+            source_entity_id=model.model_id,
+            provenance=c.Provenance.ESTIMATED,
+        )
+        results_art = store.put_artifact(
+            _json_bytes(results),
+            kind="calibration_results",
+            source_entity_id=model.model_id,
+            provenance=c.Provenance.ESTIMATED,
+        )
+        source_arts = [
+            store.put_artifact(
+                data,
+                kind="calibration_source",
+                source_entity_id=model.model_id,
+                provenance=c.Provenance.MEASURED,
+            )
+            for _label, data in sources
+        ]
+        study = store.add(
+            c.CalibrationStudy(
+                method="bayesian",
+                model_id=model.model_id,
+                inputs_artifact_id=inputs_art.artifact_id,
+                results_artifact_id=results_art.artifact_id,
+                source_artifact_ids=tuple(a.artifact_id for a in source_arts),
+                source_labels=tuple(label for label, _data in sources),
+                n_runs=len(req.points),
+                n_held_out=len(req.held_out),
+            )
+        )
+        return study, model
+    finally:
+        store.close()
 
 
 @router.post("/calibrations/bayesian")
 def bayesian_calibration(req: BayesianCalibrationRequest) -> dict[str, object]:
-    """Fit the existing Bayesian model and optionally score separate held-out runs."""
+    """Fit the existing Bayesian model, score held-out runs and save the whole study."""
     from daedalus.bayes_calibration import BayesCalibrationError, Priors, calibrate
 
     if not _BAYESIAN_LOCK.acquire(blocking=False):
@@ -350,6 +460,7 @@ def bayesian_calibration(req: BayesianCalibrationRequest) -> dict[str, object]:
             for value in (point.time_s, point.track_m, point.sigma_s, point.mass_kg)
         ) or not np.all(np.isfinite([*req.thrust_t_s, *req.thrust_force_n])):
             raise ValueError("run and thrust values must be finite")
+        sources = _decode_sources(req.source_files)
         thrust = ThrustCurve(np.asarray(req.thrust_t_s), np.asarray(req.thrust_force_n))
         priors = Priors(
             req.cda_m2,
@@ -389,7 +500,9 @@ def bayesian_calibration(req: BayesianCalibrationRequest) -> dict[str, object]:
                     "error_s": float(median - run.time_s),
                 }
             )
-        return {**posterior.to_mapping(), "held_out": held_out}
+        results: dict[str, object] = {**posterior.to_mapping(), "held_out": held_out}
+        study, model = _save_study(req, sources, results)
+        return {**results, "study_id": study.study_id, "model_id": model.model_id}
     except (BayesCalibrationError, ValueError, np.linalg.LinAlgError) as exc:
         raise HTTPException(422, str(exc)) from exc
     finally:
@@ -409,6 +522,88 @@ def get_calibration(model_id: str) -> dict[str, Any]:
         return model.model_dump(mode="json")
     finally:
         store.close()
+
+
+def _study_summary(study: c.CalibrationStudy, store: EvidenceStore) -> dict[str, object]:
+    summaries: dict[str, float] | None = None
+    try:
+        results = json.loads(store.read_artifact(study.results_artifact_id))
+        summaries = {
+            key: float(value["median"]) for key, value in results.get("summaries", {}).items()
+        }
+    except (KeyError, ValueError, TypeError):
+        summaries = None  # missing or unreadable results are shown as absent, not invented
+    return {
+        "study_id": study.study_id,
+        "created_at": study.created_at.isoformat(),
+        "method": study.method,
+        "model_id": study.model_id,
+        "n_runs": study.n_runs,
+        "n_held_out": study.n_held_out,
+        "source_labels": list(study.source_labels),
+        "medians": summaries,
+    }
+
+
+@router.get("/calibration-studies")
+def list_calibration_studies() -> list[dict[str, object]]:
+    """Saved calibrations, newest first; each carries the IDs needed to reopen it."""
+    store = _store()
+    try:
+        studies = sorted(
+            store.records(c.CalibrationStudy),
+            key=lambda s: (s.created_at, s.study_id),
+            reverse=True,
+        )
+        return [_study_summary(s, store) for s in studies]
+    finally:
+        store.close()
+
+
+@router.get("/calibration-studies/{study_id}")
+def get_calibration_study(study_id: str) -> dict[str, object]:
+    """Exact stored inputs, results, trust-relevant artifacts and source-file metadata."""
+    store = _store()
+    try:
+        try:
+            study = store.get(study_id, c.CalibrationStudy)
+        except KeyError as exc:
+            raise HTTPException(404, f"calibration study {study_id!r} not found") from exc
+        try:
+            inputs = json.loads(store.read_artifact(study.inputs_artifact_id))
+            results = json.loads(store.read_artifact(study.results_artifact_id))
+        except KeyError as exc:
+            raise HTTPException(
+                409, f"calibration study {study_id!r} is missing a stored artifact"
+            ) from exc
+        sources = []
+        for index, artifact_id in enumerate(study.source_artifact_ids):
+            artifact = store.get(artifact_id, c.Artifact)
+            sources.append(
+                {
+                    "artifact_id": artifact_id,
+                    "label": study.source_labels[index]
+                    if index < len(study.source_labels)
+                    else artifact_id,
+                    "content_sha256": artifact.content_sha256,
+                    "size_bytes": _artifact_size(store, artifact_id),
+                }
+            )
+        return {
+            "study": _study_summary(study, store),
+            "inputs": inputs,
+            "results": results,
+            "sources": sources,
+        }
+    finally:
+        store.close()
+
+
+def _artifact_size(store: EvidenceStore, artifact_id: str) -> int:
+    try:
+        return len(store.read_artifact(artifact_id))
+    except KeyError:
+        return 0
 
 
 class SealRequest(BaseModel):

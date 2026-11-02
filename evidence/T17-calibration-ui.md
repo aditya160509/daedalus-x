@@ -9,3 +9,13 @@ Checks: `uv run pytest -q tests/test_bayes_calibration.py` (5 synthetic core tes
 Scientific gates remain: real instrument-backed runs under varied conditions, known timing definition and thrust, independent held-out measurements, assessment of sampling quality and model discrepancy. No physical validation or browser check was performed. The limited particles may leave the posterior approximate, particularly when effective sample size is low; use warnings rather than treating the result as an acceptance claim.
 
 Parent review added a nonblocking single-calibration gate per API process to avoid concurrent memory-heavy posterior fits, with an overlap-rejection test. Input fieldsets are disabled while fitting/planning so a late result cannot silently appear beside edited assumptions.
+
+## 2026-11-02 — saved studies, exact inputs and source files
+
+- `POST /v1/calibrations/bayesian` now appends a `titan` Model, a `CalibrationStudy` (`cal_*`), the canonical request JSON (`calibration_inputs` artifact), the posterior/held-out results (`calibration_results` artifact) and each uploaded file (`calibration_source` artifact, capped at 4 MB, extension-whitelisted, base64-validated). The study references the model and every artifact; the store rejects a study whose references are missing.
+- Inputs are stored without the file bytes; the results artifact holds what the UI displayed. The model's `training_data_hash` is the SHA-256 of the canonical inputs, so an identical rerun is recognisable.
+- `GET /v1/calibration-studies` lists saved studies newest first with run counts, source labels and posterior medians (read from the results artifact; absent when unreadable). `GET /v1/calibration-studies/{id}` returns the exact inputs, results and source metadata (label, hash, size) for reopening.
+- Race → Calibration now shows saved studies with Open; opening restores the points, thrust curve, priors and track/SD fields from the stored request, clears the confirmation and keeps the loaded study ID visible. A recalculation saves a new study rather than editing the old one.
+- The panel no longer says files are not saved; it states that running the calibration stores inputs, results and files with hashes.
+- Checks: `pytest tests/test_api_bayesian_calibration.py tests/test_bayes_calibration.py tests/test_api_data.py tests/test_importers.py tests/test_api_analysis.py` → 41 passed; ruff check/format, `tsc --noEmit` and focused oxlint passed.
+- Still open: no real measured timing file has been calibrated, no physical validation, and the stored posterior is not yet applied to the Race model. Reopening rebuilds rows from stored points, so the original file is available as evidence but is not re-parsed by the UI.

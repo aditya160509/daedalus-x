@@ -790,6 +790,8 @@ const BayesianCalibration = z.object({
       error_s: z.number(),
     }),
   ),
+  study_id: z.string(),
+  model_id: z.string(),
 });
 interface CalibrationRun {
   time_s: number;
@@ -810,12 +812,72 @@ export interface BayesianCalibrationRequest {
   offset_sd_s: number;
   rho_kg_m3: number;
   seed: number;
+  source_files?: { label: string; content_b64: string }[];
 }
 export const calibrateBayesian = (input: BayesianCalibrationRequest) =>
   request("/v1/calibrations/bayesian", BayesianCalibration, {
     method: "POST",
     body: JSON.stringify(input),
   });
+
+const CalibrationStudySummary = z.object({
+  study_id: z.string(),
+  created_at: z.string(),
+  method: z.string(),
+  model_id: z.string(),
+  n_runs: z.number().int().positive(),
+  n_held_out: z.number().int().nonnegative(),
+  source_labels: z.array(z.string()),
+  medians: z.record(z.string(), z.number()).nullable(),
+});
+export type CalibrationStudySummary = z.infer<typeof CalibrationStudySummary>;
+const CalibrationStudyDetail = z.object({
+  study: CalibrationStudySummary,
+  inputs: z.object({
+    points: z.array(
+      z.object({
+        time_s: z.number(),
+        track_m: z.number(),
+        sigma_s: z.number(),
+        mass_kg: z.number(),
+        reaction_s: z.number().nullable().optional(),
+      }),
+    ),
+    held_out: z.array(
+      z.object({
+        time_s: z.number(),
+        track_m: z.number(),
+        sigma_s: z.number(),
+        mass_kg: z.number(),
+        reaction_s: z.number().nullable().optional(),
+      }),
+    ),
+    thrust_t_s: z.array(z.number()),
+    thrust_force_n: z.array(z.number()),
+    cda_m2: z.number(),
+    crr: z.number(),
+    thrust_scale: z.number(),
+    log_sd: z.number(),
+    extra_noise_scale_s: z.number(),
+    offset_sd_s: z.number(),
+    rho_kg_m3: z.number(),
+    seed: z.number(),
+  }),
+  results: z.looseObject({ held_out: z.array(z.looseObject({})) }),
+  sources: z.array(
+    z.object({
+      artifact_id: z.string(),
+      label: z.string(),
+      content_sha256: z.string(),
+      size_bytes: z.number().int().nonnegative(),
+    }),
+  ),
+});
+export type CalibrationStudyDetail = z.infer<typeof CalibrationStudyDetail>;
+export const listCalibrationStudies = () =>
+  request("/v1/calibration-studies", z.array(CalibrationStudySummary));
+export const getCalibrationStudy = (id: string) =>
+  request(`/v1/calibration-studies/${encodeURIComponent(id)}`, CalibrationStudyDetail);
 
 const BeamMaterial = z.object({
   name: z.string(),
