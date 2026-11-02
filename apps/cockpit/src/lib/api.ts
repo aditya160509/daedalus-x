@@ -722,6 +722,74 @@ export const getEnergyAudit = (race: RaceSimulationRequest) =>
     }),
   });
 
+const TimingImport = z.object({
+  filename: z.string(),
+  units: z.record(z.string(), z.string()),
+  warnings: z.array(z.string()),
+  rows: z.array(
+    z.object({
+      run_no: z.number(),
+      lane: z.string(),
+      time_s: z.number(),
+      reaction_s: z.number().nullable(),
+      mass_kg: z.number().nullable(),
+      notes: z.string(),
+    }),
+  ),
+});
+export type TimingImport = z.infer<typeof TimingImport>;
+export const previewTimingImport = (file: File) => {
+  const body = new FormData();
+  body.append("file", file);
+  return request("/v1/data/import?kind=race_timing", TimingImport, { method: "POST", body });
+};
+const BayesSummary = z.object({
+  median: z.number(),
+  p05: z.number(),
+  p95: z.number(),
+  information_gain: z.number().nullable(),
+});
+const BayesianCalibration = z.object({
+  summaries: z.record(z.string(), BayesSummary),
+  effective_sample_size: z.number(),
+  seed: z.number(),
+  warnings: z.array(z.string()),
+  held_out: z.array(
+    z.object({
+      measured_s: z.number(),
+      median_s: z.number(),
+      p05_s: z.number(),
+      p95_s: z.number(),
+      error_s: z.number(),
+    }),
+  ),
+});
+interface CalibrationRun {
+  time_s: number;
+  track_m: number;
+  sigma_s: number;
+  mass_kg: number;
+}
+export interface BayesianCalibrationRequest {
+  points: CalibrationRun[];
+  held_out: CalibrationRun[];
+  thrust_t_s: number[];
+  thrust_force_n: number[];
+  cda_m2: number;
+  crr: number;
+  thrust_scale: number;
+  log_sd: number;
+  extra_noise_scale_s: number;
+  offset_sd_s: number;
+  rho_kg_m3: number;
+  seed: number;
+}
+export const calibrateBayesian = (input: BayesianCalibrationRequest) =>
+  request("/v1/calibrations/bayesian", BayesianCalibration, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+
 const BeamMaterial = z.object({
   name: z.string(),
   youngs_modulus_gpa: z.number(),

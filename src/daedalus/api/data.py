@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from dataclasses import asdict
 from pathlib import Path
+from threading import Lock
 from typing import Annotated, Any, Literal
 
 import numpy as np
@@ -311,6 +312,88 @@ def list_calibrations() -> list[dict[str, Any]]:
         return [m.model_dump(mode="json") for m in store.records(c.Model) if m.kind == "titan"]
     finally:
         store.close()
+
+
+_BAYESIAN_LOCK = Lock()
+
+
+class BayesianCalibrationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+
+    points: list[MeasuredRun] = Field(min_length=1, max_length=30)
+    held_out: list[MeasuredRun] = Field(default_factory=list, max_length=20)
+    thrust_t_s: list[float] = Field(min_length=2, max_length=20_000)
+    thrust_force_n: list[float] = Field(min_length=2, max_length=20_000)
+    cda_m2: float = Field(gt=0, le=0.05)
+    crr: float = Field(gt=0, le=1)
+    thrust_scale: float = Field(default=1, gt=0, le=5)
+    log_sd: float = Field(default=0.3, gt=0, le=2)
+    extra_noise_scale_s: float = Field(default=0.01, gt=0, le=1)
+    offset_sd_s: float = Field(default=0.02, gt=0, le=1)
+    rho_kg_m3: float = Field(default=1.204, gt=0.5, lt=1.5)
+    seed: int = Field(default=0, ge=0, le=2**32 - 1)
+
+
+@router.post("/calibrations/bayesian")
+def bayesian_calibration(req: BayesianCalibrationRequest) -> dict[str, object]:
+    """Fit the existing Bayesian model and optionally score separate held-out runs."""
+    from daedalus.bayes_calibration import BayesCalibrationError, Priors, calibrate
+
+    if not _BAYESIAN_LOCK.acquire(blocking=False):
+        raise HTTPException(
+            409, "A Bayesian calibration is already running; retry when it finishes"
+        )
+    try:
+        if not all(
+            np.isfinite(value)
+            for point in [*req.points, *req.held_out]
+            for value in (point.time_s, point.track_m, point.sigma_s, point.mass_kg)
+        ) or not np.all(np.isfinite([*req.thrust_t_s, *req.thrust_force_n])):
+            raise ValueError("run and thrust values must be finite")
+        thrust = ThrustCurve(np.asarray(req.thrust_t_s), np.asarray(req.thrust_force_n))
+        priors = Priors(
+            req.cda_m2,
+            req.crr,
+            req.thrust_scale,
+            req.log_sd,
+            req.extra_noise_scale_s,
+            req.offset_sd_s,
+        )
+        posterior = calibrate(
+            req.points,
+            thrust,
+            priors,
+            rho_kg_m3=req.rho_kg_m3,
+            particles=300,
+            stages=2,
+            draws=300,
+            seed=req.seed,
+        )
+        held_out = []
+        for i, run in enumerate(req.held_out):
+            draws = posterior.predict(
+                thrust,
+                track_m=run.track_m,
+                mass_kg=run.mass_kg,
+                rho_kg_m3=req.rho_kg_m3,
+                sigma_s=run.sigma_s,
+                seed=(req.seed + i + 1) % 2**32,
+            )
+            low, median, high = np.quantile(draws, [0.05, 0.5, 0.95])
+            held_out.append(
+                {
+                    "measured_s": run.time_s,
+                    "median_s": float(median),
+                    "p05_s": float(low),
+                    "p95_s": float(high),
+                    "error_s": float(median - run.time_s),
+                }
+            )
+        return {**posterior.to_mapping(), "held_out": held_out}
+    except (BayesCalibrationError, ValueError, np.linalg.LinAlgError) as exc:
+        raise HTTPException(422, str(exc)) from exc
+    finally:
+        _BAYESIAN_LOCK.release()
 
 
 @router.get("/calibrations/{model_id}")

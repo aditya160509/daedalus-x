@@ -144,7 +144,10 @@ export function TestPlannerPanel() {
       bodyClassName="overflow-y-auto"
     >
       <div className="grid gap-0 lg:grid-cols-[minmax(260px,320px)_1fr]">
-        <div className="space-y-4 border-b p-4 lg:border-r lg:border-b-0">
+        <fieldset
+          disabled={plan.isPending}
+          className="min-w-0 space-y-4 border-b p-4 lg:border-r lg:border-b-0"
+        >
           <p className="text-xs leading-relaxed text-muted-foreground">
             Compare timing runs at two masses and two lengths, with optional fast and slow
             coast-downs. Edit the assumptions before planning.
@@ -234,7 +237,7 @@ export function TestPlannerPanel() {
           <Button disabled={!valid || plan.isPending} onClick={submit}>
             Calculate plan
           </Button>
-        </div>
+        </fieldset>
         <div className="min-w-0 space-y-4 p-4">
           <p className="text-sm leading-relaxed text-muted-foreground">
             Expected uncertainty reduction is a model prediction, not a measured outcome. This

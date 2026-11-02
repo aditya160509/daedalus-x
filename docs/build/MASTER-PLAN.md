@@ -373,7 +373,7 @@ The next-wave changes were merged into `main` in `6d708b5`. The table tracks ver
 | 3 Race replay rebuild | 🟨 Built core; acceptance pending | Correct Z-up GLB conversion and leading-point placement; PBR car/wheel motion, studio track, tether/start/sector/finish details, six camera modes, adaptive reflections/effects, cursor timing, comparison controls, photo-finish slow motion and PNG capture | Hardware 60 fps verification, final 1024 px pass and broader final QA; no measured reaction data supplied |
 | 4 Race analysis | 🟨 Partial | Time budget, tornado chart, exchange rates, Breakdown tab, Energy panel (`raceanalysis.py`, `energy.py`) | Stadium timing / TV mode |
 | 5 Closed loop | 📝 Local draft; deferred behind reuse backlog | Local `parametric.py` draft builds a valid 11-solid study assembly using baseline extents and the four ORACLE variables; not wired into the app or committed yet | Constraint-filtered recommendation, build-next API, Design/evidence records, Pit Wall actions, CFD-job integration and accepted-result feedback |
-| 6 Calibration / optimisation analysis | 🟨 Partial | Bayesian calibration core, Monte Carlo and SALib Sobol/Morris API + Sensitivity UI | Calibration UI, GP uncertainty maps and measured validation; ⏳ Sensitivity visual review |
+| 6 Calibration / optimisation analysis | 🟨 Partial | Bayesian calibration API/UI with timing previews and held-out scoring, Monte Carlo and SALib Sobol/Morris API + Sensitivity UI | Calibration persistence/application, GP uncertainty maps and measured validation; ⏳ Calibration/Sensitivity visual review |
 | 7 Remaining | 🟨 Partial | Project page, cleanup, ✅ uPlot telemetry and ✅ React Flow evidence lineage | Run wizard, ⏳ dockview visual review, complete judge outputs and action-level evidence coverage |
 
 ### 23.1 Latest reuse integrations — current tags
@@ -449,7 +449,7 @@ Partial tasks receive a fixed half-point for a simple, reproducible tally; this 
 | T14 | Final app polish | ⬜ Remaining | Consolidated responsiveness, accessibility, performance and acceptance pass remains. |
 | T15 | Racing-points objective | 🟨 Partial | Outcome core and API exist; ORACLE objective integration and declared opponent assumptions or owner-supplied results remain; competitor scraping is cut. |
 | T16 | Third-party prediction timestamps | 🟨 Partial | ✅ Submission/status/explicit OpenSSL verification UI and API connected; real authority response and trusted certificate-chain verification remain. |
-| T17 | Bayesian calibration | 🟨 Partial | Bayesian core exists; measured-data workflow, uncertainty UI and held-out validation remain. |
+| T17 | Bayesian calibration | 🟨 Partial | ✅ Race UI, timing-file preview, explicit priors and optional separate held-out scoring connected; results ephemeral, real held-out validation and evidence persistence remain. |
 | T18 | Cartridge thermodynamic thrust model | ⬜ Remaining | Organiser gas confirmation and measured thrust curves remain. |
 | T19 | Energy-loss audit | ✅ Built | Energy model, API and Race Energy panel connected; final review remains. |
 | T20 | FORGE v2 | 🟨 Partial | Added rolling bands, sampled sections, named-notch logic and remeasurement; missing features and tolerance probabilities remain. |
@@ -581,7 +581,8 @@ Follow scope decision §27: no photo/video/AR/competitor-scraping/base-bleed/com
 - [x] T23 software UI shipped (`c75b9eb`): editable assumptions, optional thrust CSV, actual information-gain recommendations, explicit uncertainty and physical-validation limits. Uses existing TanStack Query/Zod/Base UI components.
 - [ ] ⏳ Dockview and Test Planner visual review; no servers/browser/CFD started for these changes.
 - [x] Terra completed T29 single-design limits UI and T16 timestamp submission/verification workflow; parent reviewed sources. Existing ECharts, Query, Zod/Base UI and OpenSSL reused.
-- [ ] 🔄 Terra continuing T17/T09 Bayesian calibration UI and measured-input workflow. Partial task status stays until each remaining gate is met.
+- [x] Terra completed T17/T09 ephemeral Bayesian calibration workflow; parent added a single-fit concurrency gate and disabled assumption editing during fits.
+- [ ] 🔄 Terra continuing T04/T06 wake planes and Q-criterion via the active PyVista/vtk.js exporter/viewer. Partial task status stays until each remaining gate is met.
 
 Checklist score remains 45%: these integrations advance existing partial tasks; they do not establish scientific acceptance or complete all their remaining scope.
 

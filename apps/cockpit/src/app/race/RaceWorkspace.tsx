@@ -39,10 +39,12 @@ const RACE_TABS = [
   { id: "start", label: "Start" },
   { id: "energy", label: "Energy" },
   { id: "breakdown", label: "Breakdown" },
+  { id: "calibration", label: "Calibration" },
 ] as const;
 import { SpreadPanel } from "./SpreadPanel";
 import { EnergyPanel } from "@/components/race/EnergyPanel";
 import { BreakdownPanel } from "@/components/race/BreakdownPanel";
+import { CalibrationPanel } from "@/components/race/CalibrationPanel";
 import {
   DEFAULT_CAR,
   DEFAULT_ESTIMATE,
@@ -567,6 +569,11 @@ export function RaceWorkspace() {
           {tab === "energy" && (
             <div className="mx-auto w-full max-w-4xl overflow-y-auto">
               <EnergyPanel data={energy.data} error={energy.error} fetching={energy.isFetching} />
+            </div>
+          )}
+          {tab === "calibration" && (
+            <div className="mx-auto h-full max-w-5xl p-3 [&>section]:h-full">
+              <CalibrationPanel />
             </div>
           )}
           {tab === "breakdown" && (
