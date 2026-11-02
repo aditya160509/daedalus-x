@@ -76,3 +76,54 @@ The screenshot shows blocky grey cars and an empty track.
 6. Multi-fidelity, adjoint map, calibration (§5.2–5.4)
 7. FoamPilot wizard, dockview, xyflow
 8. Full CHECKLIST.md QA, including the "connected" checks
+
+---
+
+## 9. UI quality bar: T3 Code / Linear / shadcn
+Every page must pass this before it counts as done:
+- **One job per screen.** One main view plus at most one side panel. No card grids or stacked sliders.
+- **Quiet chrome.** Neutral greys, one accent used only for active or selected states, 1px hairline borders, no glow, no loud buttons. The primary action is white-on-dark (shadcn default), not cyan.
+- **Type.** Inter for UI, JetBrains Mono for numbers; tabular numbers; 12–14 px UI text with clear hierarchy (title, value, unit, muted label).
+- **Density like T3 Code / Linear.** Tight 8 px spacing grid, compact controls, keyboard shortcuts on everything (⌘K, tab keys).
+- **Components only from shadcn/Base UI** (sheet, tabs, select, slider, tooltip, command, toast). No hand-rolled chrome.
+- **Status shown once:** the provenance badge lives in the header only.
+- **Charts:** one theme (ECharts/uPlot), units on every axis, uncertainty bands, source badge, hover tooltips with values.
+- **Motion:** 150 ms ease-out, never decorative.
+- **Empty, loading and error states** on every panel (skeletons, not spinners).
+- **Responsive:** 1440 / 1024 / 375 px with no squashed panels.
+
+## 10. Honest ratings and cuts
+Full table in `RATINGS.md`. Overall today: about 5.5/10.
+Cuts being done now:
+- [x] Aero score "97" gauge → real CdA vs the design-space best
+- [x] Old Flow view → 3D Flow (vtk.js) becomes Flow
+- [x] Pit Wall Legal tab → removed (Design → Rules has it)
+- [x] Loud cyan Present button → quiet
+- [x] Duplicate "Simulated" badges → header only
+- [x] Race what-if slider stack → collapsed behind "Advanced"
+Later: Race replay rebuild, Ghost merged into Replay, Inspect merged into the CAD side panel.
+
+## 11. All analysis (full list, ranked by points ÷ effort)
+1. India NF compliance sheet (every rule, value, margin, penalty; printable)
+2. Drag breakdown by part and by pressure vs friction
+3. Run vs run comparison (ΔCp surface, Δwake, Δforces)
+4. Grid independence (Richardson extrapolation, GCI)
+5. Race-time sensitivity tornado (mass, CdA, thrust, rolling, reaction)
+6. Adjoint drag map on the car surface
+7. Prediction vs reality calibration over races
+8. Wheel and wake study (Q-criterion vortex cores, wake deficit planes)
+9. Mass budget vs the minimum mass rule
+10. ms gained per mm changed (design-change value table)
+11. Monte Carlo race-time distribution with p5–p95
+12. ORACLE: GP uncertainty map, expected improvement map, benchmark vs random
+13. Thrust curve fit and cartridge-to-cartridge variance
+14. Start reaction statistics (mean, σ, distribution)
+15. Convergence and acceptance audit per run (why accepted or rejected)
+
+## 12. Open source map (from the 2026-11-02 search)
+- Wind Tunnel: **trame + PyVista** (Apache) as the ParaView-grade engine; vtk.js/Glance (BSD) client side
+- Race UI: f1-dash, F1 Replay Timing, f1-telemetry layouts (check licences); FastF1/OpenF1 chart conventions
+- Charts: uPlot (MIT) + ECharts (Apache)
+- UI kit: shadcn/ui templates on Tailwind v4 + Base UI (MIT)
+- Reference sims: TUMFTM race-simulation / laptime-simulation
+- Benchmark to beat: Synopsys/Ansys STEM Racing digital twin racetrack (commercial)
