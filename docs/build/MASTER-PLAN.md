@@ -309,13 +309,13 @@ The next-wave changes were merged into `main` in `6d708b5`. The table tracks ver
 | 2 Wind Tunnel analysis | 🟨 Partial | Analysis API (`api/analysis.py`) | Drag by part, compare runs, grid independence, wake/vortex layers |
 | 3 Race replay rebuild | 🟨 Built core; acceptance pending | Correct Z-up GLB conversion and leading-point placement; PBR car/wheel motion, studio track, tether/start/sector/finish details, six camera modes, adaptive reflections/effects, cursor timing, comparison controls, photo-finish slow motion and PNG capture | Hardware 60 fps verification, final 1024 px pass and broader final QA; no measured reaction data supplied |
 | 4 Race analysis | 🟨 Partial | Time budget, tornado chart, exchange rates, Breakdown tab, Energy panel (`raceanalysis.py`, `energy.py`) | Stadium timing / TV mode |
-| 5 Closed loop | 📝 Local draft; paused | Local `parametric.py` draft builds a valid 11-solid study assembly using baseline extents and the four ORACLE variables; not wired into the app or committed yet | Constraint-filtered recommendation, build-next API, Design/evidence records, Pit Wall actions, CFD-job integration and accepted-result feedback |
+| 5 Closed loop | 📝 Local draft; deferred behind reuse backlog | Local `parametric.py` draft builds a valid 11-solid study assembly using baseline extents and the four ORACLE variables; not wired into the app or committed yet | Constraint-filtered recommendation, build-next API, Design/evidence records, Pit Wall actions, CFD-job integration and accepted-result feedback |
 | 6 Calibration | 🟨 Partial | Bayesian calibration (`bayes_calibration.py`), bigger Monte Carlo | Calibration UI, uncertainty maps |
 | 7 Remaining | 🟨 Partial | Project page (`app/project`), clean-up (old flow viewer deleted, knip passes) | Run wizard, dockview, evidence graph, judge outputs |
 
 ### Owner handoff checkpoint — 2026-11-02
 
-Paused at the owner's request for a progress handoff. Resume only when the owner says continue.
+Historical pause checkpoint, subsequently resumed; retained for handoff context. The owner resumed work with an open-source-first priority; see §26.
 
 **Five pieces committed and pushed to main in this session:**
 1. `adae52a` — Replace the UK pitch/checklist example with the reproduced India NF front-wheel-gap finding.
@@ -476,7 +476,7 @@ The requested named projects were used to different extents. The replay is a cus
 
 Licences were checked before replay-source use, pinned source references were recorded, and retained MIT/AGPL licence texts were added. See [THIRD_PARTY.md](../../THIRD_PARTY.md), [replay references](references/ORDER-3.md), and [drawing references](references/T22.md). No code from a repository without a licence was copied in this session. Planned source lists are not proof of adoption.
 
-### 25.1 Reuse shortfall and exact continuation instructions
+### 25.1 Reuse shortfall and exact continuation instructions (pre-resume snapshot)
 
 **Owner's instruction:** reuse as much suitable, licensed open-source implementation as possible. The previous build pass fell short of that instruction: Codex used racing-game mainly as a reference and wrote more custom replay code than requested. This was an implementation choice, not a licence restriction. Existing functionality is saved; this note does not claim the missing adoption has been completed.
 
@@ -503,4 +503,30 @@ Licences were checked before replay-source use, pinned source references were re
 - [ ] Review whether any suitable newly written components should be replaced by upstream adaptations. Preserve working behaviour until its replacement is connected and reviewable; do not delete the current implementation wholesale.
 - [ ] Continue the remaining build order, prioritising implementation and cleanup. Batch focused checks around completed changes; leave broad QA and heavy CFD to the agreed final phase.
 
-Work remains paused until the owner says continue. This documentation update does not resume implementation.
+Historical note: the owner subsequently resumed implementation. Current work is tracked in §26.
+
+
+## 26. Open-source-first resume — 2026-11-02
+
+Owner resumed implementation, prioritising suitable prebuilt open source, fast completion of partial work and high-quality UI. Do not restart the repository audit; use the existing checkpoint and inspect only files needed for each integration.
+
+### Reuse pass 1 — imported replay/timing components
+
+- [x] Clone the actual licensed upstream sources to temporary directories and pin revisions.
+- [x] Import/adapt racing-game's speed-gauge SVG and Score/Scores/Finished result structure; replace upstream physics/store/auth inputs with our telemetry props.
+- [x] Import/adapt f1-dash DriverTag, DriverGap, DriverLapTime and full DriverMiniSectors presentation. Replace its F1 feed/settings dependencies with typed model-data adapters.
+- [x] Connect imported components to selected car names, trajectory-derived speed, finish times, gaps and eight actual sector durations.
+- [x] Preserve MIT/AGPL notices and record source-to-destination mapping below. TypeScript passes; changed-component lint has no errors (upstream static-index warnings remain). Consolidated visual QA remains.
+- [ ] uPlot telemetry renderer (package installed; not yet connected at this checkpoint).
+- [ ] React Flow evidence lineage (package installed; not yet connected at this checkpoint).
+
+| Upstream revision / original path | Destination | Adaptation |
+|---|---|---|
+| racing-game `7816a5d`, `src/ui/Speed/Gauge.tsx` | `components/race/upstream/SpeedGauge.tsx` | Original SVG background/foreground paths retained; telemetry props, SI/km/h units, unique SVG IDs and cockpit styling |
+| racing-game `7816a5d`, `src/ui/LeaderBoard.tsx` + `src/ui/Finished.tsx` | `components/race/upstream/ReplayResults.tsx` | Score/Scores and finish-result structure; model results replace Supabase/auth/medal assets |
+| f1-dash `d21607a`, `dashboard/src/components/driver/DriverTag.tsx` | `components/race/timing/DriverTag.tsx` | Lane tags and cockpit tokens |
+| f1-dash `d21607a`, `dashboard/src/components/driver/DriverGap.tsx` | `components/race/timing/DriverGap.tsx` | Typed local feed shape; our trajectory/finish gaps with units |
+| f1-dash `d21607a`, `dashboard/src/components/driver/DriverLapTime.tsx` | `components/race/timing/DriverLapTime.tsx` | Current progress/finish and best comparison, without fabricated personal-best history |
+| f1-dash `d21607a`, `dashboard/src/components/driver/DriverMiniSectors.tsx` | `components/race/timing/DriverMiniSectors.tsx` | Full sector presentation; eight equal-distance sectors in a compact grid; local adapter replaces settings/data stores |
+
+**Fit decisions:** Racing-game's road-course GLB, Cannon driving physics, keyboard/audio controls and Supabase authentication are not imported: the required product is a straight STEM track replaying TITAN results, not an interactive road-driving game or a foreign score service. The real car, domain-specific track geometry and trajectory interpolation remain. This is component reuse, not a claim that the complete upstream applications were imported.

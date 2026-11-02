@@ -22,3 +22,10 @@ Rebuild Chili3D: clone it into `vendor/chili3d` at the commit above, `git apply 
 - **Not adopted in this pass:** trame, FoamPilot, F3D, uPlot, FastF1, dockview, xyflow, SU2, Ax/BoTorch/Optuna. Current charts use ECharts; the current GP uses NumPy/SciPy. Their presence in a planning table does not mean they are connected.
 
 The complete progress ledger and scoring method are in `docs/build/MASTER-PLAN.md` §§24–25.
+
+
+## Additional direct component adaptations — reuse pass 1
+
+Pinned racing-game `7816a5d954b75e6ad853ae4e4f0cbbd628072643` (MIT): `src/ui/Speed/Gauge.tsx` → `components/race/upstream/SpeedGauge.tsx`; `src/ui/LeaderBoard.tsx` Score/Scores and `src/ui/Finished.tsx` result structure → `components/race/upstream/ReplayResults.tsx`.
+
+Pinned f1-dash `d21607afbbab44a97863a605bad174d3c92367f2` (AGPL-3.0): `dashboard/src/components/driver/{DriverTag,DriverGap,DriverLapTime,DriverMiniSectors}.tsx` → corresponding files in `components/race/timing/`. Original rendering logic retained where applicable; source stores/feed types replaced with typed adapters to our model results; layout and units restyled. Full mapping and exclusions: MASTER-PLAN §26. Existing retained licence texts apply. Earlier scope notes describe the first pass before these additional imports.

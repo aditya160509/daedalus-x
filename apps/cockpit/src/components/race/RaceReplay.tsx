@@ -1,5 +1,7 @@
 "use client";
 
+import { ReplayResults } from "./upstream/ReplayResults";
+import { SpeedGauge } from "./upstream/SpeedGauge";
 import { Pause, Play, RotateCcw } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { SegmentedControl } from "@/components/ui/primitives";
@@ -38,6 +40,8 @@ export function RaceReplay({
   cursor,
   onCursor,
   hasGhost,
+  primaryName = "Car",
+  comparisonName = "Comparison",
 }: {
   trackM: number;
   model: LoadedModel | null;
@@ -47,6 +51,8 @@ export function RaceReplay({
   cursor: number;
   onCursor: (t: number) => void;
   hasGhost: boolean;
+  primaryName?: string;
+  comparisonName?: string;
 }) {
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState("1");
@@ -57,6 +63,10 @@ export function RaceReplay({
   const ghostFinish = ghost ? timeAtDistance(trackM, ghost.time, ghost.position) : null;
   const photoTime = Math.min(finish ?? Infinity, ghostFinish ?? Infinity);
   const speedMps = velocityAt(cursor, primary);
+  const peakSpeed = useMemo(
+    () => Math.max(0.01, ...primary.time.map((time) => velocityAt(time, primary) ?? 0)),
+    [primary],
+  );
   const distance = clampedSampleAt(cursor, primary.time, primary.position) ?? 0;
   const ghostDistance = ghost ? clampedSampleAt(cursor, ghost.time, ghost.position) : null;
   const common = Math.min(distance, ghostDistance ?? distance);
@@ -119,7 +129,6 @@ export function RaceReplay({
         <div className="pointer-events-none absolute top-3 left-3 right-3 flex flex-wrap gap-2">
           {[
             ["Time", `${cursor.toFixed(3)} s`],
-            ["Speed", speedMps === null ? "—" : `${(speedMps * 3.6).toFixed(1)} km/h`],
             ["Distance", `${distance.toFixed(2)} m`],
             ["Ghost Δ", gapMs === null ? "—" : `${gapMs >= 0 ? "+" : ""}${gapMs.toFixed(2)} ms`],
             ["Reaction", "Not supplied"],
@@ -133,6 +142,20 @@ export function RaceReplay({
             </div>
           ))}
         </div>
+        {cursor < endTime - 1e-6 ? (
+          <div className="pointer-events-none absolute bottom-8 right-3 rounded-md border border-white/10 bg-black/50 p-3 backdrop-blur-sm">
+            <SpeedGauge speedMps={speedMps} maximumMps={peakSpeed} />
+          </div>
+        ) : (
+          <div className="pointer-events-none absolute bottom-8 left-3 right-3 max-w-sm">
+            <ReplayResults
+              primary={finish}
+              comparison={hasGhost ? ghostFinish : undefined}
+              primaryName={primaryName}
+              comparisonName={comparisonName}
+            />
+          </div>
+        )}
         <div className="pointer-events-none absolute bottom-2 left-3 text-[9px] text-white/40">
           Launch puff illustrative · trajectory from race model
         </div>

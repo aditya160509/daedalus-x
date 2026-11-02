@@ -414,6 +414,8 @@ export function RaceWorkspace() {
                       cursor={cursor}
                       onCursor={setCursor}
                       hasGhost={ghostTrace !== null}
+                      primaryName={design.id}
+                      comparisonName={activePreset?.name ?? "Manual CdA"}
                     />
                   ) : (
                     <EmptyState

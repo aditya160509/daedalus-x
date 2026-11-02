@@ -1,5 +1,8 @@
 "use client";
 
+import DriverTag from "./timing/DriverTag";
+import DriverGap from "./timing/DriverGap";
+import DriverLapTime from "./timing/DriverLapTime";
 import { Panel } from "@/components/ui/primitives";
 import { clampedSampleAt, miniSectorTimes, type DistanceTrace } from "./raceMath";
 import { MiniSectors, SectorLegend } from "./timing/MiniSectors";
@@ -67,27 +70,54 @@ export function TimingTower({
           return (
             <div key={row.lane} className="space-y-2 p-3">
               <div className="flex items-center gap-2">
-                <span className="font-mono text-xs text-muted-foreground">{index + 1}</span>
+                <DriverTag
+                  position={index + 1}
+                  short={row.lane}
+                  teamColor={row.lane === "A" ? "257985" : "596675"}
+                />
                 <span className="min-w-0 flex-1 truncate text-xs font-medium" title={row.name}>
                   {row.name}
                 </span>
-                <span className="text-[10px] text-muted-foreground">Lane {row.lane}</span>
               </div>
-              <div className="flex items-baseline justify-between gap-2 font-mono text-xs tabular-nums">
-                <span>
-                  {crossed
-                    ? row.time === null
-                      ? "DNF"
-                      : `${row.time.toFixed(4)} s`
-                    : `${row.distance.toFixed(2)} m`}
-                </span>
-                <span className="text-muted-foreground">
-                  {crossed && row.time !== null && Number.isFinite(lead)
-                    ? row.time === lead
-                      ? "Leader"
-                      : `+${((row.time - lead) * 1000).toFixed(2)} ms`
-                    : `${completed}/8 sectors`}
-                </span>
+              <div className="grid grid-cols-2 gap-3">
+                <DriverLapTime
+                  last={{
+                    Value: crossed
+                      ? row.time === null
+                        ? "DNF"
+                        : `${row.time.toFixed(4)} s`
+                      : `${row.distance.toFixed(2)} m`,
+                    OverallFastest: crossed && row.time === lead,
+                  }}
+                  best={{
+                    Value:
+                      crossed && Number.isFinite(lead)
+                        ? `${lead.toFixed(4)} s best`
+                        : `${completed}/8 completed`,
+                  }}
+                  hasFastest={crossed && row.time === lead}
+                />
+                <DriverGap
+                  sessionPart={undefined}
+                  timingDriver={{
+                    GapToLeader:
+                      crossed && row.time !== null && Number.isFinite(lead)
+                        ? row.time === lead
+                          ? "Leader"
+                          : `+${((row.time - lead) * 1000).toFixed(2)} ms to leader`
+                        : index === 0
+                          ? "Leader"
+                          : `${Math.max(0, rows[0].distance - row.distance).toFixed(2)} m behind`,
+                    IntervalToPositionAhead: {
+                      Value:
+                        index === 0
+                          ? "—"
+                          : crossed && rows[index - 1].time !== null && row.time !== null
+                            ? `+${((row.time - rows[index - 1].time!) * 1000).toFixed(2)} ms`
+                            : `${Math.max(0, rows[index - 1].distance - row.distance).toFixed(2)} m`,
+                    },
+                  }}
+                />
               </div>
               <MiniSectors times={row.sectors} other={row.other} completed={completed} />
             </div>
