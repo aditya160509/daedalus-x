@@ -6,6 +6,7 @@ import { Save } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { LegalPanel } from "@/components/pitwall/LegalPanel";
+import { FrontierPanel } from "@/components/pitwall/FrontierPanel";
 import { StrengthPanel } from "@/components/strength/StrengthPanel";
 import { useTab, WorkspaceTabs } from "@/components/shell/WorkspaceTabs";
 import { importCadStep, listDesigns } from "@/lib/api";
@@ -17,6 +18,7 @@ const TABS = [
   { id: "cad", label: "CAD" },
   { id: "inspect", label: "Inspect" },
   { id: "rules", label: "Rules" },
+  { id: "frontier", label: "Limits" },
   { id: "strength", label: "Strength" },
   { id: "drawings", label: "Drawings" },
 ] as const;
@@ -169,6 +171,11 @@ function Studio({
         {tab === "strength" && (
           <div className="mx-auto w-full max-w-3xl overflow-y-auto p-3">
             <StrengthPanel />
+          </div>
+        )}
+        {tab === "frontier" && (
+          <div className="mx-auto h-full max-w-4xl p-3 [&>section]:h-full">
+            <FrontierPanel design={current === BLANK ? undefined : current} onFocus={focus} />
           </div>
         )}
         {tab === "rules" && (

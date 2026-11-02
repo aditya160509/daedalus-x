@@ -374,7 +374,7 @@ The next-wave changes were merged into `main` in `6d708b5`. The table tracks ver
 | 4 Race analysis | 🟨 Partial | Time budget, tornado chart, exchange rates, Breakdown tab, Energy panel (`raceanalysis.py`, `energy.py`) | Stadium timing / TV mode |
 | 5 Closed loop | 📝 Local draft; deferred behind reuse backlog | Local `parametric.py` draft builds a valid 11-solid study assembly using baseline extents and the four ORACLE variables; not wired into the app or committed yet | Constraint-filtered recommendation, build-next API, Design/evidence records, Pit Wall actions, CFD-job integration and accepted-result feedback |
 | 6 Calibration / optimisation analysis | 🟨 Partial | Bayesian calibration core, Monte Carlo and SALib Sobol/Morris API + Sensitivity UI | Calibration UI, GP uncertainty maps and measured validation; ⏳ Sensitivity visual review |
-| 7 Remaining | 🟨 Partial | Project page, cleanup, ✅ uPlot telemetry and ✅ React Flow evidence lineage | Run wizard, 🔄 dockview (package installed; not connected), complete judge outputs and action-level evidence coverage |
+| 7 Remaining | 🟨 Partial | Project page, cleanup, ✅ uPlot telemetry and ✅ React Flow evidence lineage | Run wizard, ⏳ dockview visual review, complete judge outputs and action-level evidence coverage |
 
 ### 23.1 Latest reuse integrations — current tags
 
@@ -384,7 +384,7 @@ The next-wave changes were merged into `main` in `6d708b5`. The table tracks ver
 | uPlot telemetry | ✅ Connected; bands, native zoom/cursor sync, A/B controls and PNG export | ⏳ Final responsive/performance pass; cursor-input memory fix landed | `8cfb60e` (integration began in `20ad8b9`) |
 | React Flow + Dagre evidence lineage | ✅ Connected to actual records/ID references; lazy loaded | ⏳ Full action coverage and final acceptance; current DB has 3 nodes / 2 links | `8cfb60e` |
 | SALib Sobol/Morris sensitivity | ✅ Library, API and Pit Wall tab connected | ⏳ Visual review; analytic/script checks passed | `6c42121` |
-| dockview | 🔄 Dependency installed; integration not started | Verify distribution licence, then connect saved layouts to real Pit Wall panels | Not committed/integrated yet |
+| dockview | ✅ Actual docking engine connected to real Overview panels; saved layouts, drag/drop, reset and compact defaults | ⏳ Visual review; TypeScript and four layout checks passed; MIT notice retained | Current reuse pass 4 |
 | Closed-loop parametric car | 📝 Local CAD-generator draft only | API, evidence, FORGE/CFD and accepted-result feedback not connected | Uncommitted |
 | Final acceptance | ⬜ Still pending | Full QA, accepted CFD campaigns and measured validation | No acceptance claim |
 
@@ -448,20 +448,20 @@ Partial tasks receive a fixed half-point for a simple, reproducible tally; this 
 | T13 | Competition mode and report (AR cut) | 🟨 Partial | Presenter and Typst report exist; complete judge pack and public verification remain; AR is out of scope. |
 | T14 | Final app polish | ⬜ Remaining | Consolidated responsiveness, accessibility, performance and acceptance pass remains. |
 | T15 | Racing-points objective | 🟨 Partial | Outcome core and API exist; ORACLE objective integration and declared opponent assumptions or owner-supplied results remain; competitor scraping is cut. |
-| T16 | Third-party prediction timestamps | 🟨 Partial | RFC 3161 core and API exist; real authority token and full UI workflow remain. |
+| T16 | Third-party prediction timestamps | 🟨 Partial | ✅ Submission/status/explicit OpenSSL verification UI and API connected; real authority response and trusted certificate-chain verification remain. |
 | T17 | Bayesian calibration | 🟨 Partial | Bayesian core exists; measured-data workflow, uncertainty UI and held-out validation remain. |
 | T18 | Cartridge thermodynamic thrust model | ⬜ Remaining | Organiser gas confirmation and measured thrust curves remain. |
 | T19 | Energy-loss audit | ✅ Built | Energy model, API and Race Energy panel connected; final review remains. |
 | T20 | FORGE v2 | 🟨 Partial | Added rolling bands, sampled sections, named-notch logic and remeasurement; missing features and tolerance probabilities remain. |
 | T21 | Structural analysis | 🟨 Partial | Beam FEM, API and Strength panel exist; material validation and 3D FEA remain. |
 | T22 | Drawing pack and drawing importer | 🟨 Partial | 13-item A4 draft generator/UI implemented; detailed annotations, DXF/SVG deviation importer and render pack remain. |
-| T23 | Test planner | 🟨 Partial | Information-gain/coast-down planning core and API exist; complete UI and physical validation remain. |
+| T23 | Test planner | 🟨 Partial | ✅ Pit Wall UI connects editable assumptions, thrust CSV and ranked timing/coast-down recommendations (`c75b9eb`); completed-outcome feedback, density comparison, physical validation and visual review remain. |
 | T24 | Gradient / multi-fidelity ORACLE | ⬜ Remaining | Combined gradient and multi-fidelity optimisation remains. |
 | T25 | Free-form shape optimisation | ⬜ Remaining | Constraint-aware free-form optimisation remains. |
 | T26 | Exhaust base-bleed study | ✂️ Out of scope | Gas confirmation, compressible study and evidence remain. |
 | T27 | Physical-in-the-loop optimiser | ⬜ Remaining | Measured trials and discrepancy-aware optimiser remain. |
 | T28 | Field intelligence | ✂️ Out of scope | Cited competitor portfolio/result dataset and connected analysis remain. |
-| T29 | Legal-frontier map | 🟨 Partial | Margin-ranking/backend foundation exists; complete interactive map remains. |
+| T29 | Legal-frontier map | 🟨 Partial | ✅ Interactive unit-filtered nearest-limit chart/list with rule pages and CAD focus connected; sampled feasible-space frontier and acceptance remain. |
 | T30 | Photo scrutineer | ✂️ Out of scope | Scale-aware image measurements and uncertainty workflow remain. |
 | T31 | Video test lab | ✂️ Out of scope | Trajectory, wobble and snag analysis workflow remains. |
 | T32 | As-built twin | ✂️ Out of scope | Measured scan/photogrammetry-to-model workflow remains. |
@@ -570,7 +570,20 @@ Owner resumed implementation, prioritising suitable prebuilt open source, fast c
 - [x] Rename Pit Wall “CFD runs” to “Observations” so synthetic seeds are not presented as CFD runs.
 - [ ] Visual review of the new tab remains; servers/browser were not started for this pass.
 
-Follow scope decision §27: no photo/video/AR/competitor-scraping/base-bleed/community-calibration work; skip BoTorch, OpenMDAO and trame. CalculiX is gated on real material data. Next reuse candidate: dockview for a saved, rearrangeable Pit Wall workspace.
+Follow scope decision §27: no photo/video/AR/competitor-scraping/base-bleed/community-calibration work; skip BoTorch, OpenMDAO and trame. CalculiX is gated on real material data. Dockview is now connected in reuse pass 4 below.
+
+
+### Reuse pass 4 — Dockview and task queue
+
+- [x] Connect MIT Dockview React 8.8.3 to real Flow, Car, Sealed prediction, Next run and Rules panels in Overview; lazy load the engine.
+- [x] Use native docking, tabs, splits, resizing and serialization rather than rewriting these interactions. Save compact/wide layouts separately; reset restores closed panels. Restrict restored component IDs and disable floating groups.
+- [x] Retain the actual distribution MIT licence. TypeScript, focused lint and four default-layout checks pass.
+- [x] T23 software UI shipped (`c75b9eb`): editable assumptions, optional thrust CSV, actual information-gain recommendations, explicit uncertainty and physical-validation limits. Uses existing TanStack Query/Zod/Base UI components.
+- [ ] ⏳ Dockview and Test Planner visual review; no servers/browser/CFD started for these changes.
+- [x] Terra completed T29 single-design limits UI and T16 timestamp submission/verification workflow; parent reviewed sources. Existing ECharts, Query, Zod/Base UI and OpenSSL reused.
+- [ ] 🔄 Terra continuing T17/T09 Bayesian calibration UI and measured-input workflow. Partial task status stays until each remaining gate is met.
+
+Checklist score remains 45%: these integrations advance existing partial tasks; they do not establish scientific acceptance or complete all their remaining scope.
 
 ---
 

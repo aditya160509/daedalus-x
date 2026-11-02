@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Lock } from "lucide-react";
 import { useState } from "react";
 import { listPredictions, scorePrediction } from "@/lib/api";
+import { TimestampControls } from "@/components/pitwall/TimestampControls";
 import { cn } from "@/lib/utils";
 
 /** Race-day reveal: the newest sealed prediction, then the measured time scored against it. */
@@ -13,6 +14,14 @@ export function SealedReveal() {
   const p = preds.data?.at(-1);
   const score = useMutation({ mutationFn: (v: number) => scorePrediction(p!.prediction_id, v) });
 
+  if (preds.isPending)
+    return <p className="p-4 text-xs text-muted-foreground">Loading predictions…</p>;
+  if (preds.isError)
+    return (
+      <p role="alert" className="p-4 text-xs text-destructive">
+        Could not load predictions: {preds.error.message}
+      </p>
+    );
   if (!p) return <p className="p-4 text-xs text-muted-foreground">No sealed prediction yet.</p>;
   const half = (p.interval_high.value - p.interval_low.value) / 2;
   return (
@@ -62,6 +71,7 @@ export function SealedReveal() {
           </span>
         )}
       </form>
+      {p.manifest_hash && <TimestampControls key={p.prediction_id} id={p.prediction_id} />}
     </div>
   );
 }

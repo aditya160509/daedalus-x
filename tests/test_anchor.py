@@ -142,3 +142,31 @@ def test_plain_http_is_refused() -> None:
 def test_verify_command_names_the_hash() -> None:
     cmd = anchor.verify_command("ab" * 32, "token.tsr")
     assert cmd.startswith("openssl ts -verify") and "ab" * 32 in cmd
+
+
+def test_timestamp_api_status_and_verify_untrusted_response(
+    store: EvidenceStore, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+
+    from daedalus.api import analysis, engineering
+
+    pred = _seal(store)
+    monkeypatch.setattr(engineering, "data_root", lambda: store.root)
+    monkeypatch.setattr(anchor, "_http_post", fake_tsa())
+    monkeypatch.delenv("DAEDALUS_TSA_CA_FILE", raising=False)
+    app = FastAPI()
+    app.include_router(analysis.router)
+    client = TestClient(app)
+    base = f"/v1/analysis/predictions/{pred.prediction_id}/anchor"
+    assert client.get(base).json() == {"token_count": 0, "ca_configured": False}
+    assert client.post(base + "/verify").status_code == 503
+    assert client.post(base).status_code == 200
+    assert client.get(base).json()["token_count"] == 1
+    ca = tmp_path / "ca.pem"
+    ca.write_text("not a certificate")
+    monkeypatch.setenv("DAEDALUS_TSA_CA_FILE", str(ca))
+    result = client.post(base + "/verify")
+    assert result.status_code == 200
+    assert result.json()["verified"] is False

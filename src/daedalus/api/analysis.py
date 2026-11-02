@@ -3,6 +3,10 @@
 
 from __future__ import annotations
 
+import os
+import shutil
+import subprocess
+import tempfile
 from pathlib import Path
 from typing import Literal
 
@@ -239,17 +243,104 @@ def anchor_prediction(prediction_id: str) -> dict[str, object]:
     store = EvidenceStore(data_root())
     try:
         token = anchor.anchor_prediction(store, prediction_id)
+        digest = anchor.manifest_digest(store, prediction_id).hex()
     except (anchor.AnchorError, IntegrityError, KeyError) as exc:
         raise HTTPException(422, str(exc)) from exc
     except OSError as exc:  # no network or the authority is down
         raise HTTPException(503, f"timestamp authority unreachable: {exc}") from exc
-    digest = anchor.manifest_digest(store, prediction_id).hex()
+    finally:
+        store.close()
     return {
         "prediction_id": prediction_id,
         "tsa": token.tsa_url,
         "gen_time": token.gen_time,
         "verify": anchor.verify_command(digest, f"{prediction_id}.tsr"),
     }
+
+
+@router.get("/predictions/{prediction_id}/anchor")
+def anchor_status(prediction_id: str) -> dict[str, object]:
+    from daedalus import anchor, contracts
+    from daedalus.api.engineering import data_root
+    from daedalus.store import EvidenceStore, IntegrityError
+
+    store = EvidenceStore(data_root())
+    try:
+        anchor.manifest_digest(store, prediction_id)
+        tokens = [
+            a
+            for a in store.records(contracts.Artifact)
+            if a.kind == anchor.TOKEN_KIND and a.source_entity_id == prediction_id
+        ]
+        return {
+            "token_count": len(tokens),
+            "ca_configured": bool(
+                os.environ.get("DAEDALUS_TSA_CA_FILE")
+                and Path(os.environ["DAEDALUS_TSA_CA_FILE"]).is_file()
+            ),
+        }
+    except (anchor.AnchorError, IntegrityError, KeyError) as exc:
+        raise HTTPException(422, str(exc)) from exc
+    finally:
+        store.close()
+
+
+@router.post("/predictions/{prediction_id}/anchor/verify")
+def verify_anchor(prediction_id: str) -> dict[str, object]:
+    """Verify the latest stored response against the seal and server-configured trust roots."""
+    from daedalus import anchor, contracts
+    from daedalus.api.engineering import data_root
+    from daedalus.store import EvidenceStore, IntegrityError
+
+    ca = os.environ.get("DAEDALUS_TSA_CA_FILE")
+    if not ca or not Path(ca).is_file():
+        raise HTTPException(
+            503, "Configure DAEDALUS_TSA_CA_FILE with the trusted TSA CA bundle on the server"
+        )
+    openssl = shutil.which("openssl")
+    if not openssl:
+        raise HTTPException(503, "OpenSSL is required for timestamp verification")
+    store = EvidenceStore(data_root())
+    try:
+        digest = anchor.manifest_digest(store, prediction_id).hex()
+        tokens = [
+            a
+            for a in store.records(contracts.Artifact)
+            if a.kind == anchor.TOKEN_KIND and a.source_entity_id == prediction_id
+        ]
+        if not tokens:
+            raise HTTPException(404, "No timestamp response is stored for this prediction")
+        response = store.read_artifact(tokens[-1].artifact_id)
+        with tempfile.TemporaryDirectory() as directory:
+            token_path = Path(directory) / "response.tsr"
+            token_path.write_bytes(response)
+            result = subprocess.run(
+                [
+                    openssl,
+                    "ts",
+                    "-verify",
+                    "-digest",
+                    digest,
+                    "-in",
+                    str(token_path),
+                    "-CAfile",
+                    ca,
+                ],
+                capture_output=True,
+                text=True,
+                timeout=20,
+                check=False,
+            )
+        return {
+            "verified": result.returncode == 0,
+            "detail": (result.stderr or result.stdout).strip()[:2000],
+        }
+    except (anchor.AnchorError, IntegrityError, KeyError) as exc:
+        raise HTTPException(422, str(exc)) from exc
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise HTTPException(503, f"Timestamp verification unavailable: {exc}") from exc
+    finally:
+        store.close()
 
 
 class EstimateIn(BaseModel):

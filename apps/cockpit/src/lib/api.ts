@@ -494,6 +494,27 @@ const SealedPrediction = z.looseObject({
 });
 type SealedPrediction = z.infer<typeof SealedPrediction>;
 export const listPredictions = () => request("/v1/predictions", z.array(SealedPrediction));
+const AnchorStatus = z.object({
+  token_count: z.number().int().nonnegative(),
+  ca_configured: z.boolean(),
+});
+const AnchorResponse = z.object({
+  prediction_id: z.string(),
+  tsa: z.string(),
+  gen_time: z.string(),
+  verify: z.string(),
+});
+const AnchorVerification = z.object({ verified: z.boolean(), detail: z.string() });
+export const getAnchorStatus = (id: string) =>
+  request(`/v1/analysis/predictions/${encodeURIComponent(id)}/anchor`, AnchorStatus);
+export const submitAnchor = (id: string) =>
+  request(`/v1/analysis/predictions/${encodeURIComponent(id)}/anchor`, AnchorResponse, {
+    method: "POST",
+  });
+export const verifyAnchor = (id: string) =>
+  request(`/v1/analysis/predictions/${encodeURIComponent(id)}/anchor/verify`, AnchorVerification, {
+    method: "POST",
+  });
 const ScoreResult = z.looseObject({ inside_interval: z.boolean() });
 export const scorePrediction = (id: string, measured_s: number) =>
   request(`/v1/predictions/${id}/score`, ScoreResult, {
@@ -537,6 +558,22 @@ export const forgeSheetUrl = (design: string) =>
   `/api/v1/forge/sheet.pdf?design=${encodeURIComponent(design)}`;
 export const getForgeChecks = (design: string) =>
   request(`/v1/forge/checks?design=${encodeURIComponent(design)}`, ForgeChecks);
+
+const ForgeFrontier = z.object({
+  rows: z.array(
+    z.object({
+      rule_id: z.string(),
+      name: z.string(),
+      headroom: z.number(),
+      unit: z.string(),
+      points_if_one_unit_over: z.number().nullable(),
+      limit_side: z.enum(["min", "max"]),
+    }),
+  ),
+});
+export type ForgeFrontier = z.infer<typeof ForgeFrontier>;
+export const getForgeFrontier = (design: string) =>
+  request(`/v1/forge/frontier?design=${encodeURIComponent(design)}`, ForgeFrontier);
 
 export const measureForge = (design: string) =>
   request(
