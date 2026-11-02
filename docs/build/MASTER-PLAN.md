@@ -127,3 +127,24 @@ Later: Race replay rebuild, Ghost merged into Replay, Inspect merged into the CA
 - UI kit: shadcn/ui templates on Tailwind v4 + Base UI (MIT)
 - Reference sims: TUMFTM race-simulation / laptime-simulation
 - Benchmark to beat: Synopsys/Ansys STEM Racing digital twin racetrack (commercial)
+
+## 13. Race rebuild: open source to copy (searched and licence-checked 2026-11-02)
+| Project | Licence | Stars | What we take | Fit |
+|---|---|---|---|---|
+| **pmndrs/racing-game** | MIT | 2.2k | **Our base.** Same stack (React Three Fiber + drei). Studio lighting and environment, PBR car shading, chase/broadcast cameras, speedometer HUD, minimap, ghost car, leaderboard, finish screen, post-processing | ★★★★★ copy the scene and HUD structure |
+| **slowlydev/f1-dash** | AGPL-3.0 (same as ours) | 1.9k | Real F1 broadcast UI: timing tower, mini-sectors, gap charts, telemetry layout. Can copy code directly | ★★★★★ for the timing and telemetry panels |
+| **pmndrs/postprocessing** | Zlib | 2.9k | Bloom, motion blur, SMAA, tone mapping: the "game" look | ★★★★ |
+| **pmndrs/drei** | MIT | 10k | Environment maps, contact shadows, `Trail` for speed streaks, `PerformanceMonitor` | ★★★★ (already installed) |
+| **BKcore/HexGL** | MIT | 1.8k | Speed-effect ideas: camera shake, FOV kick at launch, light streaks | ★★★ ideas |
+| IAmTomShaw/f1-race-replay | **no licence** | 6.9k | Ideas only (replay controls, race-state UI). **Can't copy its code** | ★★ inspiration |
+| Synopsys/Ansys STEM Racing digital twin racetrack | commercial | — | The benchmark to beat (realistic 20 m track) | target |
+
+**What the rebuilt Race replay should feel like (EA F1 / TV broadcast):**
+1. **Our real car**: the design's `display.glb` with team-livery PBR paint, wheels spinning at true rpm and a CO₂ puff at launch.
+2. **A real track**: the 20 m STEM Racing lane with tether line, start gate and lights, finish gate, timing beams, barriers, studio floor reflections and a crowd-free arena.
+3. **Cameras**: TV broadcast pans, chase, onboard (nose cam), top-down and finish-line photo; auto-director cuts.
+4. **Game-quality effects**: bloom, motion blur at speed, FOV kick at launch, light speed streaks, contact shadows.
+5. **Broadcast HUD (f1-dash style)**: speed (km/h and m/s), gap to ghost, mini-sectors (purple/green/yellow with a legend), reaction time, finish time, and a "PREDICTED" vs "MEASURED" tag.
+6. **Ghost and compare**: race two designs or predicted vs measured, with a split-screen delta trace.
+7. **Photo finish and slow-mo replay** after each run; export a clip for the presentation.
+8. **Performance**: `PerformanceMonitor` lowers effects on weak laptops; target 60 fps.
