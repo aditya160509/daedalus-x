@@ -8,6 +8,7 @@ from daedalus.api import (
     analysis,
     cad,
     data,
+    drawings,
     engineering,
     evidence,
     forge,
@@ -29,6 +30,7 @@ def create_app() -> FastAPI:
     app.include_router(forge.router)
     app.include_router(evidence.router)
     app.include_router(report.router)
+    app.include_router(drawings.router)
     app.include_router(analysis.router)
 
     @app.get("/v1/health")

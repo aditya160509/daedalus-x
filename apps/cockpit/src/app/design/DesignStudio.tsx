@@ -10,6 +10,7 @@ import { StrengthPanel } from "@/components/strength/StrengthPanel";
 import { useTab, WorkspaceTabs } from "@/components/shell/WorkspaceTabs";
 import { importCadStep, listDesigns } from "@/lib/api";
 import { CadFrame, type FocusRequest } from "./CadFrame";
+import { DrawingsPanel } from "./DrawingsPanel";
 import { DesignWorkspace } from "./DesignWorkspace";
 
 const TABS = [
@@ -17,6 +18,7 @@ const TABS = [
   { id: "inspect", label: "Inspect" },
   { id: "rules", label: "Rules" },
   { id: "strength", label: "Strength" },
+  { id: "drawings", label: "Drawings" },
 ] as const;
 
 const BLANK = "__blank";
@@ -163,6 +165,7 @@ function Studio({
           </div>
         )}
         {tab === "inspect" && <DesignWorkspace />}
+        {tab === "drawings" && <DrawingsPanel design={current === BLANK ? undefined : current} />}
         {tab === "strength" && (
           <div className="mx-auto w-full max-w-3xl overflow-y-auto p-3">
             <StrengthPanel />
