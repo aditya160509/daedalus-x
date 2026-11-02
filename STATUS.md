@@ -34,7 +34,7 @@ Remaining work is tracked task-by-task in [docs/build/TASK-BOARD.md](docs/build/
 | P6-06 | Optimize workspace | Claude | todo | |
 | P6-07 | Race workspace | Claude | T08 review: telemetry wall (channel picker, cursor table, A/B delta, per-channel y-zoom, MC p5–p95 band), what-if sliders with sweep sparklines, race replay, ghost race, presets | [T08](evidence/T08.md), [original](evidence/P6-07-race.md) |
 | P6-08 | Inspect workspace | Claude | todo | |
-| P6-09 | Evidence workspace | Claude + Codex | review: timeline/hash verification and lazy React Flow lineage connected; full action coverage pending | [OSS-02](evidence/OSS-02-uplot-lineage.md) |
+| P6-09 | Evidence workspace | Claude | review: timeline/hash verification, lazy React Flow lineage and derived missing-action coverage tied to real entity IDs; final acceptance pending | [T12](evidence/T12-evidence-coverage.md) |
 | P6-10 | Competition Mode | Claude | todo | |
 | P6-11 | Polish pass | Claude | todo | |
 | P7-01 | Initial + holdout CFD runs | GPT | todo | |

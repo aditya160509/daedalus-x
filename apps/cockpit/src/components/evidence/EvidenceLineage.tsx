@@ -13,7 +13,7 @@ import {
 } from "@xyflow/react";
 import { graphlib, layout as dagreLayout } from "@dagrejs/dagre";
 import "@xyflow/react/dist/style.css";
-import { ShieldCheck, ShieldX } from "lucide-react";
+import { ShieldCheck, ShieldX, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/primitives";
 import { getEvidenceLineage, type EvidenceRow } from "@/lib/api";
@@ -47,6 +47,12 @@ function EvidenceNode({ data, selected }: NodeProps<RecordNode>) {
         {provenance && <span>{provenance}</span>}
         <span>{record.verified ? "Hash verified" : "Hash mismatch"}</span>
       </div>
+      {record.gaps.length > 0 && (
+        <div className="mt-1 flex items-center gap-1 text-[10px] text-risk">
+          <TriangleAlert className="size-3" aria-hidden />
+          {record.gaps.length} open action{record.gaps.length === 1 ? "" : "s"}
+        </div>
+      )}
       <Handle type="source" position={Position.Right} isConnectable={false} />
     </div>
   );
@@ -117,6 +123,7 @@ export default function EvidenceLineage({
         No evidence records yet. Import a saved design to start its trace.
       </div>
     );
+  const openActions = graph.data.nodes.reduce((sum, node) => sum + node.gaps.length, 0);
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b px-4 py-2 text-[10px] text-muted-foreground">
@@ -124,6 +131,12 @@ export default function EvidenceLineage({
           {graph.data.nodes.length} records · {graph.data.edges.length} stored links
         </span>
         <span>Parent → dependent</span>
+        {openActions > 0 && (
+          <span className="flex items-center gap-1 text-risk">
+            <TriangleAlert className="size-3" aria-hidden />
+            {openActions} open action{openActions === 1 ? "" : "s"} on these records
+          </span>
+        )}
         {graph.data.truncated && <span>Newest 500 records shown</span>}
         {graph.data.outside_window > 0 && (
           <span>{graph.data.outside_window} parent records outside this view</span>

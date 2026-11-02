@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FileStack, ShieldCheck, ShieldX } from "lucide-react";
 import { useDeferredValue, useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-import { listEvidence, type EvidenceRow } from "@/lib/api";
+import { listEvidence, getEvidenceCoverage, type EvidenceRow } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 const EvidenceLineage = dynamic(() => import("./EvidenceLineage"), {
@@ -40,7 +40,7 @@ function summary(r: EvidenceRow): string {
 /** ATLAS timeline: every stored record newest first, grouped by day, with its hash check. Opens with E. */
 export function EvidenceDrawer() {
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<"timeline" | "lineage">("timeline");
+  const [mode, setMode] = useState<"timeline" | "lineage" | "coverage">("timeline");
   const [q, setQ] = useState("");
   const [sel, setSel] = useState<EvidenceRow | null>(null);
   const query = useDeferredValue(q);
@@ -48,6 +48,11 @@ export function EvidenceDrawer() {
     queryKey: ["evidence", query],
     queryFn: () => listEvidence(query),
     enabled: open && mode === "timeline",
+  });
+  const coverage = useQuery({
+    queryKey: ["evidence-coverage"],
+    queryFn: getEvidenceCoverage,
+    enabled: open && mode === "coverage",
   });
 
   useEffect(() => {
@@ -76,10 +81,29 @@ export function EvidenceDrawer() {
     groups.set(day(r.created_at), [...(groups.get(day(r.created_at)) ?? []), r]);
   const broken = (rows.data ?? []).filter((r) => !r.verified).length;
 
+  const needle = query.trim().toLowerCase();
+  const openGaps = (coverage.data?.items ?? []).filter(
+    (gap) =>
+      !needle ||
+      `${gap.kind} ${gap.entity_kind} ${gap.entity_id} ${gap.action} ${gap.detail}`
+        .toLowerCase()
+        .includes(needle),
+  );
+  const gapGroups = new Map<string, typeof openGaps>();
+  for (const gap of openGaps)
+    gapGroups.set(gap.kind, [...(gapGroups.get(gap.kind) ?? []), gap]);
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent
-        className={cn("flex flex-col", mode === "lineage" ? "sm:max-w-7xl" : "sm:max-w-xl")}
+        className={cn(
+          "flex flex-col",
+          mode === "lineage"
+            ? "sm:max-w-7xl"
+            : mode === "coverage"
+              ? "sm:max-w-2xl"
+              : "sm:max-w-xl",
+        )}
       >
         <div className="flex items-center gap-2 border-b p-4 pr-12">
           <FileStack className="size-4 text-muted-foreground" aria-hidden />
@@ -104,6 +128,7 @@ export function EvidenceDrawer() {
             options={[
               { value: "timeline", label: "Timeline" },
               { value: "lineage", label: "Lineage" },
+              { value: "coverage", label: "Coverage" },
             ]}
           />
           <span className="text-[10px] text-muted-foreground">Stored records · read only</span>
@@ -131,11 +156,68 @@ export function EvidenceDrawer() {
                 <p className="mb-2 break-all font-mono text-[10px] text-muted-foreground">
                   {sel.id}
                 </p>
+                {sel.gaps.length > 0 && (
+                  <ul className="mb-3 space-y-1.5 text-[11px]">
+                    {sel.gaps.map((gap) => (
+                      <li key={gap.gap_id} className="rounded border border-risk/40 px-2 py-1.5">
+                        <p className="font-medium">{gap.action}</p>
+                        <p className="text-muted-foreground">{gap.detail}</p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 <pre className="overflow-x-auto font-mono text-[10px] leading-relaxed text-text-2">
                   {JSON.stringify(sel.body, null, 2)}
                 </pre>
               </aside>
             )}
+          </div>
+        ) : mode === "coverage" ? (
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
+            <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
+              Next actions derived from the stored records. A gap disappears as soon as the
+              missing record exists, so this is not a stored or editable checklist.
+            </p>
+            {coverage.isPending && <Skeleton className="h-40" />}
+            {coverage.isError && (
+              <p role="alert" className="text-xs text-destructive">
+                Could not load coverage.{" "}
+                <Button variant="link" onClick={() => void coverage.refetch()}>
+                  Retry
+                </Button>
+              </p>
+            )}
+            {coverage.data && openGaps.length === 0 && (
+              <p className="text-xs text-muted-foreground">
+                {coverage.data.items.length === 0
+                  ? "Every expected step has a record."
+                  : "No open action matches this search."}
+              </p>
+            )}
+            {[...gapGroups].map(([kind, items]) => (
+              <section key={kind} className="mb-4">
+                <h3 className="mb-1.5 flex items-baseline gap-2 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                  {kind.replaceAll("_", " ")}
+                  <span className="tabular-nums">{items.length}</span>
+                </h3>
+                <ul className="divide-y rounded-md border text-xs">
+                  {items.map((gap) => (
+                    <li key={gap.gap_id} className="space-y-1 px-3 py-2">
+                      <p className="font-medium">{gap.action}</p>
+                      <p className="text-muted-foreground">{gap.detail}</p>
+                      <p className="flex flex-wrap gap-x-3 gap-y-1 font-mono text-[10px] text-muted-foreground">
+                        <span>
+                          {gap.entity_kind} {gap.entity_id}
+                        </span>
+                        {gap.related_ids.map((id) => (
+                          <span key={id}>· {id}</span>
+                        ))}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
           </div>
         ) : (
           <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">

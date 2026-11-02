@@ -6,6 +6,7 @@ import json
 
 from fastapi import APIRouter, Query
 
+from daedalus import coverage
 from daedalus.api.engineering import data_root
 from daedalus.store import EvidenceStore
 
@@ -43,6 +44,20 @@ def verify() -> dict[str, object]:
         store.close()
 
 
+@router.get("/coverage")
+def coverage_report() -> dict[str, object]:
+    """Next actions the store has no record of, tied to the waiting records."""
+    store = EvidenceStore(data_root())
+    try:
+        actions = coverage.missing_actions(store)
+        return {
+            "items": [action.to_mapping() for action in actions],
+            "counts": coverage.counts(actions),
+        }
+    finally:
+        store.close()
+
+
 @router.get("/lineage")
 def lineage(limit: int = Query(500, ge=1, le=2000)) -> dict[str, object]:
     """Read-only graph of actual stored references, parent → dependent record.
@@ -53,6 +68,7 @@ def lineage(limit: int = Query(500, ge=1, le=2000)) -> dict[str, object]:
     try:
         timeline = store.timeline(limit + 1)
         broken = set(store.verify_all())
+        gaps = coverage.coverage_by_entity(store)
         nodes = [
             {
                 "id": rid,
@@ -60,6 +76,7 @@ def lineage(limit: int = Query(500, ge=1, le=2000)) -> dict[str, object]:
                 "created_at": stamp,
                 "body": json.loads(body),
                 "verified": rid not in broken,
+                "gaps": [gap.to_mapping() for gap in gaps.get(rid, [])],
             }
             for rid, kind, stamp, body in timeline[:limit]
         ]

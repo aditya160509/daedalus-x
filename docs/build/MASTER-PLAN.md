@@ -444,7 +444,7 @@ Partial tasks receive a fixed half-point for a simple, reproducible tally; this 
 | T09 | Imports, units and calibration | 🟨 Partial | Import/unit/calibration foundations; complete calibration UI and measured validation remain. |
 | T10 | ORACLE optimisation | 🟨 Partial | GP/EI, SALib sensitivity and family-filtered study build/API/FORGE/evidence/UI connected; complete legal geometry, accepted-only CFD feedback, training-source separation and full objective remain. |
 | T11 | FORGE rules and inspections | 🟨 Partial | India rulebook, CAD states/margins and sheet; measured inspections and full coverage remain. |
-| T12 | ATLAS evidence | 🟨 Partial | Store, hashes, timeline, verify and React Flow lineage exist; complete action linkage and final acceptance remain. |
+| T12 | ATLAS evidence | 🟨 Partial | Store, hashes, timeline, verify and React Flow lineage exist; derived missing-action coverage now ties every gap to a real design/run/calibration/prediction ID and shows it in the lineage and a Coverage view. Final acceptance remains. |
 | T13 | Competition mode and report (AR cut) | 🟨 Partial | Presenter and Typst report exist; complete judge pack and public verification remain; AR is out of scope. |
 | T14 | Final app polish | ⬜ Remaining | Consolidated responsiveness, accessibility, performance and acceptance pass remains. |
 | T15 | Racing-points objective | 🟨 Partial | Outcome core and API exist; ORACLE objective integration and declared opponent assumptions or owner-supplied results remain; competitor scraping is cut. |
@@ -608,6 +608,13 @@ Checklist score remains 45%: these integrations advance existing partial tasks; 
 - [x] `POST /v1/analysis/project/forecast` appends a `ProjectForecast` plus hashed plan and result artifacts; `GET /v1/analysis/project/forecasts` lists them for later comparison with what happened.
 - [x] The Project workspace shows assumptions, the scorecard's evidenced/declared points, derived evidence gaps and saved forecasts; gaps are labelled as derived, not an audit.
 - [ ] ⏳ Official India NF weights and any validation of the plan against real delivery remain team-supplied.
+
+### Evidence coverage (T12)
+
+- [x] `coverage.py` derives missing next actions in one pass over the stored records and points each at the waiting design, solver run, build, calibration study or prediction.
+- [x] `GET /v1/evidence/coverage` returns the gaps and counts; lineage nodes carry their own `gaps`, and a Coverage view lists them grouped by kind with related IDs.
+- [x] Successful runs without an observation, failed runs, unbuilt designs, unscored predictions, studies without held-out runs and unverified timestamps are handled separately so the list stays factual.
+- [ ] ⏳ The rules are expectations, not adequacy checks; a gap outside the newest 500 lineage records has no node in the graph window.
 
 ---
 

@@ -610,14 +610,40 @@ export const measureForge = (design: string) =>
   );
 
 // ATLAS evidence (T12)
+export const CoverageGap = z.object({
+  gap_id: z.string(),
+  kind: z.enum([
+    "solver_run",
+    "observation",
+    "physical_build",
+    "race_run",
+    "prediction",
+    "held_out_runs",
+    "timestamp",
+    "inspection",
+  ]),
+  entity_id: z.string(),
+  entity_kind: z.string(),
+  action: z.string(),
+  detail: z.string(),
+  related_ids: z.array(z.string()),
+});
+export type CoverageGap = z.infer<typeof CoverageGap>;
 export const EvidenceRow = z.object({
   id: z.string(),
   kind: z.string(),
   created_at: z.string(),
   body: z.record(z.string(), z.unknown()),
   verified: z.boolean(),
+  gaps: z.array(CoverageGap).default([]),
 });
 export type EvidenceRow = z.infer<typeof EvidenceRow>;
+const EvidenceCoverage = z.object({
+  items: z.array(CoverageGap),
+  counts: z.record(z.string(), z.number()),
+});
+export type EvidenceCoverage = z.infer<typeof EvidenceCoverage>;
+export const getEvidenceCoverage = () => request("/v1/evidence/coverage", EvidenceCoverage);
 const EvidenceLineage = z.object({
   nodes: z.array(EvidenceRow),
   edges: z.array(
