@@ -24,11 +24,11 @@ Take the **first `todo` whose dependencies are `accepted` or `review`**. "Lane" 
 | T16 | Third-party timestamps for sealed predictions | backend-api | P2-02 | todo | |
 | T17 | Bayesian calibration, information gain, out-of-sample validation | backend-ml | T09 | todo | |
 | T18 | Cartridge thrust model (gas type to be confirmed) | backend-ml | gas confirmed | todo | |
-| T19 | Energy-loss audit | backend-ml | - | todo | |
+| T19 | Energy-loss audit | backend-ml | - | review | Claude Sonnet 5.5 (branch next-wave; energy.py, no API or UI yet) |
 | T20 | FORGE v2: missing measures, pass probability, points at risk | backend-api + frontend-2d | T11 | todo | |
 | T21 | Structural analysis: beam FEM first, 3D FEA later | backend-ml | - | todo | |
 | T22 | Engineering drawing pack generator and 2D drawing importer | backend-api | T07 | todo | |
-| T23 | Test planner (expected information gain) | backend-ml | T17 | todo | |
+| T23 | Test planner (expected information gain). Finding: timing runs cannot identify CdA or Crr, see evidence/T19-T23.md | backend-ml | T17 | review | Claude Sonnet 5.5 (branch next-wave; testplan.py, no API or UI yet) |
 | T24 | Gradient-enhanced and multi-fidelity ORACLE | backend-ml | T05, T10 | todo | |
 | T25 | Free-form adjoint shape optimisation | backend-cfd | T05, T20 | todo | |
 | T26 | Exhaust base-bleed study (research) | backend-cfd | T18 | todo | |
