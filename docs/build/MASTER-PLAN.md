@@ -297,7 +297,7 @@ What the big-screen timing page should show, inspired by F1 TV, f1-dash and STEM
 - **Race-day report**: the times, calibration update and next actions.
 - **Evidence appendix**: hash list plus a QR verify link.
 
-## 22. Progress: Jainam's `next-wave` branch (checked 2026-11-02, not merged yet)
+## 23. Progress: Jainam's `next-wave` branch (checked 2026-11-02, not merged yet)
 15 commits, about 5.6k lines added and 3k removed. It merges into `main` with no conflicts, and every new module has its own tests.
 
 | Order | Status | Done | Still missing |
