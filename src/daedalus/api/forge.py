@@ -72,3 +72,20 @@ def frontier(design: str, rulebook: str = DEFAULT_RULEBOOK) -> dict[str, object]
     path = _rulebook_path(rulebook)
     results = forge.check_design(_design_dir(design), path)
     return {"rows": [asdict(r) for r in forge.frontier(results)]}
+
+
+@router.post("/measure")
+def measure(design: str) -> dict[str, object]:
+    """Derive CAD features without modifying the immutable imported geometry."""
+    from daedalus.api.cad import _source_step
+    from daedalus.forge_features import measure_design
+
+    directory = _design_dir(design)
+    source = _source_step(directory)
+    if source is None:
+        raise HTTPException(409, "Original STEP source is unavailable; import it in Design Studio")
+    try:
+        features = measure_design(directory, source)
+    except ValueError as exc:
+        raise HTTPException(409, str(exc)) from exc
+    return {"design": design, "parts_measured": len(features)}

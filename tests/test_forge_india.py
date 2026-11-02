@@ -183,7 +183,7 @@ def test_baseline_layout_measures() -> None:
     assert c["T5.6"].value == 7.0  # cartridge sticks out 7 mm beyond the rear wing
     assert c["T5.2"].value == 37.0  # cartridge centre height
     assert c["T2.7.1-L"].value == 170.0
-    assert [i for i, ch in c.items() if ch.state in {"fail_cad", "at_risk"}] == []
+    assert [i for i, ch in c.items() if ch.state in {"fail_cad", "at_risk"}] == ["T9.4.1"]
 
 
 def test_axle_bushes_are_not_counted_as_wheels() -> None:
@@ -237,7 +237,7 @@ def test_at_risk_rules_are_scored_separately() -> None:
     risk = forge.points_at_risk(checks)
     assert "T7.2.1" in risk.at_risk_rules  # 0.4 mm margin
     assert risk.at_risk_points == 2.5
-    assert risk.failing_points == 0.0
+    assert risk.failing_points == 10.0  # rear wing starts 1 mm ahead of plane B
 
 
 def test_sheet_rows_cover_every_rule_and_compile_to_pdf() -> None:
@@ -266,8 +266,29 @@ def test_sheet_rejects_mismatched_checks() -> None:
 def test_frontier_ranks_the_tightest_rule_first() -> None:
     checks = forge.run_checks(forge.load_rulebook(BOOK_PATH), car(front_gap=38.4))
     rows = forge.frontier(checks)
-    assert rows[0].rule_id == "T7.2.1"  # 0.4 mm above its 38 mm minimum
+    assert rows[0].rule_id == "T9.4.1"  # rear wing is 1 mm ahead of plane B
+    assert next(r for r in rows if r.rule_id == "T7.2.1").headroom == pytest.approx(0.4)
     assert rows[0].limit_side == "min"
-    assert rows[0].points_if_one_unit_over == 2.5
+    assert rows[0].points_if_one_unit_over == 10.0
     assert [r.headroom for r in rows] == sorted(r.headroom for r in rows)
     assert all(r.rule_id != "T3.6" for r in rows)  # mass is not measured from CAD
+
+
+def test_estimates_never_prove_a_pass() -> None:
+    c = results(car())
+    for rule in ("T8.6.1", "T8.6.2", "T7.4.1", "T9.4.3"):
+        assert c[rule].value is not None
+        assert c[rule].state == "manual_review"
+
+
+def test_sampled_thickness_uses_worst_extreme() -> None:
+    geometry = car()
+    geometry["forge_features"] = {
+        "Front Wing": {"thickness_min_mm": 3.0, "thickness_max_mm": 7.5},
+        "halo_notch": {"notch_height_mm": 34.2},
+    }
+    c = results(geometry)
+    assert c["T8.6.3"].value == 7.5
+    assert c["T8.6.3"].state == "at_risk"
+    assert c["T4.4.4"].value == 34.2
+    assert c["T4.4.4"].parts == ("halo_notch",)

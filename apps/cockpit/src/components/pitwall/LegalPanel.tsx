@@ -3,8 +3,15 @@
 import { useRouter } from "next/navigation";
 import { cadFocusHref } from "@/lib/cadFocus";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
-import { forgeSheetUrl, getForgeChecks, listDesigns, type RuleCheck } from "@/lib/api";
+import { toast } from "sonner";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  forgeSheetUrl,
+  getForgeChecks,
+  listDesigns,
+  measureForge,
+  type RuleCheck,
+} from "@/lib/api";
 import { Panel, Skeleton } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
 
@@ -38,12 +45,23 @@ export function LegalPanel({
     queryFn: () => getForgeChecks(design!),
     enabled: !!design,
   });
+  const measurement = useMutation({
+    mutationFn: () => measureForge(design!),
+    onSuccess: async (result) => {
+      await q.refetch();
+      toast.success(`Measured CAD features on ${result.parts_measured} parts`, {
+        description: "Sampled wing sections and contact widths still require manual verification.",
+      });
+    },
+    onError: (error) => toast.error("Could not measure CAD", { description: error.message }),
+  });
   const checks = (q.data?.checks ?? []).toSorted(
     (a, b) => ORDER.indexOf(a.state) - ORDER.indexOf(b.state),
   );
   const fails = checks.filter((c) => c.state === "fail_cad").length;
   const risks = checks.filter((c) => c.state === "at_risk").length;
   const points = q.data?.points_at_risk;
+  const manual = checks.filter((c) => c.state === "manual_review").length;
 
   return (
     <Panel
@@ -53,10 +71,22 @@ export function LegalPanel({
           <span
             className={cn(
               "text-xs font-medium",
-              fails ? "text-destructive" : risks ? "text-risk" : "text-ok",
+              fails
+                ? "text-destructive"
+                : risks
+                  ? "text-risk"
+                  : manual
+                    ? "text-muted-foreground"
+                    : "text-ok",
             )}
           >
-            {fails ? `${fails} fail` : risks ? `${risks} at risk` : "✓ CAD pass"}
+            {fails
+              ? `${fails} fail`
+              : risks
+                ? `${risks} at risk`
+                : manual
+                  ? `${manual} to review`
+                  : "✓ CAD checks pass"}
             {points && (points.failing_points > 0 || points.at_risk_points > 0) && (
               <span className="tabular ml-2 font-mono">
                 −{points.failing_points} pts
@@ -89,11 +119,21 @@ export function LegalPanel({
         <Skeleton className="m-4 h-40" />
       ) : (
         <>
-          <div className="flex items-center justify-between border-b border-border/50 px-4 py-2 text-2xs text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/50 px-4 py-2 text-2xs text-muted-foreground">
             <span>
               {q.data.revision}
               {points ? ` · ${points.manual_review_rules} rules to measure by hand` : ""}
             </span>
+            {design && (
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={measurement.isPending}
+                onClick={() => measurement.mutate()}
+              >
+                {measurement.isPending ? "Measuring CAD…" : "Measure CAD features"}
+              </Button>
+            )}
             {design && (
               <a
                 href={forgeSheetUrl(design)}

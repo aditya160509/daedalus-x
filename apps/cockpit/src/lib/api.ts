@@ -538,6 +538,13 @@ export const forgeSheetUrl = (design: string) =>
 export const getForgeChecks = (design: string) =>
   request(`/v1/forge/checks?design=${encodeURIComponent(design)}`, ForgeChecks);
 
+export const measureForge = (design: string) =>
+  request(
+    `/v1/forge/measure?design=${encodeURIComponent(design)}`,
+    z.object({ design: z.string(), parts_measured: z.number() }),
+    { method: "POST" },
+  );
+
 // ATLAS evidence (T12)
 export const EvidenceRow = z.object({
   id: z.string(),

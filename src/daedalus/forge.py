@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import re
@@ -76,6 +77,31 @@ def measures(geometry: dict[str, object]) -> Measures:
             out[f"{g}_chord"] = (w_hi[0] - w_lo[0], w_parts)
             out[f"{g}_bottom"] = (w_lo[2] - lo[2], w_parts)
     out.update(_layout_measures(geometry, parts))
+    out.update(_feature_measures(geometry, parts))
+    return out
+
+
+def _feature_measures(geometry: dict[str, object], parts: list[dict[str, object]]) -> Measures:
+    """Only source-derived named features; never infer notch identity from a legal height."""
+    features = geometry.get("forge_features", {})
+    if not isinstance(features, dict):
+        return {}
+    out: Measures = {}
+    for group in ("front_wing", "rear_wing"):
+        selected = [p for p in parts if p["group"] == group]
+        samples = [features.get(str(p["label"]), {}) for p in selected]
+        if samples and all("thickness_min_mm" in sample for sample in samples):
+            low = min(float(sample["thickness_min_mm"]) for sample in samples)
+            high = max(float(sample["thickness_max_mm"]) for sample in samples)
+            # Report the sampled extreme with the smallest clearance to the 2-6 mm limits.
+            out[f"{group}_thickness"] = (
+                low if low - 2.0 <= 6.0 - high else high,
+                _label_set(selected),
+            )
+    notches = [(label, data) for label, data in features.items() if "notch_height_mm" in data]
+    if len(notches) == 1:
+        label, data = notches[0]
+        out["halo_notch_height"] = (float(data["notch_height_mm"]), (label,))
     return out
 
 
@@ -143,6 +169,19 @@ def _layout_measures(geometry: dict[str, object], parts: list[dict[str, object]]
     if front_x is not None:
         out["nose_overhang"] = ((front_x - PLANE_OFFSET_MM) - nose_x, ())
     if rear_x is not None:
+        rear_parts = [p for p in car if _bounds(p, 0)[1] > rear_x + PLANE_OFFSET_MM]
+        if rear_parts:
+            # Whole-part upper bound: conservative where a part crosses plane B.
+            out["rear_overhang_height"] = (
+                max(_bounds(p, 2)[1] for p in rear_parts) - track_z,
+                _label_set(rear_parts),
+            )
+        wing = [p for p in parts if p["group"] == "rear_wing"]
+        if wing:
+            out["rear_wing_location"] = (
+                min(_bounds(p, 0)[0] for p in wing) - (rear_x + PLANE_OFFSET_MM),
+                _label_set(wing),
+            )
         out["rear_overhang_length"] = (tail_x - (rear_x + PLANE_OFFSET_MM), ())
     if front_x is not None and rear_x is not None:
         out["wheelbase"] = (abs(rear_x - front_x), ())
@@ -168,6 +207,22 @@ def _wheel_measures(geometry: dict[str, object], parts: list[dict[str, object]])
             min(_bounds(p, 1)[1] - _bounds(p, 1)[0] for p in solids),
             labels,
         )
+        features = geometry.get("forge_features", {})
+        if isinstance(features, dict):
+            bands = [features.get(str(p["label"]), {}) for p in solids]
+            if all("rolling_width_mm" in band for band in bands):
+                out[f"{prefix}_wheel_contact_width"] = (
+                    min(float(band["rolling_width_mm"]) for band in bands),
+                    labels,
+                )
+            if all("rolling_diameter_mm" in band for band in bands):
+                diameters = [float(band["rolling_diameter_mm"]) for band in bands]
+                out[f"{prefix}_wheel_diameter"] = (
+                    min(diameters)
+                    if min(diameters) - 28 <= 32 - max(diameters)
+                    else max(diameters),
+                    labels,
+                )
         left = [p for p in solids if sum(_bounds(p, 1)) > 0]
         right = [p for p in solids if sum(_bounds(p, 1)) <= 0]
         if left and right:
@@ -273,8 +328,9 @@ def run_checks(rulebook: dict[str, object], geometry: dict[str, object]) -> list
         state: State = (
             "fail_cad" if margin < 0 else "at_risk" if margin < AT_RISK_MM else "pass_cad_only"
         )
-        if state == "fail_cad" and r.get("approx"):
-            state = "at_risk"  # a bounding-box estimate cannot prove a failure
+        if r.get("approx"):
+            # Estimates can flag a risk, but neither a CAD pass nor a definite failure.
+            state = "at_risk" if margin < AT_RISK_MM else "manual_review"
         checks.append(
             Check(
                 r["id"],
@@ -295,9 +351,18 @@ def run_checks(rulebook: dict[str, object], geometry: dict[str, object]) -> list
 
 
 def check_design(design_dir: Path, rulebook_path: Path) -> list[Check]:
-    return run_checks(
-        load_rulebook(rulebook_path), json.loads((design_dir / "geometry.json").read_text())
-    )
+    raw = (design_dir / "geometry.json").read_bytes()
+    geometry = json.loads(raw)
+    sidecar = design_dir / "forge-features.json"
+    if sidecar.is_file():
+        derived = json.loads(sidecar.read_text())
+        if (
+            derived.get("version") == 1
+            and derived.get("geometry_sha256") == hashlib.sha256(raw).hexdigest()
+            and derived.get("source_sha256") == geometry.get("source_sha256")
+        ):
+            geometry["forge_features"] = derived["features"]
+    return run_checks(load_rulebook(rulebook_path), geometry)
 
 
 @dataclass(frozen=True)

@@ -95,6 +95,7 @@ class GeometryReport:
     warnings: tuple[str, ...] = ()
     schema_version: int = 2
     axles: dict[str, Axle] = field(default_factory=dict)
+    forge_features: dict[str, dict[str, object]] = field(default_factory=dict)
 
     def to_json(self) -> str:
         return json.dumps(asdict(self), indent=2)
@@ -218,6 +219,13 @@ def import_car(
         translation_m=(float(shift[0]), float(shift[1]), float(shift[2])),
     )
 
+    from daedalus.forge_features import analytic_features, wing_sections
+
+    features = analytic_features(solids, rot, shift)
+    for label, group, mesh, _ in meshes:
+        if group in (ForceGroup.FRONT_WING, ForceGroup.REAR_WING):
+            features.setdefault(label, {}).update(wing_sections(mesh.vertices, mesh.faces))
+
     warnings: list[str] = []
     body_meshes = [m for _, g, m, _ in meshes if g is ForceGroup.BODY]
     parts: list[Part] = []
@@ -304,6 +312,7 @@ def import_car(
             **({"wheels": [parts[i].label for i in wheel_indices]} if wheel_indices else {}),
         },
         axles=axles,
+        forge_features=features,
         warnings=tuple(warnings),
     )
     (out_dir / "geometry.json").write_text(report.to_json())
