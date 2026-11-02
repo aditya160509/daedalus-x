@@ -219,3 +219,80 @@ Later: Race replay rebuild, Ghost merged into Replay, Inspect merged into the CA
 - Before building any feature, **search GitHub for an existing project**. Check the licence (`gh api repos/<owner>/<repo> --jq .license.spdx_id`); AGPL/GPL/MIT/BSD/Apache/ISC/Zlib are all fine; **no licence = ideas only**.
 - Add every find to the tables above with its licence, stars and fit, then commit.
 - Search ideas still open: OpenFOAM web GUIs, Rapier physics for the launch, STEM Racing world-champion portfolios (what judges reward), F1 TV graphics packages, broadcast timing fonts, Formula Student telemetry tools.
+
+---
+
+## 19. Deep analysis catalogue (high-level, data-driven outputs)
+Each item lists **input → method → output (what the user sees) → decision it drives**. ★ = do first.
+
+### A. Aerodynamics (from CFD)
+1. ★ **Drag decomposition by part**: per-patch forces → % of drag from body / front wing / rear wing / wheels / cartridge, split into pressure vs friction → waterfall chart → "attack the biggest bar first".
+2. ★ **Run vs run delta**: two runs → ΔCp on the surface, Δ wake deficit, Δ per-part drag → diverging surface map + table → "did this change actually help, and where?".
+3. ★ **Grid independence / GCI**: 3 mesh levels → Richardson extrapolation and the Grid Convergence Index → Cd ± numerical error → "trust level" badge on every Cd.
+4. **Wake survey**: velocity-deficit planes at x/L = 0.5, 1, 2 → momentum-deficit drag estimate (a cross-check against force integration) and wake area → contour plots.
+5. **Vortex analysis**: Q-criterion / λ2 → vortex cores from the wheels and wing tips, with strength and location → "wheel wake dominates?".
+6. **Surface flow topology**: wall shear stress → separation and reattachment lines, stagnation points → LIC plus marked lines → where flow separates.
+7. **Pressure distributions along lines**: Cp along centreline and sections → line plots, compared between designs.
+8. **Boundary-layer health**: y+ map, skin friction → mesh adequacy and transition hints.
+9. **Ground effect and ride-height sensitivity**: runs at different heights → Cd vs height curve.
+10. **Yaw / crosswind sensitivity** (stretch): small yaw angles → Cd(yaw).
+11. **Speed sweep / Reynolds dependence**: 15–25 m/s runs → Cd vs Re → whether constant Cd is valid across the whole race.
+12. **Frontal area vs Cd trade**: CdA = Cd × A → whether to shrink area or improve shape.
+
+### B. Optimisation (ORACLE)
+13. ★ **GP response surfaces**: mean and uncertainty maps for each variable pair → where the model is unsure.
+14. **Variable importance**: GP length-scales and Sobol indices → "nose height matters 3× more than taper".
+15. **Expected-improvement map and acquisition history** → why each run was chosen.
+16. **Optimisation convergence**: best CdA vs runs, compared with random and Latin hypercube → the benchmark curve.
+17. **Pareto front**: drag vs mass vs rule margin → the best legal trade-offs.
+18. **Model validation**: leave-one-out predictions vs actual, with RMSE → how much to trust ORACLE.
+
+### C. Race performance (physics model)
+19. ★ **Race-time budget**: time lost to drag vs rolling vs mass vs reaction → stacked bar → where the milliseconds are.
+20. ★ **Sensitivity tornado**: ±10% of each input → Δ race time → what to work on.
+21. **ms per unit**: ms per gram, per cm² of CdA, per 0.001 Crr → a design-change value table for the verbal pitch.
+22. **Monte Carlo distribution**: thrust variance, mass and reaction → p5/p50/p95 race time → the sealed-prediction band.
+23. **Speed/acceleration/force traces**: thrust vs drag vs rolling over time → where drag overtakes thrust.
+24. **Optimal mass study**: a heavier car is legal but slower → the minimum-legal-mass benefit.
+25. **Track-length scaling**: times for 20 m vs other track lengths.
+26. **Head-to-head win probability**: our distribution vs a rival's estimated time → P(win).
+
+### D. Race-day and measured data
+27. ★ **Predicted vs measured calibration**: each real run updates CdA and Crr (Bayesian) → posterior plots and shrinking error bars.
+28. **Reaction-time statistics**: mean, σ, distribution and improvement over practice → reaction coaching.
+29. **Car-to-car and lane variance**: lane A vs B, cartridge batch → is the difference real (t-test)?
+30. **Outlier detection**: flags runs with timing errors or a bad launch.
+31. **Season trend**: race times across events with annotations of design changes.
+
+### E. Rules and scrutineering
+32. ★ **Compliance margin map**: every India NF rule → measured, limit, margin, penalty → points at risk.
+33. **Tolerance stack-up**: manufacturing tolerance (±0.2 mm) → probability each dimension ends up illegal → "make the wing 0.5 mm taller to be safe".
+34. **Mass compliance**: material density × CAD volume → predicted mass vs the 60 g minimum.
+
+### F. Manufacturing and quality
+35. **Measured vs CAD deviation**: scan or caliper measurements → deviation table/heat map → what manufacturing changed.
+36. **Wall-thickness map** and **CNC reach check**.
+
+### G. Project and team (Enterprise / PM points)
+37. **Timeline of decisions** from the evidence log (design → run → change) → Gantt-style chart.
+38. **Compute and effort log**: CFD hours, runs per week → project-management evidence.
+
+## 20. "Full stadium" race timing view (F1 broadcast style)
+What the big-screen timing page should show, inspired by F1 TV, f1-dash and STEM Racing world finals displays:
+- **Timing tower** (left): position, car, best time, last time, gap to leader, interval, delta to prediction; colour codes purple = session best, green = personal best, yellow = slower (with a legend).
+- **Mini-sectors**: 8 sectors per 20 m run with sector times and colours.
+- **Reaction time** column with a green/amber/red threshold.
+- **Speed trap**: peak speed and finish speed.
+- **Race-pair view**: two lanes side by side, live gap, winner banner, photo-finish frame.
+- **Event-wide leaderboard**: all teams' best times (manual entry or CSV), our position, gap to P1.
+- **History strip**: every run today, as a sparkline of times.
+- **Big-screen / TV mode**: full-screen, huge numbers, auto-rotates panels, works on a projector.
+- **Prediction scoreboard**: predicted vs actual for every run, with a sealed-hash ✓/✗.
+- Export the day as a PDF/CSV for the portfolio.
+
+## 21. Output products (what the app produces for judges)
+- **Engineering portfolio pack**: auto-generated PDF chapters (Aero, Optimisation, Race, Rules, Manufacturing) with figures from the analyses above.
+- **Verbal-presentation deck**: live presenter slides with key numbers and one "wow" (the sealed prediction reveal).
+- **Scrutineering sheet**: a printable compliance table with measured values.
+- **Race-day report**: the times, calibration update and next actions.
+- **Evidence appendix**: hash list plus a QR verify link.
