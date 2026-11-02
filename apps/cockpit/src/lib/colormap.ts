@@ -70,14 +70,6 @@ export function colorize(
   return out;
 }
 
-/** CSS linear-gradient matching a colormap, for legends. */
-export function cssGradient(name: ColormapName, direction = "to right"): string {
-  const stops = MAPS[name]
-    .map(([t, r, g, b]) => `rgb(${(r * 255) | 0} ${(g * 255) | 0} ${(b * 255) | 0}) ${t * 100}%`)
-    .join(", ");
-  return `linear-gradient(${direction}, ${stops})`;
-}
-
 /** Categorical series colours for charts, in assignment order. */
 export const SERIES = {
   blue: "#5aa8ff",

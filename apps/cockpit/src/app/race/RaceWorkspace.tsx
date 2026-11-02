@@ -338,7 +338,7 @@ export function RaceWorkspace() {
             presetNote={fileError ? `${presetNote ?? ""} ${fileError}`.trim() || null : presetNote}
             onAddPreset={addPreset}
             onRenamePreset={(id, name) =>
-              persistPresets(presets.map((p) => (p.id === id ? { ...p, name } : p)))
+              persistPresets(presets.map((item) => (item.id === id ? { ...item, name } : item)))
             }
             onDeletePreset={deletePreset}
             onApplyPreset={applyPreset}

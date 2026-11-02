@@ -29,7 +29,7 @@ export function LegalPanel({ design: picked }: { design?: string } = {}) {
     queryFn: () => getForgeChecks(design!),
     enabled: !!design,
   });
-  const checks = [...(q.data?.checks ?? [])].sort(
+  const checks = (q.data?.checks ?? []).toSorted(
     (a, b) => ORDER.indexOf(a.state) - ORDER.indexOf(b.state),
   );
   const fails = checks.filter((c) => c.state === "fail_cad").length;

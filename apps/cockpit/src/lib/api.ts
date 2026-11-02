@@ -484,7 +484,7 @@ export const getOracleState = () => request("/v1/oracle/state", OracleState);
 
 // Sealed predictions (T09)
 const Qty = z.object({ value: z.number(), unit: z.string() });
-export const SealedPrediction = z.looseObject({
+const SealedPrediction = z.looseObject({
   prediction_id: z.string(),
   predicted: Qty,
   interval_low: Qty,
@@ -492,9 +492,9 @@ export const SealedPrediction = z.looseObject({
   sealed_at: z.string().nullable(),
   manifest_hash: z.string().nullable(),
 });
-export type SealedPrediction = z.infer<typeof SealedPrediction>;
+type SealedPrediction = z.infer<typeof SealedPrediction>;
 export const listPredictions = () => request("/v1/predictions", z.array(SealedPrediction));
-export const ScoreResult = z.looseObject({ inside_interval: z.boolean() });
+const ScoreResult = z.looseObject({ inside_interval: z.boolean() });
 export const scorePrediction = (id: string, measured_s: number) =>
   request(`/v1/predictions/${id}/score`, ScoreResult, {
     method: "POST",
@@ -525,7 +525,7 @@ const PointsAtRisk = z.object({
   manual_review_rules: z.number(),
   unquantified_rules: z.array(z.string()),
 });
-export const ForgeChecks = z.object({
+const ForgeChecks = z.object({
   revision: z.string(),
   rulebook: z.string().optional(),
   is_reference_only: z.boolean(),
@@ -550,13 +550,13 @@ export type EvidenceRow = z.infer<typeof EvidenceRow>;
 export const listEvidence = (q?: string) =>
   request(`/v1/evidence/records${q ? `?q=${encodeURIComponent(q)}` : ""}`, z.array(EvidenceRow));
 
-export const CadImport = z.object({
+const CadImport = z.object({
   design_id: z.string(),
   artifact_id: z.string(),
   warnings: z.array(z.string()),
   checks: z.array(RuleCheck),
 });
-export type CadImport = z.infer<typeof CadImport>;
+type CadImport = z.infer<typeof CadImport>;
 
 /** Save the in-browser CAD's parts (one named STEP each) as a new, rule-checked car design. */
 export const importCadStep = (parts: { name: string; blob: Blob }[], name: string) => {
