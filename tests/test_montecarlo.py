@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from daedalus.dynamics import CarParams, ModelLevel, ThrustCurve, simulate
-from daedalus.montecarlo import BAND_POINTS, Uncertainty, run
+from daedalus.montecarlo import BAND_POINTS, Uncertainty, race_times, run
 
 
 def _car() -> CarParams:
@@ -93,3 +93,28 @@ def test_trajectory_band_runtime_for_1000_samples() -> None:
     start = time.perf_counter()
     run(_car(), Uncertainty(), n=1000, seed=0, trajectory_band=True)
     assert time.perf_counter() - start < 1.2
+
+
+def test_race_times_accepts_a_different_track_length_per_sample() -> None:
+    # Regression: an array track_m crashed when samples crossed the line at different steps.
+    thrust = ThrustCurve(np.array([0.0, 0.02, 0.1, 0.4, 0.6]), np.array([0.0, 4.0, 3.0, 1.5, 0.0]))
+    ones = np.ones(3)
+    tracks = np.array([5.0, 10.0, 20.0])
+    together = race_times(
+        thrust, ones, ones * 0.05, ones * 4e-4, ones * 0.01, 1.204, tracks, ModelLevel.M2
+    )
+    alone = [
+        race_times(
+            thrust,
+            ones[:1],
+            ones[:1] * 0.05,
+            ones[:1] * 4e-4,
+            ones[:1] * 0.01,
+            1.204,
+            t,
+            ModelLevel.M2,
+        )[0]
+        for t in tracks
+    ]
+    assert np.allclose(together, alone)
+    assert np.all(np.diff(together) > 0)

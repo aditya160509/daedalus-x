@@ -566,6 +566,38 @@ export const importCadStep = (parts: { name: string; blob: Blob }[], name: strin
   return request("/v1/designs/import", CadImport, { method: "POST", body });
 };
 
+const RaceBreakdown = z.object({
+  budget_ms: z.object({
+    car_time_ms: z.number(),
+    drag_ms: z.number(),
+    rolling_ms: z.number(),
+    mass_above_minimum_ms: z.number(),
+    reaction_ms: z.number(),
+    total_time_ms: z.number(),
+  }),
+  tornado: z.array(z.object({ input: z.string(), low_ms: z.number(), high_ms: z.number() })),
+  exchange_rates: z.object({
+    ms_per_gram: z.number(),
+    ms_per_cm2_cda: z.number(),
+    ms_per_0p001_crr: z.number(),
+    ms_per_percent_thrust: z.number(),
+  }),
+});
+export type RaceBreakdown = z.infer<typeof RaceBreakdown>;
+export const getRaceBreakdown = (race: RaceSimulationRequest, reactionS: number) =>
+  request("/v1/analysis/race-breakdown", RaceBreakdown, {
+    method: "POST",
+    body: JSON.stringify({
+      mass_kg: race.mass_kg,
+      track_length_m: race.track_length_m,
+      thrust: { t_s: race.thrust.t_s, force_n: race.thrust.force_n },
+      cda_m2: race.cda_m2,
+      crr: race.crr,
+      rho_kg_m3: race.rho_kg_m3,
+      reaction_s: reactionS,
+    }),
+  });
+
 // Analysis (T19 energy audit, T21 beam FEM, T33 project twin)
 export const EnergyAudit = z.object({
   thrust_work_j: z.number(),

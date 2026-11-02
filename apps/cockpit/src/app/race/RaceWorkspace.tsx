@@ -21,6 +21,7 @@ import {
   raceMonteCarlo,
   simulateRace,
   getEnergyAudit,
+  getRaceBreakdown,
   type RaceSimulationRequest,
   type UncertaintyInput,
 } from "@/lib/api";
@@ -37,9 +38,11 @@ const RACE_TABS = [
   { id: "ghost", label: "Ghost" },
   { id: "start", label: "Start" },
   { id: "energy", label: "Energy" },
+  { id: "breakdown", label: "Breakdown" },
 ] as const;
 import { SpreadPanel } from "./SpreadPanel";
 import { EnergyPanel } from "@/components/race/EnergyPanel";
+import { BreakdownPanel } from "@/components/race/BreakdownPanel";
 import {
   DEFAULT_CAR,
   DEFAULT_ESTIMATE,
@@ -298,6 +301,11 @@ export function RaceWorkspace() {
     queryFn: () => getEnergyAudit(request),
     enabled: valid && tab === "energy",
   });
+  const breakdown = useQuery({
+    queryKey: ["race-breakdown", request],
+    queryFn: () => getRaceBreakdown(request, 0),
+    enabled: valid && tab === "breakdown",
+  });
   const [inputsOpen, setInputsOpen] = useState(true);
 
   const p = mc.data?.percentiles_s;
@@ -502,6 +510,11 @@ export function RaceWorkspace() {
           {tab === "energy" && (
             <div className="mx-auto w-full max-w-4xl overflow-y-auto">
               <EnergyPanel data={energy.data} error={energy.error} fetching={energy.isFetching} />
+            </div>
+          )}
+          {tab === "breakdown" && (
+            <div className="mx-auto w-full max-w-4xl overflow-y-auto">
+              <BreakdownPanel data={breakdown.data} error={breakdown.error} />
             </div>
           )}
           {tab === "start" && (
