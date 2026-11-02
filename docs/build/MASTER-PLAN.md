@@ -445,7 +445,7 @@ Partial tasks receive a fixed half-point for a simple, reproducible tally; this 
 | T10 | ORACLE optimisation | 🟨 Partial | GP/EI, SALib sensitivity and family-filtered study build/API/FORGE/evidence/UI connected; complete legal geometry, accepted-only CFD feedback, training-source separation and full objective remain. |
 | T11 | FORGE rules and inspections | 🟨 Partial | India rulebook, CAD states/margins and sheet; measured inspections and full coverage remain. |
 | T12 | ATLAS evidence | 🟨 Partial | Store, hashes, timeline, verify and React Flow lineage exist; derived missing-action coverage now ties every gap to a real design/run/calibration/prediction ID and shows it in the lineage and a Coverage view. Final acceptance remains. |
-| T13 | Competition mode and report (AR cut) | 🟨 Partial | Presenter and Typst report exist; complete judge pack and public verification remain; AR is out of scope. |
+| T13 | Competition mode and report (AR cut) | 🟨 Partial | Presenter, Typst report and drawing pack exist; a downloadable judge pack now bundles the existing exports, rule findings, run manifests and evidence verification with an honest missing list. Public verification remains; AR is out of scope. |
 | T14 | Final app polish | ⬜ Remaining | Consolidated responsiveness, accessibility, performance and acceptance pass remains. |
 | T15 | Racing-points objective | 🟨 Partial | Outcome core and API exist; ORACLE objective integration and declared opponent assumptions or owner-supplied results remain; competitor scraping is cut. |
 | T16 | Third-party prediction timestamps | 🟨 Partial | ✅ Submission/status/OpenSSL verification UI and API connected; each verification is now an append-only evidence record linked to the prediction, token artifact and trust-bundle artifact, with a history view. A real authority response and trusted certificate-chain verification remain. |
@@ -615,6 +615,13 @@ Checklist score remains 45%: these integrations advance existing partial tasks; 
 - [x] `GET /v1/evidence/coverage` returns the gaps and counts; lineage nodes carry their own `gaps`, and a Coverage view lists them grouped by kind with related IDs.
 - [x] Successful runs without an observation, failed runs, unbuilt designs, unscored predictions, studies without held-out runs and unverified timestamps are handled separately so the list stays factual.
 - [ ] ⏳ The rules are expectations, not adequacy checks; a gap outside the newest 500 lineage records has no node in the graph window.
+
+### Judge pack (T13)
+
+- [x] `GET /v1/report/judge-pack` returns one ZIP built from the existing report, drawing, rule, manifest and evidence outputs; each entry is hashed in `manifest.json`.
+- [x] A failed export is omitted and named in `MISSING.txt`; a reference-only rulebook, missing runs/designs, broken hashes and open coverage actions are listed too.
+- [x] Pit Wall links the pack next to the report PDF.
+- [ ] ⏳ A live Typst/STEP export and a browser download were not run in this pass; public verification remains.
 
 ---
 

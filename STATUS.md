@@ -35,7 +35,7 @@ Remaining work is tracked task-by-task in [docs/build/TASK-BOARD.md](docs/build/
 | P6-07 | Race workspace | Claude | T08 review: telemetry wall (channel picker, cursor table, A/B delta, per-channel y-zoom, MC p5–p95 band), what-if sliders with sweep sparklines, race replay, ghost race, presets | [T08](evidence/T08.md), [original](evidence/P6-07-race.md) |
 | P6-08 | Inspect workspace | Claude | todo | |
 | P6-09 | Evidence workspace | Claude | review: timeline/hash verification, lazy React Flow lineage and derived missing-action coverage tied to real entity IDs; final acceptance pending | [T12](evidence/T12-evidence-coverage.md) |
-| P6-10 | Competition Mode | Claude | todo | |
+| P6-10 | Competition Mode | Claude | review: presenter, report PDF and judge-pack ZIP (existing exports, hashed manifest, honest missing list); public verification pending | [T13](evidence/T13-judge-pack.md) |
 | P6-11 | Polish pass | Claude | todo | |
 | P7-01 | Initial + holdout CFD runs | GPT | todo | |
 | P7-02 | ORACLE loop live | Codex | partial: real study build/import/FORGE/evidence/UI; accepted-only feedback and complete legal geometry remain | [study build](evidence/ORDER-5-study-build.md) |

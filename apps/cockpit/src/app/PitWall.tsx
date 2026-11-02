@@ -55,14 +55,24 @@ export function PitWall() {
         value={tab}
         onChange={setTab}
         right={
-          <a
-            href="/api/v1/report/pdf"
-            target="_blank"
-            rel="noreferrer"
-            className="rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
-          >
-            Report PDF ↗
-          </a>
+          <div className="flex items-center gap-1">
+            <a
+              href="/api/v1/report/pdf"
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+            >
+              Report PDF ↗
+            </a>
+            <a
+              href="/api/v1/report/judge-pack"
+              download="daedalus-x-judge-pack.zip"
+              title="One ZIP with the existing report, drawings, rule checks, run manifests, evidence verification and a list of anything missing"
+              className="rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+            >
+              Judge pack ZIP ↓
+            </a>
+          </div>
         }
       />
       <div className="min-h-0 flex-1 overflow-y-auto p-3">

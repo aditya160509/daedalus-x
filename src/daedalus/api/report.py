@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import typst
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import Response
 
 from daedalus.api import engineering as eng_api
@@ -69,4 +69,33 @@ def report_pdf(design: str = "orbit_baseline") -> Response:
         content=pdf,
         media_type="application/pdf",
         headers={"Content-Disposition": 'inline; filename="daedalus-x-report.pdf"'},
+    )
+
+
+@router.get("/judge-pack")
+def judge_pack_bundle(
+    design: str = Query("orbit_baseline", min_length=1, max_length=120),
+    team: str = Query("Veloira", min_length=1, max_length=100),
+    number: str = Query("DX-001", min_length=1, max_length=30),
+    rulebook: str = Query("india-nf-2025-26", min_length=1, max_length=60),
+) -> Response:
+    """One ZIP of the existing exports plus an honest list of what is missing."""
+    from daedalus import judge_pack as pack
+
+    for label, value in (("design", design), ("team", team), ("number", number)):
+        if "/" in value or "\\" in value or ".." in value:
+            raise HTTPException(422, f"{label} may not contain path separators")
+    try:
+        result = pack.build_pack(
+            eng_api.data_root(), design=design, team=team, number=number, rulebook=rulebook
+        )
+    except OSError as exc:
+        raise HTTPException(503, f"judge pack could not be built: {exc}") from exc
+    return Response(
+        content=result.data,
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": 'attachment; filename="daedalus-x-judge-pack.zip"',
+            "X-Daedalus-Missing": str(len(result.missing)),
+        },
     )
