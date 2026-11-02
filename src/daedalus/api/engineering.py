@@ -5,13 +5,14 @@ from __future__ import annotations
 import json
 import os
 import re
+import tempfile
 import threading
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 from fastapi import APIRouter, HTTPException, Query
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
 from starlette.concurrency import run_in_threadpool
 
@@ -21,6 +22,7 @@ router = APIRouter(prefix="/v1", tags=["engineering"])
 
 _ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,80}$")
 MAX_HISTORY_POINTS = 600
+_FIELD_EXPORT_LOCK = threading.Lock()  # native field reads are memory-heavy
 
 
 def data_root() -> Path:
@@ -253,13 +255,62 @@ def run_vtk_layer(run_id: str, filename: str) -> FileResponse:
         raise HTTPException(404, f"unknown layer {filename!r}")
     run = _safe_dir("runs", run_id)
     try:
-        path = export_layer(run, layer)
+        with _FIELD_EXPORT_LOCK:
+            path = export_layer(run, layer)
     except FileNotFoundError as exc:
         raise HTTPException(404, str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
     return FileResponse(
         path, media_type="text/xml", headers={"Cache-Control": "private, max-age=300"}
+    )
+
+
+@router.get("/cfd/compare/cp/metadata")
+def compare_cp_metadata(base: str, other: str) -> dict[str, object]:
+    from daedalus.viz.compare import compare_sources
+
+    try:
+        a, b = compare_sources(_safe_dir("runs", base), _safe_dir("runs", other))
+    except FileNotFoundError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except (ValueError, KeyError, TypeError) as exc:
+        raise HTTPException(422, str(exc)) from exc
+    return {
+        "base": a,
+        "other": b,
+        "coordinate_frame": "engineering metres, symmetry y=0",
+        "definition": "Cp(other) - Cp(base), Cp = p/(0.5 U_inf^2)",
+        "method": "identical indexed surface; no interpolation; mesh check on VTP request",
+    }
+
+
+@router.get("/cfd/compare/cp/surface.vtp")
+def compare_cp_surface(base: str, other: str) -> Response:
+    from daedalus.viz.compare import build_comparison
+    from daedalus.viz.vtkexport import _write
+
+    try:
+        with _FIELD_EXPORT_LOCK:
+            surface, meta = build_comparison(_safe_dir("runs", base), _safe_dir("runs", other))
+            with tempfile.TemporaryDirectory() as directory:
+                path = Path(directory) / "delta.vtp"
+                _write(surface, path)
+                data = path.read_bytes()
+    except FileNotFoundError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except (ValueError, KeyError, TypeError) as exc:
+        raise HTTPException(422, str(exc)) from exc
+    return Response(
+        data,
+        media_type="text/xml",
+        headers={
+            "Cache-Control": "no-store",
+            "X-Delta-Cp-Max": str(meta["max_abs_delta_cp"]),
+            "X-Base-Time": meta["base"]["field_time"],
+            "X-Other-Time": meta["other"]["field_time"],
+            "X-Geometry-Sha256": meta["base"]["geometry_sha256"],
+        },
     )
 
 

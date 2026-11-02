@@ -369,7 +369,7 @@ The next-wave changes were merged into `main` in `6d708b5`. The table tracks ver
 | 1 India rulebook | 🟨 Partial | `rulebooks/stem-racing-india-nf-2025-26.yaml`, more rules measured, points at risk, scrutineering sheet (`forge_sheet.py`, `sheet.typ`), failed-rule links select and frame named CAD parts; responsive shell | Physical verification; feature-level measures tracked below |
 | T20 FORGE v2 | 🟨 Partial | Axle layout measures retained; CAD cylinder rolling bands, sampled wing-section extremes, explicit named halo-notch arcs, rear-wing plane B location and rear overhang bound; hash-bound remeasurement sidecar + UI action | Halo absent/ambiguous features remain manual; continuous wing surfaces, contact geometry and physical tolerances still require verification |
 | T22 drawing pack | 🟨 Partial | Design Studio Drawings tab exports all 13 C2.10.6 contents items as A4 vector PDF from original STEP; sections, exploded key, CAD extents, FORGE findings, team notes and review register | Local feature dimensioning, wing-boundary markup, missing named nose/tether geometry and team finish/decal annotations require engineering completion; DXF/SVG deviation importer and separate render pack remain |
-| 2 Wind Tunnel analysis | 🟨 Partial | Component-force and drag charts, analysis API and grid-study view are wired | Accepted-source/campaign validation, complete run comparison and advanced wake/vortex layers |
+| 2 Wind Tunnel analysis | 🟨 Partial | Component-force/drag charts and grid study wired; ✅ wake planes, Q surfaces and strict same-mesh ΔCp with exports connected | Accepted-source/campaign validation, interpolated design-to-design comparison and remaining wake metrics |
 | 3 Race replay rebuild | 🟨 Built core; acceptance pending | Correct Z-up GLB conversion and leading-point placement; PBR car/wheel motion, studio track, tether/start/sector/finish details, six camera modes, adaptive reflections/effects, cursor timing, comparison controls, photo-finish slow motion and PNG capture | Hardware 60 fps verification, final 1024 px pass and broader final QA; no measured reaction data supplied |
 | 4 Race analysis | 🟨 Partial | Time budget, tornado chart, exchange rates, Breakdown tab, Energy panel (`raceanalysis.py`, `energy.py`) | Stadium timing / TV mode |
 | 5 Closed loop | 🟨 Partial; real study build connected | Canonical build123d study generator, cheap family-filtered recommendations, build-next API, real geometry import/FORGE, parameterized Design/evidence artifacts and Pit Wall CAD/rules links; existing CFD dialog receives the exact generated design when no CAD rules fail | Legal/complete production geometry, full constraints/objective, automatic accepted-only CFD feedback and synthetic/physical training separation |
@@ -436,9 +436,9 @@ Partial tasks receive a fixed half-point for a simple, reproducible tally; this 
 | T01 | CFD accuracy and acceptance | 🟨 Partial | Rotating-wheel / moving-ground case and acceptance tooling; accepted current-car CFD and scientific review remain. |
 | T02 | Durable job queue and launch UI | ✅ Built | Queue, worker, logs, cancellation/recovery, API and launch UI implemented; reviewer acceptance remains. |
 | T03 | Grid study and speed sweep | 🟨 Partial | Study tooling exists; actual accepted multi-mesh/speed campaigns remain. |
-| T04 | Flow insight export | 🟨 Partial | Field/export tooling exists; full catalogue and accepted-source validation remain. |
+| T04 | Flow insight export | 🟨 Partial | ✅ Active VTK exporter adds lazy wake-plane/Q layers and strict ΔCp exports; remaining catalogue, accepted-source and visual validation remain. |
 | T05 | Adjoint sensitivity | 🟨 Partial | Tooling exists; accepted primal, adjoint result and connected sensitivity map remain. |
-| T06 | Wind Tunnel experience | 🟨 Partial | vtk.js surface, streamlines and slices connected; advanced layers, compare and quality UX remain. |
+| T06 | Wind Tunnel experience | 🟨 Partial | ✅ vtk.js wake/Q controls, strict same-mesh ΔCp, source metadata and downloads connected; design-to-design interpolation, remaining analysis and final visual/performance validation remain. |
 | T07 | Design Studio | 🟨 Partial | Real CAD import/save, inspection and rule focus; deeper integration and final acceptance remain. |
 | T08 | TITAN race experience | ✅ Built | Telemetry now uses uPlot; direct racing-game/f1-dash components, what-if/presets, uncertainty band, replay and comparison connected; ⏳ final QA/performance. |
 | T09 | Imports, units and calibration | 🟨 Partial | Import/unit/calibration foundations; complete calibration UI and measured validation remain. |
@@ -582,7 +582,8 @@ Follow scope decision §27: no photo/video/AR/competitor-scraping/base-bleed/com
 - [ ] ⏳ Dockview and Test Planner visual review; no servers/browser/CFD started for these changes.
 - [x] Terra completed T29 single-design limits UI and T16 timestamp submission/verification workflow; parent reviewed sources. Existing ECharts, Query, Zod/Base UI and OpenSSL reused.
 - [x] Terra completed T17/T09 ephemeral Bayesian calibration workflow; parent added a single-fit concurrency gate and disabled assumption editing during fits.
-- [ ] 🔄 Terra implementing T04/T06 wake planes, Q-criterion and strict compatible-mesh ΔCp via native PyVista/vtk.js. Parent review/commit pending.
+- [x] Terra completed T04/T06 wake/Q layers and strict same-mesh ΔCp with source checks and VTP/metadata exports; parent reviewed, serialized native field exports and verified focused tests. vtk.js resource ownership/cleanup extended to base and optional layers.
+- [ ] ⏳ Browser/GPU checks, compatible real-source comparison and accepted CFD validation remain; no CFD campaign ran.
 - [x] Parent connected the Order 5 real study build path and hardened observation validation/concurrent writes; see `evidence/ORDER-5-study-build.md`. No accepted CFD feedback or legal-car claim.
 
 Checklist score remains 45%: these integrations advance existing partial tasks; they do not establish scientific acceptance or complete all their remaining scope.

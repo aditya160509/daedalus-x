@@ -22,9 +22,16 @@ import vtk
 
 from . import CAR_GROUPS, _reader
 
-Layer = Literal["surface", "streamlines", "volume"]
-LAYERS: dict[str, str] = {"surface": "vtp", "streamlines": "vtp", "volume": "vti"}
-EXPORT_VERSION = 2
+Layer = Literal["surface", "streamlines", "volume", "wake1", "wake1p5", "wake2", "vortex"]
+WAKE_POSITIONS = {"wake1": 1.0, "wake1p5": 1.5, "wake2": 2.0}
+LAYERS: dict[str, str] = {
+    "surface": "vtp",
+    "streamlines": "vtp",
+    "volume": "vti",
+    **dict.fromkeys(WAKE_POSITIONS, "vtp"),
+    "vortex": "vtp",
+}
+EXPORT_VERSION = 3
 GRID_MAX = 64
 SURFACE_TARGET_CELLS = 120_000
 
@@ -117,6 +124,45 @@ def _volume(internal: pv.UnstructuredGrid, car: dict, u_inf: float, q: float) ->
     return grid
 
 
+def _wake_plane(
+    internal: pv.UnstructuredGrid, car: dict, u_inf: float, x_over_l: float
+) -> pv.PolyData:
+    """Streamwise velocity ratio on a transverse plane, mirrored from the half model."""
+    x = float(car["length_m"]) * x_over_l
+    width, height = float(car["width_m"]), float(car["height_m"])
+    plane = internal.slice(normal="x", origin=(x, 0, 0))
+    if not plane.n_points:
+        return pv.PolyData()
+    plane = (
+        plane.clip_box((x - 0.001, x + 0.001, 0, width / 2 + 0.03, 0, height + 0.03), invert=False)
+        .extract_surface(algorithm="dataset_surface")
+        .triangulate()
+    )
+    if not plane.n_points:
+        return pv.PolyData()
+    ux = np.asarray(plane.point_data["U"], float)[:, 0] / u_inf
+    plane.clear_data()
+    plane.point_data["Ux_Uinf"] = ux.astype(np.float32)
+    return _mirror(plane)
+
+
+def _vortices(internal: pv.UnstructuredGrid, car: dict, u_inf: float) -> pv.PolyData:
+    """Q isosurfaces at Q/(U∞/L)² = 50 and 200, colored by speed ratio."""
+    length = float(car["length_m"])
+    derived = internal.compute_derivative(scalars="U", gradient=False, qcriterion=True)
+    surface = derived.contour(
+        [50 * (u_inf / length) ** 2, 200 * (u_inf / length) ** 2], scalars="qcriterion"
+    )
+    if not surface.n_points:
+        return pv.PolyData()
+    speed = np.linalg.norm(np.asarray(surface.point_data["U"], float), axis=1) / u_inf
+    surface.clear_data()
+    surface.point_data["U_Uinf"] = speed.astype(np.float32)
+    if surface.n_cells > SURFACE_TARGET_CELLS // 2:
+        surface = surface.decimate_pro(1 - (SURFACE_TARGET_CELLS // 2) / surface.n_cells)
+    return _mirror(surface)
+
+
 def _latest_time(case: Path) -> Path | None:
     times = [d for d in case.iterdir() if d.is_dir() and _is_float(d.name) and float(d.name) > 0]
     return max(times, key=lambda d: float(d.name)) if times else None
@@ -149,6 +195,13 @@ def export_layer(case: Path, layer: str, cache_dir: Path | None = None) -> Path:
     u_inf = float(manifest["reference"]["U_m_s"])
     q = 0.5 * u_inf**2
     car = manifest["car"]
+    if (
+        not np.isfinite(u_inf)
+        or u_inf <= 0
+        or not np.isfinite(car["length_m"])
+        or car["length_m"] <= 0
+    ):
+        raise ValueError("run manifest needs positive finite reference speed and car length")
     groups = [g for g in car["groups"] if g in CAR_GROUPS]
     mesh = _reader(case, groups if layer == "surface" else [])
     internal = mesh["internalMesh"]
@@ -156,8 +209,12 @@ def export_layer(case: Path, layer: str, cache_dir: Path | None = None) -> Path:
         data: pv.DataSet = _surface(mesh["boundary"], groups, q)
     elif layer == "streamlines":
         data = _streamlines(internal, car, u_inf)
-    else:
+    elif layer == "volume":
         data = _volume(internal, car, u_inf, q)
+    elif layer in WAKE_POSITIONS:
+        data = _wake_plane(internal, car, u_inf, WAKE_POSITIONS[layer])
+    else:
+        data = _vortices(internal, car, u_inf)
 
     out_dir.mkdir(parents=True, exist_ok=True)
     if stamp.exists() and json.loads(stamp.read_text()) != key:

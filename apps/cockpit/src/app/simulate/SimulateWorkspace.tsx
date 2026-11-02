@@ -80,6 +80,7 @@ export function SimulateWorkspace() {
         <RunView
           run={detail.data}
           hasViz={runs.data?.find((r) => r.run_id === runId)?.has_viz ?? false}
+          runs={runs.data ?? []}
         />
       ) : (
         <div className="flex-1 animate-pulse rounded-xl bg-surface-2" />
@@ -88,7 +89,15 @@ export function SimulateWorkspace() {
   );
 }
 
-function RunView({ run, hasViz }: { run: CfdRunDetail; hasViz: boolean }) {
+function RunView({
+  run,
+  hasViz,
+  runs,
+}: {
+  run: CfdRunDetail;
+  hasViz: boolean;
+  runs: { run_id: string; state: string }[];
+}) {
   const [tab, setTab] = useTab(TUNNEL_TABS);
   const buildup = useQuery({
     queryKey: ["drag-buildup", run.run_id],
@@ -176,7 +185,14 @@ function RunView({ run, hasViz }: { run: CfdRunDetail; hasViz: boolean }) {
         {tab === "flow" &&
           (hasViz ? (
             <div className="min-h-0 min-w-0 flex-1">
-              <FlowViewer3D runId={run.run_id} />
+              <FlowViewer3D
+                key={run.run_id}
+                runId={run.run_id}
+                acceptance={run.result?.acceptance ?? "not evaluated"}
+                speed={manifest.reference.U_m_s}
+                length={manifest.car.length_m}
+                runs={runs}
+              />
             </div>
           ) : (
             <EmptyState icon={<Wind className="size-5" />} title="No flow field for this run">

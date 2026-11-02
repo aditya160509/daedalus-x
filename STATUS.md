@@ -1,6 +1,6 @@
 # Status
 
-Remaining work is tracked task-by-task in [docs/build/TASK-BOARD.md](docs/build/TASK-BOARD.md) (T01–T14). Mapping: T01→P3-02, T02→P1-03, T03→P3-03, T04/T05/T06→P3-04+Appendix B, T07→P6-04, T08→P6-07, T09→P1-04/P2-02, T10→P4-*/P7-*, T11→P5-01/P6-08, T12→P6-09, T13→P6-10, T14→P6-11.
+Remaining work is tracked task-by-task in [docs/build/TASK-BOARD.md](docs/build/TASK-BOARD.md) (T01–T35; scope cuts in MASTER-PLAN §27). Mapping: T01→P3-02, T02→P1-03, T03→P3-03, T04/T05/T06→P3-04+Appendix B, T07→P6-04, T08→P6-07, T09→P1-04/P2-02, T10→P4-*/P7-*, T11→P5-01/P6-08, T12→P6-09, T13→P6-10, T14→P6-11.
 
 | ID | Title | Owner | Status | Evidence |
 |---|---|---|---|---|
@@ -15,8 +15,8 @@ Remaining work is tracked task-by-task in [docs/build/TASK-BOARD.md](docs/build/
 | P2-03 | Monte Carlo uncertainty | Claude | done: vectorised, 2000 samples in 0.9 s, API + Race panel, trajectory band p5/p50/p95 (tests/test_montecarlo.py) | [T08](evidence/T08.md) |
 | P2-04 | Outcome objective: India NF points, knock-out odds, car choice | Claude (branch next-wave) | review: src/daedalus/outcome.py with 13 tests; not wired to ORACLE, API or UI | [T15](evidence/T15.md) |
 | P2-05 | Energy-loss audit | Claude (branch next-wave) | review: src/daedalus/energy.py with 8 tests; no API or UI | [T19-T23](evidence/T19-T23.md) |
-| P2-06 | Test planner (D-optimal tests, flags unidentified parameters) | Claude (branch next-wave) | review: src/daedalus/testplan.py with 8 tests; no API or UI | [T19-T23](evidence/T19-T23.md) |
-| P2-07 | Third-party timestamps for sealed predictions (RFC 3161) | Claude (branch next-wave) | review: src/daedalus/anchor.py with 7 tests; no real token yet | [T16-T21](evidence/T16-T21.md) |
+| P2-06 | Test planner (D-optimal tests, flags unidentified parameters) | Claude + Terra + Codex | review: editable Pit Wall planner/API and ranked timing/coast-down recommendations; physical validation pending | [T23](evidence/T23-test-planner.md) |
+| P2-07 | Third-party timestamps for sealed predictions (RFC 3161) | Claude + Terra + Codex | review: submission/status/verification UI/API; trusted real authority verification pending | [T16](evidence/T16-timestamps.md) |
 | P2-08 | Structural analysis, beam FEM with the rule load tests | Claude (branch next-wave) | review: src/daedalus/structure.py with 8 tests; 3D FEA not started | [T16-T21](evidence/T16-T21.md) |
 | P3-01 | Geometry path decision | GPT + Claude | blocked: car CAD/GLB | |
 | P3-02 | OpenFOAM case template | Claude + Codex | T01 review: axle rotation, explicit mesh quality and averaged CI gate implemented; T01b fixed the mesh: quick and final meshes pass checkMesh (1.5 mm contact step, boundary skewness 4); Cd deferred to new car model | [T01](evidence/T01.md), [T01b](evidence/T01b.md), [motorBike](evidence/P3-02-motorbike.md), [orbit](evidence/P3-02-orbit-baseline.md) |
@@ -38,7 +38,10 @@ Remaining work is tracked task-by-task in [docs/build/TASK-BOARD.md](docs/build/
 | P6-10 | Competition Mode | Claude | todo | |
 | P6-11 | Polish pass | Claude | todo | |
 | P7-01 | Initial + holdout CFD runs | GPT | todo | |
-| P7-02 | ORACLE loop live | GPT | todo | |
+| P7-02 | ORACLE loop live | Codex | partial: real study build/import/FORGE/evidence/UI; accepted-only feedback and complete legal geometry remain | [study build](evidence/ORDER-5-study-build.md) |
 | P9-01 | Freeze and rehearse | Claude | todo | |
 
 Cleanup review 2026-11-01: dead code removed, React Compiler on, knip/jscpd/size-limit/deptry/vulture/ruff S+C901 gates, 0 prod CVEs, no secrets; per-task verdicts in [REVIEW-cleanup](evidence/REVIEW-cleanup.md).
+
+
+Software integration batch 2026-11-02: ✅ native Dockview Overview; ✅ T23 planner UI; ✅ T29 single-design limits UI; ✅ T16 timestamp workflow; ✅ T17 Bayesian calibration UI with separate held-out scoring; ✅ T04/T06 wake/Q and strict same-mesh ΔCp controls/exports; 🟨 ORACLE real study build path. All remain subject to their evidence-note limitations and final acceptance. Focused checks passed; no browser/GPU validation, accepted CFD campaign or real measurement validation in this batch. Servers/browser were not started. Memory safeguards include serialized native field exports, single Bayesian fit per process and explicit vtk.js resource disposal. See MASTER-PLAN §§23–27; the coarse in-scope checklist score remains 45% because these advance already-partial tasks.

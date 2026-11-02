@@ -11,30 +11,30 @@ Take the **first `todo` whose dependencies are `accepted` or `review`**. "Lane" 
 | T03 | [Grid study + speed check](tasks/T03-grid-study.md) | backend-cfd | T01 | review | Codex (GPT-6) |
 | T04 | [Flow insight export: Q-criterion, iso-surfaces, oil flow, separation, total-pressure loss, drag build-up](tasks/T04-flow-insight-export.md) | backend-viz | — | review | Codex (GPT-6) |
 | T05 | [Adjoint drag sensitivity map](tasks/T05-adjoint-sensitivity.md) | backend-cfd | T01 | in-progress | Codex (GPT-6) |
-| T06 | [AETHER Wind Tunnel: commercial-grade visuals](tasks/T06-aether-wind-tunnel.md) | frontend-3d | T04 | review | DeepSeek V4.1 |
+| T06 | [AETHER Wind Tunnel: commercial-grade visuals](tasks/T06-aether-wind-tunnel.md) | frontend-3d | T04 | review | DeepSeek + Terra + Codex (wake/Q and strict same-mesh ΔCp connected; final QA pending) |
 | T07 | [AETHER Design Studio](tasks/T07-aether-design-studio.md) | frontend-3d | — | review | DeepSeek V4.1 |
 | T08 | [TITAN race experience](tasks/T08-titan-race.md) | frontend-2d | — | review | Claude (Codebuff) |
 | T09 | [Importers, units, calibration](tasks/T09-importers-calibration.md) | backend-api | T02 | review | Claude Opus 5.5 (recovered) |
-| T10 | [ORACLE optimisation](tasks/T10-oracle.md) | backend-ml + frontend-2d | T02, T03 | review | Claude Opus 5.5 (lean: numpy GP, Pit Wall) |
+| T10 | [ORACLE optimisation](tasks/T10-oracle.md) | backend-ml + frontend-2d | T02, T03 | review | Claude + Codex (GP/SALib and real study build/FORGE/evidence/UI; accepted-only CFD feedback remains) |
 | T11 | [FORGE rules and inspections](tasks/T11-forge.md) | backend-api + frontend-2d | — | review | Claude Opus 5.5 (CAD checks; inspections not yet) |
 | T12 | [ATLAS evidence workspace](tasks/T12-atlas-evidence.md) | frontend-2d | T02 | review | Claude + Codex (timeline/verify + React Flow lineage connected; complete action coverage and final acceptance pending) |
 | T13 | [Competition Mode, PDF report, AR](tasks/T13-competition-mode.md) | frontend | T06, T08, T12 | review | Claude Opus 5.5 (presenter + Typst PDF; AR not built) |
 | T14 | [App-wide polish pass](tasks/T14-polish.md) | frontend | all UI tasks | todo | |
 | T15 | Outcome objective: expected India NF points, knock-out win probability, tail risk (MASTER-PLAN 22.3) | backend-ml | T10 | review | Claude Sonnet 5.5 (branch next-wave; outcome.py, no API or UI yet) |
-| T16 | Third-party timestamps for sealed predictions | backend-api | P2-02 | review | Claude (branch next-wave; anchor.py, no API or UI yet) |
-| T17 | Bayesian calibration, information gain, out-of-sample validation | backend-ml | T09 | todo | |
+| T16 | Third-party timestamps for sealed predictions | backend-api | P2-02 | review | Claude + Terra + Codex (submission/status/verification UI and API; real trusted authority verification pending) |
+| T17 | Bayesian calibration, information gain, out-of-sample validation | backend-ml | T09 | review | Terra + Codex (API/UI and separate held-out scoring; evidence persistence and physical validation pending) |
 | T18 | Cartridge thrust model (gas type to be confirmed) | backend-ml | gas confirmed | todo | |
 | T19 | Energy-loss audit | backend-ml | - | review | Claude Sonnet 5.5 (branch next-wave; energy.py, no API or UI yet) |
 | T20 | FORGE v2: missing measures, pass probability, points at risk | backend-api + frontend-2d | T11 | todo | |
 | T21 | Structural analysis: beam FEM first, 3D FEA later | backend-ml | - | review | Claude (branch next-wave; structure.py beam FEM, 3D FEA not started) |
 | T22 | Engineering drawing pack generator and 2D drawing importer | backend-api | T07 | todo | |
-| T23 | Test planner (expected information gain). Finding: timing runs cannot identify CdA or Crr, see evidence/T19-T23.md | backend-ml | T17 | review | Claude Sonnet 5.5 (branch next-wave; testplan.py, no API or UI yet) |
+| T23 | Test planner (expected information gain). Finding: timing runs cannot identify CdA or Crr, see evidence/T19-T23.md | backend-ml | T17 | review | Claude + Terra + Codex (ranked timing/coast-down API/UI; completed-outcome feedback and physical validation pending) |
 | T24 | Gradient-enhanced and multi-fidelity ORACLE | backend-ml | T05, T10 | todo | |
 | T25 | Free-form adjoint shape optimisation | backend-cfd | T05, T20 | todo | |
 | T26 | Exhaust base-bleed study (research) | backend-cfd | T18 | todo | |
 | T27 | Physical-in-the-loop optimiser with model discrepancy | backend-ml | T15, T17 | todo | |
 | T28 | Field intelligence from public portfolios | backend-ml | - | todo | |
-| T29 | Legal-frontier map | backend-api | T20 | todo | |
+| T29 | Legal-frontier map | backend-api | T20 | review | Terra + Codex (single-design limits UI; sampled feasible-space frontier remains) |
 | T30 | Virtual scrutineer from photos | backend-api | T20 | todo | |
 | T31 | Video test lab | backend-ml | T17 | todo | |
 | T32 | As-built twin | backend-cfd | T20 | todo | |
@@ -74,3 +74,8 @@ Build everything first. Each build task runs only its own fast checks (format, t
 | L4 | T05 adjoint sensitivity | L2 | ~45 min |
 | L5 | T10 optimisation loop (CFD-in-the-loop) | L2 | overnight |
 | Q1 | Full QA: browser pass all workspaces, Lighthouse, axe, screenshots, full pytest + pnpm check | all builds | ~2 h |
+
+
+## Reuse batch checkpoint — 2026-11-02
+
+T23 planner UI, T29 nearest-limit UI, T16 timestamp workflow, T17 Bayesian UI and T04/T06 flow layers/comparison were implemented by Terra with low reasoning and reviewed/integrated by Codex. Codex connected actual MIT Dockview and the build123d study-design pipeline. These are software milestones under review, not complete scientific acceptance. Master-plan §§23–27 remains the scope ledger; explicitly cut T26/T28/T30/T31/T32/T35 and AR must not be restarted from older todo rows. Final browser/GPU checks and real measurement/accepted-source validation remain.
