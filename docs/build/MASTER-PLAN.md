@@ -372,7 +372,7 @@ The next-wave changes were merged into `main` in `6d708b5`. The table tracks ver
 | 2 Wind Tunnel analysis | 🟨 Partial | Component-force and drag charts, analysis API and grid-study view are wired | Accepted-source/campaign validation, complete run comparison and advanced wake/vortex layers |
 | 3 Race replay rebuild | 🟨 Built core; acceptance pending | Correct Z-up GLB conversion and leading-point placement; PBR car/wheel motion, studio track, tether/start/sector/finish details, six camera modes, adaptive reflections/effects, cursor timing, comparison controls, photo-finish slow motion and PNG capture | Hardware 60 fps verification, final 1024 px pass and broader final QA; no measured reaction data supplied |
 | 4 Race analysis | 🟨 Partial | Time budget, tornado chart, exchange rates, Breakdown tab, Energy panel (`raceanalysis.py`, `energy.py`) | Stadium timing / TV mode |
-| 5 Closed loop | 📝 Local draft; deferred behind reuse backlog | Local `parametric.py` draft builds a valid 11-solid study assembly using baseline extents and the four ORACLE variables; not wired into the app or committed yet | Constraint-filtered recommendation, build-next API, Design/evidence records, Pit Wall actions, CFD-job integration and accepted-result feedback |
+| 5 Closed loop | 🟨 Partial; real study build connected | Canonical build123d study generator, cheap family-filtered recommendations, build-next API, real geometry import/FORGE, parameterized Design/evidence artifacts and Pit Wall CAD/rules links; existing CFD dialog receives the exact generated design when no CAD rules fail | Legal/complete production geometry, full constraints/objective, automatic accepted-only CFD feedback and synthetic/physical training separation |
 | 6 Calibration / optimisation analysis | 🟨 Partial | Bayesian calibration API/UI with timing previews and held-out scoring, Monte Carlo and SALib Sobol/Morris API + Sensitivity UI | Calibration persistence/application, GP uncertainty maps and measured validation; ⏳ Calibration/Sensitivity visual review |
 | 7 Remaining | 🟨 Partial | Project page, cleanup, ✅ uPlot telemetry and ✅ React Flow evidence lineage | Run wizard, ⏳ dockview visual review, complete judge outputs and action-level evidence coverage |
 
@@ -385,7 +385,7 @@ The next-wave changes were merged into `main` in `6d708b5`. The table tracks ver
 | React Flow + Dagre evidence lineage | ✅ Connected to actual records/ID references; lazy loaded | ⏳ Full action coverage and final acceptance; current DB has 3 nodes / 2 links | `8cfb60e` |
 | SALib Sobol/Morris sensitivity | ✅ Library, API and Pit Wall tab connected | ⏳ Visual review; analytic/script checks passed | `6c42121` |
 | dockview | ✅ Actual docking engine connected to real Overview panels; saved layouts, drag/drop, reset and compact defaults | ⏳ Visual review; TypeScript and four layout checks passed; MIT notice retained | Current reuse pass 4 |
-| Closed-loop parametric car | 📝 Local CAD-generator draft only | API, evidence, FORGE/CFD and accepted-result feedback not connected | Uncommitted |
+| Closed-loop parametric car | 🟨 Real study generator/API/evidence/FORGE/UI connected | Legal geometry, complete constraints/objective and accepted-only CFD feedback remain | Current Order 5 study-build pass |
 | Final acceptance | ⬜ Still pending | Full QA, accepted CFD campaigns and measured validation | No acceptance claim |
 
 Browser and both development servers are stopped. Continue with scripts and short in-app checks only when needed; the earlier 21 GB peak remains unverified.
@@ -442,7 +442,7 @@ Partial tasks receive a fixed half-point for a simple, reproducible tally; this 
 | T07 | Design Studio | 🟨 Partial | Real CAD import/save, inspection and rule focus; deeper integration and final acceptance remain. |
 | T08 | TITAN race experience | ✅ Built | Telemetry now uses uPlot; direct racing-game/f1-dash components, what-if/presets, uncertainty band, replay and comparison connected; ⏳ final QA/performance. |
 | T09 | Imports, units and calibration | 🟨 Partial | Import/unit/calibration foundations; complete calibration UI and measured validation remain. |
-| T10 | ORACLE optimisation | 🟨 Partial | GP/EI, benchmark, Pit Wall and SALib sensitivity API/UI implemented; constrained CAD/CFD loop, full objective and sensitivity visual review remain. |
+| T10 | ORACLE optimisation | 🟨 Partial | GP/EI, SALib sensitivity and family-filtered study build/API/FORGE/evidence/UI connected; complete legal geometry, accepted-only CFD feedback, training-source separation and full objective remain. |
 | T11 | FORGE rules and inspections | 🟨 Partial | India rulebook, CAD states/margins and sheet; measured inspections and full coverage remain. |
 | T12 | ATLAS evidence | 🟨 Partial | Store, hashes, timeline, verify and React Flow lineage exist; complete action linkage and final acceptance remain. |
 | T13 | Competition mode and report (AR cut) | 🟨 Partial | Presenter and Typst report exist; complete judge pack and public verification remain; AR is out of scope. |
@@ -469,7 +469,7 @@ Partial tasks receive a fixed half-point for a simple, reproducible tally; this 
 | T34 | Red-team / V&V dossier | ⬜ Remaining | Integrated red-team and post-event reports remain. |
 | T35 | Community calibration | ✂️ Out of scope | Cross-team calibrated-data workflow remains. |
 
-**New work landed in this session:** ✅ India honesty correction; ✅ failed-rule CAD selection/focus; 🟨 FORGE v2 feature expansion; 🟨 13-item drawing draft; 🟨 replay rebuild pending final acceptance; 📝 closed-loop generator draft only. Details and commit IDs are in §23.
+**New work landed in this session:** ✅ India honesty correction; ✅ failed-rule CAD selection/focus; 🟨 FORGE v2 feature expansion; 🟨 13-item drawing draft; 🟨 replay rebuild pending final acceptance; 🟨 closed-loop study generation/API/evidence/UI now connected. Details and commit IDs are in §23.
 
 ## 25. Open-source reuse audit — what was actually used
 
@@ -582,7 +582,8 @@ Follow scope decision §27: no photo/video/AR/competitor-scraping/base-bleed/com
 - [ ] ⏳ Dockview and Test Planner visual review; no servers/browser/CFD started for these changes.
 - [x] Terra completed T29 single-design limits UI and T16 timestamp submission/verification workflow; parent reviewed sources. Existing ECharts, Query, Zod/Base UI and OpenSSL reused.
 - [x] Terra completed T17/T09 ephemeral Bayesian calibration workflow; parent added a single-fit concurrency gate and disabled assumption editing during fits.
-- [ ] 🔄 Terra continuing T04/T06 wake planes and Q-criterion via the active PyVista/vtk.js exporter/viewer. Partial task status stays until each remaining gate is met.
+- [ ] 🔄 Terra implementing T04/T06 wake planes, Q-criterion and strict compatible-mesh ΔCp via native PyVista/vtk.js. Parent review/commit pending.
+- [x] Parent connected the Order 5 real study build path and hardened observation validation/concurrent writes; see `evidence/ORDER-5-study-build.md`. No accepted CFD feedback or legal-car claim.
 
 Checklist score remains 45%: these integrations advance existing partial tasks; they do not establish scientific acceptance or complete all their remaining scope.
 

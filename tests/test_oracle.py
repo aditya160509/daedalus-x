@@ -36,3 +36,47 @@ def test_state_and_add(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         r = c.post("/v1/oracle/observations", json={"unit": [0.5] * 4, "cda_m2": 0.0024})
         assert r.json()["count"] == 9
         assert c.get("/v1/oracle/state").json()["provenance"] == "mixed"
+
+
+def test_observation_rejects_invalid_inputs():
+    for params, cda in [
+        ((0.5,) * 3, 0.002),
+        ((float("nan"),) * 4, 0.002),
+        ((1.1,) * 4, 0.002),
+        ((0.5,) * 4, float("inf")),
+    ]:
+        with pytest.raises(ValueError):
+            oracle.Observation(params, cda, "simulated")
+    with TestClient(app) as client:
+        assert (
+            client.post(
+                "/v1/oracle/observations", json={"unit": [1.1] * 4, "cda_m2": 0.002}
+            ).status_code
+            == 422
+        )
+
+
+def test_parallel_campaign_appends_do_not_lose_observations(tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+
+    def append(index):
+        return oracle.Campaign(tmp_path).add(
+            oracle.Observation((index / 100,) * 4, 0.002, "simulated")
+        )
+
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        list(pool.map(append, range(16)))
+    observations = oracle.Campaign(tmp_path).load()
+    actual = [o for o in observations if o.provenance != "synthetic"]
+    assert len(observations) == 24 and len(actual) == 16
+    assert len({o.params for o in actual}) == 16
+    assert not list((tmp_path / "oracle").glob("tmp*"))
+
+
+def test_study_recommendation_uses_declared_family_bounds():
+    x = oracle.candidates(8, seed=7)
+    y = oracle.synthetic_cda(x)
+    candidate, _, _ = oracle.next_best(x, y, candidate_filter=oracle.study_feasible)
+    assert bool(oracle.study_feasible(candidate)[0])
+    with pytest.raises(ValueError, match="No candidate"):
+        oracle.next_best(x, y, candidate_filter=lambda points: np.zeros(len(points), dtype=bool))

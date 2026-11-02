@@ -892,3 +892,15 @@ const OracleSensitivity = z.object({
 export type OracleSensitivity = z.infer<typeof OracleSensitivity>;
 export const getOracleSensitivity = (method: "sobol" | "morris") =>
   request(`/v1/oracle/sensitivity?method=${method}`, OracleSensitivity);
+
+const OracleStudy = z.object({
+  design_id: z.string(),
+  artifact_id: z.string(),
+  checks: z.array(RuleCheck),
+  failed_rules: z.number().int(),
+  manual_rules: z.number().int(),
+  warnings: z.array(z.string()),
+  provenance: z.literal("estimated"),
+});
+export const buildOracleStudy = (input: { baseline: string; unit: number[] }) =>
+  request("/v1/oracle/build-next", OracleStudy, { method: "POST", body: JSON.stringify(input) });

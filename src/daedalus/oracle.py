@@ -6,7 +6,12 @@ with ~30 CFD runs a GP is the honest surrogate, and it avoids a PyTorch dependen
 
 from __future__ import annotations
 
+import fcntl
 import json
+import math
+import os
+import tempfile
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -107,9 +112,32 @@ def candidates(n: int = 2000, seed: int = 0) -> FloatArray:
     return qmc.LatinHypercube(d=DIM, seed=seed).random(n)
 
 
-def next_best(x: FloatArray, y: FloatArray, seed: int = 0) -> tuple[FloatArray, float, GP]:
+def study_feasible(unit: FloatArray) -> NDArray[np.bool_]:
+    """Study-family bounds only; FORGE and physical checks remain separate gates."""
+    values = np.atleast_2d(unit)
+    if values.shape[1] != DIM:
+        raise ValueError(f"Expected {DIM} design variables")
+    return (
+        np.isfinite(values).all(axis=1)
+        & (values >= 0).all(axis=1)
+        & (values <= 1).all(axis=1)
+        & (values[:, 3] >= 0.25)
+        & (values[:, 3] <= 0.75)
+    )
+
+
+def next_best(
+    x: FloatArray,
+    y: FloatArray,
+    seed: int = 0,
+    candidate_filter: Callable[[FloatArray], NDArray[np.bool_]] | None = None,
+) -> tuple[FloatArray, float, GP]:
     gp = GP(x, y)
     cand = candidates(seed=seed)
+    if candidate_filter is not None:
+        cand = cand[candidate_filter(cand)]
+    if not len(cand):
+        raise ValueError("No candidate satisfies the declared study-family constraints")
     ei = expected_improvement(gp, cand, float(np.min(y)))
     i = int(np.argmax(ei))
     return cand[i], float(ei[i]), gp
@@ -140,6 +168,17 @@ class Observation:
     cda_m2: float
     provenance: str
 
+    def __post_init__(self) -> None:
+        if len(self.params) != DIM or not all(
+            math.isfinite(v) and 0 <= v <= 1 for v in self.params
+        ):
+            raise ValueError(
+                "Observation parameters must be finite values in the declared unit cube"
+            )
+        if not math.isfinite(self.cda_m2) or not 0 < self.cda_m2 < 0.1:
+            raise ValueError("Observation CdA must be finite and between 0 and 0.1 m²")
+        Provenance(self.provenance)
+
 
 class Campaign:
     """Observations on disk; a SYNTHETIC Latin-hypercube seed until CFD results arrive."""
@@ -160,7 +199,22 @@ class Campaign:
         ]
 
     def add(self, obs: Observation) -> list[Observation]:
-        all_obs = [*self.load(), obs]
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.path.write_text(json.dumps([asdict(o) for o in all_obs]))
+        # Serialize read/append/replace across API processes; readers see complete revisions.
+        with self.path.with_suffix(".lock").open("a") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            all_obs = [*self.load(), obs]
+            name: str | None = None
+            try:
+                with tempfile.NamedTemporaryFile(
+                    mode="w", dir=self.path.parent, delete=False
+                ) as file:
+                    name = file.name
+                    json.dump([asdict(o) for o in all_obs], file, allow_nan=False)
+                    file.flush()
+                    os.fsync(file.fileno())
+                os.replace(name, self.path)
+            finally:
+                if name is not None:
+                    Path(name).unlink(missing_ok=True)
         return all_obs

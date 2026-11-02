@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import Literal
+from typing import Annotated, Literal
 
 import numpy as np
 from fastapi import APIRouter
@@ -39,7 +39,7 @@ def state() -> dict[str, object]:
     obs = oracle.Campaign(data_root()).load()
     x = np.array([o.params for o in obs])
     y = np.array([o.cda_m2 for o in obs])
-    u, ei, gp = oracle.next_best(x, y)
+    u, ei, gp = oracle.next_best(x, y, candidate_filter=oracle.study_feasible)
     best_i = int(np.argmin(y))
     mean, sd = gp.predict(u[None, :])
 
@@ -86,8 +86,10 @@ def state() -> dict[str, object]:
 
 
 class ObservationIn(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    unit: list[float] = Field(min_length=oracle.DIM, max_length=oracle.DIM)
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    unit: list[Annotated[float, Field(ge=0, le=1)]] = Field(
+        min_length=oracle.DIM, max_length=oracle.DIM
+    )
     cda_m2: float = Field(gt=0, lt=0.1)
     provenance: Provenance = Provenance.SIMULATED
 
@@ -95,9 +97,7 @@ class ObservationIn(BaseModel):
 @router.post("/observations")
 def add_observation(body: ObservationIn) -> dict[str, int]:
     obs = oracle.Campaign(data_root()).add(
-        oracle.Observation(
-            tuple(min(max(v, 0.0), 1.0) for v in body.unit), body.cda_m2, body.provenance.value
-        )
+        oracle.Observation(tuple(body.unit), body.cda_m2, body.provenance.value)
     )
     return {"count": len(obs)}
 
@@ -136,3 +136,32 @@ def sensitivity_analysis(method: Literal["sobol", "morris"] = "sobol") -> dict[s
         return _sensitivity(body, method)
     except ValueError as exc:
         raise HTTPException(409, str(exc)) from exc
+
+
+class BuildNextIn(BaseModel):
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    baseline: str = Field(pattern=r"^[a-z0-9_]{3,64}$")
+    unit: list[Annotated[float, Field(ge=0, le=1)]] = Field(
+        min_length=oracle.DIM, max_length=oracle.DIM
+    )
+
+
+@router.post("/build-next", status_code=201)
+def build_next(body: BuildNextIn) -> dict[str, object]:
+    """Build the selected recommendation as an estimated study, never a certified car."""
+    from fastapi import HTTPException
+
+    from daedalus import design_loop, geometry
+    from daedalus.api.cad import PROJECT_ID
+    from daedalus.api.engineering import _safe_dir
+    from daedalus.api.forge import RULEBOOK
+
+    baseline = _safe_dir("designs", body.baseline)
+    try:
+        return design_loop.build(
+            data_root(), baseline, tuple(body.unit), RULEBOOK, project_id=PROJECT_ID
+        )
+    except design_loop.BuildBusyError as exc:
+        raise HTTPException(409, str(exc)) from exc
+    except (ValueError, OSError, geometry.GeometryError) as exc:
+        raise HTTPException(422, f"Study build failed: {exc}") from exc

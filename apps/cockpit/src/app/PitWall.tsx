@@ -3,6 +3,7 @@
 import { lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { SensitivityPanel } from "@/components/pitwall/SensitivityPanel";
+import { BuildNextControls } from "@/components/pitwall/BuildNextControls";
 import { TestPlannerPanel } from "@/components/pitwall/TestPlannerPanel";
 import { LegalPanel } from "@/components/pitwall/LegalPanel";
 import { AeroMap, BenchmarkChart, cm2 } from "@/components/pitwall/PitCharts";
@@ -132,6 +133,7 @@ export function PitWall() {
                     ) : (
                       <Skeleton className="h-40" />
                     )}
+                    {s && <BuildNextControls key={s.next.unit.join(",")} unit={s.next.unit} />}
                   </Panel>
                 ),
                 rules: <LegalPanel />,

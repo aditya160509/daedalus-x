@@ -18,12 +18,12 @@ import { listDesigns, listCfdRuns, listJobs, submitCfdJob } from "@/lib/api";
 import { useSettings } from "@/lib/settings";
 import { suggestRunId } from "./jobMath";
 
-export function NewRunDialog() {
+export function NewRunDialog({ initialDesign }: { initialDesign?: string } = {}) {
   const [open, setOpen] = useState(false);
   const designs = useQuery({ queryKey: ["designs"], queryFn: listDesigns });
   const runs = useQuery({ queryKey: ["cfd-runs"], queryFn: listCfdRuns });
   const jobs = useQuery({ queryKey: ["jobs"], queryFn: listJobs, enabled: open });
-  const [selected, setSelected] = useState("");
+  const [selected, setSelected] = useState(initialDesign ?? "");
   const design = selected || designs.data?.[0]?.design_id || "";
   const [speed, setSpeed] = useState(20);
   const [fidelity, setFidelity] = useState<"quick" | "final">("quick");
