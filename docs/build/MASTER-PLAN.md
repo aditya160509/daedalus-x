@@ -309,9 +309,26 @@ The next-wave changes were merged into `main` in `6d708b5`. The table tracks ver
 | 2 Wind Tunnel analysis | ⚠️ small | Analysis API (`api/analysis.py`) | Drag by part, compare runs, grid independence, wake/vortex layers |
 | 3 Race replay rebuild | implemented, review pending | Correct Z-up GLB conversion and leading-point placement; PBR car/wheel motion, studio track, tether/start/sector/finish details, six camera modes, adaptive reflections/effects, cursor timing, comparison controls, photo-finish slow motion and PNG capture | Hardware 60 fps verification, final 1024 px pass and broader final QA; no measured reaction data supplied |
 | 4 Race analysis | ✅ mostly | Time budget, tornado chart, exchange rates, Breakdown tab, Energy panel (`raceanalysis.py`, `energy.py`) | Stadium timing / TV mode |
-| 5 Closed loop | ❌ | — | All of it |
+| 5 Closed loop | in progress; paused at owner request | Local `parametric.py` draft builds a valid 11-solid study assembly using baseline extents and the four ORACLE variables; not wired into the app or committed yet | Constraint-filtered recommendation, build-next API, Design/evidence records, Pit Wall actions, CFD-job integration and accepted-result feedback |
 | 6 Calibration | ✅ partly | Bayesian calibration (`bayes_calibration.py`), bigger Monte Carlo | Calibration UI, uncertainty maps |
 | 7 Remaining | ⚠️ little | Project page (`app/project`), clean-up (old flow viewer deleted, knip passes) | Run wizard, dockview, evidence graph, judge outputs |
+
+### Owner handoff checkpoint — 2026-11-02
+
+Paused at the owner's request for a progress handoff. Resume only when the owner says continue.
+
+**Five pieces committed and pushed to main in this session:**
+1. `adae52a` — Replace the UK pitch/checklist example with the reproduced India NF front-wheel-gap finding.
+2. `7d18bd8` — Failed-rule links select/frame named CAD parts; responsive shell and honest rule-loading states.
+3. `a596d63` — FORGE CAD features, hash-bound remeasurement, rear-wing placement checks and honest estimate states.
+4. `7401273` — Thirteen-item A4 drawing-draft generator and Design Studio export form.
+5. `e2a574b` — Real-car replay rebuild, coordinate correction, camera director, comparison timing and photo-finish controls.
+
+**Current local draft:** `src/daedalus/parametric.py` is intentionally uncommitted. It constructs 11 valid CAD solids with baseline dimensions (214.63 mm length excluding cartridge, 74.34 mm width, 46.57 mm height). Only the standalone assembly was checked; import/FORGE integration and the closed-loop endpoint are unfinished. Do not call this a legal or production-ready car. The formal pipeline must keep absent halo/load/manufacturing evidence manual and feed back only scientifically accepted CFD results.
+
+**Verification and limits:** Focused FORGE checks (20) and existing race-math checks (10) passed, alongside TypeScript and changed-file lint checks. Replay was viewed at 1440 × 900 and 375 px; the narrow page had no horizontal overflow. Full-suite/final visual QA, 1024 px review and physical-Mac 60 fps verification remain. No CFD campaign ran. Both API and frontend were stopped after review. Per owner direction, implementation and cleanup take priority over repeated testing.
+
+**Drawing artifact:** `output/pdf/daedalus-orbit-v2-engineering-draft.pdf` is a local working example. The generator includes all 13 required contents items, but local chamber/bore dimensions, wing-boundary markup, missing named geometry and team finish/decal details still need engineering completion. It is not submission-ready.
 
 **Extras beyond the orders:**
 - Beam-strength FEM (`structure.py`, StrengthPanel)
@@ -321,7 +338,7 @@ The next-wave changes were merged into `main` in `6d708b5`. The table tracks ver
 - RFC 3161 timestamps for the sealed prediction (`anchor.py`)
 - Evidence notes in `evidence/`
 
-**Next priority:** Order 3 (race replay), the rule→CAD focus, Order 5 (closed loop), Order 2 (drag by part and compare runs).
+**Next priority:** Finish Order 5 (closed loop), then Order 2 (Wind Tunnel analysis), stadium timing / TV mode, calibration UI, Order 7 and consolidated final QA.
 
 ---
 
