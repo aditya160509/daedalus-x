@@ -1,6 +1,6 @@
 # Handoff for a new contributor (or their Claude)
 
-Read this first, then `MASTER-PLAN.md` (what to build next), `RATINGS.md` (what's weak), `CHECKLIST.md` (how we verify) and `docs/innovation.md` (the pitch).
+**To build: follow `BUILD-ORDERS.md` (exact work orders).** Read this first, then `MASTER-PLAN.md` (what to build next), `RATINGS.md` (what's weak), `CHECKLIST.md` (how we verify) and `docs/innovation.md` (the pitch).
 
 ## Project in one paragraph
 Daedalus X is a race-engineering app for our STEM Racing (F1 in Schools) team, Veloira:
