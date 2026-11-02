@@ -16,8 +16,13 @@ PRIORS = Priors(cda_m2=4e-4, crr=0.01, thrust_scale=1.0)
 
 
 def runs(
-    n: int, *, seed: int, offset: float = 0.0, masses=(0.05,), tracks=(20.0,)
-) -> list[MeasuredRun]:  # type: ignore[no-untyped-def]
+    n: int,
+    *,
+    seed: int,
+    offset: float = 0.0,
+    masses: tuple[float, ...] = (0.05,),
+    tracks: tuple[float, ...] = (20.0,),
+) -> list[MeasuredRun]:
     rng = np.random.default_rng(seed)
     out = []
     for i in range(n):

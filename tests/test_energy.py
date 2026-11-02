@@ -13,7 +13,8 @@ from daedalus.energy import EnergyAuditError, audit, audit_car, compare
 THRUST = ThrustCurve(
     np.array([0.0, 0.02, 0.1, 0.4, 0.6]), np.array([0.0, 4.0, 3.0, 1.5, 0.0])
 )  # synthetic
-CAR = CarParams(0.05, 20.0, thrust=THRUST, cda_m2=4.0e-4, crr=0.01)
+CDA = 4.0e-4
+CAR = CarParams(0.05, 20.0, thrust=THRUST, cda_m2=CDA, crr=0.01)
 
 
 def test_energy_books_balance() -> None:
@@ -38,7 +39,7 @@ def test_conversion_efficiency_and_losses_add_to_one() -> None:
 
 def test_a_draggier_car_loses_more_to_drag_and_finishes_with_less_energy() -> None:
     base = audit_car(CAR)
-    draggy = audit_car(dataclasses.replace(CAR, cda_m2=CAR.cda_m2 * 2))
+    draggy = audit_car(dataclasses.replace(CAR, cda_m2=CDA * 2))
     change = compare(base, draggy)
     assert change["drag_loss_j"] > 0
     assert change["kinetic_energy_j"] < 0
