@@ -29,3 +29,14 @@ The complete progress ledger and scoring method are in `docs/build/MASTER-PLAN.m
 Pinned racing-game `7816a5d954b75e6ad853ae4e4f0cbbd628072643` (MIT): `src/ui/Speed/Gauge.tsx` → `components/race/upstream/SpeedGauge.tsx`; `src/ui/LeaderBoard.tsx` Score/Scores and `src/ui/Finished.tsx` result structure → `components/race/upstream/ReplayResults.tsx`.
 
 Pinned f1-dash `d21607afbbab44a97863a605bad174d3c92367f2` (AGPL-3.0): `dashboard/src/components/driver/{DriverTag,DriverGap,DriverLapTime,DriverMiniSectors}.tsx` → corresponding files in `components/race/timing/`. Original rendering logic retained where applicable; source stores/feed types replaced with typed adapters to our model results; layout and units restyled. Full mapping and exclusions: MASTER-PLAN §26. Existing retained licence texts apply. Earlier scope notes describe the first pass before these additional imports.
+
+
+## Additional library integrations — reuse pass 2
+
+| Library | Licence | Actual use |
+|---|---|---|
+| [uPlot 1.6.32](https://github.com/leeoniya/uPlot) | MIT | TelemetryChart: native canvas rendering, synchronized cursors, zoom and percentile bands; replaces the telemetry ECharts renderer |
+| [React Flow 12.12.0](https://github.com/xyflow/xyflow) | MIT | Lazy-loaded EvidenceLineage: nodes/edges, pan/zoom/fit and record selection, connected to stored evidence |
+| [Dagre 3.1.3](https://github.com/dagrejs/dagre) | MIT | Graph layout through React Flow's documented Dagre integration pattern |
+
+Retained distribution licence texts: `docs/licenses/uplot-LICENSE.txt`, `docs/licenses/xyflow-react-LICENSE.txt`, `docs/licenses/dagrejs-dagre-LICENSE.txt`. React Flow/Dagre example reference: https://reactflow.dev/examples/layout/dagre. Earlier “not adopted” notes are historical and superseded for uPlot/xyflow by this section. Postprocessing is now pinned to 6.39.6 to support the installed Three.js version.

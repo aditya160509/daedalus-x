@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
 import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
 import "./TelemetryChart.css";
@@ -391,6 +392,45 @@ export function TelemetryChart({
     if (next >= 0) onDelta(which, time[next]);
   };
 
+  const exportPng = () => {
+    const current = plots.current;
+    if (!current.length) return;
+    const ratio = window.devicePixelRatio || 1;
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(...current.map((plot) => plot.ctx.canvas.width));
+    canvas.height = current.reduce(
+      (sum, plot) => sum + plot.ctx.canvas.height + 22 * ratio,
+      40 * ratio,
+    );
+    const context = canvas.getContext("2d");
+    if (!context) return;
+    context.fillStyle = "#0b0b0c";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "#ececee";
+    context.font = `${12 * ratio}px monospace`;
+    context.fillText("Daedalus X · predicted model telemetry", 16 * ratio, 24 * ratio);
+    let y = 40 * ratio;
+    current.forEach((plot, index) => {
+      context.fillStyle = "#8a8a93";
+      context.font = `${10 * ratio}px monospace`;
+      context.fillText(
+        `${tracks[index].name} [${tracks[index].unit}]`,
+        LEFT * ratio,
+        y + 12 * ratio,
+      );
+      context.drawImage(plot.ctx.canvas, 0, y + 20 * ratio);
+      y += plot.ctx.canvas.height + 22 * ratio;
+    });
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob),
+        link = document.createElement("a");
+      link.href = url;
+      link.download = "daedalus-race-telemetry.png";
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 30_000);
+    });
+  };
   return (
     <div
       ref={wrapper}
@@ -408,6 +448,28 @@ export function TelemetryChart({
       onPointerCancel={endDrag}
       onKeyDown={key}
     >
+      <div className="absolute top-0 right-2 z-10 flex gap-1">
+        <Button
+          size="xs"
+          variant="ghost"
+          onClick={() => {
+            const min = time[0],
+              max = time[time.length - 1];
+            if (min !== undefined && max !== undefined)
+              for (const plot of plots.current) plot.setScale("x", { min, max });
+          }}
+        >
+          Reset zoom
+        </Button>
+        <Button
+          size="xs"
+          variant="ghost"
+          onClick={exportPng}
+          disabled={time.length < 2 || tracks.length === 0}
+        >
+          PNG
+        </Button>
+      </div>
       <div ref={host} className="h-full min-h-110 w-full" />
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div

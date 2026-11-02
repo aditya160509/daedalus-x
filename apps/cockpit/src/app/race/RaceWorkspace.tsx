@@ -251,6 +251,13 @@ export function RaceWorkspace() {
     () => (primaryTrace && ghostTrace ? deltaTimeCurve(primaryTrace, ghostTrace, 80) : []),
     [primaryTrace, ghostTrace],
   );
+  // Keep chart inputs stable while the shared cursor moves; recreating native charts
+  // on every animation frame generates avoidable canvas/heap churn.
+  const eventMarkers = useMemo(() => (sim.data ? markers(sim.data, time) : []), [sim.data, time]);
+  const trajectoryBand = useMemo(
+    () => toBand(mc.data?.trajectory_band),
+    [mc.data?.trajectory_band],
+  );
   const primaryTime = sim.data?.finished === true ? (sim.data.time_s ?? null) : null;
   const ghostTime = ghost.data?.finished === true ? (ghost.data.time_s ?? null) : null;
   const gapRaw = finishGap(primaryTime, ghostTime);
@@ -503,7 +510,7 @@ export function RaceWorkspace() {
                   </>
                 }
                 bodyClassName="flex min-h-0 flex-1 flex-col gap-2 p-2"
-                className="min-w-0 flex-1"
+                className="min-h-[580px] min-w-0 flex-1 xl:min-h-0"
               >
                 {sim.data ? (
                   <>
@@ -511,8 +518,8 @@ export function RaceWorkspace() {
                       <TelemetryChart
                         time={time}
                         tracks={shownTracks}
-                        markers={markers(sim.data, time)}
-                        band={toBand(mc.data?.trajectory_band)}
+                        markers={eventMarkers}
+                        band={trajectoryBand}
                         bandTrackId="velocity"
                         yZoom={yZoom}
                         cursor={cursor}
@@ -536,7 +543,11 @@ export function RaceWorkspace() {
                 )}
               </Panel>
               {sim.data && (
-                <Panel title="Cursor" className="w-80 shrink-0" bodyClassName="p-0">
+                <Panel
+                  title="Cursor"
+                  className="w-full shrink-0 xl:w-80"
+                  bodyClassName="overflow-x-auto p-0"
+                >
                   <CursorTable time={time} tracks={shownTracks} cursor={cursorT} delta={delta} />
                 </Panel>
               )}

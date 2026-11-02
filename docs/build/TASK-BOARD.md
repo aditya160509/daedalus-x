@@ -17,7 +17,7 @@ Take the **first `todo` whose dependencies are `accepted` or `review`**. "Lane" 
 | T09 | [Importers, units, calibration](tasks/T09-importers-calibration.md) | backend-api | T02 | review | Claude Opus 5.5 (recovered) |
 | T10 | [ORACLE optimisation](tasks/T10-oracle.md) | backend-ml + frontend-2d | T02, T03 | review | Claude Opus 5.5 (lean: numpy GP, Pit Wall) |
 | T11 | [FORGE rules and inspections](tasks/T11-forge.md) | backend-api + frontend-2d | — | review | Claude Opus 5.5 (CAD checks; inspections not yet) |
-| T12 | [ATLAS evidence workspace](tasks/T12-atlas-evidence.md) | frontend-2d | T02 | review | Claude Opus 5.5 (timeline drawer + verify; lineage graph not built) |
+| T12 | [ATLAS evidence workspace](tasks/T12-atlas-evidence.md) | frontend-2d | T02 | review | Claude + Codex (timeline/verify + React Flow lineage connected; complete action coverage and final acceptance pending) |
 | T13 | [Competition Mode, PDF report, AR](tasks/T13-competition-mode.md) | frontend | T06, T08, T12 | review | Claude Opus 5.5 (presenter + Typst PDF; AR not built) |
 | T14 | [App-wide polish pass](tasks/T14-polish.md) | frontend | all UI tasks | todo | |
 | T15 | Outcome objective: expected India NF points, knock-out win probability, tail risk (MASTER-PLAN 22.3) | backend-ml | T10 | review | Claude Sonnet 5.5 (branch next-wave; outcome.py, no API or UI yet) |

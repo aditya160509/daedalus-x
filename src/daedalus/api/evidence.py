@@ -92,7 +92,7 @@ def lineage(limit: int = Query(500, ge=1, le=2000)) -> dict[str, object]:
                         missing.add(parent)
         return {
             "nodes": nodes,
-            "edges": edges,
+            "edges": list({edge["id"]: edge for edge in edges}.values()),
             "truncated": len(timeline) > limit,
             "outside_window": len(outside),
             "missing_references": sorted(missing),

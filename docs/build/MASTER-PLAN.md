@@ -311,7 +311,7 @@ The next-wave changes were merged into `main` in `6d708b5`. The table tracks ver
 | 4 Race analysis | 🟨 Partial | Time budget, tornado chart, exchange rates, Breakdown tab, Energy panel (`raceanalysis.py`, `energy.py`) | Stadium timing / TV mode |
 | 5 Closed loop | 📝 Local draft; deferred behind reuse backlog | Local `parametric.py` draft builds a valid 11-solid study assembly using baseline extents and the four ORACLE variables; not wired into the app or committed yet | Constraint-filtered recommendation, build-next API, Design/evidence records, Pit Wall actions, CFD-job integration and accepted-result feedback |
 | 6 Calibration | 🟨 Partial | Bayesian calibration (`bayes_calibration.py`), bigger Monte Carlo | Calibration UI, uncertainty maps |
-| 7 Remaining | 🟨 Partial | Project page (`app/project`), clean-up (old flow viewer deleted, knip passes) | Run wizard, dockview, evidence graph, judge outputs |
+| 7 Remaining | 🟨 Partial | Project page (`app/project`), clean-up (old flow viewer deleted, knip passes) | Run wizard, dockview, complete judge outputs and evidence coverage for all actions |
 
 ### Owner handoff checkpoint — 2026-11-02
 
@@ -430,7 +430,7 @@ Partial tasks receive a fixed half-point for a simple, reproducible tally; this 
 | T09 | Imports, units and calibration | 🟨 Partial | Import/unit/calibration foundations; complete calibration UI and measured validation remain. |
 | T10 | ORACLE optimisation | 🟨 Partial | GP/EI, synthetic benchmark and Pit Wall implemented; constrained CAD/CFD loop and full objective remain. |
 | T11 | FORGE rules and inspections | 🟨 Partial | India rulebook, CAD states/margins and sheet; measured inspections and full coverage remain. |
-| T12 | ATLAS evidence | 🟨 Partial | Store, hashes, timeline and verify exist; lineage graph and complete action linkage remain. |
+| T12 | ATLAS evidence | 🟨 Partial | Store, hashes, timeline, verify and React Flow lineage exist; complete action linkage and final acceptance remain. |
 | T13 | Competition mode, report and AR | 🟨 Partial | Presenter and Typst report exist; complete judge pack, public verification/AR scope remain. |
 | T14 | Final app polish | ⬜ Remaining | Consolidated responsiveness, accessibility, performance and acceptance pass remains. |
 | T15 | Racing-points objective | 🟨 Partial | Outcome core and API exist; ORACLE objective integration and opponent evidence remain. |
@@ -517,8 +517,8 @@ Owner resumed implementation, prioritising suitable prebuilt open source, fast c
 - [x] Import/adapt f1-dash DriverTag, DriverGap, DriverLapTime and full DriverMiniSectors presentation. Replace its F1 feed/settings dependencies with typed model-data adapters.
 - [x] Connect imported components to selected car names, trajectory-derived speed, finish times, gaps and eight actual sector durations.
 - [x] Preserve MIT/AGPL notices and record source-to-destination mapping below. TypeScript passes; changed-component lint has no errors (upstream static-index warnings remain). Consolidated visual QA remains.
-- [ ] uPlot telemetry renderer (package installed; not yet connected at this checkpoint).
-- [ ] React Flow evidence lineage (package installed; not yet connected at this checkpoint).
+- [x] uPlot 1.6.32 telemetry renderer connected: native bands/cursor/zoom, retained keyboard/A-B controls, reset and PNG export.
+- [x] React Flow 12.12.0 + Dagre 3.1.3 lineage connected to actual evidence references; lazy-loaded graph, search highlighting and record detail selection.
 
 | Upstream revision / original path | Destination | Adaptation |
 |---|---|---|
@@ -542,3 +542,17 @@ Owner resumed implementation, prioritising suitable prebuilt open source, fast c
 - AR car view
 
 **Everything else stays in scope and gets built.** Open source: add SALib (Sobol/Morris sensitivity); CalculiX only with real material data; skip BoTorch, OpenMDAO, trame.
+
+
+### Reuse pass 2 — uPlot telemetry and React Flow lineage
+
+- [x] Use actual uPlot 1.6.32 for the telemetry canvas, synchronized cursors, native drag zoom and p5–p95 bands; retain channel ordering, y-zoom, A/B handles and keyboard controls. Add reset and PNG export.
+- [x] Use actual @xyflow/react 12.12.0 and @dagrejs/dagre 3.1.3 for the evidence view, automatic layout, pan/zoom, fit and node selection. Graph loads only when selected in the Evidence drawer.
+- [x] Add read-only `/v1/evidence/lineage`: actual records and parent-ID links only. No invented nodes; omitted-window and missing references are reported.
+- [x] Fresh live check showed four uPlot plots and the existing three evidence records/two stored links. Targeted lineage test covers real references and truncation without placeholders. TypeScript/Ruff/changed-file lint passed.
+- [x] Update postprocessing to 6.39.6, whose published peer range supports Three 0.187. Package peer check now passes.
+- [x] Stabilize telemetry marker/band props to avoid chart recreation during cursor movement. Allocate title height separately so low-value traces are not clipped.
+
+**Memory constraint:** owner observed a 21 GB figure. A later process snapshot measured the external test renderer at 1,223 MiB resident and Next at 116 MiB resident; this snapshot cannot establish the earlier peak. The owned browser and both dev servers were stopped and exit confirmed. Prefer scripts/static checks, use the available in-app browser for brief necessary UI checks, and close owned checks immediately afterward. Do not leave an external test browser running or treat a dev-browser memory figure as production app usage. No full-memory-profile claim is made.
+
+**References:** TinyFish search/fetch of the official uPlot repository, React Flow theming and Dagre example; licences checked using GitHub metadata before dependency adoption. See THIRD_PARTY.md and `evidence/OSS-02-uplot-lineage.md`.
