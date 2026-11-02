@@ -16,10 +16,9 @@ Rebuild Chili3D: clone it into `vendor/chili3d` at the commit above, `git apply 
 ## Scope of reuse (2026-11-02)
 
 - **Full upstream application:** Chili3D is a patched, rebuilt upstream CAD app connected to our designs.
-- **Small code adaptation:** the f1-dash MiniSector status mapping/styling was adapted. Its full dashboard was not imported; our timing arithmetic uses our own trajectories.
-- **Reference/pattern adaptation:** racing-game App/Cameras informed camera/light setup. Our straight-track scene, camera controller, HUD, wheel pivots and photo-finish integration are custom; the complete racing-game scene/HUD was not ported.
-- **Actual library dependencies:** React Three Fiber, drei, postprocessing, vtk.js, build123d/OpenCascade, PyVista, OpenFOAM and Typst provide the rendering, geometry, solver and document machinery. Using these APIs is different from copying an upstream application.
-- **Not adopted in this pass:** trame, FoamPilot, F3D, uPlot, FastF1, dockview, xyflow, SU2, Ax/BoTorch/Optuna. Current charts use ECharts; the current GP uses NumPy/SciPy. Their presence in a planning table does not mean they are connected.
+- **Direct component adaptations:** racing-game's gauge/results and four f1-dash driver timing components are imported and connected. Source mappings follow below. Our straight-track geometry and TITAN trajectory interpolation remain domain-specific code; the complete games/dashboards were not imported.
+- **Actual library integrations:** uPlot telemetry, React Flow/Dagre evidence lineage, SALib sensitivity and Dockview Pit Wall layouts are connected. ECharts remains in other analytical panels. React Three Fiber, drei, postprocessing, vtk.js, build123d/OpenCascade, PyVista, OpenFOAM and Typst provide rendering, geometry, solver and document machinery.
+- **Not adopted:** FoamPilot, F3D, FastF1, SU2 and Ax/BoTorch/Optuna. BoTorch, OpenMDAO and trame are explicitly skipped by current scope. Their presence in earlier research does not mean they are connected. The GP currently uses NumPy/SciPy.
 
 The complete progress ledger and scoring method are in `docs/build/MASTER-PLAN.md` §§24–25.
 
@@ -45,3 +44,8 @@ Retained distribution licence texts: `docs/licenses/uplot-LICENSE.txt`, `docs/li
 ## SALib integration — reuse pass 3
 
 [SALib 1.6.0](https://github.com/SALib/SALib), MIT, provides actual Sobol and Morris samplers/analysers in `src/daedalus/sensitivity.py`. API/UI adapt their results to the current ORACLE GP; estimators were not rewritten. Licence retained in `docs/licenses/SALib-LICENSE.txt`. Official reference researched with TinyFish: https://salib.readthedocs.io/en/latest/user_guide/basics.html.
+
+
+## Dockview integration — reuse pass 4
+
+[Dockview React 8.8.3](https://github.com/dockview/dockview), MIT, supplies the actual Pit Wall Overview docking engine: tabs, pane splits, drag/drop, resizing and native layout serialization. `PitWallDock.tsx` adapts existing real panel content through React context; `dockLayout.ts` declares the default layout. The library is lazy-loaded with Overview. Compact and wide layouts save separately on this device; reset restores all panels. No standalone upstream application is claimed. Distribution licence retained at `docs/licenses/dockview-LICENSE.txt`; the installed package declares MIT and its full `LICENCE.md` was inspected (the old repository metadata alone returned NOASSERTION).

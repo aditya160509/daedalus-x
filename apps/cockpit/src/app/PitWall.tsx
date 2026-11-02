@@ -1,5 +1,6 @@
 "use client";
 
+import { lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { SensitivityPanel } from "@/components/pitwall/SensitivityPanel";
 import { TestPlannerPanel } from "@/components/pitwall/TestPlannerPanel";
@@ -10,6 +11,10 @@ import { HeroImage, useHeroRun } from "@/components/render/HeroRender";
 import { StatusBar, useTab, WorkspaceTabs } from "@/components/shell/WorkspaceTabs";
 import { Panel, ProvenanceBadge, Skeleton } from "@/components/ui/primitives";
 import { getOracleState } from "@/lib/api";
+
+const PitWallDock = lazy(() =>
+  import("@/components/pitwall/PitWallDock").then((m) => ({ default: m.PitWallDock })),
+);
 
 const TABS = [
   { id: "overview", label: "Overview" },
@@ -61,68 +66,78 @@ export function PitWall() {
       />
       <div className="min-h-0 flex-1 overflow-y-auto p-3">
         {tab === "overview" && (
-          <div className="mx-auto grid max-w-6xl grid-cols-1 gap-3 lg:h-full lg:grid-cols-[1fr_1fr] lg:grid-rows-[auto_auto_1fr]">
-            {heroRun && (
-              <Panel title={`Flow · ${heroRun}`} className="lg:col-span-2" bodyClassName="p-0">
-                <HeroImage runId={heroRun} className="aspect-[16/6] rounded-none" />
-              </Panel>
-            )}
-            <Panel title="Car" bodyClassName="flex items-center gap-8 p-4">
-              {s ? (
-                <>
-                  <dl className="grid flex-1 grid-cols-2 gap-x-6 gap-y-4">
-                    {[
-                      ["Drag area", cm2(s.best.cda_m2), "cm²"],
-                      ["Predicted race", s.best.race_time_s.toFixed(3), "s"],
-                      ["Next run gain", (gain * 1000).toFixed(1), "ms"],
-                      ["Observations", String(s.observations.length), ""],
-                    ].map(([l, v, u]) => (
-                      <div key={l}>
-                        <dt className="text-xs text-muted-foreground">{l}</dt>
-                        <dd className="tabular font-mono text-2xl">
-                          {v}
-                          <span className="ml-1 text-xs text-muted-foreground">{u}</span>
+          <Suspense fallback={<Skeleton className="h-full min-h-96" />}>
+            <PitWallDock
+              slots={{
+                flow: heroRun ? (
+                  <HeroImage runId={heroRun} className="min-h-64 w-full" />
+                ) : (
+                  <p className="p-4 text-sm text-muted-foreground">
+                    No flow render available. Select a completed CFD run in Wind Tunnel.
+                  </p>
+                ),
+                car: (
+                  <Panel title="Car" bodyClassName="flex items-center gap-8 p-4">
+                    {s ? (
+                      <>
+                        <dl className="grid flex-1 grid-cols-2 gap-x-6 gap-y-4">
+                          {[
+                            ["Drag area", cm2(s.best.cda_m2), "cm²"],
+                            ["Predicted race", s.best.race_time_s.toFixed(3), "s"],
+                            ["Next run gain", (gain * 1000).toFixed(1), "ms"],
+                            ["Observations", String(s.observations.length), ""],
+                          ].map(([l, v, u]) => (
+                            <div key={l}>
+                              <dt className="text-xs text-muted-foreground">{l}</dt>
+                              <dd className="tabular font-mono text-2xl">
+                                {v}
+                                <span className="ml-1 text-xs text-muted-foreground">{u}</span>
+                              </dd>
+                            </div>
+                          ))}
+                        </dl>
+                      </>
+                    ) : (
+                      <Skeleton className="h-40 w-full" />
+                    )}
+                  </Panel>
+                ),
+                sealed: (
+                  <Panel title="Sealed prediction">
+                    <SealedReveal />
+                  </Panel>
+                ),
+                next: (
+                  <Panel
+                    title="Next run · ORACLE"
+                    actions={s && <ProvenanceBadge value={prov} />}
+                    bodyClassName="p-4"
+                  >
+                    {s ? (
+                      <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                        {s.variables.map((v) => (
+                          <div key={v.name} className="contents">
+                            <dt className="text-muted-foreground capitalize">{prettify(v.name)}</dt>
+                            <dd className="tabular text-right font-mono">
+                              {s.next.params[v.name].toFixed(1)}{" "}
+                              <span className="text-muted-foreground">{v.unit}</span>
+                            </dd>
+                          </div>
+                        ))}
+                        <dt className="mt-2 border-t pt-2 text-muted-foreground">Predicted CdA</dt>
+                        <dd className="tabular mt-2 border-t pt-2 text-right font-mono">
+                          {cm2(s.next.cda_m2)} ± {cm2(s.next.cda_sd_m2)} cm²
                         </dd>
-                      </div>
-                    ))}
-                  </dl>
-                </>
-              ) : (
-                <Skeleton className="h-40 w-full" />
-              )}
-            </Panel>
-            <Panel title="Sealed prediction">
-              <SealedReveal />
-            </Panel>
-            <Panel
-              title="Next run · ORACLE"
-              actions={s && <ProvenanceBadge value={prov} />}
-              bodyClassName="p-4"
-            >
-              {s ? (
-                <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                  {s.variables.map((v) => (
-                    <div key={v.name} className="contents">
-                      <dt className="text-muted-foreground capitalize">{prettify(v.name)}</dt>
-                      <dd className="tabular text-right font-mono">
-                        {s.next.params[v.name].toFixed(1)}{" "}
-                        <span className="text-muted-foreground">{v.unit}</span>
-                      </dd>
-                    </div>
-                  ))}
-                  <dt className="mt-2 border-t pt-2 text-muted-foreground">Predicted CdA</dt>
-                  <dd className="tabular mt-2 border-t pt-2 text-right font-mono">
-                    {cm2(s.next.cda_m2)} ± {cm2(s.next.cda_sd_m2)} cm²
-                  </dd>
-                </dl>
-              ) : (
-                <Skeleton className="h-40" />
-              )}
-            </Panel>
-            <div className="min-h-72 [&>section]:h-full">
-              <LegalPanel />
-            </div>
-          </div>
+                      </dl>
+                    ) : (
+                      <Skeleton className="h-40" />
+                    )}
+                  </Panel>
+                ),
+                rules: <LegalPanel />,
+              }}
+            />
+          </Suspense>
         )}
         {tab === "oracle" && (
           <div className="grid h-full min-h-[520px] grid-cols-1 gap-3 lg:grid-cols-[1.4fr_1fr]">

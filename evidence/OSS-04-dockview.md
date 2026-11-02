@@ -1,0 +1,7 @@
+# Dockview Pit Wall integration
+
+Actual MIT Dockview React 8.8.3 provides tabs, drag/drop, resizable split groups and layout serialization in Pit Wall Overview. Existing Flow, Car, Sealed prediction, Next run and Rules content is passed through React context, preserving live data and provenance badges. The engine is lazy-loaded. Compact defaults use one tab group; wide defaults use a primary group and a next-run/rules side group. Layouts persist separately by viewport class. Reset restores all panels, including closed ones. Invalid/unavailable local storage falls back to defaults; persistence failures are reported. Floating groups are disabled; stored layouts only restore known panel/component IDs and no external windows.
+
+Read installed package licence declaration and full LICENCE.md; retained docs/licenses/dockview-LICENSE.txt. GitHub old-path metadata NOASSERTION was insufficient alone. Native APIs are used, not copied/reimplemented. Source: https://github.com/dockview/dockview ; official serialization reference: https://dockview.dev/docs/core/state/load .
+
+Checks: TypeScript and focused Oxlint pass. Four native-layout configuration checks cover existing-reference ordering at 375/1024/1440 px and compact-vs-wide grouping. No server, browser, CFD or memory benchmark was run; visual, interaction and performance acceptance remain. No claim that adding Dockview completes T14 or the overall Pit Wall backlog.
