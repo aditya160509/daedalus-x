@@ -79,6 +79,10 @@ pnpm --dir apps/cockpit exec vitest run <changed .test.ts files>
 - Clicking a failing rule highlights that part in the CAD.
 - The sheet PDF downloads.
 
+**Status 2026-11-02 (Jainam's session, branch `next-wave`, evidence `evidence/ORDER-1-india-forge.md`):**
+- Done: steps 1, 2, 4 (`?rulebook=`), 6 (`points_at_risk` in `/v1/forge/checks`) and 7 (`/v1/forge/sheet.pdf`), and the measures in step 3 that the part boxes and axles allow (19 of 80 rules computable). `tests/test_forge_india.py` passes.
+- Not done: step 3 measures that need mesh work (chamber, wall thickness, wing thickness, halo notch, visibility volumes), step 5 (the Chili3D `daedalus:focus` bridge and the LegalPanel click), and showing points at risk in the LegalPanel header. Run the checks on `orbit_baseline` once and compare six values by hand.
+
 ## ORDER 2: Wind Tunnel analysis (Aero A1–A3, A4, A5)
 **Copy from:** PyVista (MIT) filters for computation. Use **trame** (Kitware, check its licence; NOASSERTION on GitHub, it's Apache in its files) only as the UX reference.
 

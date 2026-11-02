@@ -12,7 +12,7 @@
 # Safety rules marked "rectify: true" get the 10-minute service fix at half the penalty (C4.5).
 # "PP" in the penalty means proportional: charged per whole unit outside the limit, rounded up (T2.5.2).
 #
-# computable: false means FORGE cannot measure it from bounding boxes yet; it shows as manual review
+# computable: false means FORGE cannot measure it from the CAD parts and axles yet; it shows as manual review
 # and the "measure" name is the measure to build next (MASTER-PLAN section 1.3). Rules marked
 # approx: true use a bounding-box estimate that can prove a failure only loosely and cannot prove a pass.
 #
@@ -26,6 +26,9 @@
 revision: stem-racing-india-nf-2025-26
 is_reference_only: false
 rules:
+  # T2.7.1 important regulations for the main car body
+  - {id: T2.7.1-L, page: 15, name: "Main car body maximum overall length, excluding nose cone and rear wing", measure: body_length, unit: mm, max: 205.0, penalty: "not stated in the text", class: general, approx: true, note: "Called out as an important regulation under T2.7.1; the penalty is not stated"}
+  - {id: T2.7.1-T, page: 15, name: "Main car body minimum thickness at every point", measure: body_min_wall, unit: mm, min: 3.5, penalty: "not stated in the text", class: general, computable: false, note: "Needs ray-cast wall thickness over the whole body; the penalty is not stated"}
   # ARTICLE T3 - fully assembled car
   - {id: T3.1.1, page: 18, name: "Designed and engineered using CAD and CAM", measure: cad_cam_evidence, unit: check, penalty: "5 pts", class: general, computable: false, note: "Evidence in the portfolio and engineering drawings"}
   - {id: T3.1.2, page: 18, name: "Body made by CNC material removal", measure: body_cnc, unit: check, penalty: "5 pts", class: general, computable: false, note: "Judges check the unfinished body"}
@@ -34,14 +37,12 @@ rules:
   - {id: T3.2, page: 18, name: "Safe construction", measure: safe_construction, unit: check, penalty: "10 pts each", class: safety, computable: false, rectify: true, note: "Judges' discretion at specification judging and during racing"}
   - {id: T3.3, page: 18, name: "Car assembly consists only of the T1.1 components", measure: defined_features, unit: check, penalty: "20 pts", class: performance, computable: false, note: "Body, nose cone and wings, wheels and supports, tether guides, decals, halo, helmet, ballast"}
   - {id: T3.4, page: 18, name: "Total width", measure: width, unit: mm, min: 65.0, max: 85.0, penalty: "5 pts/mm PP", class: general, note: "Widest feature of the assembly, normal to the vertical reference plane"}
-  - {id: T3.5, page: 18, name: "Total height with full 8 g cartridge, on four wheels", measure: height_overall, unit: mm, max: 65.0, penalty: "5 pts/mm PP", class: general, computable: false, note: "Track surface to the highest feature"}
+  - {id: T3.5, page: 18, name: "Total height with full 8 g cartridge, on four wheels", measure: height_overall, unit: mm, max: 65.0, penalty: "5 pts/mm PP", class: general, note: "Track surface to the highest feature"}
   - {id: T3.6, page: 19, name: "Total weight without cartridge", measure: mass, unit: g, min: 50.0, penalty: "10 pts/g PP", class: performance, computable: false, note: "Official scales. An underweight car is not raced: officials add ballast to its underside at 0.2 g for every 0.1 g underweight. Legal ballast goes only in the container under the halo (T1.22)"}
-  - {id: T3.7, page: 19, name: "Track clearance of every non-wheel component", measure: ground_clearance, unit: mm, min: 1.5, penalty: "10 pts/mm PP", class: general, computable: false, note: "Measured with a full 8 g cartridge on four wheels"}
+  - {id: T3.7, page: 19, name: "Track clearance of every non-wheel component", measure: ground_clearance, unit: mm, min: 1.5, penalty: "10 pts/mm PP", class: general, note: "Measured with a full 8 g cartridge on four wheels"}
   - {id: T3.8, page: 19, name: "Nothing removed or added during racing except cartridges and permitted spares", measure: status_during_racing, unit: check, penalty: "5 pts", class: general, computable: false}
   - {id: T3.9, page: 19, name: "Spare components identical to those fitted and within the allowed counts", measure: replacement_components, unit: check, penalty: "5 pts each", class: general, computable: false, note: "Max 2 nose cone and front wing assemblies, 2 rear wing assemblies, 4 front wheels, 2 front wheel supports, 4 rear wheels, 2 rear wheel supports"}
   # ARTICLE T4 - body
-  - {id: T2.7.1-L, page: 15, name: "Main car body maximum overall length, excluding nose cone and rear wing", measure: body_length, unit: mm, max: 205.0, penalty: "not stated in the text", class: general, computable: false, note: "Called out as an important regulation under T2.7.1; the penalty is not stated"}
-  - {id: T2.7.1-T, page: 15, name: "Main car body minimum thickness at every point", measure: body_min_wall, unit: mm, min: 3.5, penalty: "not stated in the text", class: general, computable: false, note: "Needs ray-cast wall thickness over the whole body; the penalty is not stated"}
   - {id: T4.1, page: 21, name: "Body is one continuous CNC piece of model block rear of reference plane A", measure: body_single_piece, unit: check, penalty: "20 pts", class: general, computable: false}
   - {id: T4.2, page: 21, name: "Virtual cargo enclosed by the body between the wheel centre lines", measure: virtual_cargo, unit: check, penalty: "25 pts", class: performance, computable: false, note: "Minimum solid 60 mm long, 55 mm wide at the wide end tapering to 10 mm, 10 mm high, top face symmetric about and normal to the vertical reference plane. May share faces with the body and overlap the ballast container but not the halo pocket"}
   - {id: T4.3, page: 21, name: "Virtual cargo dimensioned and highlighted in the engineering drawings", measure: virtual_cargo_drawing, unit: check, penalty: "5 pts", class: general, computable: false}
@@ -60,19 +61,20 @@ rules:
   - {id: T5.3, page: 25, name: "Chamber depth, opening to end, anywhere round the circumference", measure: chamber_depth, unit: mm, min: 45.0, max: 58.0, penalty: "5 pts", class: safety, computable: false, rectify: true}
   - {id: T5.4, page: 25, name: "Chamber angle to the track surface", measure: chamber_angle, unit: deg, min: -3.0, max: 3.0, penalty: "5 pts", class: safety, computable: false, rectify: true}
   - {id: T5.5, page: 25, name: "Chamber safety zone wall thickness", measure: chamber_wall, unit: mm, min: 3.5, penalty: "10 pts", class: safety, computable: false, rectify: true, note: "Around the minimum chamber depth; nothing may intersect the chamber circumference or depth; keep the chamber free of paint"}
-  - {id: T5.6, page: 26, name: "Cartridge protrusion from the rear of the car, visible all round", measure: cartridge_protrusion, unit: mm, min: 5.0, penalty: "10 pts/mm PP", class: performance, computable: false, rectify: true, note: "Also on the safe-to-race list (C4.5), so it can be fixed during the 10-minute service at half penalty"}
+  - {id: T5.6, page: 26, name: "Cartridge protrusion from the rear of the car, visible all round", measure: cartridge_protrusion, unit: mm, min: 5.0, penalty: "10 pts/mm PP", class: performance, rectify: true, note: "Also on the safe-to-race list (C4.5), so it can be fixed during the 10-minute service at half penalty"}
   # ARTICLE T6 - tether line guides
   - {id: T6.1, page: 27, name: "Two secured tether guides, each within 10.0 mm of its axle centre line", measure: tether_guide_location, unit: mm, max: 10.0, penalty: "10 pts", class: safety, computable: false, rectify: true, note: "Front guide on or up to 10.0 mm in front of the front axle centre line; rear guide on or up to 10.0 mm behind the rear axle centre line"}
   - {id: T6.2, page: 27, name: "Tether guide internal opening", measure: tether_guide_internal, unit: mm, min: 3.5, max: 6.0, penalty: "5 pts", class: safety, computable: false, rectify: true, note: "Gauged with 3.5 mm and 6.0 mm tools"}
   - {id: T6.3, page: 28, name: "Tether guide closed and secure, 200 g load test", measure: tether_guide_test, unit: check, penalty: "10 pts", class: safety, computable: false, rectify: true}
   # ARTICLE T7 - wheels and wheel supports
   - {id: T7.1, page: 29, name: "Four cylindrical wheels, two front and two rear, sharing axes", measure: wheel_count, unit: check, penalty: "25 pts", class: general, computable: false}
-  - {id: T7.2.1, page: 29, name: "Distance between opposing front wheels", measure: front_wheel_gap, unit: mm, min: 38.0, penalty: "2.5 pts/mm per axle PP", class: performance, computable: false}
-  - {id: T7.2.2, page: 29, name: "Distance between opposing rear wheels", measure: rear_wheel_gap, unit: mm, min: 30.0, penalty: "2.5 pts/mm per axle PP", class: performance, computable: false}
-  - {id: T7.3, page: 29, name: "Wheelbase", measure: wheelbase, unit: mm, min: 120.0, max: 140.0, penalty: "5 pts/mm PP", class: performance, computable: false}
-  - {id: T7.4.1, page: 30, name: "Front wheel track contact width, excluding chamfers and fillets", measure: front_wheel_contact_width, unit: mm, min: 13.0, penalty: "2.5 pts/mm per wheel PP", class: performance, computable: false}
-  - {id: T7.4.2, page: 30, name: "Rear wheel track contact width, excluding chamfers and fillets", measure: rear_wheel_contact_width, unit: mm, min: 17.0, penalty: "2.5 pts/mm per wheel PP", class: performance, computable: false}
-  - {id: T7.5, page: 30, name: "Wheel diameter across the track contact width", measure: wheel_diameter, unit: mm, min: 28.0, max: 32.0, penalty: "2.5 pts/mm per wheel PP", class: performance, computable: false}
+  - {id: T7.2.1, page: 29, name: "Distance between opposing front wheels", measure: front_wheel_gap, unit: mm, min: 38.0, penalty: "2.5 pts/mm per axle PP", class: performance}
+  - {id: T7.2.2, page: 29, name: "Distance between opposing rear wheels", measure: rear_wheel_gap, unit: mm, min: 30.0, penalty: "2.5 pts/mm per axle PP", class: performance}
+  - {id: T7.3, page: 29, name: "Wheelbase", measure: wheelbase, unit: mm, min: 120.0, max: 140.0, penalty: "5 pts/mm PP", class: performance}
+  - {id: T7.4.1, page: 30, name: "Front wheel track contact width, excluding chamfers and fillets", measure: front_wheel_contact_width, unit: mm, min: 13.0, penalty: "2.5 pts/mm per wheel PP", class: performance, approx: true}
+  - {id: T7.4.2, page: 30, name: "Rear wheel track contact width, excluding chamfers and fillets", measure: rear_wheel_contact_width, unit: mm, min: 17.0, penalty: "2.5 pts/mm per wheel PP", class: performance, approx: true}
+  - {id: T7.5-F, page: 30, name: "Front wheel diameter across the track contact width", measure: front_wheel_diameter, unit: mm, min: 28.0, max: 32.0, penalty: "2.5 pts/mm per wheel PP", class: performance, note: "T7.5. CAD gives one rolling radius per axle, so both front wheels read the same"}
+  - {id: T7.5-R, page: 30, name: "Rear wheel diameter across the track contact width", measure: rear_wheel_diameter, unit: mm, min: 28.0, max: 32.0, penalty: "2.5 pts/mm per wheel PP", class: performance, note: "T7.5. CAD gives one rolling radius per axle, so both rear wheels read the same"}
   - {id: T7.6, page: 30, name: "All four wheels touch the track together across the full contact width", measure: wheel_contact, unit: check, penalty: "2.5 pts per wheel", class: performance, computable: false}
   - {id: T7.7, page: 30, name: "Constant wheel diameter across the contact width, no tread", measure: rolling_surface, unit: check, penalty: "2.5 pts per wheel", class: performance, computable: false}
   - {id: T7.8, page: 30, name: "Wheels rotate freely on a surface inclined up to 3 degrees", measure: wheel_rotation, unit: deg, max: 3.0, penalty: "5 pts per wheel", class: performance, computable: false}
@@ -87,7 +89,7 @@ rules:
   - {id: T7.13, page: 33, name: "Wheel safety test, 100 g per wheel", measure: wheel_load_test, unit: check, penalty: "2.5 pts per wheel", class: safety, computable: false, rectify: true, note: "Needs at least 1.5 mm clearance from the inner wheel corner to the body for the test claw"}
   # ARTICLE T8 - nose, front wing, end plates and supports
   - {id: T8.1, page: 34, name: "Nose, front wing, end plates and supports identified in the drawings", measure: nose_wing_drawing, unit: check, penalty: "5 pts", class: general, computable: false}
-  - {id: T8.2, page: 34, name: "Nose cone overhang in front of reference plane A", measure: nose_overhang, unit: mm, max: 40.0, penalty: "5 pts each", class: general, computable: false}
+  - {id: T8.2, page: 34, name: "Nose cone overhang in front of reference plane A", measure: nose_overhang, unit: mm, max: 40.0, penalty: "5 pts each", class: general}
   - {id: T8.3, page: 34, name: "Front wing with leading and trailing edges across its full span", measure: front_wing_present, unit: check, penalty: "5 pts", class: general, computable: false}
   - {id: T8.4, page: 34, name: "Front wing rigid, span fixed during races", measure: front_wing_rigid, unit: check, penalty: "5 pts", class: general, computable: false}
   - {id: T8.5.1, page: 35, name: "Nose and wing support in front of plane A, no higher than 25.0 mm, within 15 mm of the centre line", measure: nose_location, unit: mm, max: 25.0, penalty: "10 pts", class: general, computable: false}
@@ -103,7 +105,7 @@ rules:
   - {id: T9.2, page: 40, name: "Rear wing with leading and trailing edges across its span", measure: rear_wing_present, unit: check, penalty: "5 pts", class: general, computable: false}
   - {id: T9.3, page: 40, name: "Rear wing rigid, span fixed during races", measure: rear_wing_rigid, unit: check, penalty: "5 pts", class: general, computable: false}
   - {id: T9.4.1, page: 40, name: "Rear wing and supports wholly rear of reference plane B", measure: rear_wing_location, unit: check, penalty: "10 pts", class: general, computable: false}
-  - {id: T9.4.2, page: 40, name: "Rear overhang length behind reference plane B", measure: rear_overhang_length, unit: mm, max: 40.0, penalty: "5 pts", class: general, computable: false}
+  - {id: T9.4.2, page: 40, name: "Rear overhang length behind reference plane B", measure: rear_overhang_length, unit: mm, max: 40.0, penalty: "5 pts", class: general}
   - {id: T9.4.3, page: 40, name: "Rear overhang height, highest point above track", measure: rear_overhang_height, unit: mm, max: 65.0, penalty: "5 pts", class: general, computable: false}
   - {id: T9.5.1, page: 41, name: "Rear wing span, single unbroken", measure: rear_wing_span, unit: mm, min: 50.0, penalty: "2 pts/mm PP", class: performance, approx: true, note: "Bounding box includes end plates and can over-state the span"}
   - {id: T9.5.2, page: 41, name: "Rear wing chord, up to two overlapping elements, throughout the span", measure: rear_wing_chord, unit: mm, min: 15.0, max: 25.0, penalty: "1 pt/mm PP", class: performance, approx: true, note: "Bounding box includes angle of attack and end plates"}
