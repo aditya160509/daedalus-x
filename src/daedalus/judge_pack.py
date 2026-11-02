@@ -190,7 +190,8 @@ def build_pack(
             "missing": missing,
             "evidence": summary,
         }
-        _add(bundle, "manifest.json", _json(manifest), files)
+        # The manifest inventories the other entries; hashing itself would be circular.
+        bundle.writestr("manifest.json", _json(manifest))
 
     return Pack(data=buffer.getvalue(), manifest=manifest, missing=missing)
 
