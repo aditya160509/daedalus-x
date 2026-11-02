@@ -30,7 +30,7 @@ export function PitWall() {
     ? [
         { label: "Best CdA", value: `${cm2(s.best.cda_m2)} cm²` },
         { label: "Race", value: `${s.best.race_time_s.toFixed(3)} s` },
-        { label: "Runs", value: String(s.observations.length) },
+        { label: "Observations", value: String(s.observations.length) },
         { label: "Next gain", value: `${(gain * 1000).toFixed(1)} ms` },
         {
           label: "Data",
