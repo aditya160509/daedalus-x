@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from typing import Literal
 
 import numpy as np
 from fastapi import APIRouter
@@ -99,3 +100,39 @@ def add_observation(body: ObservationIn) -> dict[str, int]:
         )
     )
     return {"count": len(obs)}
+
+
+@lru_cache(maxsize=8)
+def _sensitivity(body: str, method: Literal["sobol", "morris"]) -> dict[str, object]:
+    import json
+
+    from daedalus import sensitivity
+
+    observations = json.loads(body)
+    gp = oracle.GP(
+        np.array([o["params"] for o in observations]), np.array([o["cda_m2"] for o in observations])
+    )
+    result = sensitivity.analyze(
+        lambda x: gp.predict(x)[0], [v.name for v in oracle.VARIABLES], method=method
+    )
+    result["observations"] = len(observations)
+    result["provenance"] = (
+        "synthetic" if all(o["provenance"] == "synthetic" for o in observations) else "mixed"
+    )
+    return result
+
+
+@router.get("/sensitivity")
+def sensitivity_analysis(method: Literal["sobol", "morris"] = "sobol") -> dict[str, object]:
+    import json
+    from dataclasses import asdict
+
+    from fastapi import HTTPException
+
+    if method not in ("sobol", "morris"):
+        raise HTTPException(422, "Sensitivity method must be sobol or morris")
+    body = json.dumps([asdict(o) for o in oracle.Campaign(data_root()).load()], sort_keys=True)
+    try:
+        return _sensitivity(body, method)
+    except ValueError as exc:
+        raise HTTPException(409, str(exc)) from exc

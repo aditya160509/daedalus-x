@@ -721,3 +721,29 @@ export const forecastProject = (plan: ProjectPlan) =>
     method: "POST",
     body: JSON.stringify(plan),
   });
+
+const OracleSensitivity = z.object({
+  method: z.enum(["sobol", "morris"]),
+  samples: z.number(),
+  seed: z.number(),
+  input_distribution: z.string(),
+  target: z.string(),
+  confidence_level: z.number(),
+  observations: z.number(),
+  provenance: z.enum(["synthetic", "mixed"]),
+  rows: z.array(
+    z.object({
+      name: z.string(),
+      first_order: z.number().optional(),
+      total_order: z.number().optional(),
+      first_order_ci95: z.number().optional(),
+      total_order_ci95: z.number().optional(),
+      mu_star: z.number().optional(),
+      sigma: z.number().optional(),
+      mu_star_ci95: z.number().optional(),
+    }),
+  ),
+});
+export type OracleSensitivity = z.infer<typeof OracleSensitivity>;
+export const getOracleSensitivity = (method: "sobol" | "morris") =>
+  request(`/v1/oracle/sensitivity?method=${method}`, OracleSensitivity);

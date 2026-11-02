@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { SensitivityPanel } from "@/components/pitwall/SensitivityPanel";
 import { LegalPanel } from "@/components/pitwall/LegalPanel";
 import { AeroMap, BenchmarkChart, cm2 } from "@/components/pitwall/PitCharts";
 import { SealedReveal } from "@/components/pitwall/SealedReveal";
@@ -12,6 +13,7 @@ import { getOracleState } from "@/lib/api";
 const TABS = [
   { id: "overview", label: "Overview" },
   { id: "oracle", label: "ORACLE" },
+  { id: "sensitivity", label: "Sensitivity" },
 ] as const;
 
 const prettify = (n: string) => n.replace(/_/g, " ");
@@ -71,7 +73,7 @@ export function PitWall() {
                       ["Drag area", cm2(s.best.cda_m2), "cm²"],
                       ["Predicted race", s.best.race_time_s.toFixed(3), "s"],
                       ["Next run gain", (gain * 1000).toFixed(1), "ms"],
-                      ["CFD runs", String(s.observations.length), ""],
+                      ["Observations", String(s.observations.length), ""],
                     ].map(([l, v, u]) => (
                       <div key={l}>
                         <dt className="text-xs text-muted-foreground">{l}</dt>
@@ -132,6 +134,11 @@ export function PitWall() {
             <Panel title="ORACLE vs random · same budget" bodyClassName="p-2">
               {s ? <BenchmarkChart s={s} /> : <Skeleton className="size-full" />}
             </Panel>
+          </div>
+        )}
+        {tab === "sensitivity" && (
+          <div className="mx-auto h-full max-w-5xl [&>section]:h-full">
+            <SensitivityPanel />
           </div>
         )}
         {q.error && <p className="mt-3 text-xs text-destructive">{q.error.message}</p>}

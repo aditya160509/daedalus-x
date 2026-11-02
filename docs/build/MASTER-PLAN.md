@@ -387,16 +387,16 @@ Build order is roughly top to bottom. "Needs" lists what the code cannot work wi
 | T23 | 🟨 Partial | **Test planner:** which physical test (mass ballast, air density, track length) most reduces the calibration uncertainty. | T17 | none |
 | T24 | ⬜ Remaining | **Gradient-enhanced and multi-fidelity ORACLE** (adjoint gradients, quick and final meshes in one GP). | T05 adjoint, T10 | working adjoint |
 | T25 | ⬜ Remaining | **Free-form adjoint shape optimisation** inside the FORGE constraints. | T05, T20, CFD | accepted CFD runs |
-| T26 | ⬜ Remaining | **Exhaust base-bleed study:** thrust and wake as one design problem (research, may be negligible; check T3.3 and T5.6 first). | T18, CFD | compressible CFD, gas confirmed |
+| T26 | ✂️ Out of scope | **Exhaust base-bleed study:** thrust and wake as one design problem (research, may be negligible; check T3.3 and T5.6 first). | T18, CFD | compressible CFD, gas confirmed |
 | T27 | ⬜ Remaining | **Physical-in-the-loop optimiser** with a model-discrepancy term. | T15, T17 | several real runs |
-| T28 | ⬜ Remaining | **Field intelligence** from public portfolios and results: where winners sit in design space. | none | curated public data, cited |
+| T28 | ✂️ Out of scope | **Field intelligence** from public portfolios and results: where winners sit in design space. | none | curated public data, cited |
 | T29 | 🟨 Partial | **Legal-frontier map:** the edge of the rule-feasible design space, with rule and page for every boundary. | T20 | none |
-| T30 | ⬜ Remaining | **Virtual scrutineer from photos:** rule dimensions with uncertainty. | T20 | photos with a scale reference |
-| T31 | ⬜ Remaining | **Video test lab:** trajectory, wobble and snag detection from phone video. | T17 | video |
-| T32 | ⬜ Remaining | **As-built twin:** photogrammetry of the finished car back into the prediction. | T20, CFD | photo scan |
+| T30 | ✂️ Out of scope | **Virtual scrutineer from photos:** rule dimensions with uncertainty. | T20 | photos with a scale reference |
+| T31 | ✂️ Out of scope | **Video test lab:** trajectory, wobble and snag detection from phone video. | T17 | video |
+| T32 | ✂️ Out of scope | **As-built twin:** photogrammetry of the finished car back into the prediction. | T20, CFD | photo scan |
 | T33 | 🟨 Partial | **Project twin:** Monte Carlo schedule and budget risk tied to engineering evidence, mapped to the 90-point project management scorecard. | none | the team's plan |
 | T34 | ⬜ Remaining | **Red-team mode, V&V dossier, post-event regret report.** | T10, T17 | CFD and runs |
-| T35 | ⬜ Remaining | **Community calibration** across teams. | T17 | other teams |
+| T35 | ✂️ Out of scope | **Community calibration** across teams. | T17 | other teams |
 
 ### 22.4 Questions for the organisers
 1. Are software-generated geometry or AI-assisted code acceptable under C2.9.2 and C2.16, and what must be declared?
@@ -411,11 +411,11 @@ This is the current implementation ledger for all T01–T35 tasks. Earlier featu
 
 **Legend:** ✅ scoped implementation present · 🟨 some implementation, material work remains · ⬜ remaining · 📝 local draft. A build tick does not change the task board to reviewer-accepted or tick the final QA checklist. These statuses are based on the current source and recorded evidence, not a fresh full-product acceptance audit.
 
-**Whole expanded plan: 37% checklist score.** Three built tasks + twenty partial tasks + twelve remaining tasks. Calculation: `(3 × 1 + 20 × 0.5 + 12 × 0) / 35 = 37.1%`.
+**Current in-scope plan: 45% checklist score.** Scope decision §27 removes six tasks: 29 remain, with three built, twenty partial and six remaining. Calculation: `(3 × 1 + 20 × 0.5 + 6 × 0) / 29 = 44.8%`. The prior 37.1% counted all 35 tasks; the denominator change is a scope cut, not newly completed engineering.
 
 **Original core T01–T14: 54% checklist score.** Two built + eleven partial + one remaining: `(2 + 11 × 0.5) / 14 = 53.6%`.
 
-Partial tasks receive a fixed half-point for a simple, reproducible tally; this does not mean each is halfway through its engineering effort. These are rough scope-completion indicators, not estimates of hours left, judging points or competition readiness. Broad research/stretch tasks T24–T35 are included in the 37% denominator.
+Partial tasks receive a fixed half-point for a simple, reproducible tally; this does not mean each is halfway through its engineering effort. These are rough scope-completion indicators, not estimates of hours left, judging points or competition readiness. The six explicitly cut tasks are excluded. This is a checklist tally, not an effort-weighted estimate.
 
 | ID | Task | Build | What is present / what remains |
 |---|---|---|---|
@@ -431,7 +431,7 @@ Partial tasks receive a fixed half-point for a simple, reproducible tally; this 
 | T10 | ORACLE optimisation | 🟨 Partial | GP/EI, synthetic benchmark and Pit Wall implemented; constrained CAD/CFD loop and full objective remain. |
 | T11 | FORGE rules and inspections | 🟨 Partial | India rulebook, CAD states/margins and sheet; measured inspections and full coverage remain. |
 | T12 | ATLAS evidence | 🟨 Partial | Store, hashes, timeline, verify and React Flow lineage exist; complete action linkage and final acceptance remain. |
-| T13 | Competition mode, report and AR | 🟨 Partial | Presenter and Typst report exist; complete judge pack, public verification/AR scope remain. |
+| T13 | Competition mode, report and AR | 🟨 Partial | Presenter and Typst report exist; complete judge pack and public verification remain; AR is out of scope. |
 | T14 | Final app polish | ⬜ Remaining | Consolidated responsiveness, accessibility, performance and acceptance pass remains. |
 | T15 | Racing-points objective | 🟨 Partial | Outcome core and API exist; ORACLE objective integration and opponent evidence remain. |
 | T16 | Third-party prediction timestamps | 🟨 Partial | RFC 3161 core and API exist; real authority token and full UI workflow remain. |
@@ -444,16 +444,16 @@ Partial tasks receive a fixed half-point for a simple, reproducible tally; this 
 | T23 | Test planner | 🟨 Partial | Information-gain/coast-down planning core and API exist; complete UI and physical validation remain. |
 | T24 | Gradient / multi-fidelity ORACLE | ⬜ Remaining | Combined gradient and multi-fidelity optimisation remains. |
 | T25 | Free-form shape optimisation | ⬜ Remaining | Constraint-aware free-form optimisation remains. |
-| T26 | Exhaust base-bleed study | ⬜ Remaining | Gas confirmation, compressible study and evidence remain. |
+| T26 | Exhaust base-bleed study | ✂️ Out of scope | Gas confirmation, compressible study and evidence remain. |
 | T27 | Physical-in-the-loop optimiser | ⬜ Remaining | Measured trials and discrepancy-aware optimiser remain. |
-| T28 | Field intelligence | ⬜ Remaining | Cited competitor portfolio/result dataset and connected analysis remain. |
+| T28 | Field intelligence | ✂️ Out of scope | Cited competitor portfolio/result dataset and connected analysis remain. |
 | T29 | Legal-frontier map | 🟨 Partial | Margin-ranking/backend foundation exists; complete interactive map remains. |
-| T30 | Photo scrutineer | ⬜ Remaining | Scale-aware image measurements and uncertainty workflow remain. |
-| T31 | Video test lab | ⬜ Remaining | Trajectory, wobble and snag analysis workflow remains. |
-| T32 | As-built twin | ⬜ Remaining | Measured scan/photogrammetry-to-model workflow remains. |
+| T30 | Photo scrutineer | ✂️ Out of scope | Scale-aware image measurements and uncertainty workflow remain. |
+| T31 | Video test lab | ✂️ Out of scope | Trajectory, wobble and snag analysis workflow remains. |
+| T32 | As-built twin | ✂️ Out of scope | Measured scan/photogrammetry-to-model workflow remains. |
 | T33 | Project twin | 🟨 Partial | Project forecast backend and Project workspace exist; scorecard completeness and final validation remain. |
 | T34 | Red-team / V&V dossier | ⬜ Remaining | Integrated red-team and post-event reports remain. |
-| T35 | Community calibration | ⬜ Remaining | Cross-team calibrated-data workflow remains. |
+| T35 | Community calibration | ✂️ Out of scope | Cross-team calibrated-data workflow remains. |
 
 **New work landed in this session:** ✅ India honesty correction; ✅ failed-rule CAD selection/focus; 🟨 FORGE v2 feature expansion; 🟨 13-item drawing draft; 🟨 replay rebuild pending final acceptance; 📝 closed-loop generator draft only. Details and commit IDs are in §23.
 
@@ -531,7 +531,7 @@ Owner resumed implementation, prioritising suitable prebuilt open source, fast c
 
 **Fit decisions:** Racing-game's road-course GLB, Cannon driving physics, keyboard/audio controls and Supabase authentication are not imported: the required product is a straight STEM track replaying TITAN results, not an interactive road-driving game or a foreign score service. The real car, domain-specific track geometry and trajectory interpolation remain. This is component reuse, not a claim that the complete upstream applications were imported.
 
-## 24. Scope decision (2026-11-02): cut list
+## 27. Scope decision (2026-11-02): cut list
 **Do NOT build these** (camera/hardware/external-data features, not needed):
 - T30 virtual scrutineer from photos
 - T31 video test lab (wobble/snag from phone video)
@@ -556,3 +556,15 @@ Owner resumed implementation, prioritising suitable prebuilt open source, fast c
 **Memory constraint:** owner observed a 21 GB figure. A later process snapshot measured the external test renderer at 1,223 MiB resident and Next at 116 MiB resident; this snapshot cannot establish the earlier peak. The owned browser and both dev servers were stopped and exit confirmed. Prefer scripts/static checks, use the available in-app browser for brief necessary UI checks, and close owned checks immediately afterward. Do not leave an external test browser running or treat a dev-browser memory figure as production app usage. No full-memory-profile claim is made.
 
 **References:** TinyFish search/fetch of the official uPlot repository, React Flow theming and Dagre example; licences checked using GitHub metadata before dependency adoption. See THIRD_PARTY.md and `evidence/OSS-02-uplot-lineage.md`.
+
+
+### Reuse pass 3 — SALib Sobol/Morris sensitivity
+
+- [x] Adopt MIT-licensed SALib 1.6.0 rather than implementing sensitivity estimators here.
+- [x] Add `/v1/oracle/sensitivity?method=sobol|morris`, with bounded CPU-only sampling and small result caching: 1,536 Sobol or 320 Morris surrogate evaluations for four variables.
+- [x] Connect Pit Wall Sensitivity tab with native chart bars, exact values and 95% confidence intervals. Analyse the GP mean over uniform declared bounds; synthetic observations stay labelled synthetic.
+- [x] Run both methods on current observations via script. Two analytic checks passed; focused check took 1.6 s, peaked around 143 MiB resident and recorded zero swaps. This is not a full-app benchmark.
+- [x] Rename Pit Wall “CFD runs” to “Observations” so synthetic seeds are not presented as CFD runs.
+- [ ] Visual review of the new tab remains; servers/browser were not started for this pass.
+
+Follow scope decision §27: no photo/video/AR/competitor-scraping/base-bleed/community-calibration work; skip BoTorch, OpenMDAO and trame. CalculiX is gated on real material data. Next reuse candidate: dockview for a saved, rearrangeable Pit Wall workspace.

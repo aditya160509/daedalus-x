@@ -19,6 +19,7 @@ dependencies = [
     "trimesh>=5.2.0",
     "uvicorn[standard]>=0.54.0",
     "typst>=0.15.0",
+    "salib>=1.6.0",
 ]
 
 [project.scripts]

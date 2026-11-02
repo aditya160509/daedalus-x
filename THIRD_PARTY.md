@@ -40,3 +40,8 @@ Pinned f1-dash `d21607afbbab44a97863a605bad174d3c92367f2` (AGPL-3.0): `dashboard
 | [Dagre 3.1.3](https://github.com/dagrejs/dagre) | MIT | Graph layout through React Flow's documented Dagre integration pattern |
 
 Retained distribution licence texts: `docs/licenses/uplot-LICENSE.txt`, `docs/licenses/xyflow-react-LICENSE.txt`, `docs/licenses/dagrejs-dagre-LICENSE.txt`. React Flow/Dagre example reference: https://reactflow.dev/examples/layout/dagre. Earlier “not adopted” notes are historical and superseded for uPlot/xyflow by this section. Postprocessing is now pinned to 6.39.6 to support the installed Three.js version.
+
+
+## SALib integration — reuse pass 3
+
+[SALib 1.6.0](https://github.com/SALib/SALib), MIT, provides actual Sobol and Morris samplers/analysers in `src/daedalus/sensitivity.py`. API/UI adapt their results to the current ORACLE GP; estimators were not rewritten. Licence retained in `docs/licenses/SALib-LICENSE.txt`. Official reference researched with TinyFish: https://salib.readthedocs.io/en/latest/user_guide/basics.html.
