@@ -69,7 +69,8 @@ def test_pack_contains_real_exports_and_hashed_manifest(data_root: Path) -> None
     } <= names
     manifest = json.loads(bundle.read("manifest.json"))
     listed = {entry["path"] for entry in manifest["files"]}
-    assert listed <= names
+    assert listed == names - {"manifest.json"}
+    assert pack.manifest == manifest
     for entry in manifest["files"]:
         body = bundle.read(entry["path"])
         digest = "sha256:" + hashlib.sha256(body).hexdigest()
