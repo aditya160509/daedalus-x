@@ -926,12 +926,35 @@ export const PlanTask = z.object({
   depends_on: z.array(z.string()),
   cost: EstimateDays.nullable(),
   owner: z.string(),
+  source: z.string().default(""),
 });
 export type PlanTask = z.infer<typeof PlanTask>;
+export const PlanAssumption = z.object({
+  id: z.string(),
+  text: z.string(),
+  value: z.number().nullable().default(null),
+  unit: z.string().default(""),
+  source: z.string().default(""),
+  provenance: z.enum(["official", "measured", "estimated", "assumed"]).default("assumed"),
+});
+export type PlanAssumption = z.infer<typeof PlanAssumption>;
+export const ScoreItem = z.object({
+  id: z.string(),
+  criterion: z.string(),
+  points: z.number().nullable().default(null),
+  claim: z.string().default(""),
+  evidence: z.string().default(""),
+  status: z.enum(["missing", "partial", "complete"]).default("missing"),
+});
+export type ScoreItem = z.infer<typeof ScoreItem>;
 export const ProjectPlan = z.object({
   tasks: z.array(PlanTask),
   deadline_days: z.number().nullable(),
   budget: z.number().nullable(),
+  currency: z.string().default("INR"),
+  start_date: z.string().nullable().default(null),
+  assumptions: z.array(PlanAssumption).default([]),
+  scorecard: z.array(ScoreItem).default([]),
 });
 export type ProjectPlan = z.infer<typeof ProjectPlan>;
 export const getProjectPlan = () => request("/v1/analysis/project/plan", ProjectPlan);
@@ -949,12 +972,26 @@ const ProjectForecast = z.object({
   cost_p80: z.number().nullable(),
   budget_probability: z.number().nullable(),
   slack_days: z.record(z.string(), z.number()),
+  forecast_id: z.string(),
 });
 export const forecastProject = (plan: ProjectPlan) =>
   request("/v1/analysis/project/forecast", ProjectForecast, {
     method: "POST",
     body: JSON.stringify(plan),
   });
+const SavedForecast = z.object({
+  forecast_id: z.string(),
+  created_at: z.string(),
+  plan_hash: z.string(),
+  p50_days: z.number(),
+  p80_days: z.number(),
+  finish_probability: z.number().nullable(),
+  budget_probability: z.number().nullable(),
+  critical_path: z.array(z.string()),
+});
+export type SavedForecast = z.infer<typeof SavedForecast>;
+export const listProjectForecasts = () =>
+  request("/v1/analysis/project/forecasts", z.array(SavedForecast));
 
 const OracleSensitivity = z.object({
   method: z.enum(["sobol", "morris"]),

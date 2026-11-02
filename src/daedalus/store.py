@@ -35,6 +35,7 @@ ID_FIELD: dict[type[c.Record], str] = {
     c.Prediction: "prediction_id",
     c.TimestampVerification: "verification_id",
     c.CalibrationStudy: "study_id",
+    c.ProjectForecast: "forecast_id",
     c.ValidationProtocol: "protocol_id",
     c.Decision: "decision_id",
     c.AIUseLog: "event_id",

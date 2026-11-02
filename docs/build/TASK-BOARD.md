@@ -38,7 +38,7 @@ Take the **first `todo` whose dependencies are `accepted` or `review`**. "Lane" 
 | T30 | Virtual scrutineer from photos | backend-api | T20 | todo | |
 | T31 | Video test lab | backend-ml | T17 | todo | |
 | T32 | As-built twin | backend-cfd | T20 | todo | |
-| T33 | Project twin for the 90-point project management scorecard | frontend-2d | - | review | Claude Opus 5.5 (branch next-wave; project.py, no UI yet) |
+| T33 | Project twin for the 90-point project management scorecard | frontend-2d | - | review | Claude (assumptions, task sources, declared scorecard with evidenced points, evidence gaps, saved forecast artifacts; official weights/validation pending) |
 | T34 | Red-team mode, V&V dossier, post-event regret report | backend-ml | T10, T17 | todo | |
 | T35 | Community calibration | backend-ml | T17 | todo | |
 

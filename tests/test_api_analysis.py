@@ -147,6 +147,53 @@ def test_project_forecast_and_plan_round_trip(tmp_path, monkeypatch) -> None:  #
     assert body["critical_path"] == ["cad", "cnc"]
     assert 0 < body["finish_probability"] < 1
     assert body["slack_days"]["cad"] == 0
+    assert body["forecast_id"].startswith("fc_")
+    saved = client.get("/v1/analysis/project/forecasts").json()
+    assert [f["forecast_id"] for f in saved] == [body["forecast_id"]]
+    assert saved[0]["plan_hash"].startswith("sha256:")
+    assert saved[0]["p50_days"] == body["p50_days"]
+
+
+def test_plan_source_references_and_scorecard_round_trip(tmp_path, monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    monkeypatch.setenv("DAEDALUS_DATA", str(tmp_path))
+    plan = {
+        **PLAN,
+        "currency": "INR",
+        "start_date": "2026-11-03",
+        "tasks": [
+            {**PLAN["tasks"][0], "source": "team estimate 2026-10-28"},
+            PLAN["tasks"][1],
+        ],
+        "assumptions": [
+            {
+                "id": "a1",
+                "text": "CNC slot available in week 2",
+                "source": "workshop email",
+                "provenance": "official",
+            },
+            {
+                "id": "a2",
+                "text": "Two team members free each evening",
+                "provenance": "assumed",
+            },
+        ],
+        "scorecard": [
+            {
+                "id": "pm1",
+                "criterion": "Gantt with dependencies",
+                "points": 20,
+                "claim": "Plan below",
+                "evidence": "Plan workspace",
+                "status": "partial",
+            }
+        ],
+    }
+    assert client.put("/v1/analysis/project/plan", json=plan).status_code == 200
+    stored = client.get("/v1/analysis/project/plan").json()
+    assert stored["tasks"][0]["source"] == "team estimate 2026-10-28"
+    assert stored["assumptions"][1]["source"] == ""
+    assert stored["scorecard"][0]["status"] == "partial"
+    assert stored["currency"] == "INR"
 
 
 def test_project_forecast_rejects_a_cycle() -> None:

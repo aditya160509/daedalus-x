@@ -465,7 +465,7 @@ Partial tasks receive a fixed half-point for a simple, reproducible tally; this 
 | T30 | Photo scrutineer | ✂️ Out of scope | Scale-aware image measurements and uncertainty workflow remain. |
 | T31 | Video test lab | ✂️ Out of scope | Trajectory, wobble and snag analysis workflow remains. |
 | T32 | As-built twin | ✂️ Out of scope | Measured scan/photogrammetry-to-model workflow remains. |
-| T33 | Project twin | 🟨 Partial | Project forecast backend and Project workspace exist; scorecard completeness and final validation remain. |
+| T33 | Project twin | 🟨 Partial | Project forecast backend and Project workspace exist; assumptions, per-task source references, a declared scorecard with evidenced points, derived evidence gaps and saved forecasts (hashed plan + result artifacts) are connected. Official weights and final validation remain team-supplied. |
 | T34 | Red-team / V&V dossier | ⬜ Remaining | Integrated red-team and post-event reports remain. |
 | T35 | Community calibration | ✂️ Out of scope | Cross-team calibrated-data workflow remains. |
 
@@ -594,6 +594,20 @@ Checklist score remains 45%: these integrations advance existing partial tasks; 
 - [x] `GET .../anchor/history` plus `verification_count`/`latest_verification` on the status endpoint; Pit Wall lists each attempt with verdict, TSA time, token, bundle and the reproducing command.
 - [x] Failed checks are recorded as failures with the authority's output; a verification is never upgraded by a later session.
 - [ ] ⏳ No live trusted TSA response or valid certificate chain has been verified; the tests use a fake runner.
+
+### Saved calibration studies (T17/T09)
+
+- [x] A Bayesian calibration appends a `titan` Model, a `CalibrationStudy` and content-addressed artifacts for the canonical inputs, the posterior/held-out results and each uploaded source file.
+- [x] `GET /v1/calibration-studies` and `GET /v1/calibration-studies/{id}` expose saved studies and the exact request used, so a study can be browsed and reopened.
+- [x] Race → Calibration lists saved studies; opening restores points, thrust curve, priors and track/SD fields and shows the loaded study ID. Recalculating creates a new study.
+- [ ] ⏳ No real measured timing file has been calibrated, the posterior is not applied to the Race model, and no physical validation exists.
+
+### Project twin scorecard (T33)
+
+- [x] The saved plan carries currency, start date, per-task estimate sources, assumptions (with basis and source) and a declared scorecard with points, claim, evidence reference and status.
+- [x] `POST /v1/analysis/project/forecast` appends a `ProjectForecast` plus hashed plan and result artifacts; `GET /v1/analysis/project/forecasts` lists them for later comparison with what happened.
+- [x] The Project workspace shows assumptions, the scorecard's evidenced/declared points, derived evidence gaps and saved forecasts; gaps are labelled as derived, not an audit.
+- [ ] ⏳ Official India NF weights and any validation of the plan against real delivery remain team-supplied.
 
 ---
 
