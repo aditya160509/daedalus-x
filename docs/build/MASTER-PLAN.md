@@ -297,6 +297,69 @@ What the big-screen timing page should show, inspired by F1 TV, f1-dash and STEM
 - **Race-day report**: the times, calibration update and next actions.
 - **Evidence appendix**: hash list plus a QR verify link.
 
+## 22. India NF 2025-26: what the real rules say, and the next wave
+
+Added 2026-11-02 after reading both India NF PDFs (Technical and Competition Regulations). Hashes are in `rulebooks/stem-racing-india-nf-2025-26.yaml`.
+
+### 22.1 Done in this pass
+- 🟨 Source PDFs were read from Downloads and hashes recorded in the rulebook. Correction at this handoff: `data/reference/rules/india_nf_2025_26/` currently contains no PDFs; source archival/evidence registration remains.
+- ✅ Current rulebook `rulebooks/stem-racing-india-nf-2025-26.yaml`: **80 entries** (38 general, 31 performance, 11 safety) with page, limits, penalty and class. Supported layout and CAD features compute when the design contains the required metadata; estimates and unavailable features remain manual/risk. Coverage varies by design; see §23.
+- ✅ `api/forge.py` loads the India rulebook. The UK reference file stays in the repo for comparison.
+
+### 22.2 What the real rules change
+
+| # | Finding | Where | What to do |
+|---|---|---|---|
+| 1 | **The Innovation Award is one criterion:** Verbal Presentation > Innovation, out of 20. Top band: "Excellent innovations related to competition elements, or other aspects with high positive project impact". Collaboration (/20) is a separate award, and the R&D Award comes from Computer Aided Analysis + R&D + Testing. | C13.3, Awards Matrix p39, scorecard p45 | Build the innovation story around measurable project impact. |
+| 2 | **FEA is wanted.** Design & Engineering "Application of Computer Aided Analysis" (/20) top band: "Proven design improvements made based on FEA/CFD study". Testing (/20) wants virtual and physical evidence on the assembled car and components. | Scorecard p41 | T21 below. The physical load tests in the rules (halo, wheel, tether guide) are natural FEA cases. |
+| 3 | **Rear wing height D8.5 does not exist in India NF.** T9 has only overhang height <= 65.0 mm and wing height deviation <= 15.0 mm. The "rear wing 34.4 mm vs 35 mm" catch in `docs/innovation.md` and `CHECKLIST.md` comes from the UK reference book. | T9.4.3, T9.5.4 | Replace that example with a real India NF finding before presenting. |
+| 4 | **Minimum mass is 50.0 g** (the UK reference said 60). Underweight costs 10 pts/g, and officials add ballast at 0.2 g per 0.1 g underweight (double). Ballast is allowed only in the container under the halo. | T3.6, T1.22, T4.2 | Target 50.0 g plus a measured scale margin; mass is a hard constraint, not a free variable. |
+| 5 | **Performance rules decide eligibility.** A failure makes the car ineligible for Fastest Car and Best Engineered Car, and failing on both cars seeded in the top 16 means automatic round-one elimination. | C3.6.2 | Treat the listed performance clauses as hard constraints in the optimiser (T3.3, T3.6, T4.2, T4.4.1, T5.6, T7.2-T7.11, T8.6-T8.8, T9.5-T9.7). |
+| 6 | **Racing points are formulas.** Reaction (105): top three get 105/100/95, others get 5 + 90/(Base - fastest) x (Base - own best), Base = 120% of third fastest. It uses TOTAL race time (car time plus reaction). Knock-out (135): eliminated in round of 16 / 8 / quarter / semi = 26 / 52 / 85 / 106, winner 135. Fastest car bonus 10. | C9.5, C9.6 | T15: optimise expected points, not mean time. |
+| 7 | **Cartridge.** T1.20 says "compressed air"; C9.12 says "compressed gas". Supplied by the organisers, kept at 21 C, weighed within 0.5 g. Full pack 28.9-29.4 g, 65 mm long, 18 mm diameter. | T1.20, C9.12, Appendix vi | Confirm the gas before building the thrust model (T18 assumed CO2). |
+| 8 | **Tether is 0.6 mm monofilament**, fixed at the finish, over one pulley at the start. Track is 20 m. | C9.10.1 | Re-set the tether friction prior; the Australian rules used a 0.2 mm braid. |
+| 9 | **Originality.** "All design work, text and scripting ... must be wholly undertaken and created by the team", including CAD, CAM, portfolio and graphics. An Originality Declaration is part of registration, and plagiarism can be penalised or excluded. There is no statement about AI tools or software-generated designs. | C2.9.2, C2.16, T2.10 | Ask the organisers for a text clarification (allowed under C2.6.2 and T2.2.2; design-compliance rulings are not, T2.6). Keep evidence of the team's own authorship and understanding of every part. |
+| 10 | **The drawing pack is 60 scrutineering points** (drawings /20, 3D renders /20, finish and assembly /20) and has a mandatory 13-item contents list, plus 5-pt penalties for missing identification (T4.3, T7.12.2, T8.1, T9.1). | C2.10.6, p40, p53 | T22: generate it from the CAD. |
+| 11 | **Halo and helmet are fixed standard parts** that must appear unmodified. The halo pocket is cut with a 6.35 mm ball-nose tool to 3.175 mm depth; the pocket bottom is 24.0 mm above the track and the notch centre 34.0 mm +/- 1.0 mm. | T4.4, T1.21, Appendix ix | Include the halo in every CFD geometry. |
+| 12 | **Points:** specification and scrutineering 160, design and engineering 180, project management 90, enterprise 180, verbal presentation 140, racing 250. Total 1000. | C3.5 | Use these weights in the score checklist (section 1.5). |
+
+Inconsistencies in the source documents to raise with the organisers (competitions@stemplify.com): compressed air vs gas (T1.20 vs C9.12); verbal presentation split 60/40/40 in C3.5 but 40/40/60 on the scorecard; automatic vs manual launch in C9.1 vs C9.4 and C9.7.2; Appendix iii numbers the front wing rules T8.5.x instead of T8.6.x; T4.4.5 halo load "to be reviewed".
+
+### 22.3 Next-wave tasks
+
+Build order is roughly top to bottom. "Needs" lists what the code cannot work without: real CFD runs, thrust measurements, race runs, photos or video. Unavailable data uses an honest empty/manual state; estimates and synthetic examples are labelled explicitly.
+
+| ID | Build | Task | Depends on | Needs |
+|---|---|---|---|---|
+| T15 | 🟨 Partial | **Outcome objective.** Expected racing points from the C9.5/C9.6 formulas, knock-out win probability, tail risk (CVaR), and a two-car portfolio choice per round. Replaces the drag-only objective in ORACLE. | montecarlo | declared opponent assumptions or owner-supplied results; T28 scraping is cut |
+| T16 | 🟨 Partial | **Third-party timestamps for sealed predictions** (RFC 3161 or a witnessed public hash). | predictions | network access to a timestamp authority |
+| T17 | 🟨 Partial | **Bayesian calibration** with information gain per term, model offset vs noise, and out-of-sample validation. Ported from the older repo. | calibration, montecarlo | real runs on varied conditions (mass, density) |
+| T18 | ⬜ Remaining | **Cartridge thrust model** from the gas thermodynamics at 21 C. | gas type confirmed (22.2 #7) | measured thrust curves |
+| T19 | ✅ Built | **Energy-loss audit:** where every joule of thrust went. | dynamics | none |
+| T20 | 🟨 Partial | **FORGE v2:** build the missing measures (height, wheelbase, wheel diameter and width, clearance, overhangs, wall thickness, chamber, halo notch, wing thickness), pass probability from the manufacturing spread, and live "points at risk". | geometry, rulebook | measured part spread |
+| T21 | 🟨 Partial | **Structural analysis.** Start with beam FEM (numpy) on the wings, axle and halo; model the rules' own load tests (halo 1 kg, wheel 100 g, tether guide 200 g). Add 3D FEA with CalculiX when installed. | geometry | material properties of the real block, resin or foam; solver install for 3D |
+| T22 | 🟨 Partial | **Engineering drawing pack generator:** the 13-item contents list from build123d (orthographic with dimensions, exploded view, virtual cargo highlighted, sections), plus a 2D drawing importer (DXF, SVG) with a deviation check against the rebuilt 3D model. | geometry | a sample drawing to test the importer |
+| T23 | 🟨 Partial | **Test planner:** which physical test (mass ballast, air density, track length) most reduces the calibration uncertainty. | T17 | none |
+| T24 | ⬜ Remaining | **Gradient-enhanced and multi-fidelity ORACLE** (adjoint gradients, quick and final meshes in one GP). | T05 adjoint, T10 | working adjoint |
+| T25 | ⬜ Remaining | **Free-form adjoint shape optimisation** inside the FORGE constraints. | T05, T20, CFD | accepted CFD runs |
+| T26 | ✂️ Out of scope | **Exhaust base-bleed study:** thrust and wake as one design problem (research, may be negligible; check T3.3 and T5.6 first). | T18, CFD | compressible CFD, gas confirmed |
+| T27 | ⬜ Remaining | **Physical-in-the-loop optimiser** with a model-discrepancy term. | T15, T17 | several real runs |
+| T28 | ✂️ Out of scope | **Field intelligence** from public portfolios and results: where winners sit in design space. | none | curated public data, cited |
+| T29 | 🟨 Partial | **Legal-frontier map:** the edge of the rule-feasible design space, with rule and page for every boundary. | T20 | none |
+| T30 | ✂️ Out of scope | **Virtual scrutineer from photos:** rule dimensions with uncertainty. | T20 | photos with a scale reference |
+| T31 | ✂️ Out of scope | **Video test lab:** trajectory, wobble and snag detection from phone video. | T17 | video |
+| T32 | ✂️ Out of scope | **As-built twin:** photogrammetry of the finished car back into the prediction. | T20, CFD | photo scan |
+| T33 | 🟨 Partial | **Project twin:** Monte Carlo schedule and budget risk tied to engineering evidence, mapped to the 90-point project management scorecard. | none | the team's plan |
+| T34 | ⬜ Remaining | **Red-team mode, V&V dossier, post-event regret report.** | T10, T17 | CFD and runs |
+| T35 | ✂️ Out of scope | **Community calibration** across teams. | T17 | other teams |
+
+### 22.4 Questions for the organisers
+1. Are software-generated geometry or AI-assisted code acceptable under C2.9.2 and C2.16, and what must be declared?
+2. Is the power unit cartridge compressed air or CO2?
+3. Is racing launched in manual driver-reaction mode or automatic mode (C9.1 vs C9.4, C9.7.2)?
+4. Which Verbal Presentation split applies: 60/40/40 (C3.5) or 40/40/60 (scorecard)?
+
+
 ## 23. Progress on main (updated 2026-11-02)
 The next-wave changes were merged into `main` in `6d708b5`. The table tracks verified work and remaining orders; runtime checks are recorded separately from implementation.
 
@@ -306,12 +369,26 @@ The next-wave changes were merged into `main` in `6d708b5`. The table tracks ver
 | 1 India rulebook | 🟨 Partial | `rulebooks/stem-racing-india-nf-2025-26.yaml`, more rules measured, points at risk, scrutineering sheet (`forge_sheet.py`, `sheet.typ`), failed-rule links select and frame named CAD parts; responsive shell | Physical verification; feature-level measures tracked below |
 | T20 FORGE v2 | 🟨 Partial | Axle layout measures retained; CAD cylinder rolling bands, sampled wing-section extremes, explicit named halo-notch arcs, rear-wing plane B location and rear overhang bound; hash-bound remeasurement sidecar + UI action | Halo absent/ambiguous features remain manual; continuous wing surfaces, contact geometry and physical tolerances still require verification |
 | T22 drawing pack | 🟨 Partial | Design Studio Drawings tab exports all 13 C2.10.6 contents items as A4 vector PDF from original STEP; sections, exploded key, CAD extents, FORGE findings, team notes and review register | Local feature dimensioning, wing-boundary markup, missing named nose/tether geometry and team finish/decal annotations require engineering completion; DXF/SVG deviation importer and separate render pack remain |
-| 2 Wind Tunnel analysis | 🟨 Partial | Analysis API (`api/analysis.py`) | Drag by part, compare runs, grid independence, wake/vortex layers |
+| 2 Wind Tunnel analysis | 🟨 Partial | Component-force and drag charts, analysis API and grid-study view are wired | Accepted-source/campaign validation, complete run comparison and advanced wake/vortex layers |
 | 3 Race replay rebuild | 🟨 Built core; acceptance pending | Correct Z-up GLB conversion and leading-point placement; PBR car/wheel motion, studio track, tether/start/sector/finish details, six camera modes, adaptive reflections/effects, cursor timing, comparison controls, photo-finish slow motion and PNG capture | Hardware 60 fps verification, final 1024 px pass and broader final QA; no measured reaction data supplied |
 | 4 Race analysis | 🟨 Partial | Time budget, tornado chart, exchange rates, Breakdown tab, Energy panel (`raceanalysis.py`, `energy.py`) | Stadium timing / TV mode |
 | 5 Closed loop | 📝 Local draft; deferred behind reuse backlog | Local `parametric.py` draft builds a valid 11-solid study assembly using baseline extents and the four ORACLE variables; not wired into the app or committed yet | Constraint-filtered recommendation, build-next API, Design/evidence records, Pit Wall actions, CFD-job integration and accepted-result feedback |
-| 6 Calibration | 🟨 Partial | Bayesian calibration (`bayes_calibration.py`), bigger Monte Carlo | Calibration UI, uncertainty maps |
-| 7 Remaining | 🟨 Partial | Project page (`app/project`), clean-up (old flow viewer deleted, knip passes) | Run wizard, dockview, complete judge outputs and evidence coverage for all actions |
+| 6 Calibration / optimisation analysis | 🟨 Partial | Bayesian calibration core, Monte Carlo and SALib Sobol/Morris API + Sensitivity UI | Calibration UI, GP uncertainty maps and measured validation; ⏳ Sensitivity visual review |
+| 7 Remaining | 🟨 Partial | Project page, cleanup, ✅ uPlot telemetry and ✅ React Flow evidence lineage | Run wizard, 🔄 dockview (package installed; not connected), complete judge outputs and action-level evidence coverage |
+
+### 23.1 Latest reuse integrations — current tags
+
+| Piece | Implementation | Verification / next gap | Landed commit |
+|---|---|---|---|
+| racing-game gauge/results + four f1-dash timing components | ✅ Imported, adapted and connected | ⏳ Consolidated visual/performance review | `8ea5f25` |
+| uPlot telemetry | ✅ Connected; bands, native zoom/cursor sync, A/B controls and PNG export | ⏳ Final responsive/performance pass; cursor-input memory fix landed | `8cfb60e` (integration began in `20ad8b9`) |
+| React Flow + Dagre evidence lineage | ✅ Connected to actual records/ID references; lazy loaded | ⏳ Full action coverage and final acceptance; current DB has 3 nodes / 2 links | `8cfb60e` |
+| SALib Sobol/Morris sensitivity | ✅ Library, API and Pit Wall tab connected | ⏳ Visual review; analytic/script checks passed | `6c42121` |
+| dockview | 🔄 Dependency installed; integration not started | Verify distribution licence, then connect saved layouts to real Pit Wall panels | Not committed/integrated yet |
+| Closed-loop parametric car | 📝 Local CAD-generator draft only | API, evidence, FORGE/CFD and accepted-result feedback not connected | Uncommitted |
+| Final acceptance | ⬜ Still pending | Full QA, accepted CFD campaigns and measured validation | No acceptance claim |
+
+Browser and both development servers are stopped. Continue with scripts and short in-app checks only when needed; the earlier 21 GB peak remains unverified.
 
 ### Owner handoff checkpoint — 2026-11-02
 
@@ -342,74 +419,11 @@ Historical pause checkpoint, subsequently resumed; retained for handoff context.
 
 ---
 
-## 22. India NF 2025-26: what the real rules say, and the next wave
-
-Added 2026-11-02 after reading both India NF PDFs (Technical and Competition Regulations). Hashes are in `rulebooks/stem-racing-india-nf-2025-26.yaml`.
-
-### 22.1 Done in this pass
-- 🟨 Source PDFs were read from Downloads and hashes recorded in the rulebook. Correction at this handoff: `data/reference/rules/india_nf_2025_26/` currently contains no PDFs; source archival/evidence registration remains.
-- ✅ Current rulebook `rulebooks/stem-racing-india-nf-2025-26.yaml`: **80 entries** (38 general, 31 performance, 11 safety) with page, limits, penalty and class. Supported layout and CAD features compute when the design contains the required metadata; estimates and unavailable features remain manual/risk. Coverage varies by design; see §23.
-- ✅ `api/forge.py` loads the India rulebook. The UK reference file stays in the repo for comparison.
-
-### 22.2 What the real rules change
-
-| # | Finding | Where | What to do |
-|---|---|---|---|
-| 1 | **The Innovation Award is one criterion:** Verbal Presentation > Innovation, out of 20. Top band: "Excellent innovations related to competition elements, or other aspects with high positive project impact". Collaboration (/20) is a separate award, and the R&D Award comes from Computer Aided Analysis + R&D + Testing. | C13.3, Awards Matrix p39, scorecard p45 | Build the innovation story around measurable project impact. |
-| 2 | **FEA is wanted.** Design & Engineering "Application of Computer Aided Analysis" (/20) top band: "Proven design improvements made based on FEA/CFD study". Testing (/20) wants virtual and physical evidence on the assembled car and components. | Scorecard p41 | T21 below. The physical load tests in the rules (halo, wheel, tether guide) are natural FEA cases. |
-| 3 | **Rear wing height D8.5 does not exist in India NF.** T9 has only overhang height <= 65.0 mm and wing height deviation <= 15.0 mm. The "rear wing 34.4 mm vs 35 mm" catch in `docs/innovation.md` and `CHECKLIST.md` comes from the UK reference book. | T9.4.3, T9.5.4 | Replace that example with a real India NF finding before presenting. |
-| 4 | **Minimum mass is 50.0 g** (the UK reference said 60). Underweight costs 10 pts/g, and officials add ballast at 0.2 g per 0.1 g underweight (double). Ballast is allowed only in the container under the halo. | T3.6, T1.22, T4.2 | Target 50.0 g plus a measured scale margin; mass is a hard constraint, not a free variable. |
-| 5 | **Performance rules decide eligibility.** A failure makes the car ineligible for Fastest Car and Best Engineered Car, and failing on both cars seeded in the top 16 means automatic round-one elimination. | C3.6.2 | Treat the 30 performance rules as hard constraints in the optimiser (T3.3, T3.6, T4.2, T4.4.1, T5.6, T7.2-T7.11, T8.6-T8.8, T9.5-T9.7). |
-| 6 | **Racing points are formulas.** Reaction (105): top three get 105/100/95, others get 5 + 90/(Base - fastest) x (Base - own best), Base = 120% of third fastest. It uses TOTAL race time (car time plus reaction). Knock-out (135): eliminated in round of 16 / 8 / quarter / semi = 26 / 52 / 85 / 106, winner 135. Fastest car bonus 10. | C9.5, C9.6 | T15: optimise expected points, not mean time. |
-| 7 | **Cartridge.** T1.20 says "compressed air"; C9.12 says "compressed gas". Supplied by the organisers, kept at 21 C, weighed within 0.5 g. Full pack 28.9-29.4 g, 65 mm long, 18 mm diameter. | T1.20, C9.12, Appendix vi | Confirm the gas before building the thrust model (T18 assumed CO2). |
-| 8 | **Tether is 0.6 mm monofilament**, fixed at the finish, over one pulley at the start. Track is 20 m. | C9.10.1 | Re-set the tether friction prior; the Australian rules used a 0.2 mm braid. |
-| 9 | **Originality.** "All design work, text and scripting ... must be wholly undertaken and created by the team", including CAD, CAM, portfolio and graphics. An Originality Declaration is part of registration, and plagiarism can be penalised or excluded. There is no statement about AI tools or software-generated designs. | C2.9.2, C2.16, T2.10 | Ask the organisers for a text clarification (allowed under C2.6.2 and T2.2.2; design-compliance rulings are not, T2.6). Keep evidence of the team's own authorship and understanding of every part. |
-| 10 | **The drawing pack is 60 scrutineering points** (drawings /20, 3D renders /20, finish and assembly /20) and has a mandatory 13-item contents list, plus 5-pt penalties for missing identification (T4.3, T7.12.2, T8.1, T9.1). | C2.10.6, p40, p53 | T22: generate it from the CAD. |
-| 11 | **Halo and helmet are fixed standard parts** that must appear unmodified. The halo pocket is cut with a 6.35 mm ball-nose tool to 3.175 mm depth; the pocket bottom is 24.0 mm above the track and the notch centre 34.0 mm +/- 1.0 mm. | T4.4, T1.21, Appendix ix | Include the halo in every CFD geometry. |
-| 12 | **Points:** specification and scrutineering 160, design and engineering 180, project management 90, enterprise 180, verbal presentation 140, racing 250. Total 1000. | C3.5 | Use these weights in the score checklist (section 1.5). |
-
-Inconsistencies in the source documents to raise with the organisers (competitions@stemplify.com): compressed air vs gas (T1.20 vs C9.12); verbal presentation split 60/40/40 in C3.5 but 40/40/60 on the scorecard; automatic vs manual launch in C9.1 vs C9.4 and C9.7.2; Appendix iii numbers the front wing rules T8.5.x instead of T8.6.x; T4.4.5 halo load "to be reviewed".
-
-### 22.3 Next-wave tasks
-
-Build order is roughly top to bottom. "Needs" lists what the code cannot work without: real CFD runs, thrust measurements, race runs, photos or video. Unavailable data uses an honest empty/manual state; estimates and synthetic examples are labelled explicitly.
-
-| ID | Build | Task | Depends on | Needs |
-|---|---|---|---|---|
-| T15 | 🟨 Partial | **Outcome objective.** Expected racing points from the C9.5/C9.6 formulas, knock-out win probability, tail risk (CVaR), and a two-car portfolio choice per round. Replaces the drag-only objective in ORACLE. | montecarlo | field model for opponents (T28) for real numbers |
-| T16 | 🟨 Partial | **Third-party timestamps for sealed predictions** (RFC 3161 or a witnessed public hash). | predictions | network access to a timestamp authority |
-| T17 | 🟨 Partial | **Bayesian calibration** with information gain per term, model offset vs noise, and out-of-sample validation. Ported from the older repo. | calibration, montecarlo | real runs on varied conditions (mass, density) |
-| T18 | ⬜ Remaining | **Cartridge thrust model** from the gas thermodynamics at 21 C. | gas type confirmed (22.2 #7) | measured thrust curves |
-| T19 | ✅ Built | **Energy-loss audit:** where every joule of thrust went. | dynamics | none |
-| T20 | 🟨 Partial | **FORGE v2:** build the missing measures (height, wheelbase, wheel diameter and width, clearance, overhangs, wall thickness, chamber, halo notch, wing thickness), pass probability from the manufacturing spread, and live "points at risk". | geometry, rulebook | measured part spread |
-| T21 | 🟨 Partial | **Structural analysis.** Start with beam FEM (numpy) on the wings, axle and halo; model the rules' own load tests (halo 1 kg, wheel 100 g, tether guide 200 g). Add 3D FEA with CalculiX when installed. | geometry | material properties of the real block, resin or foam; solver install for 3D |
-| T22 | 🟨 Partial | **Engineering drawing pack generator:** the 13-item contents list from build123d (orthographic with dimensions, exploded view, virtual cargo highlighted, sections), plus a 2D drawing importer (DXF, SVG) with a deviation check against the rebuilt 3D model. | geometry | a sample drawing to test the importer |
-| T23 | 🟨 Partial | **Test planner:** which physical test (mass ballast, air density, track length) most reduces the calibration uncertainty. | T17 | none |
-| T24 | ⬜ Remaining | **Gradient-enhanced and multi-fidelity ORACLE** (adjoint gradients, quick and final meshes in one GP). | T05 adjoint, T10 | working adjoint |
-| T25 | ⬜ Remaining | **Free-form adjoint shape optimisation** inside the FORGE constraints. | T05, T20, CFD | accepted CFD runs |
-| T26 | ✂️ Out of scope | **Exhaust base-bleed study:** thrust and wake as one design problem (research, may be negligible; check T3.3 and T5.6 first). | T18, CFD | compressible CFD, gas confirmed |
-| T27 | ⬜ Remaining | **Physical-in-the-loop optimiser** with a model-discrepancy term. | T15, T17 | several real runs |
-| T28 | ✂️ Out of scope | **Field intelligence** from public portfolios and results: where winners sit in design space. | none | curated public data, cited |
-| T29 | 🟨 Partial | **Legal-frontier map:** the edge of the rule-feasible design space, with rule and page for every boundary. | T20 | none |
-| T30 | ✂️ Out of scope | **Virtual scrutineer from photos:** rule dimensions with uncertainty. | T20 | photos with a scale reference |
-| T31 | ✂️ Out of scope | **Video test lab:** trajectory, wobble and snag detection from phone video. | T17 | video |
-| T32 | ✂️ Out of scope | **As-built twin:** photogrammetry of the finished car back into the prediction. | T20, CFD | photo scan |
-| T33 | 🟨 Partial | **Project twin:** Monte Carlo schedule and budget risk tied to engineering evidence, mapped to the 90-point project management scorecard. | none | the team's plan |
-| T34 | ⬜ Remaining | **Red-team mode, V&V dossier, post-event regret report.** | T10, T17 | CFD and runs |
-| T35 | ✂️ Out of scope | **Community calibration** across teams. | T17 | other teams |
-
-### 22.4 Questions for the organisers
-1. Are software-generated geometry or AI-assisted code acceptable under C2.9.2 and C2.16, and what must be declared?
-2. Is the power unit cartridge compressed air or CO2?
-3. Is racing launched in manual driver-reaction mode or automatic mode (C9.1 vs C9.4, C9.7.2)?
-4. Which Verbal Presentation split applies: 60/40/40 (C3.5) or 40/40/60 (scorecard)?
-
-
 ## 24. Whole-plan checklist and completion score — 2026-11-02
 
 This is the current implementation ledger for all T01–T35 tasks. Earlier feature catalogues describe targets and repeat some work; do not add those duplicates to the percentage. T01b is a subtask of T01. The paused closed-loop draft does not earn a separate completed task.
 
-**Legend:** ✅ scoped implementation present · 🟨 some implementation, material work remains · ⬜ remaining · 📝 local draft. A build tick does not change the task board to reviewer-accepted or tick the final QA checklist. These statuses are based on the current source and recorded evidence, not a fresh full-product acceptance audit.
+**Legend:** ✅ implemented core · 🟨 partly implemented · 🔄 active integration · 📝 uncommitted local draft · ⬜ planned/not started · ⏳ verification pending · ✂️ out of scope · 🚫 explicitly skipped library. A build tick does not change the task board to reviewer-accepted or tick the final QA checklist. These statuses are based on the current source and recorded evidence, not a fresh full-product acceptance audit.
 
 **Current in-scope plan: 45% checklist score.** Scope decision §27 removes six tasks: 29 remain, with three built, twenty partial and six remaining. Calculation: `(3 × 1 + 20 × 0.5 + 6 × 0) / 29 = 44.8%`. The prior 37.1% counted all 35 tasks; the denominator change is a scope cut, not newly completed engineering.
 
@@ -426,14 +440,14 @@ Partial tasks receive a fixed half-point for a simple, reproducible tally; this 
 | T05 | Adjoint sensitivity | 🟨 Partial | Tooling exists; accepted primal, adjoint result and connected sensitivity map remain. |
 | T06 | Wind Tunnel experience | 🟨 Partial | vtk.js surface, streamlines and slices connected; advanced layers, compare and quality UX remain. |
 | T07 | Design Studio | 🟨 Partial | Real CAD import/save, inspection and rule focus; deeper integration and final acceptance remain. |
-| T08 | TITAN race experience | ✅ Built | Telemetry, what-if/presets, uncertainty band, real-car replay and comparison implemented; final QA/performance remain. |
+| T08 | TITAN race experience | ✅ Built | Telemetry now uses uPlot; direct racing-game/f1-dash components, what-if/presets, uncertainty band, replay and comparison connected; ⏳ final QA/performance. |
 | T09 | Imports, units and calibration | 🟨 Partial | Import/unit/calibration foundations; complete calibration UI and measured validation remain. |
-| T10 | ORACLE optimisation | 🟨 Partial | GP/EI, synthetic benchmark and Pit Wall implemented; constrained CAD/CFD loop and full objective remain. |
+| T10 | ORACLE optimisation | 🟨 Partial | GP/EI, benchmark, Pit Wall and SALib sensitivity API/UI implemented; constrained CAD/CFD loop, full objective and sensitivity visual review remain. |
 | T11 | FORGE rules and inspections | 🟨 Partial | India rulebook, CAD states/margins and sheet; measured inspections and full coverage remain. |
 | T12 | ATLAS evidence | 🟨 Partial | Store, hashes, timeline, verify and React Flow lineage exist; complete action linkage and final acceptance remain. |
-| T13 | Competition mode, report and AR | 🟨 Partial | Presenter and Typst report exist; complete judge pack and public verification remain; AR is out of scope. |
+| T13 | Competition mode and report (AR cut) | 🟨 Partial | Presenter and Typst report exist; complete judge pack and public verification remain; AR is out of scope. |
 | T14 | Final app polish | ⬜ Remaining | Consolidated responsiveness, accessibility, performance and acceptance pass remains. |
-| T15 | Racing-points objective | 🟨 Partial | Outcome core and API exist; ORACLE objective integration and opponent evidence remain. |
+| T15 | Racing-points objective | 🟨 Partial | Outcome core and API exist; ORACLE objective integration and declared opponent assumptions or owner-supplied results remain; competitor scraping is cut. |
 | T16 | Third-party prediction timestamps | 🟨 Partial | RFC 3161 core and API exist; real authority token and full UI workflow remain. |
 | T17 | Bayesian calibration | 🟨 Partial | Bayesian core exists; measured-data workflow, uncertainty UI and held-out validation remain. |
 | T18 | Cartridge thermodynamic thrust model | ⬜ Remaining | Organiser gas confirmation and measured thrust curves remain. |
@@ -464,15 +478,17 @@ The requested named projects were used to different extents. The replay is a cus
 | Requested source | Actual use | Extent / remaining gap |
 |---|---|---|
 | Chili3D | Full pinned upstream CAD build, patched and rebuilt; import/save and focus bridge use our STEP designs | ✅ Real upstream app integration; not a replacement CAD kernel written here |
-| pmndrs/racing-game | Inspected pinned `App.tsx` and `effects/Cameras.tsx`; adapted camera/light setup patterns | 🟨 Selected adaptation. Straight-track camera control, HUD, track, wheel pivots and photo-finish glue are our implementation; full scene/HUD not ported |
-| slowlydev/f1-dash | Small direct adaptation of MiniSector status mapping/styling; LeaderBoard/DriverGap layout references | 🟨 Selected adaptation. Timing calculations and data connection use our race traces; full dashboard not copied |
+| pmndrs/racing-game | Original gauge SVG and Score/Scores/Finished presentation adapted and connected; camera/light references retained | ✅ Selected component integration; road-course assets, driving physics and auth intentionally excluded |
+| slowlydev/f1-dash | DriverTag, DriverGap, DriverLapTime and full DriverMiniSectors imported/adapted to our traces | ✅ Selected component integration; full F1-feed dashboard intentionally excluded |
 | pmndrs/postprocessing | Installed package through `@react-three/postprocessing`, with actual SMAA and Bloom components | ✅ Library reuse for those effects; motion blur and clip export remain |
 | pmndrs/drei / React Three Fiber | Actual renderer, reflector material, performance monitor and Stats components | ✅ Library reuse; measured 60 fps target remains unverified |
 | build123d + OpenCascade | Actual STEP import/export, solids/features, section geometry and polygonal hidden-line projection | ✅ Library reuse. Drawing generator and local parametric-study draft are our code using those APIs |
-| Ax / BoTorch / Optuna | Not adopted in the current ORACLE core; it uses a custom NumPy/SciPy GP and expected improvement | 🟨 Open-source numerical libraries are used, but this is not an Ax/BoTorch integration |
+| Ax / BoTorch / Optuna | Current GP uses NumPy/SciPy; these frameworks are not integrated | 🚫 BoTorch explicitly skipped by §27; no claim of Ax/Optuna adoption |
 | Typst | Actual PDF compiler/templates for reports, rule sheet and drawing draft | ✅ Library reuse |
 | vtk.js / PyVista / OpenFOAM | Existing viewer/render/solver dependencies retained | 🟨 Core integrations exist; complete advanced layers and accepted campaigns remain |
-| trame, FoamPilot, F3D, uPlot, FastF1, dockview, xyflow, SU2 | Not newly adopted during this build pass | ⬜ No claim that these integrations are complete; existing ECharts/PyVista/custom GP remain in use |
+| uPlot / React Flow / Dagre / SALib | Actual installed libraries connected to telemetry, lineage and surrogate sensitivity | ✅ Integrated; ⏳ acceptance gates remain as listed in §23.1 |
+| dockview / FoamPilot / F3D / FastF1 / SU2 | dockview dependency installed only; other integrations not completed | 🔄 dockview candidate; ⬜ remaining suitable tools require fit/licence review |
+| trame / OpenMDAO | Not adopted | 🚫 Explicitly skipped by §27 |
 
 Licences were checked before replay-source use, pinned source references were recorded, and retained MIT/AGPL licence texts were added. See [THIRD_PARTY.md](../../THIRD_PARTY.md), [replay references](references/ORDER-3.md), and [drawing references](references/T22.md). No code from a repository without a licence was copied in this session. Planned source lists are not proof of adoption.
 
@@ -494,14 +510,14 @@ Licences were checked before replay-source use, pinned source references were re
 | ORACLE and parametric family | Existing NumPy/SciPy and build123d libraries | The current GP/EI implementation is custom; Ax/BoTorch/Optuna were not integrated. The uncommitted `parametric.py` study family was written here, not copied from bitbybit or another car generator. bitbybit car-part ideas have not yet been researched/adopted for this draft. |
 | Remaining named tools | Existing vtk.js, PyVista, OpenFOAM and ECharts integrations retained | trame/ParaView Web, FoamPilot wizard/monitor, F3D turntables, uPlot telemetry, FastF1 layouts, dockview, xyflow, SU2/DAFoam and PyGeM were not newly integrated in this pass. CadQuery was not added as a second CAD pipeline. OpenFOAM tutorial adoption was not newly audited in this pass. |
 
-**Continuation checklist — still open:**
-- [ ] Resume from the current checkpoint and existing reference notes. Do not reread the entire repository or restart completed work; inspect the specific upstream and local files needed for the next change.
-- [ ] Before more custom replay work, inspect the actual licensed racing-game scene/HUD components and f1-dash timing components for direct reuse. Prefer adapting working components over recreating their functionality.
-- [ ] Record the upstream commit, original paths, retained licence notices and destination paths for each copied/adapted component.
-- [ ] Connect reused components to our real designs, telemetry, jobs and evidence. Remove foreign branding/demo data; retain honest loading/empty/error states and provenance.
-- [ ] For each component left custom, record the concrete compatibility reason. Do not describe an inspected reference or installed package as a full application port.
-- [ ] Review whether any suitable newly written components should be replaced by upstream adaptations. Preserve working behaviour until its replacement is connected and reviewable; do not delete the current implementation wholesale.
-- [ ] Continue the remaining build order, prioritising implementation and cleanup. Batch focused checks around completed changes; leave broad QA and heavy CFD to the agreed final phase.
+**Continuation checklist — scoped to the reuse passes recorded in §26:**
+- [x] Resume from the current checkpoint and existing reference notes. Do not reread the entire repository or restart completed work; inspect the specific upstream and local files needed for the next change.
+- [x] Before more custom replay work, inspect the actual licensed racing-game scene/HUD components and f1-dash timing components for direct reuse. Prefer adapting working components over recreating their functionality.
+- [x] Record the upstream commit, original paths, retained licence notices and destination paths for each copied/adapted component.
+- [x] Connect reused components to our real designs, telemetry, jobs and evidence. Remove foreign branding/demo data; retain honest loading/empty/error states and provenance.
+- [x] For each component left custom, record the concrete compatibility reason. Do not describe an inspected reference or installed package as a full application port.
+- [x] Review whether any suitable newly written components should be replaced by upstream adaptations. Preserve working behaviour until its replacement is connected and reviewable; do not delete the current implementation wholesale.
+- [ ] 🔄 Continue the remaining build order, prioritising implementation and cleanup. Batch focused checks around completed changes; leave broad QA and heavy CFD to the agreed final phase.
 
 Historical note: the owner subsequently resumed implementation. Current work is tracked in §26.
 
@@ -531,19 +547,6 @@ Owner resumed implementation, prioritising suitable prebuilt open source, fast c
 
 **Fit decisions:** Racing-game's road-course GLB, Cannon driving physics, keyboard/audio controls and Supabase authentication are not imported: the required product is a straight STEM track replaying TITAN results, not an interactive road-driving game or a foreign score service. The real car, domain-specific track geometry and trajectory interpolation remain. This is component reuse, not a claim that the complete upstream applications were imported.
 
-## 27. Scope decision (2026-11-02): cut list
-**Do NOT build these** (camera/hardware/external-data features, not needed):
-- T30 virtual scrutineer from photos
-- T31 video test lab (wobble/snag from phone video)
-- T32 as-built twin / photogrammetry
-- T35 community calibration across teams
-- T28 competitor/field intelligence scraping
-- T26 exhaust base-bleed study
-- AR car view
-
-**Everything else stays in scope and gets built.** Open source: add SALib (Sobol/Morris sensitivity); CalculiX only with real material data; skip BoTorch, OpenMDAO, trame.
-
-
 ### Reuse pass 2 — uPlot telemetry and React Flow lineage
 
 - [x] Use actual uPlot 1.6.32 for the telemetry canvas, synchronized cursors, native drag zoom and p5–p95 bands; retain channel ordering, y-zoom, A/B handles and keyboard controls. Add reset and PNG export.
@@ -568,3 +571,17 @@ Owner resumed implementation, prioritising suitable prebuilt open source, fast c
 - [ ] Visual review of the new tab remains; servers/browser were not started for this pass.
 
 Follow scope decision §27: no photo/video/AR/competitor-scraping/base-bleed/community-calibration work; skip BoTorch, OpenMDAO and trame. CalculiX is gated on real material data. Next reuse candidate: dockview for a saved, rearrangeable Pit Wall workspace.
+
+---
+
+## 27. Scope decision (2026-11-02): cut list
+**Do NOT build these** (camera/hardware/external-data features, not needed):
+- T30 virtual scrutineer from photos
+- T31 video test lab (wobble/snag from phone video)
+- T32 as-built twin / photogrammetry
+- T35 community calibration across teams
+- T28 competitor/field intelligence scraping
+- T26 exhaust base-bleed study
+- AR car view
+
+**Everything else stays in scope and gets built.** Open source: add SALib (Sobol/Morris sensitivity); CalculiX only with real material data; skip BoTorch, OpenMDAO, trame.
