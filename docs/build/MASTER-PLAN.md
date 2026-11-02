@@ -7,7 +7,7 @@ The goal: every screen at commercial quality, every rule checked, every feature 
 ## 0. Status
 - Jainam (`Jainamsomething25`) has **accepted** and is a collaborator.
 - Done: CAD (Chili3D) connected, vtk.js 3D Flow, hero renders, sealed prediction, ORACLE, FORGE (10 rules), evidence trail, report PDF, presenter.
-- **Critical gap:** FORGE uses the *Development 2026/27 reference* rulebook. We compete under the **STEM Racing India NF 2025-26 Technical + Competition Regulations** (now in `~/Downloads`). Replace it.
+- **Critical gap:** FORGE uses the *Development 2026/27 reference* rulebook. We compete under the **STEM Racing India NF 2025-26 Technical + Competition Regulations** (now in `~/Downloads`). Replace it. **Update 2026-11-02:** rulebook replaced for the rules FORGE can read; see section 22.
 
 ## 1. Legal: maximise every point (highest priority)
 1. Copy both PDFs into `data/reference/rules/india_nf_2025_26/`, hash them, and record them as evidence.
@@ -296,3 +296,67 @@ What the big-screen timing page should show, inspired by F1 TV, f1-dash and STEM
 - **Scrutineering sheet**: a printable compliance table with measured values.
 - **Race-day report**: the times, calibration update and next actions.
 - **Evidence appendix**: hash list plus a QR verify link.
+
+---
+
+## 22. India NF 2025-26: what the real rules say, and the next wave
+
+Added 2026-11-02 after reading both India NF PDFs (Technical and Competition Regulations). Hashes are in `rulebooks/stem-racing-india-nf-2025-26.yaml`.
+
+### 22.1 Done in this pass
+- Both PDFs copied to `data/reference/rules/india_nf_2025_26/` (git-ignored) and hashed.
+- New rulebook `rulebooks/stem-racing-india-nf-2025-26.yaml`: 79 rules (38 general, 30 performance, 11 safety) with page, limits, penalty and class. Six are computable from bounding boxes today (T3.4, T5.2, T8.6.1, T8.6.2, T9.5.1, T9.5.2); the rest show as manual review and each names the measure to build next (section 1.3).
+- `api/forge.py` now loads the India rulebook. The UK reference file stays in the repo for comparison.
+
+### 22.2 What the real rules change
+
+| # | Finding | Where | What to do |
+|---|---|---|---|
+| 1 | **The Innovation Award is one criterion:** Verbal Presentation > Innovation, out of 20. Top band: "Excellent innovations related to competition elements, or other aspects with high positive project impact". Collaboration (/20) is a separate award, and the R&D Award comes from Computer Aided Analysis + R&D + Testing. | C13.3, Awards Matrix p39, scorecard p45 | Build the innovation story around measurable project impact. |
+| 2 | **FEA is wanted.** Design & Engineering "Application of Computer Aided Analysis" (/20) top band: "Proven design improvements made based on FEA/CFD study". Testing (/20) wants virtual and physical evidence on the assembled car and components. | Scorecard p41 | T21 below. The physical load tests in the rules (halo, wheel, tether guide) are natural FEA cases. |
+| 3 | **Rear wing height D8.5 does not exist in India NF.** T9 has only overhang height <= 65.0 mm and wing height deviation <= 15.0 mm. The "rear wing 34.4 mm vs 35 mm" catch in `docs/innovation.md` and `CHECKLIST.md` comes from the UK reference book. | T9.4.3, T9.5.4 | Replace that example with a real India NF finding before presenting. |
+| 4 | **Minimum mass is 50.0 g** (the UK reference said 60). Underweight costs 10 pts/g, and officials add ballast at 0.2 g per 0.1 g underweight (double). Ballast is allowed only in the container under the halo. | T3.6, T1.22, T4.2 | Target 50.0 g plus a measured scale margin; mass is a hard constraint, not a free variable. |
+| 5 | **Performance rules decide eligibility.** A failure makes the car ineligible for Fastest Car and Best Engineered Car, and failing on both cars seeded in the top 16 means automatic round-one elimination. | C3.6.2 | Treat the 30 performance rules as hard constraints in the optimiser (T3.3, T3.6, T4.2, T4.4.1, T5.6, T7.2-T7.11, T8.6-T8.8, T9.5-T9.7). |
+| 6 | **Racing points are formulas.** Reaction (105): top three get 105/100/95, others get 5 + 90/(Base - fastest) x (Base - own best), Base = 120% of third fastest. It uses TOTAL race time (car time plus reaction). Knock-out (135): eliminated in round of 16 / 8 / quarter / semi = 26 / 52 / 85 / 106, winner 135. Fastest car bonus 10. | C9.5, C9.6 | T15: optimise expected points, not mean time. |
+| 7 | **Cartridge.** T1.20 says "compressed air"; C9.12 says "compressed gas". Supplied by the organisers, kept at 21 C, weighed within 0.5 g. Full pack 28.9-29.4 g, 65 mm long, 18 mm diameter. | T1.20, C9.12, Appendix vi | Confirm the gas before building the thrust model (T18 assumed CO2). |
+| 8 | **Tether is 0.6 mm monofilament**, fixed at the finish, over one pulley at the start. Track is 20 m. | C9.10.1 | Re-set the tether friction prior; the Australian rules used a 0.2 mm braid. |
+| 9 | **Originality.** "All design work, text and scripting ... must be wholly undertaken and created by the team", including CAD, CAM, portfolio and graphics. An Originality Declaration is part of registration, and plagiarism can be penalised or excluded. There is no statement about AI tools or software-generated designs. | C2.9.2, C2.16, T2.10 | Ask the organisers for a text clarification (allowed under C2.6.2 and T2.2.2; design-compliance rulings are not, T2.6). Keep evidence of the team's own authorship and understanding of every part. |
+| 10 | **The drawing pack is 60 scrutineering points** (drawings /20, 3D renders /20, finish and assembly /20) and has a mandatory 13-item contents list, plus 5-pt penalties for missing identification (T4.3, T7.12.2, T8.1, T9.1). | C2.10.6, p40, p53 | T22: generate it from the CAD. |
+| 11 | **Halo and helmet are fixed standard parts** that must appear unmodified. The halo pocket is cut with a 6.35 mm ball-nose tool to 3.175 mm depth; the pocket bottom is 24.0 mm above the track and the notch centre 34.0 mm +/- 1.0 mm. | T4.4, T1.21, Appendix ix | Include the halo in every CFD geometry. |
+| 12 | **Points:** specification and scrutineering 160, design and engineering 180, project management 90, enterprise 180, verbal presentation 140, racing 250. Total 1000. | C3.5 | Use these weights in the score checklist (section 1.5). |
+
+Inconsistencies in the source documents to raise with the organisers (competitions@stemplify.com): compressed air vs gas (T1.20 vs C9.12); verbal presentation split 60/40/40 in C3.5 but 40/40/60 on the scorecard; automatic vs manual launch in C9.1 vs C9.4 and C9.7.2; Appendix iii numbers the front wing rules T8.5.x instead of T8.6.x; T4.4.5 halo load "to be reviewed".
+
+### 22.3 Next-wave tasks
+
+Build order is roughly top to bottom. "Needs" lists what the code cannot work without: real CFD runs, thrust measurements, race runs, photos or video. Everything stays labelled `placeholder`, `estimated` or `synthetic` until that data exists.
+
+| ID | Task | Depends on | Needs |
+|---|---|---|---|
+| T15 | **Outcome objective.** Expected racing points from the C9.5/C9.6 formulas, knock-out win probability, tail risk (CVaR), and a two-car portfolio choice per round. Replaces the drag-only objective in ORACLE. | montecarlo | field model for opponents (T28) for real numbers |
+| T16 | **Third-party timestamps for sealed predictions** (RFC 3161 or a witnessed public hash). | predictions | network access to a timestamp authority |
+| T17 | **Bayesian calibration** with information gain per term, model offset vs noise, and out-of-sample validation. Ported from the older repo. | calibration, montecarlo | real runs on varied conditions (mass, density) |
+| T18 | **Cartridge thrust model** from the gas thermodynamics at 21 C. | gas type confirmed (22.2 #7) | measured thrust curves |
+| T19 | **Energy-loss audit:** where every joule of thrust went. | dynamics | none |
+| T20 | **FORGE v2:** build the missing measures (height, wheelbase, wheel diameter and width, clearance, overhangs, wall thickness, chamber, halo notch, wing thickness), pass probability from the manufacturing spread, and live "points at risk". | geometry, rulebook | measured part spread |
+| T21 | **Structural analysis.** Start with beam FEM (numpy) on the wings, axle and halo; model the rules' own load tests (halo 1 kg, wheel 100 g, tether guide 200 g). Add 3D FEA with CalculiX when installed. | geometry | material properties of the real block, resin or foam; solver install for 3D |
+| T22 | **Engineering drawing pack generator:** the 13-item contents list from build123d (orthographic with dimensions, exploded view, virtual cargo highlighted, sections), plus a 2D drawing importer (DXF, SVG) with a deviation check against the rebuilt 3D model. | geometry | a sample drawing to test the importer |
+| T23 | **Test planner:** which physical test (mass ballast, air density, track length) most reduces the calibration uncertainty. | T17 | none |
+| T24 | **Gradient-enhanced and multi-fidelity ORACLE** (adjoint gradients, quick and final meshes in one GP). | T05 adjoint, T10 | working adjoint |
+| T25 | **Free-form adjoint shape optimisation** inside the FORGE constraints. | T05, T20, CFD | accepted CFD runs |
+| T26 | **Exhaust base-bleed study:** thrust and wake as one design problem (research, may be negligible; check T3.3 and T5.6 first). | T18, CFD | compressible CFD, gas confirmed |
+| T27 | **Physical-in-the-loop optimiser** with a model-discrepancy term. | T15, T17 | several real runs |
+| T28 | **Field intelligence** from public portfolios and results: where winners sit in design space. | none | curated public data, cited |
+| T29 | **Legal-frontier map:** the edge of the rule-feasible design space, with rule and page for every boundary. | T20 | none |
+| T30 | **Virtual scrutineer from photos:** rule dimensions with uncertainty. | T20 | photos with a scale reference |
+| T31 | **Video test lab:** trajectory, wobble and snag detection from phone video. | T17 | video |
+| T32 | **As-built twin:** photogrammetry of the finished car back into the prediction. | T20, CFD | photo scan |
+| T33 | **Project twin:** Monte Carlo schedule and budget risk tied to engineering evidence, mapped to the 90-point project management scorecard. | none | the team's plan |
+| T34 | **Red-team mode, V&V dossier, post-event regret report.** | T10, T17 | CFD and runs |
+| T35 | **Community calibration** across teams. | T17 | other teams |
+
+### 22.4 Questions for the organisers
+1. Are software-generated geometry or AI-assisted code acceptable under C2.9.2 and C2.16, and what must be declared?
+2. Is the power unit cartridge compressed air or CO2?
+3. Is racing launched in manual driver-reaction mode or automatic mode (C9.1 vs C9.4, C9.7.2)?
+4. Which Verbal Presentation split applies: 60/40/40 (C3.5) or 40/40/60 (scorecard)?

@@ -11,9 +11,7 @@ from daedalus import forge
 from daedalus.api.engineering import data_root
 
 router = APIRouter(prefix="/v1/forge", tags=["forge"])
-RULEBOOK = (
-    Path(__file__).resolve().parents[3] / "rulebooks" / "stem-racing-development-2026-27.yaml"
-)
+RULEBOOK = Path(__file__).resolve().parents[3] / "rulebooks" / "stem-racing-india-nf-2025-26.yaml"
 
 
 @router.get("/checks")
