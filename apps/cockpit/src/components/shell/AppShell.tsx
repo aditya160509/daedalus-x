@@ -346,7 +346,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <button
                 type="button"
                 onClick={() => window.dispatchEvent(new Event(OPEN_PRESENTER))}
-                className="flex h-8 items-center gap-2 rounded-md bg-brand px-2.5 text-xs font-medium text-black transition-opacity hover:opacity-90"
+                className="flex h-8 items-center gap-2 rounded-md border px-2.5 text-xs font-medium text-foreground transition-colors hover:bg-accent"
               >
                 <Presentation className="size-3.5" aria-hidden />
                 Present

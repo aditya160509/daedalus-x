@@ -14,13 +14,11 @@ import { SERIES, SERIES_CYCLE } from "@/lib/colormap";
 import { useSelectedRun } from "@/lib/runSelection";
 import { cn } from "@/lib/utils";
 import { RenderPanel } from "@/components/render/HeroRender";
-import { FlowPanel } from "./FlowPanel";
 import { GridStudyPanel } from "./GridStudyPanel";
 import { StatusBar, useTab, WorkspaceTabs } from "@/components/shell/WorkspaceTabs";
 
 const TUNNEL_TABS = [
   { id: "flow", label: "Flow" },
-  { id: "flow3d", label: "3D Flow" },
   { id: "render", label: "Render" },
   { id: "forces", label: "Forces" },
   { id: "convergence", label: "Convergence" },
@@ -166,12 +164,7 @@ function RunView({ run, hasViz }: { run: CfdRunDetail; hasViz: boolean }) {
     <div className="flex min-h-0 flex-1 flex-col">
       <WorkspaceTabs tabs={TUNNEL_TABS} value={tab} onChange={setTab} />
       <div className="flex min-h-0 flex-1 gap-3 p-3">
-        {tab === "flow" && (
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col [&>section]:flex-1">
-            <FlowPanel runId={run.run_id} hasViz={hasViz} />
-          </div>
-        )}
-        {tab === "flow3d" &&
+        {tab === "flow" &&
           (hasViz ? (
             <div className="min-h-0 min-w-0 flex-1">
               <FlowViewer3D runId={run.run_id} />

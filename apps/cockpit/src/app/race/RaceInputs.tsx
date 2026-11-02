@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle, FileUp, RotateCcw } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { PresetPanel } from "@/components/race/PresetPanel";
 import { SliderField } from "@/components/race/SliderField";
 import { SweepSparkline } from "@/components/race/SweepSparkline";
@@ -65,6 +65,7 @@ export function RaceInputs({
   onApplyPreset: (preset: RacePreset) => void;
 }) {
   const fileInput = useRef<HTMLInputElement>(null);
+  const [advanced, setAdvanced] = useState(false);
 
   const importFile = async (file: File) => {
     onFileError(null);
@@ -90,15 +91,20 @@ export function RaceInputs({
     <div className="flex min-h-0 flex-col gap-3 overflow-y-auto pr-0.5">
       <Panel title="Model" bodyClassName="space-y-3 p-3" className="shrink-0">
         <SegmentedModel value={model} onChange={onModel} />
-        <p className="text-2xs leading-relaxed text-muted-foreground">
-          SciPy solve_ivp to the finish line. A car that stops before the line is a non-finish,
-          never a time.
-        </p>
       </Panel>
 
       <Panel
         title="What-if"
-        actions={<ProvenanceBadge value="estimated" />}
+        actions={
+          <button
+            type="button"
+            onClick={() => setAdvanced((a) => !a)}
+            aria-expanded={advanced}
+            className="rounded px-1.5 py-0.5 text-2xs text-muted-foreground hover:bg-accent hover:text-foreground"
+          >
+            {advanced ? "Hide advanced" : "Advanced"}
+          </button>
+        }
         bodyClassName="space-y-3 p-3 pb-4"
         className="shrink-0"
       >
@@ -118,59 +124,65 @@ export function RaceInputs({
                 onChange={(v) => onCar({ [param]: v })}
                 onCommit={() => sweep(param)}
               />
-              <SweepSparkline
-                curve={curves[param]}
-                current={value}
-                running={running === param}
-                label={f.label}
-              />
+              {advanced && (
+                <SweepSparkline
+                  curve={curves[param]}
+                  current={value}
+                  running={running === param}
+                  label={f.label}
+                />
+              )}
             </div>
           );
         })}
-        <div>
-          <SliderField
-            id="race-thrustScale"
-            label={FIELD.thrustScale.label}
-            unit={FIELD.thrustScale.unit}
-            value={thrustScale}
-            min={WHAT_IF_DOMAINS.thrustScale.min}
-            max={WHAT_IF_DOMAINS.thrustScale.max}
-            step={FIELD.thrustScale.step}
-            onChange={onThrustScale}
-            onCommit={() => sweep("thrustScale")}
-          />
-          <SweepSparkline
-            curve={curves.thrustScale}
-            current={thrustScale}
-            running={running === "thrustScale"}
-            label={FIELD.thrustScale.label}
-          />
-          <p className="mt-0.5 text-2xs text-muted-foreground">
-            Multiplies the whole thrust curve; 1 is the untouched curve.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 gap-2 border-t border-line pt-2">
-          <SizedField
-            id="race-track"
-            label="Track"
-            unit="m"
-            value={car.trackM}
-            min={1}
-            max={100}
-            step={0.5}
-            onChange={(v) => onCar({ trackM: v })}
-          />
-          <SizedField
-            id="race-rho"
-            label="Air ρ"
-            unit="kg/m³"
-            value={car.rho}
-            min={0.5}
-            max={1.5}
-            step={0.001}
-            onChange={(v) => onCar({ rho: v })}
-          />
-        </div>
+        {advanced && (
+          <>
+            <div>
+              <SliderField
+                id="race-thrustScale"
+                label={FIELD.thrustScale.label}
+                unit={FIELD.thrustScale.unit}
+                value={thrustScale}
+                min={WHAT_IF_DOMAINS.thrustScale.min}
+                max={WHAT_IF_DOMAINS.thrustScale.max}
+                step={FIELD.thrustScale.step}
+                onChange={onThrustScale}
+                onCommit={() => sweep("thrustScale")}
+              />
+              <SweepSparkline
+                curve={curves.thrustScale}
+                current={thrustScale}
+                running={running === "thrustScale"}
+                label={FIELD.thrustScale.label}
+              />
+              <p className="mt-0.5 text-2xs text-muted-foreground">
+                Multiplies the whole thrust curve; 1 is the untouched curve.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-2 border-t border-line pt-2">
+              <SizedField
+                id="race-track"
+                label="Track"
+                unit="m"
+                value={car.trackM}
+                min={1}
+                max={100}
+                step={0.5}
+                onChange={(v) => onCar({ trackM: v })}
+              />
+              <SizedField
+                id="race-rho"
+                label="Air ρ"
+                unit="kg/m³"
+                value={car.rho}
+                min={0.5}
+                max={1.5}
+                step={0.001}
+                onChange={(v) => onCar({ rho: v })}
+              />
+            </div>
+          </>
+        )}
       </Panel>
 
       <Panel

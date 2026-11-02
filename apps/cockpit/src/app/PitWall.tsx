@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { LegalPanel } from "@/components/pitwall/LegalPanel";
-import { AeroMap, BenchmarkChart, cm2, ScoreGauge } from "@/components/pitwall/PitCharts";
+import { AeroMap, BenchmarkChart, cm2 } from "@/components/pitwall/PitCharts";
 import { SealedReveal } from "@/components/pitwall/SealedReveal";
 import { HeroImage, useHeroRun } from "@/components/render/HeroRender";
 import { StatusBar, useTab, WorkspaceTabs } from "@/components/shell/WorkspaceTabs";
@@ -12,7 +12,6 @@ import { getOracleState } from "@/lib/api";
 const TABS = [
   { id: "overview", label: "Overview" },
   { id: "oracle", label: "ORACLE" },
-  { id: "legal", label: "Legal" },
 ] as const;
 
 const prettify = (n: string) => n.replace(/_/g, " ");
@@ -67,9 +66,6 @@ export function PitWall() {
             <Panel title="Car" bodyClassName="flex items-center gap-8 p-4">
               {s ? (
                 <>
-                  <div className="h-40 w-48 shrink-0">
-                    <ScoreGauge s={s} />
-                  </div>
                   <dl className="grid flex-1 grid-cols-2 gap-x-6 gap-y-4">
                     {[
                       ["Drag area", cm2(s.best.cda_m2), "cm²"],
@@ -136,11 +132,6 @@ export function PitWall() {
             <Panel title="ORACLE vs random · same budget" bodyClassName="p-2">
               {s ? <BenchmarkChart s={s} /> : <Skeleton className="size-full" />}
             </Panel>
-          </div>
-        )}
-        {tab === "legal" && (
-          <div className="mx-auto h-full max-w-4xl [&>section]:h-full">
-            <LegalPanel />
           </div>
         )}
         {q.error && <p className="mt-3 text-xs text-destructive">{q.error.message}</p>}

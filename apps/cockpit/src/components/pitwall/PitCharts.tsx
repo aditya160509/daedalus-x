@@ -129,44 +129,4 @@ export function BenchmarkChart({ s }: { s: OracleState }) {
 }
 
 /** Car score 0–100: where the best tested CdA sits inside the aero map's range (100 = map minimum). */
-export function ScoreGauge({ s }: { s: OracleState }) {
-  const flat = s.aero_map.cda_m2.flat();
-  const lo = Math.min(...flat);
-  const hi = Math.max(...flat);
-  const score = Math.round(100 * Math.min(1, Math.max(0, (hi - s.best.cda_m2) / (hi - lo || 1))));
-  const host = useECharts(() => {
-    const t = chartTheme();
-    return {
-      animation: true,
-      series: [
-        {
-          type: "gauge",
-          startAngle: 210,
-          endAngle: -30,
-          min: 0,
-          max: 100,
-          radius: "95%",
-          progress: { show: true, width: 10, itemStyle: { color: t.brand } },
-          axisLine: { lineStyle: { width: 10, color: [[1, t.line]] } },
-          axisTick: { show: false },
-          splitLine: { show: false },
-          axisLabel: { show: false },
-          pointer: { show: false },
-          detail: {
-            valueAnimation: true,
-            offsetCenter: [0, "5%"],
-            fontSize: 34,
-            fontFamily: t.mono,
-            color: t.text,
-            formatter: "{value}",
-          },
-          title: { offsetCenter: [0, "45%"], fontSize: 11, color: t.muted },
-          data: [{ value: score, name: "Aero score" }],
-        },
-      ],
-    };
-  }, [score]);
-  return <div ref={host} className="size-full min-h-36" />;
-}
-
 export { cm2 };

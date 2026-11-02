@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { LegalPanel } from "@/components/pitwall/LegalPanel";
-import { AeroMap, BenchmarkChart, cm2, ScoreGauge } from "@/components/pitwall/PitCharts";
+import { AeroMap, BenchmarkChart, cm2 } from "@/components/pitwall/PitCharts";
 import { SealedReveal } from "@/components/pitwall/SealedReveal";
 import { HeroImage, useHeroRun } from "@/components/render/HeroRender";
 import { getOracleState } from "@/lib/api";
@@ -72,12 +72,9 @@ export function Presenter() {
     },
     {
       title: "The car",
-      note: "The score is where our best drag sits inside the explored design space.",
+      note: "Our best measured drag, the race time it gives, and what ORACLE expects from the next run.",
       body: s && (
-        <div className="grid w-full max-w-6xl grid-cols-[320px_1fr] items-center gap-16">
-          <div className="h-72">
-            <ScoreGauge s={s} />
-          </div>
+        <div className="w-full max-w-5xl">
           <div className="grid grid-cols-2 gap-12">
             <Big label="Drag area" value={cm2(s.best.cda_m2)} unit="cm²" />
             <Big label="Predicted race" value={s.best.race_time_s.toFixed(3)} unit="s" />
