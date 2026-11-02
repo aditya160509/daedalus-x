@@ -8,6 +8,15 @@ First, read `docs/build/HANDOFF.md` (architecture and gotchas), `MASTER-PLAN.md`
 
 ## Standing rules (apply to every order)
 
+**Git: always work on `main`. No branches.** Run `git pull --rebase origin main` before you start, commit small, then `git push origin main` after every finished piece. Never create feature branches or PRs. (`next-wave` is a one-off; merge it into `main` and delete it.)
+
+**No-licence repos: read, then rewrite.** Code on GitHub with no licence is "all rights reserved".
+1. Read their main files and write plain-English notes on *what* each part does (the feature, the maths, the layout).
+2. Close their code.
+3. Write ours from those notes, in our style, wired to our data.
+
+Never translate it line by line or rename variables; that is still copying. Credit the idea in `THIRD_PARTY.md` ("ideas from X, no code copied"). Licensed repos (MIT/BSD/Apache/ISC/Zlib/GPL/AGPL) can be copied directly with credit.
+
 **Quality bar (T3 Code / Linear / shadcn):**
 - One main view per tab and at most one side panel.
 - Neutral greys plus one accent used only for the active state, 1px borders, no glow.
