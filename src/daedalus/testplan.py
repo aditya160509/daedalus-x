@@ -23,8 +23,8 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
-from daedalus.dynamics import ModelLevel, ThrustCurve
-from daedalus.montecarlo import race_times
+from daedalus.dynamics import G0, ModelLevel, ThrustCurve
+from daedalus.montecarlo import _coast_time, race_times
 
 FloatArray = NDArray[np.float64]
 PARAMETERS = ("cda", "crr", "thrust")
@@ -49,6 +49,29 @@ class Condition:
 
 
 @dataclass(frozen=True)
+class CoastDown:
+    """A push test with no cartridge: time to coast `distance_m` from a measured `speed_mps`.
+
+    With no thrust, the time depends only on drag and rolling resistance, so this is the test
+    that measures CdA and Crr when timing runs cannot. It needs good timing (about 1 ms) and a
+    pair of coasts: a fast, long one where drag dominates (e.g. 10 m/s over 8 m) and a slow,
+    short one where rolling dominates (e.g. 2 m/s over 1 m). Short slow coasts alone change
+    the time by only a few milliseconds per 10% change in CdA.
+    """
+
+    speed_mps: float
+    distance_m: float
+    mass_kg: float
+
+    def __post_init__(self) -> None:
+        if self.speed_mps <= 0 or self.distance_m <= 0 or self.mass_kg <= 0:
+            raise PlanError("speed, distance and mass must be positive")
+
+
+Test = Condition | CoastDown
+
+
+@dataclass(frozen=True)
 class Nominal:
     """Current best guess of the three parameters the tests are meant to pin down."""
 
@@ -64,7 +87,7 @@ class Nominal:
 
 @dataclass(frozen=True)
 class PlanStep:
-    condition: Condition
+    condition: Test
     information_gain_nats: float  # increase in 0.5 ln det(information)
     relative_sd: dict[str, float]  # parameter sd as a fraction of its value, after this step
 
@@ -82,8 +105,7 @@ class PlanResult:
             "poorly_identified": list(self.poorly_identified),
             "steps": [
                 {
-                    "track_m": s.condition.track_m,
-                    "mass_kg": s.condition.mass_kg,
+                    **_describe(s.condition),
                     "information_gain_nats": s.information_gain_nats,
                     "relative_sd": s.relative_sd,
                 }
@@ -94,9 +116,11 @@ class PlanResult:
 
 
 def sensitivity(
-    thrust: ThrustCurve, nominal: Nominal, condition: Condition, dt_s: float = 1e-3
+    thrust: ThrustCurve, nominal: Nominal, condition: Test, dt_s: float = 1e-3
 ) -> FloatArray:
-    """d(race time) / d ln(parameter) in seconds, for (cda, crr, thrust), by central differences."""
+    """d(time) / d ln(parameter) in seconds, for (cda, crr, thrust), by central differences."""
+    if isinstance(condition, CoastDown):
+        return _coast_sensitivity(nominal, condition)
     up, down = np.exp(LOG_STEP), np.exp(-LOG_STEP)
     cda = np.full(6, nominal.cda_m2)
     crr = np.full(6, nominal.crr)
@@ -137,9 +161,9 @@ def _logdet(matrix: FloatArray) -> float:
 def plan_tests(
     thrust: ThrustCurve,
     nominal: Nominal,
-    candidates: Sequence[Condition],
+    candidates: Sequence[Test],
     *,
-    done: Sequence[Condition] = (),
+    done: Sequence[Test] = (),
     sigma_s: float = 0.005,
     prior_relative_sd: float = 0.2,
     budget: int = 3,
@@ -184,3 +208,26 @@ def plan_tests(
             "the thrust curve shape is taken as known; only its scale is learned",
         ),
     )
+
+
+def _coast_sensitivity(nominal: Nominal, test: CoastDown) -> FloatArray:
+    up, down = np.exp(LOG_STEP), np.exp(-LOG_STEP)
+    drag = 0.5 * nominal.rho_kg_m3 * nominal.cda_m2 / test.mass_kg
+    roll = nominal.crr * G0
+    a = np.array([drag * up, drag * down, drag, drag])
+    b = np.array([roll, roll, roll * up, roll * down])
+    times = _coast_time(np.full(4, test.speed_mps), a, b, np.full(4, test.distance_m))
+    if not np.all(np.isfinite(times)):
+        raise PlanError(f"the car stops before {test.distance_m:g} m from {test.speed_mps:g} m/s")
+    return np.array([times[0] - times[1], times[2] - times[3], 0.0]) / (2.0 * LOG_STEP)
+
+
+def _describe(test: Test) -> dict[str, object]:
+    if isinstance(test, CoastDown):
+        return {
+            "kind": "coast_down",
+            "speed_mps": test.speed_mps,
+            "distance_m": test.distance_m,
+            "mass_kg": test.mass_kg,
+        }
+    return {"kind": "timing_run", "track_m": test.track_m, "mass_kg": test.mass_kg}

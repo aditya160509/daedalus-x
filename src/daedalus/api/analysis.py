@@ -64,6 +64,14 @@ class ConditionIn(BaseModel):
     mass_kg: float = Field(gt=0, le=1)
 
 
+class CoastDownIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    speed_mps: float = Field(gt=0, le=40)
+    distance_m: float = Field(gt=0, le=100)
+    mass_kg: float = Field(gt=0, le=1)
+
+
 class TestPlanRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -73,6 +81,7 @@ class TestPlanRequest(BaseModel):
     thrust_scale: float = Field(default=1.0, gt=0, le=5)
     rho_kg_m3: float = Field(default=1.204, gt=0.5, lt=1.5)
     candidates: list[ConditionIn] = Field(min_length=1, max_length=50)
+    coast_downs: list[CoastDownIn] = Field(default_factory=list, max_length=20)
     done: list[ConditionIn] = Field(default_factory=list, max_length=500)
     sigma_s: float = Field(default=0.005, gt=0, le=1)
     prior_relative_sd: float = Field(default=0.2, gt=0, le=5)
@@ -88,7 +97,13 @@ def test_plan(req: TestPlanRequest) -> dict[str, object]:
         plan = testplan.plan_tests(
             req.thrust.curve(),
             testplan.Nominal(req.cda_m2, req.crr, req.thrust_scale, req.rho_kg_m3),
-            [cond(c) for c in req.candidates],
+            [
+                *(cond(c) for c in req.candidates),
+                *(
+                    testplan.CoastDown(c.speed_mps, c.distance_m, c.mass_kg)
+                    for c in req.coast_downs
+                ),
+            ],
             done=[cond(c) for c in req.done],
             sigma_s=req.sigma_s,
             prior_relative_sd=req.prior_relative_sd,

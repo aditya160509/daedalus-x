@@ -87,3 +87,26 @@ def test_validation() -> None:
         Nominal(cda_m2=-1.0, crr=0.01)
     with pytest.raises(PlanError):
         plan_tests(THRUST, NOMINAL, (Condition(2000.0, 0.05),), budget=1)
+
+
+def test_coast_down_tests_make_drag_and_rolling_measurable() -> None:
+    from daedalus.testplan import CoastDown
+
+    # a fast long coast (drag dominates) and a slow short one (rolling dominates), 1 ms timing
+    coast = (CoastDown(10.0, 8.0, 0.05), CoastDown(2.0, 1.0, 0.05))
+    timing_only = plan_tests(THRUST, NOMINAL, CANDIDATES, budget=8, sigma_s=0.001)
+    with_coast = plan_tests(THRUST, NOMINAL, (*CANDIDATES, *coast), budget=8, sigma_s=0.001)
+    # at 1 ms noise timing runs pin CdA, but only coast-downs pin rolling resistance
+    assert timing_only.poorly_identified == ("crr",)
+    assert with_coast.poorly_identified == ()
+    assert with_coast.to_mapping()["steps"]
+    assert any(isinstance(s.condition, CoastDown) for s in with_coast.steps)
+
+
+def test_coast_down_sensitivity_signs() -> None:
+    from daedalus.testplan import CoastDown
+
+    d_cda, d_crr, d_thrust = sensitivity(THRUST, NOMINAL, CoastDown(5.0, 2.0, 0.05))
+    assert d_cda > 0 and d_crr > 0 and d_thrust == 0.0
+    with pytest.raises(PlanError, match="stops"):
+        sensitivity(THRUST, NOMINAL, CoastDown(0.5, 50.0, 0.05))

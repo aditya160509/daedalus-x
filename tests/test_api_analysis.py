@@ -186,3 +186,24 @@ def test_race_breakdown_endpoint() -> None:
     assert body["budget_ms"]["reaction_ms"] == 200.0
     assert body["tornado"][0]["input"] == "thrust"
     assert body["exchange_rates"]["ms_per_gram"] > 0
+
+
+def test_test_plan_endpoint_accepts_coast_downs() -> None:
+    r = client.post(
+        "/v1/analysis/test-plan",
+        json={
+            "thrust": THRUST,
+            "cda_m2": 4e-4,
+            "crr": 0.01,
+            "candidates": [{"track_m": 20, "mass_kg": 0.05}],
+            "coast_downs": [
+                {"speed_mps": 10, "distance_m": 8, "mass_kg": 0.05},
+                {"speed_mps": 2, "distance_m": 1, "mass_kg": 0.05},
+            ],
+            "sigma_s": 0.001,
+            "budget": 8,
+        },
+    )
+    assert r.status_code == 200
+    assert r.json()["poorly_identified"] == []
+    assert any(step["kind"] == "coast_down" for step in r.json()["steps"])
