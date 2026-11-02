@@ -148,3 +148,74 @@ Later: Race replay rebuild, Ghost merged into Replay, Inspect merged into the CA
 6. **Ghost and compare**: race two designs or predicted vs measured, with a split-screen delta trace.
 7. **Photo finish and slow-mo replay** after each run; export a clip for the presentation.
 8. **Performance**: `PerformanceMonitor` lowers effects on weak laptops; target 60 fps.
+
+---
+
+## 14. Charts: the look to aim for (searched 2026-11-02)
+| Library | Licence | Stars | Use for |
+|---|---|---|---|
+| **ECharts** | Apache-2.0 | 67k | Main analysis charts: heatmaps (aero map), bar build-ups, tornado, histograms, 3D surface. Already installed |
+| **uPlot** | MIT | 10.6k | Fast time series: residuals, telemetry (thousands of points at 60 fps), linked cursors |
+| **Observable Plot** | ISC | 5.4k | Clean static figures for the PDF report (publication look) |
+| **visx** (Airbnb) | MIT | 21k | Custom one-off visuals (timing tower bars, sealed-prediction band) |
+
+**Chart quality rules (Formula 1 TV and engineering report style):**
+- Dark plot area, a single accent per series, hairline grid at 6% opacity, no chart borders.
+- Monospace tabular numbers; units in the axis title; SI units only.
+- Every chart has a **source badge** (measured/simulated/synthetic), an **uncertainty band** where it applies, a **hover crosshair** with exact values, and **PNG/SVG export**.
+- Linked cursors across charts on the same page (hover time on speed → the same time on thrust, drag and acceleration).
+- Annotations for key events: launch, cartridge burn-out, peak speed, finish, rule limits as dashed lines.
+- Colour maps: Cp = blue–white–red (diverging, centred at 0); speed = turbo/jet; never rainbow for diverging data.
+- Animate in only on the first load (150 ms); no bouncing.
+
+## 15. Best feature list per area (the target "final boss" state)
+### Pit Wall
+- A **race-week mission control**: next action, days to the event, rules at risk (points), best car, sealed prediction status.
+- **Points dashboard**: the 1,000-point scoring broken down (Racing 250, D&E 180, Enterprise 180, Scrutineering 160, Verbal 140, PM 90) with our estimated score and the gaps.
+- dockview layout the user can arrange; saved per person.
+### Design Studio
+- CAD with a **rule overlay**: failed rule = red part, at-risk = amber; click to see the dimension and the limit.
+- **Design diff**: two designs overlaid with a deviation heat map (mm).
+- **Parametric sliders** for ORACLE's 4 variables that regenerate the car live (build123d).
+- **Mass and centre-of-gravity** estimate from the volumes × material density.
+- **Manufacturing check**: minimum wall thickness, CNC tool reach, overhangs.
+### Wind Tunnel
+- Flow viewer (vtk.js now, trame later): surface Cp, LIC surface streaks, Q-criterion vortices, wake planes, probes, clip.
+- **Run compare** (ΔCp, Δwake, Δforces) and a **drag build-up waterfall** by part.
+- **Quality gate**: convergence, y+, mesh quality and grid independence (GCI), with a clear ACCEPTED/REJECTED reason.
+- Run wizard (FoamPilot pattern) with live residuals and an ETA.
+### Race
+- The game-quality replay from §13: real car, real track, broadcast cameras, f1-dash HUD, ghost, photo finish.
+- **Race-day mode**: big numbers, reaction-time entry, actual vs predicted, and an instant calibration update.
+- Monte Carlo histogram plus a **tornado** chart, and "what wins" ranking.
+### Evidence and reports
+- xyflow **lineage graph** (design → mesh → run → result → prediction → race).
+- PDF: India-rules compliance, run gallery, ORACLE story, sealed prediction proof, QR to verify.
+- Presenter: auto-built deck from live data, speaker notes, timer.
+
+## 16. Our own innovation ideas (thought through, ranked)
+1. **Closed-loop autonomous design** (ORACLE → CAD → FORGE → CFD → ORACLE). The headline innovation.
+2. **Multi-fidelity Bayesian optimisation**: coarse and fine CFD in one model; about 3× more designs for the same compute.
+3. **Physics-informed race-time uncertainty**: CFD grid error + thrust variance + mass + reaction → a predicted race-time distribution, then a sealed prediction with a band we can defend.
+4. **Live calibration (digital twin)**: every real race updates CdA and Crr posteriors; a "prediction error shrinking" chart over the season.
+5. **Rule-aware optimisation**: ORACLE never proposes an illegal car (FORGE as a constraint in the acquisition function).
+6. **Adjoint shape hints on the CAD**: arrows on the surface showing "push here −x mm → −y ms".
+7. **ML surrogate (stretch)**: train a small model on our runs, plus transfer ideas from **DrivAerNet++** (8,000-car CFD dataset, MIT research; licence unclear, so check before use) for instant Cd guesses while designing.
+8. **Verifiable science**: hash chain of evidence and a public verify page. Judges can check that nothing was edited.
+
+## 17. Things that may be overbuilt or "too much": review, don't delete yet
+| Item | Concern | Decision later |
+|---|---|---|
+| Full Chili3D CAD | Huge (~18 MB); the team may still design in Fusion/SolidWorks | Keep if we actually design in it; otherwise make it "view + small edits" |
+| Two 3D stacks (R3F for Race, vtk.js for flow) | Two engines to maintain | Acceptable: each is best at its job |
+| Race model M1/M2 toggle | Judges don't need M1 | Hide M1 under Advanced |
+| Reaction trainer as a main tab | Fun but off-topic | Move into Race-day mode |
+| ORACLE on 4 variables only | Small for a GP showcase; fine for the real car | Add variables only when the geometry generator exists |
+| Evidence store complexity (typed records, references) | Heavy for a school team | Keep: it's our "verifiable science" story |
+| Separate Telemetry/Spread/Ghost tabs | Too many thin tabs | Merge into Replay + Analysis |
+| Photo renders and vtk.js viewer | Overlap | Renders for reports and slides, viewer for analysis |
+
+## 18. Keep researching (instructions for any Claude working on this)
+- Before building any feature, **search GitHub for an existing project**. Check the licence (`gh api repos/<owner>/<repo> --jq .license.spdx_id`); AGPL/GPL/MIT/BSD/Apache/ISC/Zlib are all fine; **no licence = ideas only**.
+- Add every find to the tables above with its licence, stars and fit, then commit.
+- Search ideas still open: OpenFOAM web GUIs, Rapier physics for the launch, STEM Racing world-champion portfolios (what judges reward), F1 TV graphics packages, broadcast timing fonts, Formula Student telemetry tools.
