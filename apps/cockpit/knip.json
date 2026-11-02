@@ -1,5 +1,10 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignoreDependencies": ["jscpd", "react-compiler-healthcheck", "size-limit", "@size-limit/file"],
-  "ignore": ["src/components/ui/**"]
+  "ignoreDependencies": [
+    "@react-three/postprocessing"
+  ],
+  "ignore": [
+    "src/components/ui/**",
+    "public/**"
+  ]
 }

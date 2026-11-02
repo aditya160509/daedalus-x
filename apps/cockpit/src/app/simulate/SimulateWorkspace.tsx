@@ -6,16 +6,20 @@ import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import { JobsDrawer } from "@/components/jobs/JobsDrawer";
 import { NewRunDialog } from "@/components/jobs/NewRunDialog";
+import { DragBuildupChart } from "@/components/charts/DragBuildupChart";
 import { ForceBars } from "@/components/charts/ForceBars";
 import { HistoryChart } from "@/components/charts/HistoryChart";
 import { EmptyState, Panel, ProvenanceBadge } from "@/components/ui/primitives";
-import { type CfdRunDetail, getCfdRun, listCfdRuns } from "@/lib/api";
+import { type CfdRunDetail, getCfdRun, getDragBuildup, listCfdRuns } from "@/lib/api";
 import { SERIES, SERIES_CYCLE } from "@/lib/colormap";
 import { useSelectedRun } from "@/lib/runSelection";
 import { cn } from "@/lib/utils";
 import { RenderPanel } from "@/components/render/HeroRender";
 import { GridStudyPanel } from "./GridStudyPanel";
 import { StatusBar, useTab, WorkspaceTabs } from "@/components/shell/WorkspaceTabs";
+
+/** The Forces tab has no 3D view, so the chart's linked marker plane has nothing to move. */
+const ignoreMarker = () => undefined;
 
 const TUNNEL_TABS = [
   { id: "flow", label: "Flow" },
@@ -86,6 +90,11 @@ export function SimulateWorkspace() {
 
 function RunView({ run, hasViz }: { run: CfdRunDetail; hasViz: boolean }) {
   const [tab, setTab] = useTab(TUNNEL_TABS);
+  const buildup = useQuery({
+    queryKey: ["drag-buildup", run.run_id],
+    queryFn: () => getDragBuildup(run.run_id),
+    enabled: tab === "forces",
+  });
   const { manifest, result, coefficients, residuals } = run;
   const U = manifest.reference.U_m_s;
   const A = manifest.reference.Aref_full_m2;
@@ -181,13 +190,30 @@ function RunView({ run, hasViz }: { run: CfdRunDetail; hasViz: boolean }) {
         )}
         {tab === "forces" && (
           <>
-            <Panel
-              title="Drag by component"
-              description="Full-car drag split into pressure and skin friction."
-              className="min-h-0 flex-1"
-            >
-              {forces.length ? <ForceBars data={forces} unit="N" /> : <Waiting />}
-            </Panel>
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
+              <Panel
+                title="Drag by component"
+                description="Full-car drag split into pressure and skin friction."
+                className="min-h-0 flex-1"
+              >
+                {forces.length ? <ForceBars data={forces} unit="N" /> : <Waiting />}
+              </Panel>
+              <Panel
+                title="Drag build-up along the car"
+                description="Cumulative drag from nose to tail, per part."
+                className="min-h-0 flex-1"
+              >
+                {buildup.data?.wall_shear === "available" ? (
+                  <DragBuildupChart data={buildup.data} onMarker={ignoreMarker} />
+                ) : buildup.data ? (
+                  <p className="p-4 text-xs text-muted-foreground">{buildup.data.instruction}</p>
+                ) : buildup.error ? (
+                  <p className="p-4 text-xs text-destructive">{buildup.error.message}</p>
+                ) : (
+                  <Waiting />
+                )}
+              </Panel>
+            </div>
             <Panel title="Acceptance" className="w-[360px] shrink-0" bodyClassName="p-4">
               <Acceptance run={run} />
             </Panel>

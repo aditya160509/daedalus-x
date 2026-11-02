@@ -26,6 +26,9 @@ const FIELDS = {
   Cp: ["Cp", [-1, 1]],
 } as const satisfies Record<string, readonly [string, readonly [number, number]]>;
 type Field = keyof typeof FIELDS;
+const isField = (v: string): v is Field => v in FIELDS;
+const isPreset = (v: string): v is (typeof PRESETS)[number] =>
+  (PRESETS as readonly string[]).includes(v);
 const AXES = ["x", "y", "z"] as const;
 type Axis = (typeof AXES)[number];
 
@@ -83,7 +86,7 @@ export function FlowViewer3D({ runId }: { runId: string }) {
     image: vtkImageData;
   } | null>(null);
   const [layers, setLayers] = useState<Layers>(INITIAL);
-  const [status, setStatus] = useState<"loading" | "ready" | string>("loading");
+  const [status, setStatus] = useState<string>("loading");
 
   useEffect(() => {
     if (!host.current) return;
@@ -234,7 +237,10 @@ export function FlowViewer3D({ runId }: { runId: string }) {
             Field
             <select
               value={layers.slice.field}
-              onChange={(e) => set("slice", { field: e.target.value as Field })}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (isField(v)) set("slice", { field: v });
+              }}
               className="rounded border bg-transparent px-1 py-0.5"
             >
               {Object.entries(FIELDS).map(([id, [label]]) => (
@@ -311,7 +317,10 @@ function LayerCard({
       </header>
       <select
         value={style.preset}
-        onChange={(e) => onPreset(e.target.value as (typeof PRESETS)[number])}
+        onChange={(e) => {
+          const v = e.target.value;
+          if (isPreset(v)) onPreset(v);
+        }}
         aria-label={`${title} colour map`}
         className="rounded border bg-transparent px-1 py-0.5"
       >

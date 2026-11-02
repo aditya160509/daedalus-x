@@ -20,6 +20,27 @@ Take the **first `todo` whose dependencies are `accepted` or `review`**. "Lane" 
 | T12 | [ATLAS evidence workspace](tasks/T12-atlas-evidence.md) | frontend-2d | T02 | review | Claude Opus 5.5 (timeline drawer + verify; lineage graph not built) |
 | T13 | [Competition Mode, PDF report, AR](tasks/T13-competition-mode.md) | frontend | T06, T08, T12 | review | Claude Opus 5.5 (presenter + Typst PDF; AR not built) |
 | T14 | [App-wide polish pass](tasks/T14-polish.md) | frontend | all UI tasks | todo | |
+| T15 | Outcome objective: expected India NF points, knock-out win probability, tail risk (MASTER-PLAN 22.3) | backend-ml | T10 | review | Claude Sonnet 5.5 (branch next-wave; outcome.py, no API or UI yet) |
+| T16 | Third-party timestamps for sealed predictions | backend-api | P2-02 | review | Claude (branch next-wave; anchor.py, no API or UI yet) |
+| T17 | Bayesian calibration, information gain, out-of-sample validation | backend-ml | T09 | todo | |
+| T18 | Cartridge thrust model (gas type to be confirmed) | backend-ml | gas confirmed | todo | |
+| T19 | Energy-loss audit | backend-ml | - | review | Claude Sonnet 5.5 (branch next-wave; energy.py, no API or UI yet) |
+| T20 | FORGE v2: missing measures, pass probability, points at risk | backend-api + frontend-2d | T11 | todo | |
+| T21 | Structural analysis: beam FEM first, 3D FEA later | backend-ml | - | review | Claude (branch next-wave; structure.py beam FEM, 3D FEA not started) |
+| T22 | Engineering drawing pack generator and 2D drawing importer | backend-api | T07 | todo | |
+| T23 | Test planner (expected information gain). Finding: timing runs cannot identify CdA or Crr, see evidence/T19-T23.md | backend-ml | T17 | review | Claude Sonnet 5.5 (branch next-wave; testplan.py, no API or UI yet) |
+| T24 | Gradient-enhanced and multi-fidelity ORACLE | backend-ml | T05, T10 | todo | |
+| T25 | Free-form adjoint shape optimisation | backend-cfd | T05, T20 | todo | |
+| T26 | Exhaust base-bleed study (research) | backend-cfd | T18 | todo | |
+| T27 | Physical-in-the-loop optimiser with model discrepancy | backend-ml | T15, T17 | todo | |
+| T28 | Field intelligence from public portfolios | backend-ml | - | todo | |
+| T29 | Legal-frontier map | backend-api | T20 | todo | |
+| T30 | Virtual scrutineer from photos | backend-api | T20 | todo | |
+| T31 | Video test lab | backend-ml | T17 | todo | |
+| T32 | As-built twin | backend-cfd | T20 | todo | |
+| T33 | Project twin for the 90-point project management scorecard | frontend-2d | - | review | Claude Opus 5.5 (branch next-wave; project.py, no UI yet) |
+| T34 | Red-team mode, V&V dossier, post-event regret report | backend-ml | T10, T17 | todo | |
+| T35 | Community calibration | backend-ml | T17 | todo | |
 
 ## Suggested parallel pairs
 - Round 1: **T01** (backend-cfd) with **T07** (frontend-3d) with **T04** (backend-viz) with **T08** (frontend-2d)

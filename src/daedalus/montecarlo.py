@@ -235,6 +235,7 @@ def _integrate(
         acc = f - loss
         return np.where((v_ <= 0) & (acc < 0), 0.0, acc)
 
+    track = np.broadcast_to(np.asarray(track_m, dtype=np.float64), x.shape)  # per sample
     for i in range(steps):
         t = i * h
         k1v = accel(2 * i, v)
@@ -247,10 +248,10 @@ def _integrate(
         k4x = v + h * k3v
         x_new = x + h / 6 * (k1x + 2 * k2x + 2 * k3x + k4x)
         v_new = np.maximum(v + h / 6 * (k1v + 2 * k2v + 2 * k3v + k4v), 0.0)
-        crossed = np.isnan(t_fin) & (x_new >= track_m)
+        crossed = np.isnan(t_fin) & (x_new >= track)
         if crossed.any():
             # Cubic Hermite would be marginally better; linear is < 1e-9 s at this step.
-            frac_finish = (track_m - x[crossed]) / (x_new[crossed] - x[crossed])
+            frac_finish = (track[crossed] - x[crossed]) / (x_new[crossed] - x[crossed])
             t_fin[crossed] = t + frac_finish * h
         if record_times.size:
             here = in_burn & (step_idx == i)
@@ -263,7 +264,7 @@ def _integrate(
         v_grid[:, j] = _coast_velocity(v, a, b, float(record_times[j] - t_end))
 
     todo = np.isnan(t_fin)
-    d = track_m - x[todo]
+    d = track[todo] - x[todo]
     t_fin[todo] = t_end + _coast_time(v[todo], a[todo], b[todo], d)
     return t_fin, v_grid
 
