@@ -13,6 +13,7 @@ Remaining work is tracked task-by-task in [docs/build/TASK-BOARD.md](docs/build/
 | P2-01 | Race model M0–M2 | Claude | accepted | [evidence](evidence/P2-01.md) |
 | P2-02 | Calibration and sealed predictions | Claude | sealing/verify/score done (tests/test_predictions.py); calibration needs measured runs | |
 | P2-03 | Monte Carlo uncertainty | Claude | done: vectorised, 2000 samples in 0.9 s, API + Race panel, trajectory band p5/p50/p95 (tests/test_montecarlo.py) | [T08](evidence/T08.md) |
+| P2-04 | Outcome objective: India NF points, knock-out odds, car choice | Claude (branch next-wave) | review: src/daedalus/outcome.py with 13 tests; not wired to ORACLE, API or UI | [T15](evidence/T15.md) |
 | P3-01 | Geometry path decision | GPT + Claude | blocked: car CAD/GLB | |
 | P3-02 | OpenFOAM case template | Claude + Codex | T01 review: axle rotation, explicit mesh quality and averaged CI gate implemented; T01b fixed the mesh: quick and final meshes pass checkMesh (1.5 mm contact step, boundary skewness 4); Cd deferred to new car model | [T01](evidence/T01.md), [T01b](evidence/T01b.md), [motorBike](evidence/P3-02-motorbike.md), [orbit](evidence/P3-02-orbit-baseline.md) |
 | P3-03 | Grid study and speed check | Codex (GPT-6) | T03 review: tooling and NASA verification done; 5 quick jobs queued, no campaign executed; Celik table check pending | [evidence](evidence/T03.md) |
