@@ -20,6 +20,7 @@ import {
   listDesigns,
   raceMonteCarlo,
   simulateRace,
+  getEnergyAudit,
   type RaceSimulationRequest,
   type UncertaintyInput,
 } from "@/lib/api";
@@ -35,8 +36,10 @@ const RACE_TABS = [
   { id: "spread", label: "Spread" },
   { id: "ghost", label: "Ghost" },
   { id: "start", label: "Start" },
+  { id: "energy", label: "Energy" },
 ] as const;
 import { SpreadPanel } from "./SpreadPanel";
+import { EnergyPanel } from "@/components/race/EnergyPanel";
 import {
   DEFAULT_CAR,
   DEFAULT_ESTIMATE,
@@ -290,6 +293,11 @@ export function RaceWorkspace() {
 
   const dragging = sim.isFetching || mc.isFetching;
   const [tab, setTab] = useTab(RACE_TABS);
+  const energy = useQuery({
+    queryKey: ["race-energy", request],
+    queryFn: () => getEnergyAudit(request),
+    enabled: valid && tab === "energy",
+  });
   const [inputsOpen, setInputsOpen] = useState(true);
 
   const p = mc.data?.percentiles_s;
@@ -489,6 +497,11 @@ export function RaceWorkspace() {
                 curve={deltaPoints}
                 busy={ghost.isFetching}
               />
+            </div>
+          )}
+          {tab === "energy" && (
+            <div className="mx-auto w-full max-w-4xl overflow-y-auto">
+              <EnergyPanel data={energy.data} error={energy.error} fetching={energy.isFetching} />
             </div>
           )}
           {tab === "start" && (

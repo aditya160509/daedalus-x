@@ -517,11 +517,24 @@ export const RuleCheck = z.object({
   note: z.string(),
 });
 export type RuleCheck = z.infer<typeof RuleCheck>;
+const PointsAtRisk = z.object({
+  failing_points: z.number(),
+  at_risk_points: z.number(),
+  failing_rules: z.array(z.string()),
+  at_risk_rules: z.array(z.string()),
+  manual_review_rules: z.number(),
+  unquantified_rules: z.array(z.string()),
+});
 export const ForgeChecks = z.object({
   revision: z.string(),
+  rulebook: z.string().optional(),
   is_reference_only: z.boolean(),
   checks: z.array(RuleCheck),
+  points_at_risk: PointsAtRisk.optional(),
 });
+/** Printable scrutineering sheet for a design (opens the PDF in a new tab). */
+export const forgeSheetUrl = (design: string) =>
+  `/api/v1/forge/sheet.pdf?design=${encodeURIComponent(design)}`;
 export const getForgeChecks = (design: string) =>
   request(`/v1/forge/checks?design=${encodeURIComponent(design)}`, ForgeChecks);
 
@@ -552,3 +565,108 @@ export const importCadStep = (parts: { name: string; blob: Blob }[], name: strin
   body.append("name", name);
   return request("/v1/designs/import", CadImport, { method: "POST", body });
 };
+
+// Analysis (T19 energy audit, T21 beam FEM, T33 project twin)
+export const EnergyAudit = z.object({
+  thrust_work_j: z.number(),
+  kinetic_energy_j: z.number(),
+  losses_j: z.record(z.string(), z.number()),
+  total_loss_j: z.number(),
+  conversion_efficiency: z.number(),
+  dominant_loss: z.string(),
+  thrust_end_s: z.number(),
+  kinetic_energy_at_thrust_end_j: z.number(),
+  coast_phase_loss_j: z.number(),
+  closure_error_j: z.number(),
+  closure_fraction: z.number(),
+});
+export type EnergyAudit = z.infer<typeof EnergyAudit>;
+export const getEnergyAudit = (race: RaceSimulationRequest) =>
+  request("/v1/analysis/energy", EnergyAudit, {
+    method: "POST",
+    body: JSON.stringify({
+      mass_kg: race.mass_kg,
+      track_length_m: race.track_length_m,
+      thrust: { t_s: race.thrust.t_s, force_n: race.thrust.force_n },
+      cda_m2: race.cda_m2,
+      crr: race.crr,
+      rho_kg_m3: race.rho_kg_m3,
+    }),
+  });
+
+const BeamMaterial = z.object({
+  name: z.string(),
+  youngs_modulus_gpa: z.number(),
+  strength_mpa: z.number(),
+  source: z.enum(["measured", "estimated"]),
+  note: z.string(),
+});
+const BeamMaterials = z.object({
+  materials: z.record(z.string(), BeamMaterial),
+  rule_load_tests_kg: z.record(z.string(), z.number()),
+});
+export const getBeamMaterials = () => request("/v1/analysis/beam/materials", BeamMaterials);
+const BeamResult = z.object({
+  max_deflection_mm: z.number(),
+  max_moment_nmm: z.number(),
+  max_stress_mpa: z.number(),
+  safety_factor: z.number(),
+  material: z.string(),
+  material_source: z.enum(["measured", "estimated"]),
+  x_mm: z.array(z.number()),
+  deflection_mm: z.array(z.number()),
+});
+export interface BeamRequest {
+  length_m: number;
+  section:
+    | { kind: "rectangle"; width_m: number; depth_m: number }
+    | { kind: "circle"; outer_m: number }
+    | { kind: "tube"; outer_m: number; inner_m: number };
+  material: string;
+  supports: Record<string, "fixed" | "pinned">;
+  point_loads_n: Record<string, number>;
+}
+export const solveBeam = (req: BeamRequest) =>
+  request("/v1/analysis/beam", BeamResult, { method: "POST", body: JSON.stringify(req) });
+
+const EstimateDays = z.object({
+  optimistic: z.number(),
+  likely: z.number(),
+  pessimistic: z.number(),
+});
+export const PlanTask = z.object({
+  id: z.string(),
+  name: z.string(),
+  days: EstimateDays,
+  depends_on: z.array(z.string()),
+  cost: EstimateDays.nullable(),
+  owner: z.string(),
+});
+export type PlanTask = z.infer<typeof PlanTask>;
+export const ProjectPlan = z.object({
+  tasks: z.array(PlanTask),
+  deadline_days: z.number().nullable(),
+  budget: z.number().nullable(),
+});
+export type ProjectPlan = z.infer<typeof ProjectPlan>;
+export const getProjectPlan = () => request("/v1/analysis/project/plan", ProjectPlan);
+export const saveProjectPlan = (plan: ProjectPlan) =>
+  request("/v1/analysis/project/plan", ProjectPlan, { method: "PUT", body: JSON.stringify(plan) });
+const ProjectForecast = z.object({
+  likely_days: z.number(),
+  critical_path: z.array(z.string()),
+  p50_days: z.number(),
+  p80_days: z.number(),
+  p95_days: z.number(),
+  finish_probability: z.number().nullable(),
+  criticality: z.record(z.string(), z.number()),
+  cost_p50: z.number().nullable(),
+  cost_p80: z.number().nullable(),
+  budget_probability: z.number().nullable(),
+  slack_days: z.record(z.string(), z.number()),
+});
+export const forecastProject = (plan: ProjectPlan) =>
+  request("/v1/analysis/project/forecast", ProjectForecast, {
+    method: "POST",
+    body: JSON.stringify(plan),
+  });

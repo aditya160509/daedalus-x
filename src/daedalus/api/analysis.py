@@ -3,13 +3,14 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Literal
 
 import numpy as np
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
-from daedalus import energy, outcome, structure, testplan
+from daedalus import energy, outcome, project, structure, testplan
 from daedalus.dynamics import CarParams, ThrustCurve
 
 router = APIRouter(prefix="/v1/analysis", tags=["analysis"])
@@ -233,4 +234,83 @@ def anchor_prediction(prediction_id: str) -> dict[str, object]:
         "tsa": token.tsa_url,
         "gen_time": token.gen_time,
         "verify": anchor.verify_command(digest, f"{prediction_id}.tsr"),
+    }
+
+
+class EstimateIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    optimistic: float = Field(ge=0, le=1e6)
+    likely: float = Field(ge=0, le=1e6)
+    pessimistic: float = Field(ge=0, le=1e6)
+
+
+class TaskIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(min_length=1, max_length=40)
+    name: str = Field(min_length=1, max_length=120)
+    days: EstimateIn
+    depends_on: list[str] = Field(default_factory=list, max_length=50)
+    cost: EstimateIn | None = None
+    owner: str = Field(default="", max_length=60)
+
+
+class PlanIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    tasks: list[TaskIn] = Field(default_factory=list, max_length=200)
+    deadline_days: float | None = Field(default=None, gt=0, le=1e4)
+    budget: float | None = Field(default=None, gt=0)
+
+
+def _plan_path() -> Path:
+    from daedalus.api.engineering import data_root
+
+    return data_root() / "project" / "plan.json"
+
+
+@router.get("/project/plan")
+def get_plan() -> dict[str, object]:
+    path = _plan_path()
+    if not path.is_file():
+        return PlanIn().model_dump()
+    return PlanIn.model_validate_json(path.read_text()).model_dump()
+
+
+@router.put("/project/plan")
+def save_plan(plan: PlanIn) -> dict[str, object]:
+    path = _plan_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(".tmp")
+    tmp.write_text(plan.model_dump_json(indent=2))
+    tmp.replace(path)
+    return plan.model_dump()
+
+
+@router.post("/project/forecast")
+def forecast_plan(plan: PlanIn) -> dict[str, object]:
+    def est(e: EstimateIn) -> project.Estimate:
+        return project.Estimate(e.optimistic, e.likely, e.pessimistic)
+
+    try:
+        tasks = [
+            project.Task(
+                t.id,
+                t.name,
+                est(t.days),
+                tuple(t.depends_on),
+                est(t.cost) if t.cost else None,
+                t.owner,
+            )
+            for t in plan.tasks
+        ]
+        result = project.forecast(tasks, deadline_days=plan.deadline_days, budget=plan.budget)
+        _, _, timing = project.critical_path(tasks)
+    except project.PlanInputError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    return {
+        **result.to_mapping(),
+        "slack_days": {k: v.slack for k, v in timing.items()},
+        "earliest_start_days": {k: v.earliest_start for k, v in timing.items()},
     }

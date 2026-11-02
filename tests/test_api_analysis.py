@@ -118,3 +118,52 @@ def pytest_approx(value: float) -> object:
     import pytest
 
     return pytest.approx(value, rel=1e-6)
+
+
+PLAN = {
+    "tasks": [
+        {"id": "cad", "name": "CAD", "days": {"optimistic": 4, "likely": 5, "pessimistic": 9}},
+        {
+            "id": "cnc",
+            "name": "CNC",
+            "days": {"optimistic": 1, "likely": 2, "pessimistic": 4},
+            "depends_on": ["cad"],
+            "cost": {"optimistic": 800, "likely": 1000, "pessimistic": 1500},
+        },
+    ],
+    "deadline_days": 8,
+    "budget": 1200,
+}
+
+
+def test_project_forecast_and_plan_round_trip(tmp_path, monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    monkeypatch.setenv("DAEDALUS_DATA", str(tmp_path))
+    assert client.get("/v1/analysis/project/plan").json()["tasks"] == []
+    assert client.put("/v1/analysis/project/plan", json=PLAN).status_code == 200
+    assert client.get("/v1/analysis/project/plan").json()["tasks"][1]["id"] == "cnc"
+    r = client.post("/v1/analysis/project/forecast", json=PLAN)
+    assert r.status_code == 200
+    body = r.json()
+    assert body["critical_path"] == ["cad", "cnc"]
+    assert 0 < body["finish_probability"] < 1
+    assert body["slack_days"]["cad"] == 0
+
+
+def test_project_forecast_rejects_a_cycle() -> None:
+    bad = {
+        "tasks": [
+            {
+                "id": "a",
+                "name": "A",
+                "days": {"optimistic": 1, "likely": 1, "pessimistic": 1},
+                "depends_on": ["b"],
+            },
+            {
+                "id": "b",
+                "name": "B",
+                "days": {"optimistic": 1, "likely": 1, "pessimistic": 1},
+                "depends_on": ["a"],
+            },
+        ]
+    }
+    assert client.post("/v1/analysis/project/forecast", json=bad).status_code == 422
