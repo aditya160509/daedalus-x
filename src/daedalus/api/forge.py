@@ -64,3 +64,11 @@ def sheet(design: str = "orbit_baseline", rulebook: str = DEFAULT_RULEBOOK) -> R
         media_type="application/pdf",
         headers={"Content-Disposition": 'inline; filename="daedalus-x-scrutineering-sheet.pdf"'},
     )
+
+
+@router.get("/frontier")
+def frontier(design: str, rulebook: str = DEFAULT_RULEBOOK) -> dict[str, object]:
+    """T29: measured rules ranked by headroom to the nearest limit, tightest first."""
+    path = _rulebook_path(rulebook)
+    results = forge.check_design(_design_dir(design), path)
+    return {"rows": [asdict(r) for r in forge.frontier(results)]}

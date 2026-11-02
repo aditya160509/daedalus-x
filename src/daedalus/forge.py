@@ -298,3 +298,38 @@ def check_design(design_dir: Path, rulebook_path: Path) -> list[Check]:
     return run_checks(
         load_rulebook(rulebook_path), json.loads((design_dir / "geometry.json").read_text())
     )
+
+
+@dataclass(frozen=True)
+class FrontierRow:
+    rule_id: str
+    name: str
+    headroom: float  # margin to the nearest limit in the rule's unit; negative means outside
+    unit: str
+    points_if_one_unit_over: float | None
+    limit_side: Literal["min", "max"]
+
+
+def frontier(checks: list[Check]) -> list[FrontierRow]:
+    """T29: every measured rule ranked by how close the design sits to its nearest limit.
+
+    The top of the list is where a millimetre of manufacturing error costs points, so it is
+    where to hold tolerances tightest and where a design could be pushed no further.
+    """
+    rows = []
+    for c in checks:
+        if c.value is None or c.margin is None:
+            continue
+        to_min = c.value - c.min if c.min is not None else math.inf
+        to_max = c.max - c.value if c.max is not None else math.inf
+        rows.append(
+            FrontierRow(
+                rule_id=c.rule_id,
+                name=c.name,
+                headroom=c.margin,
+                unit=c.unit,
+                points_if_one_unit_over=penalty_points(c.penalty, -1.0),
+                limit_side="min" if to_min <= to_max else "max",
+            )
+        )
+    return sorted(rows, key=lambda r: r.headroom)

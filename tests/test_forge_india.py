@@ -261,3 +261,13 @@ def test_sheet_rejects_mismatched_checks() -> None:
     checks = forge.run_checks(book, car())
     with pytest.raises(ValueError):
         forge_sheet.sheet_data(book, checks[:-1], design="x")
+
+
+def test_frontier_ranks_the_tightest_rule_first() -> None:
+    checks = forge.run_checks(forge.load_rulebook(BOOK_PATH), car(front_gap=38.4))
+    rows = forge.frontier(checks)
+    assert rows[0].rule_id == "T7.2.1"  # 0.4 mm above its 38 mm minimum
+    assert rows[0].limit_side == "min"
+    assert rows[0].points_if_one_unit_over == 2.5
+    assert [r.headroom for r in rows] == sorted(r.headroom for r in rows)
+    assert all(r.rule_id != "T3.6" for r in rows)  # mass is not measured from CAD
