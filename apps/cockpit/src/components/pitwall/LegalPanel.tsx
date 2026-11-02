@@ -1,5 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { cadFocusHref } from "@/lib/cadFocus";
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { forgeSheetUrl, getForgeChecks, listDesigns, type RuleCheck } from "@/lib/api";
 import { Panel, Skeleton } from "@/components/ui/primitives";
@@ -18,10 +21,16 @@ const limit = (c: RuleCheck) =>
     ? `${c.min}–${c.max}`
     : c.min != null
       ? `≥ ${c.min}`
-      : `≤ ${c.max}`;
+      : c.max != null
+        ? `≤ ${c.max}`
+        : "Manual check";
 
 /** FORGE: CAD-only rule checks with margins; non-computable rules stay "Measure", never green. */
-export function LegalPanel({ design: picked }: { design?: string } = {}) {
+export function LegalPanel({
+  design: picked,
+  onFocus,
+}: { design?: string; onFocus?: (parts: string[]) => void } = {}) {
+  const router = useRouter();
   const designs = useQuery({ queryKey: ["designs"], queryFn: listDesigns });
   const design = picked ?? designs.data?.[0]?.design_id;
   const q = useQuery({
@@ -59,7 +68,24 @@ export function LegalPanel({ design: picked }: { design?: string } = {}) {
       }
       bodyClassName="overflow-y-auto"
     >
-      {!q.data ? (
+      {q.isError || designs.isError ? (
+        <div className="p-4 text-sm">
+          Could not load FORGE checks.{" "}
+          <Button
+            variant="link"
+            onClick={() => {
+              void designs.refetch();
+              void q.refetch();
+            }}
+          >
+            Retry
+          </Button>
+        </div>
+      ) : designs.isSuccess && !design ? (
+        <p className="p-4 text-sm text-muted-foreground">
+          Import a car in Design Studio to check the India NF rules.
+        </p>
+      ) : !q.data ? (
         <Skeleton className="m-4 h-40" />
       ) : (
         <>
@@ -93,15 +119,34 @@ export function LegalPanel({ design: picked }: { design?: string } = {}) {
                       aria-hidden
                     />
                     <span className="sr-only">{STATE[c.state].label}: </span>
-                    {c.name}
+                    {(c.state === "fail_cad" || c.state === "at_risk") && design ? (
+                      <Button
+                        variant="link"
+                        className="h-auto max-w-full justify-start p-0 text-left text-xs whitespace-normal"
+                        title={`Focus ${c.parts.length ? c.parts.join(", ") : "the complete car"} in CAD`}
+                        onClick={() =>
+                          onFocus ? onFocus(c.parts) : router.push(cadFocusHref(design, c.parts))
+                        }
+                      >
+                        <span>
+                          <span className="font-mono text-muted-foreground">{c.rule_id}</span> ·{" "}
+                          {c.name}
+                        </span>
+                      </Button>
+                    ) : (
+                      <span>
+                        <span className="font-mono text-muted-foreground">{c.rule_id}</span> ·{" "}
+                        {c.name}
+                      </span>
+                    )}
                   </td>
-                  <td className="tabular px-2 text-right font-mono text-muted-foreground">
+                  <td className="tabular px-2 text-right font-mono text-muted-foreground whitespace-nowrap">
                     {c.value != null ? c.value.toFixed(1) : "—"}
                     <span className="opacity-60"> / {limit(c)}</span>
                   </td>
                   <td
                     className={cn(
-                      "tabular pr-4 text-right font-mono",
+                      "tabular pr-4 text-right font-mono whitespace-nowrap",
                       c.state === "fail_cad" && "text-destructive",
                       c.state === "at_risk" && "text-risk",
                     )}

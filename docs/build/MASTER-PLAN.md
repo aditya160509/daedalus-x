@@ -303,7 +303,7 @@ The next-wave changes were merged into `main` in `6d708b5`. The table tracks ver
 | Order | Status | Done | Still missing |
 |---|---|---|---|
 | Honesty correction | done | India NF T7.2.1 finding reproduced on `orbit_v2`: 33.00 mm front-wheel gap vs 38.00 mm minimum; pitch and checklist corrected ([evidence](../../evidence/STEP-1-india-honesty.md)) | Physical measurement and official scrutineering remain unverified |
-| 1 India rulebook | ✅ mostly | `rulebooks/stem-racing-india-nf-2025-26.yaml`, more rules measured, points at risk, scrutineering sheet (`forge_sheet.py`, `sheet.typ`) | Click a failed rule → focus that part in CAD (`daedalus:focus`) |
+| 1 India rulebook | ✅ mostly | `rulebooks/stem-racing-india-nf-2025-26.yaml`, more rules measured, points at risk, scrutineering sheet (`forge_sheet.py`, `sheet.typ`), failed-rule links select and frame named CAD parts; responsive shell | Physical verification; feature-level measures tracked below |
 | 2 Wind Tunnel analysis | ⚠️ small | Analysis API (`api/analysis.py`) | Drag by part, compare runs, grid independence, wake/vortex layers |
 | 3 Race replay rebuild | ❌ | — | All of it |
 | 4 Race analysis | ✅ mostly | Time budget, tornado chart, exchange rates, Breakdown tab, Energy panel (`raceanalysis.py`, `energy.py`) | Stadium timing / TV mode |

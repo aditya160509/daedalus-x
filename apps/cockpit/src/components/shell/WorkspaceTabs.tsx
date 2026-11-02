@@ -41,8 +41,12 @@ export function WorkspaceTabs<T extends string>({
   right?: React.ReactNode;
 }) {
   return (
-    <div className="flex h-11 shrink-0 items-end gap-1 border-b px-4">
-      <div role="tablist" aria-label="Views" className="flex h-full items-end gap-1">
+    <div className="flex min-h-11 shrink-0 flex-wrap items-end gap-1 border-b px-2 sm:px-4">
+      <div
+        role="tablist"
+        aria-label="Views"
+        className="flex h-11 max-w-full items-end gap-1 overflow-x-auto"
+      >
         {tabs.map((t, i) => {
           const on = t.id === value;
           return (
@@ -81,7 +85,9 @@ export function WorkspaceTabs<T extends string>({
           );
         })}
       </div>
-      {right && <div className="ml-auto flex h-full items-center gap-3 pb-1">{right}</div>}
+      {right && (
+        <div className="ml-auto flex min-h-9 max-w-full items-center gap-2 pb-1">{right}</div>
+      )}
     </div>
   );
 }

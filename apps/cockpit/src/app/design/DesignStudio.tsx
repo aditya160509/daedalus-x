@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 import { Save } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
@@ -8,6 +9,7 @@ import { LegalPanel } from "@/components/pitwall/LegalPanel";
 import { StrengthPanel } from "@/components/strength/StrengthPanel";
 import { useTab, WorkspaceTabs } from "@/components/shell/WorkspaceTabs";
 import { importCadStep, listDesigns } from "@/lib/api";
+import { CadFrame, type FocusRequest } from "./CadFrame";
 import { DesignWorkspace } from "./DesignWorkspace";
 
 const TABS = [
@@ -46,10 +48,38 @@ function exportStep(frame: HTMLIFrameElement): Promise<CadParts> {
  * the picked car's STEP, and "Save as design" imports the model back as a rule-checked design.
  */
 export function DesignStudio() {
+  const query = useSearchParams();
+  const initialDesign = query.get("design") ?? undefined;
+  const parts = query.has("focus") ? query.getAll("part") : null;
+  return (
+    <Studio key={initialDesign ?? "default"} initialDesign={initialDesign} initialParts={parts} />
+  );
+}
+
+function Studio({
+  initialDesign,
+  initialParts,
+}: {
+  initialDesign?: string;
+  initialParts: string[] | null;
+}) {
   const [tab, setTab] = useTab(TABS);
   const qc = useQueryClient();
   const designs = useQuery({ queryKey: ["designs"], queryFn: listDesigns, staleTime: 60_000 });
-  const [design, setDesign] = useState<string>();
+  const [design, setDesign] = useState<string | undefined>(initialDesign);
+  const [cadOpened, setCadOpened] = useState(false);
+  const [focusRequest, setFocusRequest] = useState<FocusRequest | null>(() =>
+    initialParts ? { parts: initialParts, nonce: 0 } : null,
+  );
+  const focus = (parts: string[]) => {
+    setFocusRequest((previous) => ({ parts, nonce: (previous?.nonce ?? 0) + 1 }));
+    setCadOpened(true);
+    setTab("cad");
+  };
+  const selectTab = (next: typeof tab) => {
+    if (tab === "cad" || next === "cad") setCadOpened(true);
+    setTab(next);
+  };
   const [saving, setSaving] = useState(false);
   const frame = useRef<HTMLIFrameElement>(null);
   const current = design ?? designs.data?.[0]?.design_id;
@@ -79,7 +109,7 @@ export function DesignStudio() {
 
   const src =
     current && current !== BLANK
-      ? `/cad/index.html?name=${current}&url=${encodeURIComponent(`/api/v1/designs/${current}/source.step`)}`
+      ? `/cad/index.html?name=${encodeURIComponent(current)}&url=${encodeURIComponent(`/api/v1/designs/${current}/source.step`)}`
       : "/cad/index.html";
 
   return (
@@ -87,7 +117,7 @@ export function DesignStudio() {
       <WorkspaceTabs
         tabs={TABS}
         value={tab}
-        onChange={setTab}
+        onChange={selectTab}
         right={
           <div className="flex items-center gap-2">
             <label className="sr-only" htmlFor="design-pick">
@@ -97,7 +127,7 @@ export function DesignStudio() {
               id="design-pick"
               value={current ?? ""}
               onChange={(e) => setDesign(e.target.value)}
-              className="h-7 rounded-md border bg-transparent px-2 font-mono text-xs"
+              className="h-7 max-w-40 rounded-md border bg-transparent px-2 font-mono text-xs"
             >
               {designs.data?.map((d) => (
                 <option key={d.design_id} value={d.design_id}>
@@ -121,10 +151,16 @@ export function DesignStudio() {
         }
       />
       <div className="min-h-0 flex-1">
-        {tab === "cad" && (
-          // Same-origin first-party CAD (needs IndexedDB + WASM), so no sandbox.
-          // oxlint-disable-next-line react/iframe-missing-sandbox
-          <iframe key={src} ref={frame} title="CAD" src={src} className="size-full border-0" />
+        {current && (tab === "cad" || cadOpened) && (
+          <div className="size-full" hidden={tab !== "cad"}>
+            <CadFrame
+              key={src}
+              src={src}
+              frame={frame}
+              active={tab === "cad"}
+              request={focusRequest}
+            />
+          </div>
         )}
         {tab === "inspect" && <DesignWorkspace />}
         {tab === "strength" && (
@@ -134,7 +170,7 @@ export function DesignStudio() {
         )}
         {tab === "rules" && (
           <div className="mx-auto h-full max-w-4xl p-3 [&>section]:h-full">
-            <LegalPanel design={current === BLANK ? undefined : current} />
+            <LegalPanel design={current === BLANK ? undefined : current} onFocus={focus} />
           </div>
         )}
       </div>

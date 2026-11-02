@@ -113,11 +113,20 @@ function isTyping(target: EventTarget | null): boolean {
   );
 }
 
+function subscribeNarrow(listener: () => void) {
+  const media = window.matchMedia("(max-width: 767px)");
+  media.addEventListener("change", listener);
+  return () => media.removeEventListener("change", listener);
+}
+const readNarrow = () => window.matchMedia("(max-width: 767px)").matches;
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const active = ALL.find((w) => (w.href === "/" ? pathname === "/" : pathname.startsWith(w.href)));
-  const collapsed = useSyncExternalStore(subscribeCollapsed, readCollapsed, () => false);
+  const storedCollapsed = useSyncExternalStore(subscribeCollapsed, readCollapsed, () => false);
+  const narrow = useSyncExternalStore(subscribeNarrow, readNarrow, () => false);
+  const collapsed = narrow || storedCollapsed;
   const toggleCollapsed = () => writeCollapsed(!collapsed);
 
   // Keys 1-6 jump to a workspace (04-UI-QUALITY-BAR).
@@ -135,12 +144,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <TooltipProvider delayDuration={250}>
       <div
         className={cn(
-          "grid h-dvh min-w-[1280px] overflow-hidden bg-background",
-          collapsed ? "grid-cols-[56px_1fr]" : "grid-cols-[232px_1fr]",
+          "grid h-dvh min-w-0 grid-cols-[56px_minmax(0,1fr)] overflow-hidden bg-background",
+          collapsed ? "md:grid-cols-[56px_minmax(0,1fr)]" : "md:grid-cols-[232px_minmax(0,1fr)]",
         )}
       >
         <aside
-          className="flex min-h-0 flex-col border-r border-sidebar-border bg-sidebar"
+          className="flex min-h-0 flex-col overflow-hidden border-r border-sidebar-border bg-sidebar"
           aria-label="Sidebar"
           data-collapsed={collapsed || undefined}
         >
@@ -202,7 +211,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             )}
           </button>
 
-          <nav aria-label="Workspaces" className="flex-1 overflow-y-auto px-3 py-2">
+          <nav
+            aria-label="Workspaces"
+            className={cn("flex-1 overflow-y-auto py-2", collapsed ? "px-1.5" : "px-3")}
+          >
             {SECTIONS.map((section) => (
               <div key={section.title} className="mb-4">
                 {collapsed ? (
@@ -284,8 +296,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="space-y-2 border-t border-sidebar-border p-3">
             {!collapsed && (
               <>
-                <ContextRow label="Rulebook" value="Dev 26/27 · ref" />
-                <ContextRow label="Design" value="Reference car" />
+                <ContextRow label="Rulebook" value="India NF 25/26" />
               </>
             )}
             <ApiStatus compact={collapsed} />
@@ -310,7 +321,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
               title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
               className={cn(
-                "flex h-8 items-center rounded-md text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 outline-none",
+                "hidden h-8 items-center rounded-md text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 outline-none md:flex",
                 collapsed ? "mx-auto w-8 justify-center" : "w-full gap-2 px-2",
               )}
             >
@@ -327,38 +338,42 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </aside>
 
         <div className="flex min-h-0 min-w-0 flex-col">
-          <header className="flex h-14 shrink-0 items-center gap-3 border-b px-6">
-            <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[13px]">
-              <span className="text-muted-foreground">Veloira</span>
-              <span className="text-muted-foreground/50">/</span>
+          <header className="flex min-h-14 shrink-0 flex-wrap items-center gap-2 border-b px-2 py-2 sm:px-4 lg:flex-nowrap lg:px-6">
+            <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-2 text-[13px]">
+              <span className="hidden text-muted-foreground sm:inline">Veloira</span>
+              <span className="hidden text-muted-foreground/50 sm:inline">/</span>
               <span className="font-medium">
                 {active?.label ?? (pathname.startsWith("/settings") ? "Settings" : "—")}
               </span>
             </nav>
             {active && (
-              <span className="rounded-md border bg-secondary/60 px-1.5 py-0.5 font-mono text-[10px] tracking-wider text-muted-foreground">
+              <span className="hidden rounded-md border bg-secondary/60 px-1.5 py-0.5 font-mono text-[10px] tracking-wider text-muted-foreground lg:inline">
                 {active.capability}
               </span>
             )}
-            <div className="ml-auto flex items-center gap-4">
+            <div className="ml-auto flex min-w-0 items-center gap-1.5 sm:gap-3">
               <RunPicker />
               <button
                 type="button"
                 onClick={() => window.dispatchEvent(new Event(OPEN_EVIDENCE))}
+                aria-label="Evidence"
                 className="flex h-8 items-center gap-2 rounded-md border px-2.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               >
                 <FileStack className="size-3.5" aria-hidden />
-                Evidence
-                <Key>E</Key>
+                <span className="hidden sm:inline">Evidence</span>
+                <span className="hidden lg:inline">
+                  <Key>E</Key>
+                </span>
               </button>
               <button
                 type="button"
                 onClick={() => window.dispatchEvent(new Event(OPEN_PRESENTER))}
+                aria-label="Present"
                 className="flex h-8 items-center gap-2 rounded-md border px-2.5 text-xs font-medium text-foreground transition-colors hover:bg-accent"
               >
                 <Presentation className="size-3.5" aria-hidden />
-                Present
-                <kbd className="text-[10px] opacity-70">P</kbd>
+                <span className="hidden sm:inline">Present</span>
+                <kbd className="hidden text-[10px] opacity-70 lg:inline">P</kbd>
               </button>
             </div>
           </header>

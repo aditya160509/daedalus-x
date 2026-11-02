@@ -138,14 +138,14 @@ index 10d6c60..65e0ba2 100644
                  { className: style.ribbonTitlePanel },
 diff --git a/packages/web/src/daedalusBridge.ts b/packages/web/src/daedalusBridge.ts
 new file mode 100644
-index 0000000..ed8b2c8
+index 0000000..9af9517
 --- /dev/null
 +++ b/packages/web/src/daedalusBridge.ts
-@@ -0,0 +1,52 @@
+@@ -0,0 +1,99 @@
 +// Part of the Chili3d Project, under the AGPL-3.0 License.
 +// See LICENSE file in the project root for full license information.
 +
-+import { type IApplication, type INode, Logger, VisualNode } from "@chili3d/core";
++import { type IApplication, type INode, Logger, pendingWork, quietFrames, VisualNode } from "@chili3d/core";
 +
 +/**
 + * Daedalus X host bridge. The cockpit embeds this page in an iframe on the same origin and asks,
@@ -160,7 +160,54 @@ index 0000000..ed8b2c8
 +export function installDaedalusBridge(app: IApplication): void {
 +    if (window.parent === window) return;
 +    window.addEventListener("message", async (event: MessageEvent) => {
-+        if (event.origin !== window.location.origin || event.data?.type !== "daedalus:export") return;
++        if (event.source !== window.parent || event.origin !== window.location.origin) return;
++        if (event.data?.type === "daedalus:focus") {
++            const focusReply = (body: Record<string, unknown>) =>
++                window.parent.postMessage(
++                    { type: "daedalus:focused", requestId: event.data.requestId, ...body },
++                    window.location.origin,
++                );
++            try {
++                const input = event.data.part ?? event.data.parts;
++                const parts = typeof input === "string" ? [input] : input;
++                if (
++                    !Array.isArray(parts) ||
++                    parts.length > 64 ||
++                    !parts.every((p) => typeof p === "string" && p.length > 0 && p.length <= 256)
++                ) {
++                    return focusReply({
++                        error: "Focus requires a list of named parts (or an empty list for the whole car).",
++                    });
++                }
++                await pendingWork.whenIdle();
++                await quietFrames();
++                const view = app.activeView;
++                if (!view) return focusReply({ error: "No CAD document is open." });
++                const nodes = visualNodes(view.document.modelManager.rootNode);
++                const normalise = (name: string) => name.replace(/[\s_-]+/g, "").toLowerCase();
++                const selected = parts.length
++                    ? nodes.filter((node) => parts.some((part) => normalise(part) === normalise(node.name)))
++                    : [];
++                const missing = parts.filter(
++                    (part) => !selected.some((node) => normalise(part) === normalise(node.name)),
++                );
++                if (parts.length && selected.length === 0) return focusReply({ matched: [], missing });
++                selected.forEach((node) => {
++                    node.visible = true;
++                });
++                view.document.selection.setSelectedNodes(selected, false);
++                view.cameraController.fitContent({
++                    scope: parts.length ? "selection" : "all",
++                    duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 500,
++                });
++                view.update();
++                focusReply({ matched: selected.map((node) => node.name), missing });
++            } catch (error) {
++                focusReply({ error: error instanceof Error ? error.message : String(error) });
++            }
++            return;
++        }
++        if (event.data?.type !== "daedalus:export") return;
 +        const reply = (body: Record<string, unknown>) =>
 +            window.parent.postMessage({ type: "daedalus:exported", ...body }, window.location.origin);
 +        try {
