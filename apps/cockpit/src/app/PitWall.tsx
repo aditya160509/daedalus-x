@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { SensitivityPanel } from "@/components/pitwall/SensitivityPanel";
+import { TestPlannerPanel } from "@/components/pitwall/TestPlannerPanel";
 import { LegalPanel } from "@/components/pitwall/LegalPanel";
 import { AeroMap, BenchmarkChart, cm2 } from "@/components/pitwall/PitCharts";
 import { SealedReveal } from "@/components/pitwall/SealedReveal";
@@ -14,6 +15,7 @@ const TABS = [
   { id: "overview", label: "Overview" },
   { id: "oracle", label: "ORACLE" },
   { id: "sensitivity", label: "Sensitivity" },
+  { id: "test-planner", label: "Test planner" },
 ] as const;
 
 const prettify = (n: string) => n.replace(/_/g, " ");
@@ -139,6 +141,11 @@ export function PitWall() {
         {tab === "sensitivity" && (
           <div className="mx-auto h-full max-w-5xl [&>section]:h-full">
             <SensitivityPanel />
+          </div>
+        )}
+        {tab === "test-planner" && (
+          <div className="mx-auto max-w-5xl">
+            <TestPlannerPanel />
           </div>
         )}
         {q.error && <p className="mt-3 text-xs text-destructive">{q.error.message}</p>}

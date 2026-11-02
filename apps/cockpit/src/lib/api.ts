@@ -618,6 +618,46 @@ export const getRaceBreakdown = (race: RaceSimulationRequest, reactionS: number)
   });
 
 // Analysis (T19 energy audit, T21 beam FEM, T33 project twin)
+const PlannerSd = z.object({ cda: z.number(), crr: z.number(), thrust: z.number() });
+const PlannerStep = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("timing_run"),
+    track_m: z.number(),
+    mass_kg: z.number(),
+    information_gain_nats: z.number(),
+    relative_sd: PlannerSd,
+  }),
+  z.object({
+    kind: z.literal("coast_down"),
+    speed_mps: z.number(),
+    distance_m: z.number(),
+    mass_kg: z.number(),
+    information_gain_nats: z.number(),
+    relative_sd: PlannerSd,
+  }),
+]);
+const TestPlan = z.object({
+  starting_relative_sd: PlannerSd,
+  poorly_identified: z.array(z.string()),
+  steps: z.array(PlannerStep),
+  assumptions: z.array(z.string()),
+});
+export type TestPlan = z.infer<typeof TestPlan>;
+export interface TestPlanRequest {
+  thrust: { t_s: number[]; force_n: number[] };
+  cda_m2: number;
+  crr: number;
+  thrust_scale: number;
+  rho_kg_m3: number;
+  candidates: { track_m: number; mass_kg: number }[];
+  coast_downs: { speed_mps: number; distance_m: number; mass_kg: number }[];
+  sigma_s: number;
+  prior_relative_sd: number;
+  budget: number;
+}
+export const getTestPlan = (input: TestPlanRequest) =>
+  request("/v1/analysis/test-plan", TestPlan, { method: "POST", body: JSON.stringify(input) });
+
 export const EnergyAudit = z.object({
   thrust_work_j: z.number(),
   kinetic_energy_j: z.number(),
