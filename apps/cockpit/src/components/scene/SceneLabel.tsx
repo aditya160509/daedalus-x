@@ -14,10 +14,12 @@ export function SceneLabel({
   color,
   position,
   size = 0.012,
+  depthTest = false,
 }: {
   children: string;
   /** Text height in world units (metres). */
   size?: number;
+  depthTest?: boolean;
   color: string;
   position?: [number, number, number];
 }) {
@@ -56,7 +58,7 @@ export function SceneLabel({
       <spriteMaterial
         map={texture}
         transparent
-        depthTest={false}
+        depthTest={depthTest}
         depthWrite={false}
         toneMapped={false}
       />

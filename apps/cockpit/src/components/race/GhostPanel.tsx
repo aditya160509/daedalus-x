@@ -165,22 +165,23 @@ export function GhostPanel({
           </p>
         </div>
       )}
-      <div className="min-h-24 flex-1">
-        {curve.length > 0 ? (
-          <div
-            ref={host}
-            className="h-full w-full"
-            role="img"
-            aria-label="Ghost time gap by distance"
-          />
-        ) : (
-          <EmptyState
-            icon={<GitCompareArrows size={18} />}
-            title={busy ? "Waiting for both runs…" : "No ghost trace yet"}
-          >
-            The gap appears once the primary race and the ghost configuration both finish. Pick a
-            preset above or set a different CdA.
-          </EmptyState>
+      <div className="relative h-36 min-h-36 w-full shrink-0">
+        <div
+          ref={host}
+          className="h-full w-full"
+          role="img"
+          aria-label="Ghost time gap by distance"
+        />
+        {curve.length === 0 && (
+          <div className="absolute inset-0">
+            <EmptyState
+              icon={<GitCompareArrows size={18} />}
+              title={busy ? "Waiting for both runs…" : "No ghost trace yet"}
+            >
+              The gap appears once the primary race and the ghost configuration both finish. Pick a
+              preset above or set a different CdA.
+            </EmptyState>
+          </div>
         )}
       </div>
     </Panel>

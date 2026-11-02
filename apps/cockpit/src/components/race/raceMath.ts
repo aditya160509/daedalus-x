@@ -180,3 +180,13 @@ export function miniSectorTimes(trace: DistanceTrace, lengthM: number, n = 8): (
   }
   return out;
 }
+
+/** Local trajectory slope (m/s); the replay uses the same samples as the telemetry. */
+export function velocityAt(t: number, trace: DistanceTrace): number | null {
+  if (trace.time.length !== trace.position.length || trace.time.length < 2) return null;
+  const index = nearestIndex(t, trace.time);
+  const a = Math.max(0, index - 1),
+    b = Math.min(trace.time.length - 1, index + 1);
+  const dt = trace.time[b] - trace.time[a];
+  return dt > 0 ? (trace.position[b] - trace.position[a]) / dt : null;
+}

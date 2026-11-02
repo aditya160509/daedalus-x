@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
+import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { TelemetryChart, type TelemetryTrack } from "@/components/charts/TelemetryChart";
@@ -25,7 +26,7 @@ import {
   type RaceSimulationRequest,
   type UncertaintyInput,
 } from "@/lib/api";
-import { type LoadedModel, loadGlbUrl } from "@/lib/gltf";
+import { loadGlbUrl } from "@/lib/gltf";
 import { estimateThrust } from "@/lib/thrust";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { RaceInputs } from "./RaceInputs";
@@ -35,7 +36,6 @@ const RACE_TABS = [
   { id: "replay", label: "Replay" },
   { id: "telemetry", label: "Telemetry" },
   { id: "spread", label: "Spread" },
-  { id: "ghost", label: "Ghost" },
   { id: "start", label: "Start" },
   { id: "energy", label: "Energy" },
   { id: "breakdown", label: "Breakdown" },
@@ -84,7 +84,7 @@ export function RaceWorkspace() {
     mass: 0.005,
     crr: 0.2,
   });
-  const [cursor, setCursor] = useState(0);
+  const [playhead, setPlayhead] = useState({ key: "", time: 0 });
   const [delta, setDelta] = useState({ a: 0, b: 0 });
   const [order, setOrder] = useState<string[]>(TRACK_IDS);
   const [visible, setVisible] = useState<Record<string, boolean>>({});
@@ -175,6 +175,12 @@ export function RaceWorkspace() {
     thrustScale <= 5;
 
   const request = useDebouncedValue(buildRequest(), DEBOUNCE_MS);
+  const requestKey = JSON.stringify(request);
+  const cursor = playhead.key === requestKey ? playhead.time : 0;
+  const setCursor = useCallback(
+    (time: number) => setPlayhead({ key: requestKey, time }),
+    [requestKey],
+  );
   const debouncedGhost = useDebouncedValue(ghostRequest, DEBOUNCE_MS);
 
   const sim = useQuery({
@@ -197,23 +203,23 @@ export function RaceWorkspace() {
   });
 
   const designs = useQuery({ queryKey: ["designs"], queryFn: listDesigns, staleTime: 60_000 });
-  const [design, setDesign] = useState<{ id: string; model: LoadedModel } | null>(null);
-  const [designError, setDesignError] = useState<string | null>(null);
-  const designId = designs.data?.[0]?.design_id ?? null;
-  useEffect(() => {
-    if (!designId) return undefined;
-    let live = true;
-    loadGlbUrl(designGlbUrl(designId), `${designId}.glb`)
-      .then((loaded) => {
-        if (live) setDesign({ id: designId, model: loaded });
-      })
-      .catch((cause) => {
-        if (live) setDesignError(cause instanceof Error ? cause.message : String(cause));
-      });
-    return () => {
-      live = false;
-    };
-  }, [designId]);
+  const [pickedDesign, setPickedDesign] = useState("");
+  const [ghostGeometry, setGhostGeometry] = useState("");
+  const designId = pickedDesign || designs.data?.[0]?.design_id;
+  const primaryModel = useQuery({
+    queryKey: ["replay-model", designId],
+    enabled: !!designId,
+    queryFn: () => loadGlbUrl(designGlbUrl(designId!), `${designId}.glb`),
+    staleTime: Infinity,
+  });
+  const comparisonModel = useQuery({
+    queryKey: ["replay-model", ghostGeometry],
+    enabled: !!ghostGeometry,
+    queryFn: () => loadGlbUrl(designGlbUrl(ghostGeometry), `${ghostGeometry}.glb`),
+    staleTime: Infinity,
+  });
+  const design = primaryModel.data ? { id: designId!, model: primaryModel.data } : null;
+  const designError = primaryModel.error?.message ?? designs.error?.message;
 
   const time = sim.data?.time_axis.values ?? EMPTY_TIME;
   const tEnd = time.length ? time[time.length - 1] : 0;
@@ -306,7 +312,7 @@ export function RaceWorkspace() {
     queryFn: () => getRaceBreakdown(request, 0),
     enabled: valid && tab === "breakdown",
   });
-  const [inputsOpen, setInputsOpen] = useState(true);
+  const [inputsOpen, setInputsOpen] = useState(false);
 
   const p = mc.data?.percentiles_s;
   const status = [
@@ -325,9 +331,9 @@ export function RaceWorkspace() {
   ];
 
   return (
-    <div className="flex h-full min-h-0">
+    <div className="flex h-full min-h-0 flex-col md:flex-row">
       {inputsOpen && (
-        <div className="w-[320px] shrink-0 overflow-y-auto border-r p-3">
+        <div className="max-h-[35vh] w-full shrink-0 overflow-y-auto border-b p-3 md:max-h-none md:w-[300px] md:border-r md:border-b-0">
           <RaceInputs
             model={model}
             onModel={setModel}
@@ -361,13 +367,21 @@ export function RaceWorkspace() {
           right={
             <>
               {dragging && <span className="text-2xs text-muted-foreground">updating…</span>}
-              <button
-                type="button"
-                onClick={() => setInputsOpen((o) => !o)}
-                className="rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+              <select
+                aria-label="Replay car design"
+                value={designId ?? ""}
+                onChange={(event) => setPickedDesign(event.target.value)}
+                className="h-7 max-w-36 min-w-0 rounded-md border bg-background px-1.5 text-xs"
               >
+                {designs.data?.map((item) => (
+                  <option key={item.design_id} value={item.design_id}>
+                    {item.design_id}
+                  </option>
+                ))}
+              </select>
+              <Button size="xs" variant="ghost" onClick={() => setInputsOpen((value) => !value)}>
                 {inputsOpen ? "Hide inputs" : "Show inputs"}
-              </button>
+              </Button>
             </>
           }
         />
@@ -376,22 +390,23 @@ export function RaceWorkspace() {
             <MetricsRow sim={sim.data} mc={mc.data} error={sim.error ?? mc.error} valid={valid} />
           </div>
         )}
-        <div className="flex min-h-0 flex-1 gap-3 p-3">
+        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3 xl:flex-row">
           {tab === "replay" && (
             <>
-              <div className="min-w-0 flex-1 [&>section]:h-full">
+              <div className="min-h-[600px] min-w-0 flex-1 md:min-h-[440px] xl:min-h-0 [&>section]:h-full">
                 <Panel
                   title="Race replay"
-                  description="true-scale cars, camera follows the primary lane"
+                  description="Source CAD at true scale · race-model trajectories"
                   actions={<ProvenanceBadge value="predicted" />}
                   bodyClassName="p-0"
                   className="min-h-0"
                 >
                   {sim.data && design && primaryTrace ? (
                     <RaceReplay
+                      key={design.id + requestKey}
                       trackM={car.trackM}
                       model={design.model}
-                      ghostModel={ghostTrace ? design.model : null}
+                      ghostModel={ghostGeometry ? (comparisonModel.data ?? null) : design.model}
                       primary={primaryTrace}
                       ghost={ghostTrace}
                       // Unclamped so a slower ghost is shown crossing the line; the telemetry
@@ -418,16 +433,60 @@ export function RaceWorkspace() {
                   )}
                 </Panel>
               </div>
-              <div className="w-[340px] shrink-0">
+              <div className="flex w-full shrink-0 flex-col gap-3 xl:w-72 xl:overflow-y-auto">
                 {primaryTrace && (
                   <TimingTower
                     primary={primaryTrace}
                     ghost={ghostTrace}
                     lengthM={car.trackM}
                     primaryTime={primaryTime}
+                    cursor={cursor}
+                    primaryName={designId}
+                    ghostName={activePreset?.name ?? "Manual CdA"}
                     ghostTime={ghost.data?.finished === true ? (ghost.data.time_s ?? null) : null}
                   />
                 )}
+                <details className="rounded-lg border bg-card p-3" open>
+                  <summary className="cursor-pointer text-xs font-medium">
+                    Compare configurations
+                  </summary>
+                  <label className="mt-3 grid gap-1 text-xs text-muted-foreground">
+                    Comparison geometry
+                    <select
+                      value={ghostGeometry}
+                      onChange={(event) => setGhostGeometry(event.target.value)}
+                      className="h-8 w-full min-w-0 rounded-md border bg-background px-2 text-xs"
+                    >
+                      <option value="">Same design</option>
+                      {designs.data?.map((item) => (
+                        <option key={item.design_id} value={item.design_id}>
+                          {item.design_id}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <p className="my-2 text-[10px] text-muted-foreground">
+                    Geometry selection changes the display. Motion uses the configuration below.
+                  </p>
+                  {comparisonModel.error && (
+                    <p role="alert" className="text-xs text-destructive">
+                      {comparisonModel.error.message}
+                    </p>
+                  )}
+                  <div className="min-h-64 [&>section]:h-full">
+                    <GhostPanel
+                      presets={presets}
+                      selectedId={ghostId}
+                      onSelect={setGhostId}
+                      manualCdaCm2={ghostCdaCm2}
+                      onManualCda={setGhostCdaCm2}
+                      gapMs={gapMs}
+                      gapNote={gapNote}
+                      curve={deltaPoints}
+                      busy={ghost.isFetching}
+                    />
+                  </div>
+                </details>
               </div>
             </>
           )}
@@ -489,21 +548,6 @@ export function RaceWorkspace() {
                 fetching={mc.isFetching}
                 uncertainty={unc}
                 onUncertainty={setUnc}
-              />
-            </div>
-          )}
-          {tab === "ghost" && (
-            <div className="mx-auto w-full max-w-4xl overflow-y-auto">
-              <GhostPanel
-                presets={presets}
-                selectedId={ghostId}
-                onSelect={setGhostId}
-                manualCdaCm2={ghostCdaCm2}
-                onManualCda={setGhostCdaCm2}
-                gapMs={gapMs}
-                gapNote={gapNote}
-                curve={deltaPoints}
-                busy={ghost.isFetching}
               />
             </div>
           )}
