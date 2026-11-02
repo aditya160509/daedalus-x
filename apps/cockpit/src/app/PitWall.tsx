@@ -61,7 +61,7 @@ export function PitWall() {
               href="/api/v1/report/pdf"
               target="_blank"
               rel="noreferrer"
-              className="rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+              className="inline-flex items-center rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
             >
               Report PDF ↗
             </a>
@@ -69,7 +69,7 @@ export function PitWall() {
               href="/api/v1/report/judge-pack"
               download="daedalus-x-judge-pack.zip"
               title="One ZIP with the existing report, drawings, rule checks, run manifests, evidence verification and a list of anything missing"
-              className="rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+              className="inline-flex items-center rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
             >
               Judge pack ZIP ↓
             </a>

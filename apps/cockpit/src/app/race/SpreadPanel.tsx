@@ -2,7 +2,7 @@
 
 import type { MonteCarlo, UncertaintyInput } from "@/lib/api";
 import { SpreadChart } from "@/components/charts/SpreadChart";
-import { chartTheme, useECharts } from "@/components/charts/useECharts";
+import { chartAxis, chartTheme, chartTooltip, useECharts } from "@/components/charts/useECharts";
 import { NumberField, Panel, ProvenanceBadge } from "@/components/ui/primitives";
 
 const LABELS: Record<keyof UncertaintyInput, string> = {
@@ -134,18 +134,18 @@ function Tornado({ ranked }: { ranked: Array<[string, number]> }) {
       textStyle: { fontFamily: t.mono },
       grid: { left: 64, right: 40, top: 4, bottom: 4 },
       tooltip: {
+        ...chartTooltip(t),
         trigger: "axis",
-        backgroundColor: t.popover,
-        borderColor: t.lineStrong,
-        textStyle: { color: t.text, fontSize: 11 },
+        axisPointer: { type: "shadow" },
+        valueFormatter: (v: unknown) => (typeof v === "number" ? v.toFixed(2) : "—"),
       },
       xAxis: { type: "value", min: -1, max: 1, show: false },
       yAxis: {
         type: "category",
         data: rows.map(([k]) => (isUncertaintyKey(k) ? LABELS[k] : k)),
-        axisLine: { show: false },
-        axisTick: { show: false },
-        axisLabel: { color: t.text2, fontSize: 11 },
+        ...chartAxis(t),
+        splitLine: { show: false },
+        axisLabel: { color: t.text2, fontSize: 11, fontFamily: "inherit" },
       },
       series: [
         {
@@ -153,7 +153,7 @@ function Tornado({ ranked }: { ranked: Array<[string, number]> }) {
           barWidth: 8,
           data: rows.map(([, rho]) => ({
             value: rho,
-            itemStyle: { color: rho < 0 ? "#3ccf91" : "#f5a524", borderRadius: 2 },
+            itemStyle: { color: rho < 0 ? t.ok : t.risk, borderRadius: 3 },
           })),
           label: {
             show: true,

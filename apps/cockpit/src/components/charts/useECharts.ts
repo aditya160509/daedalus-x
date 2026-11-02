@@ -42,6 +42,8 @@ export function chartTheme() {
     text: token("--foreground"),
     text2: token("--text-2"),
     brand: token("--brand"),
+    ok: token("--ok"),
+    risk: token("--risk"),
     popover: token("--popover"),
     lineStrong: token("--line-strong"),
     mono: token("--font-jetbrains"),

@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { BarChart3, RotateCcw } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { chartAxis, chartTheme, chartTooltip, useECharts } from "@/components/charts/useECharts";
 import {
   Button,
@@ -49,13 +49,32 @@ function draw(rand: () => number, mean: number, sd: number, n: number): number[]
   return Array.from({ length: n }, () => Math.max(0.2, mean + sd * gaussian(rand)));
 }
 
+/** Consistent subhead plus a responsive field grid, one column in the narrow input rail. */
+function FieldGroup({
+  title,
+  hint,
+  children,
+}: {
+  title: string;
+  hint?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="space-y-2">
+      <h3 className="label-caps">{title}</h3>
+      {hint && <p className="-mt-1 text-2xs leading-4 text-muted-foreground">{hint}</p>}
+      <div className="grid gap-x-8 gap-y-2 sm:grid-cols-2 xl:grid-cols-1">{children}</div>
+    </section>
+  );
+}
+
 function RoundChart({ probabilities }: { probabilities: number[] }) {
   const host = useECharts(() => {
     const t = chartTheme();
     return {
       animation: false,
       textStyle: { fontFamily: t.mono },
-      grid: { left: 64, right: 32, top: 10, bottom: 26 },
+      grid: { left: 66, right: 28, top: 8, bottom: 24 },
       tooltip: {
         ...chartTooltip(t),
         trigger: "axis",
@@ -183,6 +202,7 @@ export function PointsPanel({
       description="Expected India NF points from a scenario. The field is an assumption until real results exist."
       actions={
         <>
+          {result.isFetching && <span className="text-2xs text-muted-foreground">updating…</span>}
           {baselineTime != null && (
             <Button
               onClick={() => {
@@ -198,221 +218,248 @@ export function PointsPanel({
           {data && <ProvenanceBadge value={data.field_source} />}
         </>
       }
-      bodyClassName="flex flex-col gap-5 p-4"
+      bodyClassName="p-4"
     >
-      <div className="grid gap-x-8 gap-y-2 md:grid-cols-2">
-        <NumberField
-          id="points-car-time"
-          label="Car time (mean)"
-          unit="s"
-          value={carTime}
-          onChange={setCarTime}
-          min={0.5}
-          max={5}
-          step={0.001}
-        />
-        <NumberField
-          id="points-car-spread"
-          label="Car time spread"
-          unit="s"
-          value={carSpread}
-          onChange={setCarSpread}
-          min={0}
-          max={0.5}
-          step={0.001}
-        />
-        <NumberField
-          id="points-reaction"
-          label="Reaction time (mean)"
-          unit="s"
-          value={reactionMean}
-          onChange={setReactionMean}
-          min={0}
-          max={2}
-          step={0.01}
-        />
-        <NumberField
-          id="points-reaction-sd"
-          label="Reaction spread"
-          unit="s"
-          value={reactionSd}
-          onChange={setReactionSd}
-          min={0}
-          max={1}
-          step={0.01}
-        />
-        <NumberField
-          id="points-field"
-          label="Field best total (mean)"
-          unit="s"
-          value={fieldMean}
-          onChange={setFieldMean}
-          min={0.5}
-          max={5}
-          step={0.01}
-        />
-        <NumberField
-          id="points-field-sd"
-          label="Field spread"
-          unit="s"
-          value={fieldSd}
-          onChange={setFieldSd}
-          min={0}
-          max={0.5}
-          step={0.01}
-        />
-        <NumberField
-          id="points-round"
-          label="Round 1 opponent (mean)"
-          unit="s"
-          value={roundBase}
-          onChange={setRoundBase}
-          min={0.5}
-          max={5}
-          step={0.01}
-        />
-        <NumberField
-          id="points-round-sd"
-          label="Opponent spread"
-          unit="s"
-          value={roundSd}
-          onChange={setRoundSd}
-          min={0}
-          max={0.5}
-          step={0.01}
-        />
-        <NumberField
-          id="points-dnf"
-          label="DNF probability"
-          unit="—"
-          value={dnf}
-          onChange={setDnf}
-          min={0}
-          max={0.5}
-          step={0.01}
-        />
-        <NumberField
-          id="points-races"
-          label="Reaction races counted"
-          unit="runs"
-          value={races}
-          onChange={(value) => setRaces(Math.round(value))}
-          min={1}
-          max={4}
-          step={1}
-        />
-      </div>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">
+        <div className="flex min-w-0 flex-col gap-5">
+          <section className="space-y-2">
+            <h3 className="label-caps">Scenario basis</h3>
+            <div className="flex flex-wrap items-center gap-2">
+              <SegmentedControl
+                label="Field source"
+                value={source}
+                onChange={setSource}
+                options={SOURCE_OPTIONS}
+              />
+            </div>
+            <p className="text-2xs leading-4 text-muted-foreground">
+              Choose measured only when the field times come from real timing data.
+            </p>
+          </section>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-3">
-        <SegmentedControl
-          label="Field source"
-          value={source}
-          onChange={setSource}
-          options={SOURCE_OPTIONS}
-        />
-        <label className="flex items-center gap-2 text-xs text-text-2">
-          <input
-            type="checkbox"
-            checked={compliant}
-            onChange={(event) => setCompliant(event.target.checked)}
-            className="size-3.5 accent-[var(--brand)]"
-          />
-          Eligible for the fastest-car bonus
-        </label>
-      </div>
+          <FieldGroup title="Car" hint="Race time for the car, without reaction.">
+            <NumberField
+              id="points-car-time"
+              label="Car time (mean)"
+              unit="s"
+              value={carTime}
+              onChange={setCarTime}
+              min={0.5}
+              max={5}
+              step={0.001}
+            />
+            <NumberField
+              id="points-car-spread"
+              label="Car time spread"
+              unit="s"
+              value={carSpread}
+              onChange={setCarSpread}
+              min={0}
+              max={0.5}
+              step={0.001}
+            />
+          </FieldGroup>
 
-      {result.isError ? (
-        <EmptyState icon={<BarChart3 className="size-5" />} title="Points model unavailable">
-          {result.error.message}
-        </EmptyState>
-      ) : !data ? (
-        <Skeleton className="h-64" />
-      ) : (
-        <div className="flex flex-col gap-5">
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <Metric
-              label="Expected points"
-              value={fmt(data.expected_total_points, 0)}
-              unit="pts"
-              provenance={data.field_source}
+          <FieldGroup title="Reaction" hint="The best counted race sets the reaction time.">
+            <NumberField
+              id="points-reaction"
+              label="Reaction time (mean)"
+              unit="s"
+              value={reactionMean}
+              onChange={setReactionMean}
+              min={0}
+              max={2}
+              step={0.01}
             />
-            <Metric
-              label="Reaction racing"
-              value={fmt(data.reaction_points_mean, 0)}
-              unit="pts"
-              hint={`p05–p95 ${fmt(data.reaction_points_p05, 0)}–${fmt(data.reaction_points_p95, 0)}`}
+            <NumberField
+              id="points-reaction-sd"
+              label="Reaction spread"
+              unit="s"
+              value={reactionSd}
+              onChange={setReactionSd}
+              min={0}
+              max={1}
+              step={0.01}
             />
-            <Metric label="Knock-out" value={fmt(data.knockout_points_mean, 0)} unit="pts" />
-            <Metric
-              label="Fastest car chance"
-              value={fmtPct(data.fastest_car_probability, 0)}
-              unit="%"
-              hint={`Bonus ${fmt(data.expected_bonus_points, 1)} pts`}
+            <NumberField
+              id="points-races"
+              label="Reaction races counted"
+              unit="runs"
+              value={races}
+              onChange={(value) => setRaces(Math.round(value))}
+              min={1}
+              max={4}
+              step={1}
             />
-          </div>
+          </FieldGroup>
 
-          <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
+          <FieldGroup
+            title="Field"
+            hint="Total race times (car plus reaction) for the other teams."
+          >
+            <NumberField
+              id="points-field"
+              label="Field best total (mean)"
+              unit="s"
+              value={fieldMean}
+              onChange={setFieldMean}
+              min={0.5}
+              max={5}
+              step={0.01}
+            />
+            <NumberField
+              id="points-field-sd"
+              label="Field spread"
+              unit="s"
+              value={fieldSd}
+              onChange={setFieldSd}
+              min={0}
+              max={0.5}
+              step={0.01}
+            />
+            <NumberField
+              id="points-round"
+              label="Round 1 opponent (mean)"
+              unit="s"
+              value={roundBase}
+              onChange={setRoundBase}
+              min={0.5}
+              max={5}
+              step={0.01}
+            />
+            <NumberField
+              id="points-round-sd"
+              label="Opponent spread"
+              unit="s"
+              value={roundSd}
+              onChange={setRoundSd}
+              min={0}
+              max={0.5}
+              step={0.01}
+            />
+          </FieldGroup>
+
+          <FieldGroup title="Reliability">
+            <NumberField
+              id="points-dnf"
+              label="DNF probability"
+              unit="—"
+              value={dnf}
+              onChange={setDnf}
+              min={0}
+              max={0.5}
+              step={0.01}
+            />
+          </FieldGroup>
+
+          <label className="flex items-start gap-2 border-t pt-3 text-xs leading-5 text-text-2">
+            <input
+              type="checkbox"
+              checked={compliant}
+              onChange={(event) => setCompliant(event.target.checked)}
+              className="mt-0.5 size-3.5 shrink-0 accent-[var(--brand)]"
+            />
+            Eligible for the fastest-car bonus
+          </label>
+        </div>
+
+        <div className="flex min-w-0 flex-col gap-5" aria-busy={result.isFetching}>
+          {result.isError ? (
+            <EmptyState icon={<BarChart3 className="size-5" />} title="Points model unavailable">
+              {result.error.message}
+            </EmptyState>
+          ) : !data ? (
             <div className="flex flex-col gap-3">
-              <div>
-                <h3 className="mb-2 text-[11px] font-medium text-muted-foreground">
-                  Where the points come from
-                </h3>
-                <div
-                  className="flex h-5 w-full overflow-hidden rounded-sm border border-border"
-                  role="img"
-                  aria-label={parts
-                    .map((part) => `${part.label} ${fmt(part.value, 0)} points`)
-                    .join(", ")}
-                >
-                  {parts.map((part) => (
+              <Skeleton className="h-24" />
+              <Skeleton className="h-56" />
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <Metric
+                  label="Expected points"
+                  value={fmt(data.expected_total_points, 0)}
+                  unit="pts"
+                  provenance={data.field_source}
+                />
+                <Metric
+                  label="Reaction racing"
+                  value={fmt(data.reaction_points_mean, 0)}
+                  unit="pts"
+                  hint={`p05–p95 ${fmt(data.reaction_points_p05, 0)}–${fmt(data.reaction_points_p95, 0)}`}
+                />
+                <Metric label="Knock-out" value={fmt(data.knockout_points_mean, 0)} unit="pts" />
+                <Metric
+                  label="Fastest car chance"
+                  value={fmtPct(data.fastest_car_probability, 0)}
+                  unit="%"
+                  hint={`Bonus ${fmt(data.expected_bonus_points, 1)} pts`}
+                />
+              </div>
+
+              <div className="grid gap-5 lg:grid-cols-[1fr_1.1fr]">
+                <div className="flex flex-col gap-3">
+                  <div>
+                    <h3 className="mb-2 text-[11px] font-medium text-muted-foreground">
+                      Where the points come from
+                    </h3>
                     <div
-                      key={part.label}
-                      className={part.tone}
-                      style={{ width: `${Math.max(0, part.value / total) * 100}%` }}
-                    />
-                  ))}
+                      className="flex h-5 w-full overflow-hidden rounded-sm border border-border"
+                      role="img"
+                      aria-label={parts
+                        .map((part) => `${part.label} ${fmt(part.value, 0)} points`)
+                        .join(", ")}
+                    >
+                      {parts.map((part) => (
+                        <div
+                          key={part.label}
+                          className={part.tone}
+                          style={{ width: `${Math.max(0, part.value / total) * 100}%` }}
+                        />
+                      ))}
+                    </div>
+                    <ul className="mt-2 space-y-1 text-[11px] text-muted-foreground">
+                      {parts.map((part) => (
+                        <li key={part.label} className="flex items-center gap-1.5">
+                          <span
+                            className={cn("inline-block size-2 rounded-sm", part.tone)}
+                            aria-hidden
+                          />
+                          {part.label}
+                          <span className="tabular ml-auto font-mono text-foreground">
+                            {fmt(part.value, 1)}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <p className="text-2xs leading-4 text-muted-foreground">
+                    Scenario output, not a field prediction. The model samples a normal distribution
+                    around each mean; change the source to measured only when the times are real.
+                  </p>
                 </div>
-                <ul className="mt-2 space-y-1 text-[11px] text-muted-foreground">
-                  {parts.map((part) => (
-                    <li key={part.label} className="flex items-center gap-1.5">
-                      <span
-                        className={cn("inline-block size-2 rounded-sm", part.tone)}
-                        aria-hidden
-                      />
-                      {part.label}
-                      <span className="tabular ml-auto font-mono text-foreground">
-                        {fmt(part.value, 1)}
-                      </span>
-                    </li>
+                <div className="rounded-lg border border-border/70 bg-background/40 p-3">
+                  <h3 className="mb-1 text-[11px] font-medium text-muted-foreground">
+                    Knock-out path · chance to win each round
+                  </h3>
+                  <RoundChart probabilities={data.round_win_probabilities} />
+                </div>
+              </div>
+
+              <details className="text-[11px]">
+                <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
+                  Model assumptions ({data.assumptions.length})
+                </summary>
+                <ul className="mt-2 list-disc space-y-1 pl-4 text-muted-foreground">
+                  {data.assumptions.map((assumption) => (
+                    <li key={assumption}>{assumption}</li>
                   ))}
                 </ul>
-              </div>
-              <p className="text-2xs text-muted-foreground">
-                Scenario output, not a field prediction. Change the field source to
-                <span className="text-text-2"> measured</span> only when the times come from real
-                timing data.
-              </p>
-            </div>
-            <div className="rounded-lg border border-border/70 bg-background/40 p-3">
-              <h3 className="mb-1 text-[11px] font-medium text-muted-foreground">
-                Knock-out path · 50% line
-              </h3>
-              <RoundChart probabilities={data.round_win_probabilities} />
-            </div>
-          </div>
-
-          <details className="text-[11px]">
-            <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
-              Model assumptions ({data.assumptions.length})
-            </summary>
-            <ul className="mt-2 list-disc space-y-1 pl-4 text-muted-foreground">
-              {data.assumptions.map((assumption) => (
-                <li key={assumption}>{assumption}</li>
-              ))}
-            </ul>
-          </details>
+              </details>
+            </>
+          )}
         </div>
-      )}
+      </div>
     </Panel>
   );
 }

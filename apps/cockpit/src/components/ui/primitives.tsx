@@ -30,7 +30,7 @@ export function Panel({
         className,
       )}
     >
-      <header className="flex min-h-11 shrink-0 items-center gap-3 border-b border-border/70 bg-white/[0.012] px-4 py-2">
+      <header className="flex min-h-11 shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-border/70 bg-white/[0.012] px-4 py-2">
         <div className="min-w-0">
           <h2 className="truncate text-[13px] font-medium tracking-[-0.01em] text-foreground">
             {title}
@@ -39,7 +39,9 @@ export function Panel({
             <p className="truncate text-[11.5px] leading-4 text-muted-foreground">{description}</p>
           )}
         </div>
-        <div className="ml-auto flex shrink-0 items-center gap-1.5">{actions}</div>
+        <div className="ml-auto flex shrink-0 flex-wrap items-center justify-end gap-1.5">
+          {actions}
+        </div>
       </header>
       <div className={cn("min-h-0 flex-1", bodyClassName)}>{children}</div>
     </section>
@@ -99,7 +101,7 @@ export function Metric({
   icon?: React.ReactNode;
 }) {
   return (
-    <div className="@container flex min-w-0 flex-col gap-3 rounded-xl border border-border/80 bg-card p-4 shadow-panel">
+    <div className="@container flex min-w-0 flex-col gap-3 rounded-xl border border-border/80 bg-card p-4 shadow-panel transition-colors duration-150 hover:border-line-strong/70">
       <div className="flex items-center justify-between gap-2">
         <span className="flex min-w-0 items-center gap-2 text-[11px] text-muted-foreground">
           {icon && <span className="text-muted-foreground [&_svg]:size-3.5">{icon}</span>}

@@ -65,17 +65,21 @@ export function SimulateWorkspace() {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4">
-        <span className="text-xs text-muted-foreground">simpleFoam · k-ω SST · moving ground</span>
-        <div className="ml-auto flex items-center gap-2">
+      <header className="flex h-12 shrink-0 items-center gap-2 border-b px-3 sm:px-4">
+        <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
+          simpleFoam · k-ω SST <span className="hidden sm:inline">· moving ground</span>
+        </span>
+        <div className="flex shrink-0 items-center gap-2">
           <NewRunDialog />
           <JobsDrawer />
         </div>
       </header>
       {runs.data?.length === 0 ? (
-        <EmptyState icon={<Wind />} title="No CFD runs yet">
-          Import a design, then use New run to queue an approved case.
-        </EmptyState>
+        <div className="flex min-h-0 flex-1">
+          <EmptyState icon={<Wind />} title="No CFD runs yet">
+            Import a design, then use New run to queue an approved case.
+          </EmptyState>
+        </div>
       ) : detail.data ? (
         <RunView
           run={detail.data}
@@ -205,8 +209,8 @@ function RunView({
           </div>
         )}
         {tab === "forces" && (
-          <>
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
+          <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-0 xl:flex-row xl:overflow-hidden">
+            <div className="flex min-h-[520px] min-w-0 flex-1 flex-col gap-3 xl:min-h-0">
               <Panel
                 title="Drag by component"
                 description="Full-car drag split into pressure and skin friction."
@@ -230,10 +234,10 @@ function RunView({
                 )}
               </Panel>
             </div>
-            <Panel title="Acceptance" className="w-[360px] shrink-0" bodyClassName="p-4">
+            <Panel title="Acceptance" className="w-full shrink-0 xl:w-[360px]" bodyClassName="p-4">
               <Acceptance run={run} />
             </Panel>
-          </>
+          </div>
         )}
         {tab === "convergence" && (
           <div className="flex min-h-0 flex-1 flex-col gap-3">
@@ -276,8 +280,8 @@ function RunView({
           </div>
         )}
         {tab === "mesh" && (
-          <>
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-y-auto">
+          <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-0 xl:flex-row xl:overflow-hidden">
+            <div className="flex min-h-[520px] min-w-0 flex-1 flex-col gap-3 overflow-y-auto xl:min-h-0">
               <GridStudyPanel />
               <Panel
                 title="Case assumptions"
@@ -294,7 +298,7 @@ function RunView({
                 </ul>
               </Panel>
             </div>
-            <Panel title="Pipeline" className="w-[360px] shrink-0" bodyClassName="p-0">
+            <Panel title="Pipeline" className="w-full shrink-0 xl:w-[360px]" bodyClassName="p-0">
               <ol className="divide-y text-sm">
                 {(result?.steps ?? []).map((s) => (
                   <li key={s.name} className="flex items-center gap-3 px-4 py-2">
@@ -314,7 +318,7 @@ function RunView({
                 )}
               </ol>
             </Panel>
-          </>
+          </div>
         )}
       </div>
       <StatusBar items={status} />

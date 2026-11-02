@@ -558,7 +558,7 @@ export function RaceWorkspace() {
             </>
           )}
           {tab === "spread" && (
-            <div className="mx-auto w-full max-w-4xl overflow-y-auto">
+            <div className="mx-auto w-full max-w-4xl">
               <SpreadPanel
                 data={mc.data}
                 error={mc.error}
@@ -569,12 +569,12 @@ export function RaceWorkspace() {
             </div>
           )}
           {tab === "energy" && (
-            <div className="mx-auto w-full max-w-4xl overflow-y-auto">
+            <div className="mx-auto w-full max-w-4xl">
               <EnergyPanel data={energy.data} error={energy.error} fetching={energy.isFetching} />
             </div>
           )}
           {tab === "points" && (
-            <div className="mx-auto w-full max-w-4xl overflow-y-auto p-3">
+            <div className="mx-auto w-full max-w-6xl">
               <PointsPanel
                 baselineTime={sim.data?.time_s ?? null}
                 baselineSpread={p ? Math.max((p.p95 - p.p5) / 3.29, 0.001) : null}
@@ -587,7 +587,7 @@ export function RaceWorkspace() {
             </div>
           )}
           {tab === "breakdown" && (
-            <div className="mx-auto w-full max-w-4xl overflow-y-auto">
+            <div className="mx-auto w-full max-w-4xl">
               <BreakdownPanel data={breakdown.data} error={breakdown.error} />
             </div>
           )}

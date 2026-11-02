@@ -34,7 +34,7 @@ export function MetricsRow({
   const peakDrag = Math.max(...(sim?.channels.find((c) => c.name === "drag")?.values ?? [0]));
   const p = mc?.percentiles_s;
   return (
-    <div className="grid shrink-0 grid-cols-5 gap-3">
+    <div className="grid shrink-0 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
       <Metric
         label="Travel time"
         value={sim?.finished && sim.time_s !== null ? sim.time_s.toFixed(3) : "DNF"}
