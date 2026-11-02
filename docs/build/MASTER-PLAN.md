@@ -296,3 +296,26 @@ What the big-screen timing page should show, inspired by F1 TV, f1-dash and STEM
 - **Scrutineering sheet**: a printable compliance table with measured values.
 - **Race-day report**: the times, calibration update and next actions.
 - **Evidence appendix**: hash list plus a QR verify link.
+
+## 22. Progress: Jainam's `next-wave` branch (checked 2026-11-02, not merged yet)
+15 commits, about 5.6k lines added and 3k removed. It merges into `main` with no conflicts, and every new module has its own tests.
+
+| Order | Status | Done | Still missing |
+|---|---|---|---|
+| 1 India rulebook | ✅ mostly | `rulebooks/stem-racing-india-nf-2025-26.yaml`, more rules measured, points at risk, scrutineering sheet (`forge_sheet.py`, `sheet.typ`) | Click a failed rule → focus that part in CAD (`daedalus:focus`) |
+| 2 Wind Tunnel analysis | ⚠️ small | Analysis API (`api/analysis.py`) | Drag by part, compare runs, grid independence, wake/vortex layers |
+| 3 Race replay rebuild | ❌ | — | All of it |
+| 4 Race analysis | ✅ mostly | Time budget, tornado chart, exchange rates, Breakdown tab, Energy panel (`raceanalysis.py`, `energy.py`) | Stadium timing / TV mode |
+| 5 Closed loop | ❌ | — | All of it |
+| 6 Calibration | ✅ partly | Bayesian calibration (`bayes_calibration.py`), bigger Monte Carlo | Calibration UI, uncertainty maps |
+| 7 Remaining | ⚠️ little | Project page (`app/project`), clean-up (old flow viewer deleted, knip passes) | Run wizard, dockview, evidence graph, judge outputs |
+
+**Extras beyond the orders:**
+- Beam-strength FEM (`structure.py`, StrengthPanel)
+- Test planner with coast-down tests (`testplan.py`)
+- Racing-points objective (`outcome.py`)
+- Legal-frontier map
+- RFC 3161 timestamps for the sealed prediction (`anchor.py`)
+- Evidence notes in `evidence/`
+
+**Next priority:** Order 3 (race replay), the rule→CAD focus, Order 5 (closed loop), Order 2 (drag by part and compare runs).
