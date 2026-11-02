@@ -167,3 +167,22 @@ def test_project_forecast_rejects_a_cycle() -> None:
         ]
     }
     assert client.post("/v1/analysis/project/forecast", json=bad).status_code == 422
+
+
+def test_race_breakdown_endpoint() -> None:
+    r = client.post(
+        "/v1/analysis/race-breakdown",
+        json={
+            "mass_kg": 0.055,
+            "track_length_m": 20,
+            "thrust": THRUST,
+            "cda_m2": 4e-4,
+            "crr": 0.01,
+            "reaction_s": 0.2,
+        },
+    )
+    assert r.status_code == 200
+    body = r.json()
+    assert body["budget_ms"]["reaction_ms"] == 200.0
+    assert body["tornado"][0]["input"] == "thrust"
+    assert body["exchange_rates"]["ms_per_gram"] > 0

@@ -314,3 +314,30 @@ def forecast_plan(plan: PlanIn) -> dict[str, object]:
         "slack_days": {k: v.slack for k, v in timing.items()},
         "earliest_start_days": {k: v.earliest_start for k, v in timing.items()},
     }
+
+
+class BreakdownRequest(EnergyRequest):
+    reaction_s: float = Field(default=0.0, ge=0, le=2)
+
+
+@router.post("/race-breakdown")
+def race_breakdown(req: BreakdownRequest) -> dict[str, object]:
+    """Race-time budget, tornado and exchange rates (ORDER 4, C19-C21)."""
+    from daedalus import raceanalysis
+
+    try:
+        car = raceanalysis.Car(
+            req.thrust.curve(),
+            req.mass_kg,
+            req.cda_m2,
+            req.crr,
+            req.rho_kg_m3,
+            req.track_length_m,
+        )
+        return {
+            "budget_ms": raceanalysis.time_budget(car, reaction_s=req.reaction_s),
+            "tornado": raceanalysis.tornado(car),
+            "exchange_rates": raceanalysis.exchange_rates(car),
+        }
+    except raceanalysis.RaceAnalysisError as exc:
+        raise HTTPException(422, str(exc)) from exc
