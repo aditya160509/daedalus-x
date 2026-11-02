@@ -45,7 +45,7 @@ export function WorkspaceTabs<T extends string>({
       <div
         role="tablist"
         aria-label="Views"
-        className="flex h-11 max-w-full items-end gap-1 overflow-x-auto"
+        className="mask-fade-x flex h-11 max-w-full items-end gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {tabs.map((t, i) => {
           const on = t.id === value;
@@ -69,7 +69,7 @@ export function WorkspaceTabs<T extends string>({
                 )?.focus();
               }}
               className={cn(
-                "relative h-full px-3 text-[13px] transition-colors outline-none focus-visible:text-foreground",
+                "relative h-full rounded-t-md px-3 text-[13px] transition-colors duration-150 outline-none hover:bg-white/[0.025] focus-visible:bg-accent focus-visible:text-foreground",
                 on ? "font-medium text-foreground" : "text-muted-foreground hover:text-foreground",
               )}
             >
@@ -77,8 +77,8 @@ export function WorkspaceTabs<T extends string>({
               <span
                 aria-hidden
                 className={cn(
-                  "absolute inset-x-2 bottom-0 h-0.5 rounded-full transition-colors",
-                  on ? "bg-foreground" : "bg-transparent",
+                  "absolute inset-x-2 bottom-0 h-0.5 rounded-full transition-colors duration-150",
+                  on ? "bg-brand shadow-[0_0_10px] shadow-brand/40" : "bg-transparent",
                 )}
               />
             </button>
@@ -99,9 +99,13 @@ export function StatusBar({
   items: { label: string; value: React.ReactNode; tone?: "risk" | "ok" }[];
 }) {
   return (
-    <div className="flex h-8 shrink-0 items-center gap-5 border-t px-4 text-[11px] text-muted-foreground">
+    <div
+      role="group"
+      aria-label="Key figures"
+      className="flex h-8 shrink-0 items-center gap-5 overflow-x-auto border-t px-4 text-[11px] whitespace-nowrap text-muted-foreground [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    >
       {items.map((it) => (
-        <span key={it.label} className="flex items-baseline gap-1.5">
+        <span key={it.label} className="flex shrink-0 items-baseline gap-1.5">
           {it.label}
           <span
             className={cn(

@@ -13,11 +13,23 @@
   of breaking the layout on a narrow window.
 - No new dependencies.
 
+## Visual-system pass
+
+- Tightened panel chrome: 44 px headers, hairline borders, a barely-there top sheen and quieter description text.
+- The active workspace-tab underline now uses the single brand accent with a soft glow; overflowing tab strips fade at the edges instead of clipping.
+- Dockview tabs now sit on the app background, are 34 px tall and carry a brand active rail.
+- Added a skip link, a global link/tab focus outline, matching scrollbars, and a 1023 px sidebar-collapse breakpoint so laptops get the compact rail earlier.
+- Added `src/lib/format.ts` (+4 tests) and replaced ad-hoc race-time, ms, cm² and percent formatting in Pit Wall and Project.
+- Project tables have sticky headers, row hover and one input focus treatment; Settings uses label caps and quieter rows.
+- No new dependencies.
+
 ## Checks run
 
 - `pnpm exec tsc --noEmit` → pass.
 - `oxlint` on all changed UI files → 0 warnings, 0 errors.
 - `pnpm build` → pass.
+- `vitest run src/lib/format.test.ts` → 4 passed.
+- `oxfmt --check` on all changed files → pass.
 - No browser, Lighthouse, axe or contrast run in this pass.
 
 ## Still required before T14 can be accepted

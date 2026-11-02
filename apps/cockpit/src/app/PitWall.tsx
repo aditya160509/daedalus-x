@@ -6,12 +6,13 @@ import { SensitivityPanel } from "@/components/pitwall/SensitivityPanel";
 import { BuildNextControls } from "@/components/pitwall/BuildNextControls";
 import { TestPlannerPanel } from "@/components/pitwall/TestPlannerPanel";
 import { LegalPanel } from "@/components/pitwall/LegalPanel";
-import { AeroMap, BenchmarkChart, cm2 } from "@/components/pitwall/PitCharts";
+import { AeroMap, BenchmarkChart } from "@/components/pitwall/PitCharts";
 import { SealedReveal } from "@/components/pitwall/SealedReveal";
 import { HeroImage, useHeroRun } from "@/components/render/HeroRender";
 import { StatusBar, useTab, WorkspaceTabs } from "@/components/shell/WorkspaceTabs";
 import { Panel, ProvenanceBadge, Skeleton } from "@/components/ui/primitives";
 import { getOracleState } from "@/lib/api";
+import { fmtCm2, fmtCount, fmtMs, fmtSec } from "@/lib/format";
 
 const PitWallDock = lazy(() =>
   import("@/components/pitwall/PitWallDock").then((m) => ({ default: m.PitWallDock })),
@@ -36,10 +37,10 @@ export function PitWall() {
 
   const status = s
     ? [
-        { label: "Best CdA", value: `${cm2(s.best.cda_m2)} cm²` },
-        { label: "Race", value: `${s.best.race_time_s.toFixed(3)} s` },
-        { label: "Observations", value: String(s.observations.length) },
-        { label: "Next gain", value: `${(gain * 1000).toFixed(1)} ms` },
+        { label: "Best CdA", value: `${fmtCm2(s.best.cda_m2)} cm²` },
+        { label: "Race", value: `${fmtSec(s.best.race_time_s)} s` },
+        { label: "Observations", value: fmtCount(s.observations.length) },
+        { label: "Next gain", value: `${fmtMs(gain)} ms` },
         {
           label: "Data",
           value: s.provenance,
@@ -93,10 +94,10 @@ export function PitWall() {
                       <>
                         <dl className="grid flex-1 grid-cols-2 gap-x-6 gap-y-4">
                           {[
-                            ["Drag area", cm2(s.best.cda_m2), "cm²"],
-                            ["Predicted race", s.best.race_time_s.toFixed(3), "s"],
-                            ["Next run gain", (gain * 1000).toFixed(1), "ms"],
-                            ["Observations", String(s.observations.length), ""],
+                            ["Drag area", fmtCm2(s.best.cda_m2), "cm²"],
+                            ["Predicted race", fmtSec(s.best.race_time_s), "s"],
+                            ["Next run gain", fmtMs(gain), "ms"],
+                            ["Observations", fmtCount(s.observations.length), ""],
                           ].map(([l, v, u]) => (
                             <div key={l}>
                               <dt className="text-xs text-muted-foreground">{l}</dt>
@@ -137,7 +138,7 @@ export function PitWall() {
                         ))}
                         <dt className="mt-2 border-t pt-2 text-muted-foreground">Predicted CdA</dt>
                         <dd className="tabular mt-2 border-t pt-2 text-right font-mono">
-                          {cm2(s.next.cda_m2)} ± {cm2(s.next.cda_sd_m2)} cm²
+                          {fmtCm2(s.next.cda_m2)} ± {fmtCm2(s.next.cda_sd_m2)} cm²
                         </dd>
                       </dl>
                     ) : (

@@ -22,6 +22,7 @@ import {
   type ProjectPlan,
   type ScoreItem,
 } from "@/lib/api";
+import { fmt, fmtPct } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { CalendarClock } from "lucide-react";
 
@@ -74,9 +75,9 @@ const EXAMPLE: PlanTask[] = [
   },
 ];
 
-const pct = (v: number | null) => (v == null ? "—" : `${Math.round(v * 100)}`);
+const pct = (v: number | null) => fmtPct(v, 0);
 const inputClass =
-  "w-full rounded border border-input bg-background px-1.5 py-1 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none";
+  "w-full rounded border border-input bg-background px-1.5 py-1 text-[12px] transition-colors duration-150 hover:border-line-strong focus-visible:border-brand/60 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none";
 
 interface Gap {
   kind: "task" | "assumption" | "score";
@@ -159,9 +160,7 @@ function PlanEditor({ initial, example }: { initial: ProjectPlan; example: boole
   const [assumptionKeys, setAssumptionKeys] = useState(() =>
     initial.assumptions.map((a, i) => `${a.id}-${i}`),
   );
-  const [scoreKeys, setScoreKeys] = useState(() =>
-    initial.scorecard.map((s, i) => `${s.id}-${i}`),
-  );
+  const [scoreKeys, setScoreKeys] = useState(() => initial.scorecard.map((s, i) => `${s.id}-${i}`));
   const save = useMutation({ mutationFn: saveProjectPlan, onSuccess: () => setIsExample(false) });
   const forecast = useMutation({
     mutationFn: forecastProject,
@@ -289,7 +288,7 @@ function PlanEditor({ initial, example }: { initial: ProjectPlan; example: boole
         bodyClassName="overflow-x-auto"
       >
         <table className="w-full min-w-[880px] text-xs">
-          <thead className="text-left text-muted-foreground">
+          <thead className="sticky top-0 z-10 bg-card text-left text-[11px] text-muted-foreground">
             <tr>
               {["Id", "Task", "Best", "Likely", "Worst", "Depends on", "Source", ""].map((h) => (
                 <th key={h} className="px-2 py-1.5 font-medium first:pl-4">
@@ -300,7 +299,10 @@ function PlanEditor({ initial, example }: { initial: ProjectPlan; example: boole
           </thead>
           <tbody>
             {rows.map(({ t, i, key }) => (
-              <tr key={key} className="border-t border-border/50">
+              <tr
+                key={key}
+                className="border-t border-border/50 transition-colors hover:bg-white/[0.02]"
+              >
                 <td className="py-1 pl-4">
                   <input
                     aria-label="Task id"
@@ -426,7 +428,7 @@ function PlanEditor({ initial, example }: { initial: ProjectPlan; example: boole
           </p>
         ) : (
           <table className="w-full min-w-[720px] text-xs">
-            <thead className="text-left text-muted-foreground">
+            <thead className="sticky top-0 z-10 bg-card text-left text-[11px] text-muted-foreground">
               <tr>
                 {["Id", "Assumption", "Value", "Unit", "Source", "Basis", ""].map((h) => (
                   <th key={h} className="px-2 py-1.5 font-medium first:pl-4">
@@ -538,7 +540,7 @@ function PlanEditor({ initial, example }: { initial: ProjectPlan; example: boole
           </p>
         ) : (
           <table className="w-full min-w-[840px] text-xs">
-            <thead className="text-left text-muted-foreground">
+            <thead className="sticky top-0 z-10 bg-card text-left text-[11px] text-muted-foreground">
               <tr>
                 {["Id", "Criterion", "Points", "Claim", "Evidence", "Status", ""].map((h) => (
                   <th key={h} className="px-2 py-1.5 font-medium first:pl-4">
@@ -669,9 +671,9 @@ function PlanEditor({ initial, example }: { initial: ProjectPlan; example: boole
         ) : (
           <>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-              <Metric label="Most likely plan" value={f.likely_days.toFixed(1)} unit="days" />
-              <Metric label="50% chance by" value={f.p50_days.toFixed(1)} unit="days" />
-              <Metric label="80% chance by" value={f.p80_days.toFixed(1)} unit="days" />
+              <Metric label="Most likely plan" value={fmt(f.likely_days, 1)} unit="days" />
+              <Metric label="50% chance by" value={fmt(f.p50_days, 1)} unit="days" />
+              <Metric label="80% chance by" value={fmt(f.p80_days, 1)} unit="days" />
               <Metric
                 label="On time"
                 value={pct(f.finish_probability)}
@@ -686,8 +688,8 @@ function PlanEditor({ initial, example }: { initial: ProjectPlan; example: boole
               />
             </div>
             <p className="text-xs text-muted-foreground">
-              Saved as {f.forecast_id}. Cost p50 {f.cost_p50?.toFixed(0) ?? "—"} {plan.currency} ·
-              budget chance {pct(f.budget_probability)}%.
+              Saved as {f.forecast_id}. Cost p50 {fmt(f.cost_p50, 0)} {plan.currency} · budget
+              chance {pct(f.budget_probability)}%.
             </p>
             <div>
               <h3 className="mb-2 text-xs font-medium">Critical path</h3>
@@ -762,7 +764,7 @@ function PlanEditor({ initial, example }: { initial: ProjectPlan; example: boole
                   {new Date(entry.created_at).toLocaleString()}
                 </span>
                 <span className="tabular-nums">
-                  p50 {entry.p50_days.toFixed(1)} d · p80 {entry.p80_days.toFixed(1)} d · on time{" "}
+                  p50 {fmt(entry.p50_days, 1)} d · p80 {fmt(entry.p80_days, 1)} d · on time{" "}
                   {pct(entry.finish_probability)}%
                 </span>
                 <span className="truncate font-mono text-2xs text-muted-foreground">

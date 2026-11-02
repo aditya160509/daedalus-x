@@ -42,6 +42,7 @@
   --surface-3: #1f1f23;
   --line-strong: #33333a;
   --text-2: #b4b4bc;
+  --text-3: #74747d;
 
   --prov-measured: #3ccf91;
   --prov-simulated: #5aa8ff;
@@ -110,6 +111,7 @@
   --color-line-strong: var(--line-strong);
   --color-text: var(--foreground);
   --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
   --color-brand: var(--brand);
   --color-risk: var(--risk);
   --color-danger: var(--destructive);
@@ -149,6 +151,29 @@
   ::selection {
     background: color-mix(in oklab, var(--brand) 30%, transparent);
   }
+  /* Links and tabs do not use the button ring, so give them a quiet focus outline. */
+  :where(a, summary, [role="tab"]):focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--ring) 60%, transparent);
+    outline-offset: 2px;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background: #2c2c32;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3a3a42;
+    background-clip: padding-box;
+  }
 }
 
 @utility tabular {
@@ -173,6 +198,17 @@
   text-transform: uppercase;
   color: var(--muted-foreground);
   font-weight: 500;
+}
+
+/* Overflowing tab strips fade at the edges instead of showing a hard cut. */
+@utility mask-fade-x {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 14px,
+    black calc(100% - 14px),
+    transparent
+  );
 }
 
 @media (prefers-reduced-motion: reduce) {

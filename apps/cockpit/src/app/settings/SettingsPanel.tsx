@@ -7,8 +7,10 @@ import { useSettings, updateSettings } from "@/lib/settings";
 function Group({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="space-y-2">
-      <h2 className="px-1 text-xs font-medium text-muted-foreground">{title}</h2>
-      <div className="divide-y rounded-xl border bg-card">{children}</div>
+      <h2 className="label-caps px-1">{title}</h2>
+      <div className="divide-y rounded-xl border border-border/80 bg-card shadow-panel">
+        {children}
+      </div>
     </section>
   );
 }
@@ -23,7 +25,7 @@ function Row({
   control: ReactNode;
 }) {
   return (
-    <div className="grid grid-cols-[1fr_auto] items-center gap-6 px-4 py-3">
+    <div className="grid grid-cols-[1fr_auto] items-center gap-6 px-4 py-3 transition-colors duration-150 hover:bg-white/[0.015]">
       <div className="min-w-0">
         <p className="text-[13px] font-medium">{label}</p>
         <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
@@ -43,9 +45,10 @@ export function SettingsPanel() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="mx-auto max-w-2xl space-y-8 px-8 py-8">
-        <header className="space-y-1">
-          <h1 className="text-xl font-semibold tracking-tight">Settings</h1>
+      <div className="mx-auto max-w-2xl space-y-7 px-6 py-7 sm:px-8">
+        <header className="space-y-1.5">
+          <p className="label-caps">Workspace</p>
+          <h1 className="text-[22px] font-semibold tracking-[-0.02em]">Settings</h1>
           <p className="text-sm text-muted-foreground">Stored in this browser only.</p>
         </header>
 

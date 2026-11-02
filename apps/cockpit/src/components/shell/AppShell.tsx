@@ -116,11 +116,11 @@ function isTyping(target: EventTarget | null): boolean {
 }
 
 function subscribeNarrow(listener: () => void) {
-  const media = window.matchMedia("(max-width: 767px)");
+  const media = window.matchMedia("(max-width: 1023px)");
   media.addEventListener("change", listener);
   return () => media.removeEventListener("change", listener);
 }
-const readNarrow = () => window.matchMedia("(max-width: 767px)").matches;
+const readNarrow = () => window.matchMedia("(max-width: 1023px)").matches;
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -162,6 +162,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <TooltipProvider delayDuration={250}>
+      <a
+        href="#workspace"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:rounded-md focus:border focus:bg-card focus:px-3 focus:py-2 focus:text-[13px] focus:shadow-float"
+      >
+        Skip to workspace
+      </a>
       <div
         className={cn(
           "grid h-dvh min-w-0 grid-cols-[56px_minmax(0,1fr)] overflow-hidden bg-background",
@@ -256,10 +262,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         aria-keyshortcuts={shortcut}
                         aria-label={collapsed ? w.label : undefined}
                         className={cn(
-                          "group relative flex h-9 items-center rounded-lg text-[13px] text-sidebar-foreground transition-colors",
+                          "group relative flex h-9 items-center rounded-lg text-[13px] text-sidebar-foreground transition-colors duration-150",
                           "hover:bg-accent hover:text-foreground",
                           collapsed ? "mx-auto w-9 justify-center" : "gap-3 px-2.5",
                           isActive && "bg-accent font-medium text-foreground",
+                          !collapsed &&
+                            isActive &&
+                            "before:absolute before:top-1/2 before:left-0 before:h-4 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-brand",
                         )}
                       >
                         <Icon
@@ -397,7 +406,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 type="button"
                 onClick={() => window.dispatchEvent(new Event(OPEN_EVIDENCE))}
                 aria-label="Evidence"
-                className="flex h-8 items-center gap-2 rounded-md border px-2.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                aria-keyshortcuts="e"
+                className="flex h-8 items-center gap-2 rounded-md border px-2.5 text-xs text-muted-foreground transition-colors duration-150 hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
               >
                 <FileStack className="size-3.5" aria-hidden />
                 <span className="hidden sm:inline">Evidence</span>
@@ -409,7 +419,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 type="button"
                 onClick={() => window.dispatchEvent(new Event(OPEN_PRESENTER))}
                 aria-label="Present"
-                className="flex h-8 items-center gap-2 rounded-md border px-2.5 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+                aria-keyshortcuts="p"
+                className="flex h-8 items-center gap-2 rounded-md border px-2.5 text-xs font-medium text-foreground transition-colors duration-150 hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
               >
                 <Presentation className="size-3.5" aria-hidden />
                 <span className="hidden sm:inline">Present</span>
@@ -417,7 +428,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </button>
             </div>
           </header>
-          <main className="min-h-0 flex-1 overflow-hidden">{children}</main>
+          <main
+            id="workspace"
+            tabIndex={-1}
+            className="min-h-0 flex-1 overflow-hidden outline-none"
+          >
+            {children}
+          </main>
         </div>
       </div>
       <CommandPalette items={ALL} />

@@ -26,18 +26,20 @@ export function Panel({
   return (
     <section
       className={cn(
-        "flex min-h-0 flex-col overflow-hidden rounded-xl border bg-card shadow-panel",
+        "group/panel flex min-h-0 flex-col overflow-hidden rounded-xl border border-border/80 bg-card shadow-panel",
         className,
       )}
     >
-      <header className="flex min-h-11 shrink-0 items-center gap-3 border-b px-4 py-2">
+      <header className="flex min-h-11 shrink-0 items-center gap-3 border-b border-border/70 bg-white/[0.012] px-4 py-2">
         <div className="min-w-0">
-          <h2 className="truncate text-[13px] font-medium tracking-[-0.005em] text-foreground">
+          <h2 className="truncate text-[13px] font-medium tracking-[-0.01em] text-foreground">
             {title}
           </h2>
-          {description && <p className="truncate text-xs text-muted-foreground">{description}</p>}
+          {description && (
+            <p className="truncate text-[11.5px] leading-4 text-muted-foreground">{description}</p>
+          )}
         </div>
-        <div className="ml-auto flex shrink-0 items-center gap-2">{actions}</div>
+        <div className="ml-auto flex shrink-0 items-center gap-1.5">{actions}</div>
       </header>
       <div className={cn("min-h-0 flex-1", bodyClassName)}>{children}</div>
     </section>
@@ -97,9 +99,9 @@ export function Metric({
   icon?: React.ReactNode;
 }) {
   return (
-    <div className="@container flex min-w-0 flex-col gap-3 rounded-xl border bg-card p-4">
+    <div className="@container flex min-w-0 flex-col gap-3 rounded-xl border border-border/80 bg-card p-4 shadow-panel">
       <div className="flex items-center justify-between gap-2">
-        <span className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
+        <span className="flex min-w-0 items-center gap-2 text-[11px] text-muted-foreground">
           {icon && <span className="text-muted-foreground [&_svg]:size-3.5">{icon}</span>}
           <span className="truncate">{label}</span>
         </span>
@@ -108,7 +110,7 @@ export function Metric({
       <div className="flex items-baseline gap-1.5">
         <span
           className={cn(
-            "tabular font-mono text-[28px] leading-none font-medium tracking-tight @max-[230px]:text-[22px]",
+            "tabular font-mono text-[26px] leading-none font-medium tracking-[-0.02em] @max-[230px]:text-[22px]",
             tone === "risk" && "text-risk",
             tone === "danger" && "text-destructive",
           )}
@@ -117,7 +119,7 @@ export function Metric({
         </span>
         {unit && <span className="text-sm text-muted-foreground">{unit}</span>}
       </div>
-      {hint && <span className="truncate text-xs text-muted-foreground">{hint}</span>}
+      {hint && <span className="truncate text-[11px] text-muted-foreground">{hint}</span>}
     </div>
   );
 }
@@ -245,12 +247,12 @@ export function EmptyState({
 }) {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-4 p-10 text-center">
-      <div className="flex size-11 items-center justify-center rounded-xl border bg-secondary text-text-2 [&_svg]:size-5">
+      <div className="flex size-10 items-center justify-center rounded-full border border-border/80 bg-secondary/70 text-text-2 shadow-panel [&_svg]:size-[18px]">
         {icon}
       </div>
       <div className="space-y-1.5">
-        <h3 className="text-sm font-medium">{title}</h3>
-        <div className="max-w-md text-[13px] leading-relaxed text-muted-foreground">{children}</div>
+        <h3 className="text-[13px] font-medium tracking-[-0.01em]">{title}</h3>
+        <div className="max-w-sm text-xs leading-relaxed text-muted-foreground">{children}</div>
       </div>
       {action}
     </div>
@@ -268,7 +270,7 @@ export function Kbd({ children }: { children: React.ReactNode }) {
 
 /** Placeholder block shaped like the content it stands in for. */
 export function Skeleton({ className }: { className?: string }) {
-  return <div aria-hidden className={cn("animate-pulse bg-surface-2", className)} />;
+  return <div aria-hidden className={cn("animate-pulse rounded-md bg-surface-2", className)} />;
 }
 
 /** `loading` fallback for dynamically imported 3D viewers. */
