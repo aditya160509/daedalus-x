@@ -8,6 +8,7 @@ import shutil
 import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Literal
 
 import typst
 from fastapi import APIRouter, HTTPException, Query
@@ -70,6 +71,25 @@ def report_pdf(design: str = "orbit_baseline") -> Response:
         media_type="application/pdf",
         headers={"Content-Disposition": 'inline; filename="daedalus-x-report.pdf"'},
     )
+
+
+@router.get("/dossier", response_model=None)
+def verification_dossier(
+    fmt: Literal["json", "md"] = Query("json", alias="format"),
+) -> Response | dict[str, object]:
+    """V&V dossier (T34): requirements, failures, limitations and open validation."""
+    from daedalus import dossier as dossier_module
+
+    doc = dossier_module.build(eng_api.data_root())
+    if fmt == "md":
+        return Response(
+            content=dossier_module.to_markdown(doc),
+            media_type="text/markdown; charset=utf-8",
+            headers={
+                "Content-Disposition": 'attachment; filename="daedalus-x-vv-dossier.md"'
+            },
+        )
+    return doc
 
 
 @router.get("/judge-pack")

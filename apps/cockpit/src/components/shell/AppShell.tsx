@@ -7,6 +7,7 @@ import {
   ChevronsUpDown,
   FileStack,
   Gauge,
+  Keyboard,
   LayoutDashboard,
   PanelLeftClose,
   PanelLeftOpen,
@@ -18,11 +19,12 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { Toaster } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { CommandPalette, OPEN_EVENT } from "./CommandPalette";
 import { RunPicker } from "./RunPicker";
+import { OPEN_SHORTCUTS, ShortcutsDialog } from "./ShortcutsDialog";
 import { EvidenceDrawer, OPEN_EVIDENCE } from "@/components/evidence/EvidenceDrawer";
 import { OPEN_PRESENTER, Presenter } from "@/components/present/Presenter";
 import { Key } from "./Key";
@@ -128,6 +130,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const narrow = useSyncExternalStore(subscribeNarrow, readNarrow, () => false);
   const collapsed = narrow || storedCollapsed;
   const toggleCollapsed = () => writeCollapsed(!collapsed);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
   // Keys 1-6 jump to a workspace (04-UI-QUALITY-BAR).
   useEffect(() => {
@@ -139,6 +142,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [router]);
+
+  // ? opens the shortcut sheet; never while typing in a field.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "?" || event.metaKey || event.ctrlKey || event.altKey) return;
+      if (isTyping(event.target)) return;
+      event.preventDefault();
+      setShortcutsOpen(true);
+    };
+    const open = () => setShortcutsOpen(true);
+    window.addEventListener("keydown", onKey);
+    window.addEventListener(OPEN_SHORTCUTS, open);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener(OPEN_SHORTCUTS, open);
+    };
+  }, []);
 
   return (
     <TooltipProvider delayDuration={250}>
@@ -300,6 +320,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </>
             )}
             <ApiStatus compact={collapsed} />
+            <button
+              type="button"
+              onClick={() => setShortcutsOpen(true)}
+              aria-label={collapsed ? "Keyboard shortcuts" : undefined}
+              title="Keyboard shortcuts (?)"
+              className={cn(
+                "flex h-8 items-center rounded-md text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none",
+                collapsed ? "mx-auto w-8 justify-center" : "w-full gap-2 px-2",
+              )}
+            >
+              <Keyboard className="size-4" aria-hidden />
+              {!collapsed && (
+                <>
+                  Shortcuts
+                  <span className="ml-auto">
+                    <Key>?</Key>
+                  </span>
+                </>
+              )}
+            </button>
             <Link
               href="/settings"
               aria-current={pathname.startsWith("/settings") ? "page" : undefined}
@@ -383,6 +423,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <CommandPalette items={ALL} />
       <EvidenceDrawer />
       <Presenter />
+      <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
       <Toaster
         theme="dark"
         position="bottom-right"

@@ -2,10 +2,22 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Command } from "cmdk";
-import { ArrowDown, ArrowUp, Box, RefreshCw, Wind } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Box,
+  FileStack,
+  Keyboard,
+  Presentation,
+  RefreshCw,
+  Wind,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Key } from "./Key";
 import type { PaletteItem } from "./CommandPalette";
+import { OPEN_SHORTCUTS } from "./ShortcutsDialog";
+import { OPEN_EVIDENCE } from "@/components/evidence/EvidenceDrawer";
+import { OPEN_PRESENTER } from "@/components/present/Presenter";
 import { listCfdRuns, listDesigns } from "@/lib/api";
 
 const ITEM =
@@ -98,6 +110,42 @@ export function CommandDialog({
           </Command.Group>
         )}
         <Command.Group heading="Actions" className={GROUP}>
+          <Command.Item
+            value="evidence drawer atlas"
+            onSelect={() => {
+              setOpen(false);
+              window.dispatchEvent(new Event(OPEN_EVIDENCE));
+            }}
+            className={ITEM}
+          >
+            <FileStack size={16} className="text-muted-foreground" />
+            Open evidence
+            <span className="ml-auto font-mono text-[10px] text-muted-foreground">E</span>
+          </Command.Item>
+          <Command.Item
+            value="present presenter competition"
+            onSelect={() => {
+              setOpen(false);
+              window.dispatchEvent(new Event(OPEN_PRESENTER));
+            }}
+            className={ITEM}
+          >
+            <Presentation size={16} className="text-muted-foreground" />
+            Presenter mode
+            <span className="ml-auto font-mono text-[10px] text-muted-foreground">P</span>
+          </Command.Item>
+          <Command.Item
+            value="shortcuts keyboard help"
+            onSelect={() => {
+              setOpen(false);
+              window.dispatchEvent(new Event(OPEN_SHORTCUTS));
+            }}
+            className={ITEM}
+          >
+            <Keyboard size={16} className="text-muted-foreground" />
+            Keyboard shortcuts
+            <span className="ml-auto font-mono text-[10px] text-muted-foreground">?</span>
+          </Command.Item>
           <Command.Item
             value="reload refresh"
             onSelect={() => window.location.reload()}

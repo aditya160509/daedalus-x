@@ -1019,6 +1019,46 @@ export type SavedForecast = z.infer<typeof SavedForecast>;
 export const listProjectForecasts = () =>
   request("/v1/analysis/project/forecasts", z.array(SavedForecast));
 
+// V&V dossier (T34): statuses are computed from stored evidence, never from the UI.
+const DossierCheck = z.object({
+  requirement_id: z.string(),
+  title: z.string(),
+  claim: z.string(),
+  status: z.enum(["verified", "partial", "failed", "no_evidence"]),
+  detail: z.string(),
+  evidence_ids: z.array(z.string()),
+});
+const DossierGap = z.object({
+  gap_id: z.string(),
+  kind: z.string(),
+  entity_id: z.string(),
+  entity_kind: z.string(),
+  action: z.string(),
+  detail: z.string(),
+  related_ids: z.array(z.string()),
+});
+export const Dossier = z.object({
+  generated: z.string(),
+  summary: z.object({
+    requirements: z.number(),
+    verified: z.number(),
+    partial: z.number(),
+    failed: z.number(),
+    no_evidence: z.number(),
+    failures: z.number(),
+    outstanding: z.number(),
+    records: z.number(),
+  }),
+  checks: z.array(DossierCheck),
+  failures: z.array(z.object({ kind: z.string(), id: z.string(), detail: z.string() })),
+  limitations: z.array(z.string()),
+  outstanding: z.array(DossierGap),
+  statement: z.string(),
+});
+export type Dossier = z.infer<typeof Dossier>;
+export const getDossier = () => request("/v1/report/dossier", Dossier);
+export const dossierMarkdownUrl = "/api/v1/report/dossier?format=md";
+
 const OracleSensitivity = z.object({
   method: z.enum(["sobol", "morris"]),
   samples: z.number(),

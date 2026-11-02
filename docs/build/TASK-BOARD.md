@@ -19,7 +19,7 @@ Take the **first `todo` whose dependencies are `accepted` or `review`**. "Lane" 
 | T11 | [FORGE rules and inspections](tasks/T11-forge.md) | backend-api + frontend-2d | — | review | Claude Opus 5.5 (CAD checks; inspections not yet) |
 | T12 | [ATLAS evidence workspace](tasks/T12-atlas-evidence.md) | frontend-2d | T02 | review | Claude (timeline/verify + React Flow lineage, derived missing-action coverage linked to real entity IDs; final acceptance pending) |
 | T13 | [Competition Mode, PDF report, AR](tasks/T13-competition-mode.md) | frontend | T06, T08, T12 | review | Claude (presenter, Typst PDF, drawing pack and one-click judge ZIP with hashed contents and a missing list; AR not built) |
-| T14 | [App-wide polish pass](tasks/T14-polish.md) | frontend | all UI tasks | todo | |
+| T14 | [App-wide polish pass](tasks/T14-polish.md) | frontend | all UI tasks | in-progress | Claude (Codebuff) (`?` sheet, route error boundary, palette actions; responsive/contrast/bundle pass remains) |
 | T15 | Outcome objective: expected India NF points, knock-out win probability, tail risk (MASTER-PLAN 22.3) | backend-ml | T10 | review | Claude Sonnet 5.5 (branch next-wave; outcome.py, no API or UI yet) |
 | T16 | Third-party timestamps for sealed predictions | backend-api | P2-02 | review | Claude (persisted verification records + history UI connected; real trusted authority response pending) |
 | T17 | Bayesian calibration, information gain, out-of-sample validation | backend-ml | T09 | review | Claude (API/UI, separate held-out scoring, saved studies with exact inputs/results/source files and reopening; physical validation pending) |
@@ -39,7 +39,7 @@ Take the **first `todo` whose dependencies are `accepted` or `review`**. "Lane" 
 | T31 | Video test lab | backend-ml | T17 | todo | |
 | T32 | As-built twin | backend-cfd | T20 | todo | |
 | T33 | Project twin for the 90-point project management scorecard | frontend-2d | - | review | Claude (assumptions, task sources, declared scorecard with evidenced points, evidence gaps, saved forecast artifacts; official weights/validation pending) |
-| T34 | Red-team mode, V&V dossier, post-event regret report | backend-ml | T10, T17 | todo | |
+| T34 | Red-team mode, V&V dossier, post-event regret report | backend-ml | T10, T17 | review | Claude (Codebuff) (dossier from stored records + JSON/Markdown API + Project panel; red-team and post-event report remain) |
 | T35 | Community calibration | backend-ml | T17 | todo | |
 
 ## Suggested parallel pairs

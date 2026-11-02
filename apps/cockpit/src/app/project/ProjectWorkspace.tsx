@@ -11,6 +11,7 @@ import {
   ProvenanceBadge,
   Skeleton,
 } from "@/components/ui/primitives";
+import { DossierPanel } from "@/components/evidence/DossierPanel";
 import {
   forecastProject,
   getProjectPlan,
@@ -772,6 +773,8 @@ function PlanEditor({ initial, example }: { initial: ProjectPlan; example: boole
           </ul>
         )}
       </Panel>
+
+      <DossierPanel />
     </div>
   );
 }

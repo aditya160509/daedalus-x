@@ -36,12 +36,14 @@ Remaining work is tracked task-by-task in [docs/build/TASK-BOARD.md](docs/build/
 | P6-08 | Inspect workspace | Claude | todo | |
 | P6-09 | Evidence workspace | Claude | review: timeline/hash verification, lazy React Flow lineage and derived missing-action coverage tied to real entity IDs; final acceptance pending | [T12](evidence/T12-evidence-coverage.md) |
 | P6-10 | Competition Mode | Claude | review: presenter, report PDF and judge-pack ZIP (existing exports, hashed manifest, honest missing list); public verification pending | [T13](evidence/T13-judge-pack.md) |
-| P6-11 | Polish pass | Claude | todo | |
+| P6-11 | Polish pass | Claude | partial: `?` shortcut sheet, route error boundary, palette actions and dossier panel; responsive/contrast/bundle audit remains | |
 | P7-01 | Initial + holdout CFD runs | GPT | todo | |
 | P7-02 | ORACLE loop live | Codex | partial: real study build/import/FORGE/evidence/UI; accepted-only feedback and complete legal geometry remain | [study build](evidence/ORDER-5-study-build.md) |
 | P9-01 | Freeze and rehearse | Claude | todo | |
 
 Cleanup review 2026-11-01: dead code removed, React Compiler on, knip/jscpd/size-limit/deptry/vulture/ruff S+C901 gates, 0 prod CVEs, no secrets; per-task verdicts in [REVIEW-cleanup](evidence/REVIEW-cleanup.md).
 
+
+T34 adds a V&V dossier built only from stored records: ten requirements with `verified`/`partial`/`failed`/`no_evidence`, recorded failures, stated limitations and the existing coverage gaps as outstanding validation. JSON and Markdown endpoints plus a Project panel are connected (`evidence/T34-vv-dossier.md`). Red-team mode and the post-event regret report remain.
 
 Software integration batch 2026-11-02: ✅ native Dockview Overview; ✅ T23 planner UI; ✅ T29 single-design limits UI; ✅ T16 timestamp workflow; ✅ T17 Bayesian calibration UI with separate held-out scoring; ✅ saved calibration studies (exact inputs/results/source files, reopen); ✅ T33 project scorecard (assumptions, task sources, evidenced points, derived gaps, saved forecasts); ✅ T04/T06 wake/Q and strict same-mesh ΔCp controls/exports; 🟨 ORACLE real study build path. All remain subject to their evidence-note limitations and final acceptance. Focused checks passed; no browser/GPU validation, accepted CFD campaign or real measurement validation in this batch. Servers/browser were not started. Memory safeguards include serialized native field exports, single Bayesian fit per process and explicit vtk.js resource disposal. See MASTER-PLAN §§23–27; the coarse in-scope checklist score remains 45% because these advance already-partial tasks.

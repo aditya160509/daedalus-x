@@ -374,7 +374,7 @@ The next-wave changes were merged into `main` in `6d708b5`. The table tracks ver
 | 4 Race analysis | 🟨 Partial | Time budget, tornado chart, exchange rates, Breakdown tab, Energy panel (`raceanalysis.py`, `energy.py`) | Stadium timing / TV mode |
 | 5 Closed loop | 🟨 Partial; real study build connected | Canonical build123d study generator, cheap family-filtered recommendations, build-next API, real geometry import/FORGE, parameterized Design/evidence artifacts and Pit Wall CAD/rules links; existing CFD dialog receives the exact generated design when no CAD rules fail | Legal/complete production geometry, full constraints/objective, automatic accepted-only CFD feedback and synthetic/physical training separation |
 | 6 Calibration / optimisation analysis | 🟨 Partial | ✅ Bayesian calibration API/UI with timing previews and held-out scoring; saved studies persist exact inputs, results and source files with browsing/reopening. Monte Carlo and SALib Sobol/Morris API + Sensitivity UI | Applying the posterior to Race, GP uncertainty maps and measured validation; ⏳ Calibration/Sensitivity visual review |
-| 7 Remaining | 🟨 Partial | Project page, cleanup, ✅ uPlot telemetry and ✅ React Flow evidence lineage | Run wizard, ⏳ dockview visual review, complete judge outputs and action-level evidence coverage |
+| 7 Remaining | 🟨 Partial | Project page, cleanup, ✅ uPlot telemetry, ✅ React Flow evidence lineage and ✅ T34 V&V dossier (JSON/Markdown + Project panel) | Run wizard, ⏳ dockview visual review, red-team/post-event reports and final browser review |
 
 ### 23.1 Latest reuse integrations — current tags
 
@@ -425,9 +425,9 @@ This is the current implementation ledger for all T01–T35 tasks. Earlier featu
 
 **Legend:** ✅ implemented core · 🟨 partly implemented · 🔄 active integration · 📝 uncommitted local draft · ⬜ planned/not started · ⏳ verification pending · ✂️ out of scope · 🚫 explicitly skipped library. A build tick does not change the task board to reviewer-accepted or tick the final QA checklist. These statuses are based on the current source and recorded evidence, not a fresh full-product acceptance audit.
 
-**Current in-scope plan: 45% checklist score.** Scope decision §27 removes six tasks: 29 remain, with three built, twenty partial and six remaining. Calculation: `(3 × 1 + 20 × 0.5 + 6 × 0) / 29 = 44.8%`. The prior 37.1% counted all 35 tasks; the denominator change is a scope cut, not newly completed engineering.
+**Current in-scope plan: 47% checklist score.** Scope decision §27 removes six tasks: 29 remain, with three built, twenty-one partial and five remaining. Calculation: `(3 × 1 + 21 × 0.5 + 5 × 0) / 29 = 46.6%`. The prior 37.1% counted all 35 tasks; the denominator change is a scope cut, not newly completed engineering.
 
-**Original core T01–T14: 54% checklist score.** Two built + eleven partial + one remaining: `(2 + 11 × 0.5) / 14 = 53.6%`.
+**Original core T01–T14: 57% checklist score.** Two built + twelve partial: `(2 + 12 × 0.5) / 14 = 57.1%`.
 
 Partial tasks receive a fixed half-point for a simple, reproducible tally; this does not mean each is halfway through its engineering effort. These are rough scope-completion indicators, not estimates of hours left, judging points or competition readiness. The six explicitly cut tasks are excluded. This is a checklist tally, not an effort-weighted estimate.
 
@@ -446,7 +446,7 @@ Partial tasks receive a fixed half-point for a simple, reproducible tally; this 
 | T11 | FORGE rules and inspections | 🟨 Partial | India rulebook, CAD states/margins and sheet; measured inspections and full coverage remain. |
 | T12 | ATLAS evidence | 🟨 Partial | Store, hashes, timeline, verify and React Flow lineage exist; derived missing-action coverage now ties every gap to a real design/run/calibration/prediction ID and shows it in the lineage and a Coverage view. Final acceptance remains. |
 | T13 | Competition mode and report (AR cut) | 🟨 Partial | Presenter, Typst report and drawing pack exist; a downloadable judge pack now bundles the existing exports, rule findings, run manifests and evidence verification with an honest missing list. Public verification remains; AR is out of scope. |
-| T14 | Final app polish | ⬜ Remaining | Consolidated responsiveness, accessibility, performance and acceptance pass remains. |
+| T14 | Final app polish | 🟨 Partial | ✅ `?` shortcut sheet, route error boundary, palette actions and dossier panel; consolidated responsiveness, contrast, formatting, bundle and acceptance pass remains. |
 | T15 | Racing-points objective | 🟨 Partial | Outcome core and API exist; ORACLE objective integration and declared opponent assumptions or owner-supplied results remain; competitor scraping is cut. |
 | T16 | Third-party prediction timestamps | 🟨 Partial | ✅ Submission/status/OpenSSL verification UI and API connected; each verification is now an append-only evidence record linked to the prediction, token artifact and trust-bundle artifact, with a history view. A real authority response and trusted certificate-chain verification remain. |
 | T17 | Bayesian calibration | 🟨 Partial | ✅ Race UI, timing-file preview, explicit priors and optional separate held-out scoring connected; saved studies now persist exact inputs, results and uploaded source files as evidence, with browsing and reopening. Real held-out validation and applying the posterior to the Race model remain. |
@@ -466,7 +466,7 @@ Partial tasks receive a fixed half-point for a simple, reproducible tally; this 
 | T31 | Video test lab | ✂️ Out of scope | Trajectory, wobble and snag analysis workflow remains. |
 | T32 | As-built twin | ✂️ Out of scope | Measured scan/photogrammetry-to-model workflow remains. |
 | T33 | Project twin | 🟨 Partial | Project forecast backend and Project workspace exist; assumptions, per-task source references, a declared scorecard with evidenced points, derived evidence gaps and saved forecasts (hashed plan + result artifacts) are connected. Official weights and final validation remain team-supplied. |
-| T34 | Red-team / V&V dossier | ⬜ Remaining | Integrated red-team and post-event reports remain. |
+| T34 | Red-team / V&V dossier | 🟨 Partial | ✅ Dossier evaluates ten requirements from stored records, lists failures/limitations/open validation and exports JSON/Markdown in the Project panel; red-team mode and post-event regret report remain. |
 | T35 | Community calibration | ✂️ Out of scope | Cross-team calibrated-data workflow remains. |
 
 **New work landed in this session:** ✅ India honesty correction; ✅ failed-rule CAD selection/focus; 🟨 FORGE v2 feature expansion; 🟨 13-item drawing draft; 🟨 replay rebuild pending final acceptance; 🟨 closed-loop study generation/API/evidence/UI now connected. Details and commit IDs are in §23.
