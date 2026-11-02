@@ -38,11 +38,13 @@ const RACE_TABS = [
   { id: "spread", label: "Spread" },
   { id: "start", label: "Start" },
   { id: "energy", label: "Energy" },
+  { id: "points", label: "Points" },
   { id: "breakdown", label: "Breakdown" },
   { id: "calibration", label: "Calibration" },
 ] as const;
 import { SpreadPanel } from "./SpreadPanel";
 import { EnergyPanel } from "@/components/race/EnergyPanel";
+import { PointsPanel } from "@/components/race/PointsPanel";
 import { BreakdownPanel } from "@/components/race/BreakdownPanel";
 import { CalibrationPanel } from "@/components/race/CalibrationPanel";
 import {
@@ -569,6 +571,14 @@ export function RaceWorkspace() {
           {tab === "energy" && (
             <div className="mx-auto w-full max-w-4xl overflow-y-auto">
               <EnergyPanel data={energy.data} error={energy.error} fetching={energy.isFetching} />
+            </div>
+          )}
+          {tab === "points" && (
+            <div className="mx-auto w-full max-w-4xl overflow-y-auto p-3">
+              <PointsPanel
+                baselineTime={sim.data?.time_s ?? null}
+                baselineSpread={p ? Math.max((p.p95 - p.p5) / 3.29, 0.001) : null}
+              />
             </div>
           )}
           {tab === "calibration" && (

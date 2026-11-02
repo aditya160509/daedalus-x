@@ -1,7 +1,7 @@
 "use client";
 
 import { SERIES } from "@/lib/colormap";
-import { chartTheme, useECharts } from "./useECharts";
+import { chartAxis, chartTheme, chartTooltip, useECharts } from "./useECharts";
 
 export interface ComponentForce {
   name: string;
@@ -27,29 +27,26 @@ export function ForceBars({ data, unit }: { data: ComponentForce[]; unit: string
         textStyle: { color: t.text2, fontSize: 11 },
       },
       tooltip: {
+        ...chartTooltip(t),
         trigger: "axis",
         axisPointer: { type: "shadow" },
-        backgroundColor: t.popover,
-        borderColor: t.lineStrong,
-        textStyle: { color: t.text, fontSize: 11 },
         valueFormatter: (v: unknown) =>
           typeof v === "number" ? `${v.toFixed(2)} ${unit}` : String(v),
       },
       xAxis: {
         type: "value",
+        ...chartAxis(t),
         name: unit,
         nameLocation: "middle",
         nameGap: 20,
         nameTextStyle: { color: t.muted, fontSize: 10 },
-        axisLabel: { color: t.muted, fontSize: 10 },
-        splitLine: { lineStyle: { color: t.line, opacity: 0.6 } },
       },
       yAxis: {
         type: "category",
+        ...chartAxis(t),
         data: names,
         inverse: true,
-        axisTick: { show: false },
-        axisLine: { lineStyle: { color: t.line } },
+        splitLine: { show: false },
         axisLabel: { color: t.text2, fontSize: 11, fontFamily: "inherit" },
       },
       series: [

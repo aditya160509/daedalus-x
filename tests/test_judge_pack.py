@@ -66,6 +66,8 @@ def test_pack_contains_real_exports_and_hashed_manifest(data_root: Path) -> None
         "runs/run_1-result.json",
         "evidence/verification.json",
         "evidence/coverage.json",
+        "evidence/dossier.json",
+        "evidence/dossier.md",
     } <= names
     manifest = json.loads(bundle.read("manifest.json"))
     listed = {entry["path"] for entry in manifest["files"]}
@@ -77,6 +79,8 @@ def test_pack_contains_real_exports_and_hashed_manifest(data_root: Path) -> None
         assert entry["sha256"] == digest
         assert entry["bytes"] == len(body)
     assert manifest["evidence"]["ok"] is True
+    assert manifest["verification"]["requirements"] == 10
+    assert any("requirement(s) are not verified" in item for item in pack.missing)
 
 
 def test_missing_export_is_named_and_not_replaced(

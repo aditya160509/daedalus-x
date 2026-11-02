@@ -20,7 +20,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from daedalus import coverage
+from daedalus import coverage, dossier
 from daedalus.store import EvidenceStore
 
 
@@ -161,6 +161,31 @@ def build_pack(
         summary, gaps = _evidence_summary(root)
         _add(bundle, "evidence/verification.json", _json(summary), files)
         _add(bundle, "evidence/coverage.json", _json({"items": gaps}), files)
+
+        verification: dict[str, Any] | None = None
+        try:
+            verification = dossier.build(root)
+            _add(bundle, "evidence/dossier.json", _json(verification), files)
+            _add(
+                bundle,
+                "evidence/dossier.md",
+                dossier.to_markdown(verification).encode(),
+                files,
+            )
+            counts = verification["summary"]
+            if counts["failures"]:
+                missing.append(
+                    f"verification — {counts['failures']} recorded failure(s); "
+                    "see evidence/dossier.md"
+                )
+            if counts["verified"] < counts["requirements"]:
+                missing.append(
+                    f"verification — {counts['requirements'] - counts['verified']} of "
+                    f"{counts['requirements']} requirement(s) are not verified; "
+                    "see evidence/dossier.md"
+                )
+        except Exception as exc:
+            missing.append(f"verification — V&V dossier unavailable: {exc}")
         if summary["broken"]:
             missing.append(
                 f"evidence — {len(summary['broken'])} record(s) fail their stored hash check: "
@@ -189,6 +214,7 @@ def build_pack(
             "files": files,
             "missing": missing,
             "evidence": summary,
+            "verification": verification["summary"] if verification else None,
         }
         # The manifest inventories the other entries; hashing itself would be circular.
         bundle.writestr("manifest.json", _json(manifest))
@@ -214,6 +240,8 @@ def _readme_text(*, design: str, team: str, number: str, rulebook: str) -> str:
         "- runs/*-manifest.json and *-result.json: stored solver case metadata.\n"
         "- evidence/verification.json: the evidence store's own hash verification and counts.\n"
         "- evidence/coverage.json: next actions derived from the stored records.\n"
+        "- evidence/dossier.json and dossier.md: the V&V dossier, built only from stored records,\n"
+        "  with failures, limitations and the validation still outstanding.\n"
         "- MISSING.txt: anything that could not be produced, with the reason.\n\n"
         "The evidence hashes cover the stored files, not the physical car. A CAD-only rule result "
         "is not a measurement, a solver run is not an accepted CFD result, and a listed gap means "

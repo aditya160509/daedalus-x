@@ -1,6 +1,6 @@
 "use client";
 
-import { chartTheme, useECharts } from "./useECharts";
+import { chartAxis, chartTheme, chartTooltip, useECharts } from "./useECharts";
 
 /** Histogram of Monte Carlo race times with p5 / p50 / p95 markers. */
 export function SpreadChart({
@@ -21,10 +21,8 @@ export function SpreadChart({
       textStyle: { fontFamily: t.mono },
       grid: { left: 40, right: 16, top: 24, bottom: 30 },
       tooltip: {
+        ...chartTooltip(t),
         trigger: "axis",
-        backgroundColor: t.popover,
-        borderColor: t.lineStrong,
-        textStyle: { color: t.text, fontSize: 11 },
         formatter: (p: Array<{ data: [number, number] }>) => {
           const [x, c] = p[0].data;
           return `${(x - width / 2).toFixed(3)}–${(x + width / 2).toFixed(3)} s<br/>${c} runs`;
@@ -32,21 +30,24 @@ export function SpreadChart({
       },
       xAxis: {
         type: "value",
+        ...chartAxis(t),
         min: edges[0],
         max: edges.at(-1),
         name: "race time, s",
         nameLocation: "middle",
         nameGap: 20,
         nameTextStyle: { color: t.muted, fontSize: 10 },
-        axisLabel: { color: t.muted, fontSize: 10, formatter: (v: number) => v.toFixed(3) },
-        axisLine: { lineStyle: { color: t.line } },
         splitLine: { show: false },
+        axisLabel: {
+          color: t.muted,
+          fontSize: 10,
+          formatter: (v: number) => v.toFixed(3),
+        },
       },
       yAxis: {
         type: "value",
+        ...chartAxis(t),
         splitNumber: 3,
-        axisLabel: { color: t.muted, fontSize: 10 },
-        splitLine: { lineStyle: { color: t.line, opacity: 0.6 } },
       },
       series: [
         {

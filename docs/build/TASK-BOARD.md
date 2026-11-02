@@ -20,11 +20,11 @@ Take the **first `todo` whose dependencies are `accepted` or `review`**. "Lane" 
 | T12 | [ATLAS evidence workspace](tasks/T12-atlas-evidence.md) | frontend-2d | T02 | review | Claude (timeline/verify + React Flow lineage, derived missing-action coverage linked to real entity IDs; final acceptance pending) |
 | T13 | [Competition Mode, PDF report, AR](tasks/T13-competition-mode.md) | frontend | T06, T08, T12 | review | Claude (presenter, Typst PDF, drawing pack and one-click judge ZIP with hashed contents and a missing list; AR not built) |
 | T14 | [App-wide polish pass](tasks/T14-polish.md) | frontend | all UI tasks | in-progress | Claude (Codebuff) (`?` sheet, route error boundary, palette actions; responsive/contrast/bundle pass remains) |
-| T15 | Outcome objective: expected India NF points, knock-out win probability, tail risk (MASTER-PLAN 22.3) | backend-ml | T10 | review | Claude Sonnet 5.5 (branch next-wave; outcome.py, no API or UI yet) |
+| T15 | Outcome objective: expected India NF points, knock-out win probability, tail risk (MASTER-PLAN 22.3) | backend-ml | T10 | review | Claude (Codebuff) (outcome core + tested API + Race Points scenario panel; ORACLE objective integration and real field data remain) |
 | T16 | Third-party timestamps for sealed predictions | backend-api | P2-02 | review | Claude (persisted verification records + history UI connected; real trusted authority response pending) |
 | T17 | Bayesian calibration, information gain, out-of-sample validation | backend-ml | T09 | review | Claude (API/UI, separate held-out scoring, saved studies with exact inputs/results/source files and reopening; physical validation pending) |
 | T18 | Cartridge thrust model (gas type to be confirmed) | backend-ml | gas confirmed | todo | |
-| T19 | Energy-loss audit | backend-ml | - | review | Claude Sonnet 5.5 (branch next-wave; energy.py, no API or UI yet) |
+| T19 | Energy-loss audit | backend-ml | - | review | Claude (Codebuff) (module, API and Race Energy panel verified; final review remains) |
 | T20 | FORGE v2: missing measures, pass probability, points at risk | backend-api + frontend-2d | T11 | todo | |
 | T21 | Structural analysis: beam FEM first, 3D FEA later | backend-ml | - | review | Claude (branch next-wave; structure.py beam FEM, 3D FEA not started) |
 | T22 | Engineering drawing pack generator and 2D drawing importer | backend-api | T07 | todo | |

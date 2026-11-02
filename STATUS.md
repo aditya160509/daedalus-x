@@ -13,8 +13,8 @@ Remaining work is tracked task-by-task in [docs/build/TASK-BOARD.md](docs/build/
 | P2-01 | Race model M0–M2 | Claude | accepted | [evidence](evidence/P2-01.md) |
 | P2-02 | Calibration and sealed predictions | Claude | sealing/verify/score done (tests/test_predictions.py); calibration needs measured runs | |
 | P2-03 | Monte Carlo uncertainty | Claude | done: vectorised, 2000 samples in 0.9 s, API + Race panel, trajectory band p5/p50/p95 (tests/test_montecarlo.py) | [T08](evidence/T08.md) |
-| P2-04 | Outcome objective: India NF points, knock-out odds, car choice | Claude (branch next-wave) | review: src/daedalus/outcome.py with 13 tests; not wired to ORACLE, API or UI | [T15](evidence/T15.md) |
-| P2-05 | Energy-loss audit | Claude (branch next-wave) | review: src/daedalus/energy.py with 8 tests; no API or UI | [T19-T23](evidence/T19-T23.md) |
+| P2-04 | Outcome objective: India NF points, knock-out odds, car choice | Claude (branch next-wave) | review: tested API + Race Points scenario panel connected; ORACLE objective integration and real field data remain | [T15](evidence/T15.md), [panel](evidence/T15-points-ui.md) |
+| P2-05 | Energy-loss audit | Claude (branch next-wave) | review: module, API and Race Energy panel connected; final review remains | [T19-T23](evidence/T19-T23.md), [closure](evidence/T19-energy.md) |
 | P2-06 | Test planner (D-optimal tests, flags unidentified parameters) | Claude + Terra + Codex | review: editable Pit Wall planner/API and ranked timing/coast-down recommendations; physical validation pending | [T23](evidence/T23-test-planner.md) |
 | P2-07 | Third-party timestamps for sealed predictions (RFC 3161) | Claude | review: submission/status/verification UI/API, append-only verification records linked to token and CA bundle, history view; trusted real authority verification pending | [T16](evidence/T16-timestamps.md) |
 | P2-08 | Structural analysis, beam FEM with the rule load tests | Claude (branch next-wave) | review: src/daedalus/structure.py with 8 tests; 3D FEA not started | [T16-T21](evidence/T16-T21.md) |

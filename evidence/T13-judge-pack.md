@@ -14,6 +14,7 @@ The app already produced an engineering report PDF, a drawing pack, FORGE rule f
 - `GET /v1/report/judge-pack` returns the ZIP as an attachment with an `X-Daedalus-Missing` count. Path separators in `design`, `team` or `number` are rejected.
 - An export that cannot be produced is omitted and named in `MISSING.txt` with the exception text; no placeholder PDF or invented number is substituted. A reference-only rulebook, a missing design/run, a broken evidence hash and open coverage actions are all listed as missing material.
 - The Pit Wall header now offers "Judge pack ZIP" next to "Report PDF".
+- The V&V dossier (T34) is included as `evidence/dossier.json` and `evidence/dossier.md`. Recorded failures and unverified requirements are added to `MISSING.txt`, and `manifest.json` carries the dossier summary.
 
 ## Checks run
 

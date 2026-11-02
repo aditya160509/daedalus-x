@@ -539,9 +539,13 @@ export const submitAnchor = (id: string) =>
     method: "POST",
   });
 export const verifyAnchor = (id: string) =>
-  request(`/v1/analysis/predictions/${encodeURIComponent(id)}/anchor/verify`, AnchorVerificationRecord, {
-    method: "POST",
-  });
+  request(
+    `/v1/analysis/predictions/${encodeURIComponent(id)}/anchor/verify`,
+    AnchorVerificationRecord,
+    {
+      method: "POST",
+    },
+  );
 const ScoreResult = z.looseObject({ inside_interval: z.boolean() });
 export const scorePrediction = (id: string, measured_s: number) =>
   request(`/v1/predictions/${id}/score`, ScoreResult, {
@@ -773,6 +777,39 @@ export const getEnergyAudit = (race: RaceSimulationRequest) =>
       crr: race.crr,
       rho_kg_m3: race.rho_kg_m3,
     }),
+  });
+
+export const RacingOutcome = z.object({
+  reaction_points_mean: z.number(),
+  reaction_points_p05: z.number(),
+  reaction_points_p95: z.number(),
+  knockout_points_mean: z.number(),
+  round_win_probabilities: z.array(z.number()),
+  fastest_car_probability: z.number(),
+  expected_bonus_points: z.number(),
+  expected_total_points: z.number(),
+  field_source: z.enum(["measured", "estimated", "synthetic"]),
+  performance_compliant: z.boolean(),
+  assumptions: z.array(z.string()),
+});
+export type RacingOutcome = z.infer<typeof RacingOutcome>;
+export interface RacingPointsRequest {
+  car_time_s: number[];
+  reaction_mean_s: number;
+  reaction_sd_s: number;
+  other_best_total_s: number[];
+  other_best_car_s: number[];
+  round_opponents_s: number[][];
+  field_source: "measured" | "estimated" | "synthetic";
+  reaction_races: number;
+  dnf_probability: number;
+  performance_compliant: boolean;
+  seed: number;
+}
+export const racingPoints = (req: RacingPointsRequest) =>
+  request("/v1/analysis/racing-points", RacingOutcome, {
+    method: "POST",
+    body: JSON.stringify(req),
   });
 
 const TimingImport = z.object({

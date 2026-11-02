@@ -3,7 +3,13 @@
 import { GaugeChart, HeatmapChart, ScatterChart } from "echarts/charts";
 import { VisualMapComponent } from "echarts/components";
 import type { OracleState } from "@/lib/api";
-import { chartTheme, echarts, useECharts } from "@/components/charts/useECharts";
+import {
+  chartAxis,
+  chartTheme,
+  chartTooltip,
+  echarts,
+  useECharts,
+} from "@/components/charts/useECharts";
 
 echarts.use([HeatmapChart, ScatterChart, GaugeChart, VisualMapComponent]);
 
@@ -24,19 +30,26 @@ export function AeroMap({ s }: { s: OracleState }) {
       animation: false,
       textStyle: { fontFamily: t.mono, color: t.muted },
       grid: { left: 44, right: 70, top: 10, bottom: 36 },
-      tooltip: { formatter: (p: { value: number[] }) => `CdA ${p.value[2].toFixed(2)} cm²` },
+      tooltip: {
+        ...chartTooltip(t),
+        formatter: (p: { value: number[] }) => `CdA ${p.value[2].toFixed(2)} cm²`,
+      },
       xAxis: {
         type: "category",
+        ...chartAxis(t),
         data: s.aero_map.axis.map((_, i) => lbl(vx, i)),
         name: `${vx.name} ${vx.unit}`,
         nameLocation: "middle",
         nameGap: 24,
-        axisLabel: { interval: 6, fontSize: 10 },
+        splitLine: { show: false },
+        axisLabel: { color: t.muted, interval: 6, fontSize: 10 },
       },
       yAxis: {
         type: "category",
+        ...chartAxis(t),
         data: s.aero_map.axis.map((_, i) => lbl(vy, i)),
-        axisLabel: { interval: 6, fontSize: 10 },
+        splitLine: { show: false },
+        axisLabel: { color: t.muted, interval: 6, fontSize: 10 },
       },
       visualMap: {
         min: Math.min(...vals),
@@ -71,7 +84,14 @@ export function AeroMap({ s }: { s: OracleState }) {
       ],
     };
   }, [s]);
-  return <div ref={host} className="size-full min-h-56" />;
+  return (
+    <div
+      ref={host}
+      className="size-full min-h-56"
+      role="img"
+      aria-label="Predicted drag area over the first two optimisation variables, with tested runs and the next candidate"
+    />
+  );
 }
 
 /** Best CdA found vs runs used: ORACLE against Latin hypercube on the same budget. */
@@ -90,20 +110,30 @@ export function BenchmarkChart({ s }: { s: OracleState }) {
         itemWidth: 12,
         itemHeight: 4,
       },
-      tooltip: { trigger: "axis", valueFormatter: (v: number) => `${v.toFixed(3)} cm²` },
+      tooltip: {
+        ...chartTooltip(t),
+        trigger: "axis",
+        valueFormatter: (v: number) => `${v.toFixed(3)} cm²`,
+      },
       xAxis: {
         type: "category",
+        ...chartAxis(t),
         data: x,
-        axisLabel: { fontSize: 10 },
+        splitLine: { show: false },
+        axisLabel: { color: t.muted, fontSize: 10 },
         name: "runs",
         nameLocation: "middle",
         nameGap: 18,
       },
       yAxis: {
         type: "value",
+        ...chartAxis(t),
         scale: true,
-        axisLabel: { fontSize: 10, formatter: (v: number) => v.toFixed(2) },
-        splitLine: { lineStyle: { color: t.line } },
+        axisLabel: {
+          color: t.muted,
+          fontSize: 10,
+          formatter: (v: number) => v.toFixed(2),
+        },
       },
       series: [
         {
@@ -125,7 +155,14 @@ export function BenchmarkChart({ s }: { s: OracleState }) {
       ],
     };
   }, [s]);
-  return <div ref={host} className="size-full min-h-40" />;
+  return (
+    <div
+      ref={host}
+      className="size-full min-h-40"
+      role="img"
+      aria-label="Best drag area found by the optimiser versus random search at the same budget"
+    />
+  );
 }
 
 /** Car score 0–100: where the best tested CdA sits inside the aero map's range (100 = map minimum). */

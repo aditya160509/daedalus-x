@@ -48,6 +48,30 @@ export function chartTheme() {
   };
 }
 
+type ChartTheme = ReturnType<typeof chartTheme>;
+
+/** One tooltip treatment: graphite card, hairline border, mono numbers, soft shadow. */
+export function chartTooltip(t: ChartTheme) {
+  return {
+    backgroundColor: t.popover,
+    borderColor: t.lineStrong,
+    borderWidth: 1,
+    padding: [8, 10],
+    textStyle: { color: t.text, fontSize: 11, fontFamily: t.mono },
+    extraCssText: "border-radius:8px;box-shadow:0 10px 30px -12px rgba(0,0,0,0.7);",
+  };
+}
+
+/** Leave the data, remove the chart junk: no axis spine, no ticks, dashed hairlines. */
+export function chartAxis(t: ChartTheme) {
+  return {
+    axisLine: { show: false },
+    axisTick: { show: false },
+    axisLabel: { color: t.muted, fontSize: 10, fontFamily: t.mono },
+    splitLine: { lineStyle: { color: t.line, opacity: 0.55, type: "dashed" } },
+  };
+}
+
 /**
  * Owns one ECharts instance bound to a div. `build` receives the element height so layouts
  * that need pixel geometry stay correct; it re-runs on resize and when `deps` change.

@@ -1,6 +1,6 @@
 "use client";
 
-import { chartTheme, useECharts } from "./useECharts";
+import { chartAxis, chartTheme, chartTooltip, useECharts } from "./useECharts";
 
 export interface HistorySeries {
   name: string;
@@ -44,26 +44,24 @@ export function HistoryChart({
         textStyle: { color: t.text2, fontSize: 11 },
       },
       tooltip: {
+        ...chartTooltip(t),
         trigger: "axis",
-        backgroundColor: t.popover,
-        borderColor: t.lineStrong,
-        textStyle: { color: t.text, fontSize: 11 },
         valueFormatter: (v: unknown) => (typeof v === "number" ? v.toPrecision(4) : String(v)),
       },
       xAxis: {
         type: "value",
+        ...chartAxis(t),
         min: iteration[0],
         max: iteration[iteration.length - 1],
         name: "iteration",
         nameLocation: "middle",
         nameGap: 22,
         nameTextStyle: { color: t.muted, fontSize: 10 },
-        axisLine: { lineStyle: { color: t.line } },
         splitLine: { show: false },
-        axisLabel: { color: t.muted, fontSize: 10 },
       },
       yAxis: {
         type: log ? "log" : "value",
+        ...chartAxis(t),
         scale: !log,
         min: yRange?.[0],
         max: yRange?.[1],
@@ -72,8 +70,6 @@ export function HistoryChart({
         nameGap: 42,
         nameTextStyle: { color: t.muted, fontSize: 10 },
         splitNumber: 4,
-        axisLine: { show: false },
-        splitLine: { lineStyle: { color: t.line, opacity: 0.6 } },
         axisLabel: {
           color: t.muted,
           fontSize: 10,
