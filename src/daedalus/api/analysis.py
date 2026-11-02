@@ -6,7 +6,6 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
-import tempfile
 from pathlib import Path
 from typing import Literal
 
@@ -272,12 +271,70 @@ def anchor_status(prediction_id: str) -> dict[str, object]:
             for a in store.records(contracts.Artifact)
             if a.kind == anchor.TOKEN_KIND and a.source_entity_id == prediction_id
         ]
+        history = anchor.verification_history(store, prediction_id)
+        latest = history[0] if history else None
         return {
             "token_count": len(tokens),
             "ca_configured": bool(
                 os.environ.get("DAEDALUS_TSA_CA_FILE")
                 and Path(os.environ["DAEDALUS_TSA_CA_FILE"]).is_file()
             ),
+            "verification_count": len(history),
+            "latest_verification": _verification_json(latest) if latest else None,
+        }
+    except (anchor.AnchorError, IntegrityError, KeyError) as exc:
+        raise HTTPException(422, str(exc)) from exc
+    finally:
+        store.close()
+
+
+def _verification_json(v: object) -> dict[str, object]:
+    from daedalus import contracts
+
+    if not isinstance(v, contracts.TimestampVerification):
+        raise TypeError("expected a TimestampVerification record")
+    return {
+        "verification_id": v.verification_id,
+        "created_at": v.created_at.isoformat(),
+        "prediction_id": v.prediction_id,
+        "token_artifact_id": v.token_artifact_id,
+        "ca_artifact_id": v.ca_artifact_id,
+        "verified": v.verified,
+        "detail": v.detail,
+        "command": v.command,
+        "openssl_version": v.openssl_version,
+        "gen_time": v.gen_time,
+    }
+
+
+@router.get("/predictions/{prediction_id}/anchor/history")
+def anchor_history(prediction_id: str) -> dict[str, object]:
+    """Append-only verification history plus the stored response and trust-bundle IDs."""
+    from daedalus import anchor, contracts
+    from daedalus.api.engineering import data_root
+    from daedalus.store import EvidenceStore, IntegrityError
+
+    store = EvidenceStore(data_root())
+    try:
+        anchor.manifest_digest(store, prediction_id)
+        tokens = [
+            a
+            for a in store.records(contracts.Artifact)
+            if a.kind == anchor.TOKEN_KIND and a.source_entity_id == prediction_id
+        ]
+        return {
+            "prediction_id": prediction_id,
+            "tokens": [
+                {
+                    "artifact_id": a.artifact_id,
+                    "created_at": a.created_at.isoformat(),
+                    "content_sha256": a.content_sha256,
+                }
+                for a in tokens
+            ],
+            "verifications": [
+                _verification_json(v) for v in anchor.verification_history(store, prediction_id)
+            ],
         }
     except (anchor.AnchorError, IntegrityError, KeyError) as exc:
         raise HTTPException(422, str(exc)) from exc
@@ -287,60 +344,28 @@ def anchor_status(prediction_id: str) -> dict[str, object]:
 
 @router.post("/predictions/{prediction_id}/anchor/verify")
 def verify_anchor(prediction_id: str) -> dict[str, object]:
-    """Verify the latest stored response against the seal and server-configured trust roots."""
-    from daedalus import anchor, contracts
+    """Verify the latest stored response and persist the verdict as evidence."""
+    from daedalus import anchor
     from daedalus.api.engineering import data_root
-    from daedalus.store import EvidenceStore, IntegrityError
+    from daedalus.store import DuplicateRecordError, EvidenceStore, IntegrityError
 
     ca = os.environ.get("DAEDALUS_TSA_CA_FILE")
     if not ca or not Path(ca).is_file():
         raise HTTPException(
             503, "Configure DAEDALUS_TSA_CA_FILE with the trusted TSA CA bundle on the server"
         )
-    openssl = shutil.which("openssl")
-    if not openssl:
+    if not shutil.which("openssl"):
         raise HTTPException(503, "OpenSSL is required for timestamp verification")
     store = EvidenceStore(data_root())
     try:
-        digest = anchor.manifest_digest(store, prediction_id).hex()
-        tokens = [
-            a
-            for a in store.records(contracts.Artifact)
-            if a.kind == anchor.TOKEN_KIND and a.source_entity_id == prediction_id
-        ]
-        if not tokens:
-            raise HTTPException(404, "No timestamp response is stored for this prediction")
-        response = store.read_artifact(tokens[-1].artifact_id)
-        with tempfile.TemporaryDirectory() as directory:
-            token_path = Path(directory) / "response.tsr"
-            token_path.write_bytes(response)
-            result = subprocess.run(
-                [
-                    openssl,
-                    "ts",
-                    "-verify",
-                    "-digest",
-                    digest,
-                    "-in",
-                    str(token_path),
-                    "-CAfile",
-                    ca,
-                ],
-                capture_output=True,
-                text=True,
-                timeout=20,
-                check=False,
-            )
-        return {
-            "verified": result.returncode == 0,
-            "detail": (result.stderr or result.stdout).strip()[:2000],
-        }
+        record = anchor.verify_stored_timestamp(store, prediction_id, Path(ca))
     except (anchor.AnchorError, IntegrityError, KeyError) as exc:
         raise HTTPException(422, str(exc)) from exc
-    except (OSError, subprocess.TimeoutExpired) as exc:
+    except (DuplicateRecordError, OSError, subprocess.TimeoutExpired) as exc:
         raise HTTPException(503, f"Timestamp verification unavailable: {exc}") from exc
     finally:
         store.close()
+    return _verification_json(record)
 
 
 class EstimateIn(BaseModel):

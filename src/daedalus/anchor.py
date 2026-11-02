@@ -13,16 +13,21 @@ is the standard `openssl ts -verify` command that `verify_command` prints.
 from __future__ import annotations
 
 import secrets
+import shutil
+import subprocess
+import tempfile
 import urllib.request
 from collections.abc import Callable
 from dataclasses import dataclass
+from pathlib import Path
 
 from daedalus import contracts as c
 from daedalus import predictions
-from daedalus.store import EvidenceStore
+from daedalus.store import EvidenceStore, sha256_of
 
 DEFAULT_TSA_URL = "https://freetsa.org/tsr"  # free public TSA; any RFC 3161 TSA works
 TOKEN_KIND = "rfc3161_timestamp"  # noqa: S105 (an artifact kind, not a credential)
+CA_BUNDLE_KIND = "rfc3161_ca_bundle"
 SHA256_OID = bytes.fromhex("0609608648016503040201")  # DER OID 2.16.840.1.101.3.4.2.1
 GRANTED = (0, 1)  # PKIStatus granted, grantedWithMods
 
@@ -172,3 +177,103 @@ def anchor_prediction(
 def verify_command(prediction_hash_hex: str, tsr_path: str, ca_path: str = "cacert.pem") -> str:
     """The openssl command a judge runs to check the TSA signature over our hash."""
     return f"openssl ts -verify -digest {prediction_hash_hex} -in {tsr_path} -CAfile {ca_path}"
+
+
+def _tokens(store: EvidenceStore, prediction_id: str) -> list[c.Artifact]:
+    return [
+        a
+        for a in store.records(c.Artifact)
+        if a.kind == TOKEN_KIND and a.source_entity_id == prediction_id
+    ]
+
+
+def _ca_artifact(store: EvidenceStore, prediction_id: str, ca_bytes: bytes) -> c.Artifact:
+    """One artifact record per distinct trust bundle, reused across verifications."""
+    digest = sha256_of(ca_bytes)
+    for art in store.records(c.Artifact):
+        if art.kind == CA_BUNDLE_KIND and art.content_sha256 == digest:
+            return art
+    return store.put_artifact(
+        ca_bytes,
+        kind=CA_BUNDLE_KIND,
+        source_entity_id=prediction_id,
+        provenance=c.Provenance.MEASURED,
+    )
+
+
+def _default_runner(argv: list[str]) -> tuple[int, str, str]:
+    result = subprocess.run(argv, capture_output=True, text=True, timeout=20, check=False)
+    return result.returncode, result.stdout, result.stderr
+
+
+def verify_stored_timestamp(
+    store: EvidenceStore,
+    prediction_id: str,
+    ca_path: Path,
+    *,
+    openssl: str | None = None,
+    runner: Callable[[list[str]], tuple[int, str, str]] | None = None,
+) -> c.TimestampVerification:
+    """Verify the newest stored response and record the verdict as append-only evidence.
+
+    The record keeps the exact token artifact, the trust bundle artifact (reused by content
+    hash, so the bytes a judge would use are recoverable) and the command that was run.
+    """
+    digest = manifest_digest(store, prediction_id)
+    tokens = _tokens(store, prediction_id)
+    if not tokens:
+        raise AnchorError(f"no timestamp response is stored for {prediction_id}")
+    token = tokens[-1]
+    openssl = openssl if openssl is not None else shutil.which("openssl")
+    if not openssl:
+        raise AnchorError("OpenSSL is required for timestamp verification")
+    ca_bytes = ca_path.read_bytes()
+    ca = _ca_artifact(store, prediction_id, ca_bytes)
+
+    with tempfile.TemporaryDirectory() as directory:
+        token_path = Path(directory) / "response.tsr"
+        token_path.write_bytes(store.read_artifact(token.artifact_id))
+        ca_file = Path(directory) / "ca.pem"
+        ca_file.write_bytes(ca_bytes)
+        argv = [
+            openssl,
+            "ts",
+            "-verify",
+            "-digest",
+            digest.hex(),
+            "-in",
+            str(token_path),
+            "-CAfile",
+            str(ca_file),
+        ]
+        code, out, err = (runner or _default_runner)(argv)
+        version_code, version_out, _ = (runner or _default_runner)([openssl, "version"])
+
+    detail = (err or out).strip()[:2000]
+    times = _generalized_times(store.read_artifact(token.artifact_id))
+    record = store.add(
+        c.TimestampVerification(
+            prediction_id=prediction_id,
+            token_artifact_id=token.artifact_id,
+            ca_artifact_id=ca.artifact_id,
+            verified=code == 0,
+            detail=detail,
+            command=verify_command(
+                digest.hex(),
+                f"{prediction_id}-{token.artifact_id}.tsr",
+                f"tsa-ca-{ca.content_sha256.removeprefix('sha256:')[:16]}.pem",
+            ),
+            openssl_version=version_out.strip()[:200] if version_code == 0 else None,
+            gen_time=times[-1] if times else None,
+        )
+    )
+    return record
+
+
+def verification_history(store: EvidenceStore, prediction_id: str) -> list[c.TimestampVerification]:
+    """Every recorded verification for a prediction, newest first."""
+    return sorted(
+        (v for v in store.records(c.TimestampVerification) if v.prediction_id == prediction_id),
+        key=lambda v: (v.created_at, v.verification_id),
+        reverse=True,
+    )

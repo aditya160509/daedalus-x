@@ -448,7 +448,7 @@ Partial tasks receive a fixed half-point for a simple, reproducible tally; this 
 | T13 | Competition mode and report (AR cut) | 🟨 Partial | Presenter and Typst report exist; complete judge pack and public verification remain; AR is out of scope. |
 | T14 | Final app polish | ⬜ Remaining | Consolidated responsiveness, accessibility, performance and acceptance pass remains. |
 | T15 | Racing-points objective | 🟨 Partial | Outcome core and API exist; ORACLE objective integration and declared opponent assumptions or owner-supplied results remain; competitor scraping is cut. |
-| T16 | Third-party prediction timestamps | 🟨 Partial | ✅ Submission/status/explicit OpenSSL verification UI and API connected; real authority response and trusted certificate-chain verification remain. |
+| T16 | Third-party prediction timestamps | 🟨 Partial | ✅ Submission/status/OpenSSL verification UI and API connected; each verification is now an append-only evidence record linked to the prediction, token artifact and trust-bundle artifact, with a history view. A real authority response and trusted certificate-chain verification remain. |
 | T17 | Bayesian calibration | 🟨 Partial | ✅ Race UI, timing-file preview, explicit priors and optional separate held-out scoring connected; results ephemeral, real held-out validation and evidence persistence remain. |
 | T18 | Cartridge thermodynamic thrust model | ⬜ Remaining | Organiser gas confirmation and measured thrust curves remain. |
 | T19 | Energy-loss audit | ✅ Built | Energy model, API and Race Energy panel connected; final review remains. |
@@ -587,6 +587,13 @@ Follow scope decision §27: no photo/video/AR/competitor-scraping/base-bleed/com
 - [x] Parent connected the Order 5 real study build path and hardened observation validation/concurrent writes; see `evidence/ORDER-5-study-build.md`. No accepted CFD feedback or legal-car claim.
 
 Checklist score remains 45%: these integrations advance existing partial tasks; they do not establish scientific acceptance or complete all their remaining scope.
+
+### Verification persistence (T16)
+
+- [x] `TimestampVerification` records each OpenSSL check as append-only evidence referencing the prediction, the stored token artifact and the CA-bundle artifact (reused by content hash).
+- [x] `GET .../anchor/history` plus `verification_count`/`latest_verification` on the status endpoint; Pit Wall lists each attempt with verdict, TSA time, token, bundle and the reproducing command.
+- [x] Failed checks are recorded as failures with the authority's output; a verification is never upgraded by a later session.
+- [ ] ⏳ No live trusted TSA response or valid certificate chain has been verified; the tests use a fake runner.
 
 ---
 

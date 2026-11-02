@@ -227,6 +227,24 @@ class Prediction(Record):
     manifest_hash: Sha256 | None = None
 
 
+class TimestampVerification(Record):
+    """A recorded OpenSSL check of a stored RFC 3161 response (T16).
+
+    Append-only: a later check adds a record instead of overwriting an earlier verdict, so the
+    verification history shows what was checked, against which token and which CA bundle.
+    """
+
+    verification_id: str = Field(default_factory=lambda: new_id("tsv"))
+    prediction_id: str
+    token_artifact_id: str
+    ca_artifact_id: str
+    verified: bool
+    detail: str
+    command: str
+    openssl_version: str | None = None
+    gen_time: str | None = None
+
+
 class ValidationProtocol(Record):
     protocol_id: str = Field(default_factory=lambda: new_id("prot"))
     hypothesis: str

@@ -494,9 +494,24 @@ const SealedPrediction = z.looseObject({
 });
 type SealedPrediction = z.infer<typeof SealedPrediction>;
 export const listPredictions = () => request("/v1/predictions", z.array(SealedPrediction));
+const AnchorVerificationRecord = z.object({
+  verification_id: z.string(),
+  created_at: z.string(),
+  prediction_id: z.string(),
+  token_artifact_id: z.string(),
+  ca_artifact_id: z.string(),
+  verified: z.boolean(),
+  detail: z.string(),
+  command: z.string(),
+  openssl_version: z.string().nullable(),
+  gen_time: z.string().nullable(),
+});
+type AnchorVerificationRecord = z.infer<typeof AnchorVerificationRecord>;
 const AnchorStatus = z.object({
   token_count: z.number().int().nonnegative(),
   ca_configured: z.boolean(),
+  verification_count: z.number().int().nonnegative(),
+  latest_verification: AnchorVerificationRecord.nullable(),
 });
 const AnchorResponse = z.object({
   prediction_id: z.string(),
@@ -504,15 +519,27 @@ const AnchorResponse = z.object({
   gen_time: z.string(),
   verify: z.string(),
 });
-const AnchorVerification = z.object({ verified: z.boolean(), detail: z.string() });
+const AnchorHistory = z.object({
+  prediction_id: z.string(),
+  tokens: z.array(
+    z.object({
+      artifact_id: z.string(),
+      created_at: z.string(),
+      content_sha256: z.string(),
+    }),
+  ),
+  verifications: z.array(AnchorVerificationRecord),
+});
 export const getAnchorStatus = (id: string) =>
   request(`/v1/analysis/predictions/${encodeURIComponent(id)}/anchor`, AnchorStatus);
+export const getAnchorHistory = (id: string) =>
+  request(`/v1/analysis/predictions/${encodeURIComponent(id)}/anchor/history`, AnchorHistory);
 export const submitAnchor = (id: string) =>
   request(`/v1/analysis/predictions/${encodeURIComponent(id)}/anchor`, AnchorResponse, {
     method: "POST",
   });
 export const verifyAnchor = (id: string) =>
-  request(`/v1/analysis/predictions/${encodeURIComponent(id)}/anchor/verify`, AnchorVerification, {
+  request(`/v1/analysis/predictions/${encodeURIComponent(id)}/anchor/verify`, AnchorVerificationRecord, {
     method: "POST",
   });
 const ScoreResult = z.looseObject({ inside_interval: z.boolean() });

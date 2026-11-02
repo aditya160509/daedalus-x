@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -144,6 +145,101 @@ def test_verify_command_names_the_hash() -> None:
     assert cmd.startswith("openssl ts -verify") and "ab" * 32 in cmd
 
 
+def _fake_openssl(
+    verified: bool = True, detail: str = "Verification: OK"
+) -> tuple[Callable[[list[str]], tuple[int, str, str]], list[list[str]]]:
+    calls: list[list[str]] = []
+
+    def runner(argv: list[str]) -> tuple[int, str, str]:
+        calls.append(argv)
+        if argv[-1] == "version":
+            return 0, "OpenSSL 3.6.0 1 Oct 2025\n", ""
+        return (0 if verified else 1), "", detail
+
+    return runner, calls
+
+
+def test_verification_is_recorded_and_linked(store: EvidenceStore, tmp_path: Path) -> None:
+    pred = _seal(store)
+    anchor.anchor_prediction(store, pred.prediction_id, post=fake_tsa())
+    ca = tmp_path / "ca.pem"
+    ca.write_bytes(b"trusted bundle bytes")
+    runner, calls = _fake_openssl()
+
+    record = anchor.verify_stored_timestamp(
+        store, pred.prediction_id, ca, openssl="/usr/bin/openssl", runner=runner
+    )
+
+    assert record.verified is True
+    assert record.gen_time == GEN_TIME.decode()
+    assert record.openssl_version == "OpenSSL 3.6.0 1 Oct 2025"
+    saved = store.get(record.verification_id, c.TimestampVerification)
+    assert saved.prediction_id == pred.prediction_id
+    token = store.get(saved.token_artifact_id, c.Artifact)
+    assert token.kind == anchor.TOKEN_KIND
+    bundle = store.get(saved.ca_artifact_id, c.Artifact)
+    assert bundle.kind == anchor.CA_BUNDLE_KIND
+    assert store.read_artifact(bundle.artifact_id) == b"trusted bundle bytes"
+    assert saved.command.startswith("openssl ts -verify")
+    # the verify invocation, then the version probe
+    assert calls[0][:3] == ["/usr/bin/openssl", "ts", "-verify"]
+    assert calls[1][-1] == "version"
+
+
+def test_failed_verification_is_recorded_truthfully(store: EvidenceStore, tmp_path: Path) -> None:
+    pred = _seal(store)
+    anchor.anchor_prediction(store, pred.prediction_id, post=fake_tsa())
+    ca = tmp_path / "ca.pem"
+    ca.write_bytes(b"wrong bundle")
+    runner, _ = _fake_openssl(
+        verified=False, detail="error 20 at 0 depth: unable to get local issuer"
+    )
+
+    record = anchor.verify_stored_timestamp(store, pred.prediction_id, ca, runner=runner)
+
+    assert record.verified is False
+    assert "unable to get local issuer" in record.detail
+
+
+def test_verification_history_is_newest_first_and_reuses_bundle(
+    store: EvidenceStore, tmp_path: Path
+) -> None:
+    pred = _seal(store)
+    anchor.anchor_prediction(store, pred.prediction_id, post=fake_tsa())
+    ca = tmp_path / "ca.pem"
+    ca.write_bytes(b"same bundle")
+    runner, _ = _fake_openssl()
+
+    first = anchor.verify_stored_timestamp(store, pred.prediction_id, ca, runner=runner)
+    second = anchor.verify_stored_timestamp(store, pred.prediction_id, ca, runner=runner)
+
+    assert first.ca_artifact_id == second.ca_artifact_id
+    bundles = [a for a in store.records(c.Artifact) if a.kind == anchor.CA_BUNDLE_KIND]
+    assert len(bundles) == 1
+    history = anchor.verification_history(store, pred.prediction_id)
+    assert next(v.verification_id for v in history) == second.verification_id
+    assert {v.verification_id for v in history} == {first.verification_id, second.verification_id}
+
+
+def test_verification_requires_a_stored_token(store: EvidenceStore, tmp_path: Path) -> None:
+    pred = _seal(store)
+    ca = tmp_path / "ca.pem"
+    ca.write_bytes(b"bundle")
+    with pytest.raises(AnchorError, match="no timestamp response"):
+        anchor.verify_stored_timestamp(
+            store, pred.prediction_id, ca, openssl="/usr/bin/openssl", runner=_fake_openssl()[0]
+        )
+
+
+def test_verification_requires_openssl(store: EvidenceStore, tmp_path: Path) -> None:
+    pred = _seal(store)
+    anchor.anchor_prediction(store, pred.prediction_id, post=fake_tsa())
+    ca = tmp_path / "ca.pem"
+    ca.write_bytes(b"bundle")
+    with pytest.raises(AnchorError, match="OpenSSL"):
+        anchor.verify_stored_timestamp(store, pred.prediction_id, ca, openssl="")
+
+
 def test_timestamp_api_status_and_verify_untrusted_response(
     store: EvidenceStore, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -160,7 +256,12 @@ def test_timestamp_api_status_and_verify_untrusted_response(
     app.include_router(analysis.router)
     client = TestClient(app)
     base = f"/v1/analysis/predictions/{pred.prediction_id}/anchor"
-    assert client.get(base).json() == {"token_count": 0, "ca_configured": False}
+    assert client.get(base).json() == {
+        "token_count": 0,
+        "ca_configured": False,
+        "verification_count": 0,
+        "latest_verification": None,
+    }
     assert client.post(base + "/verify").status_code == 503
     assert client.post(base).status_code == 200
     assert client.get(base).json()["token_count"] == 1
@@ -170,3 +271,10 @@ def test_timestamp_api_status_and_verify_untrusted_response(
     result = client.post(base + "/verify")
     assert result.status_code == 200
     assert result.json()["verified"] is False
+    status = client.get(base).json()
+    assert status["verification_count"] == 1
+    assert status["latest_verification"]["verified"] is False
+    history = client.get(base + "/history").json()
+    assert len(history["verifications"]) == 1
+    assert history["verifications"][0]["verification_id"] == result.json()["verification_id"]
+    assert len(history["tokens"]) == 1

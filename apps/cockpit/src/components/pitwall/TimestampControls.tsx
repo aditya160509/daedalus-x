@@ -1,24 +1,59 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { getAnchorStatus, submitAnchor, verifyAnchor } from "@/lib/api";
+import {
+  getAnchorHistory,
+  getAnchorStatus,
+  submitAnchor,
+  verifyAnchor,
+} from "@/lib/api";
+
+const short = (value: string) => value.replace(/^sha256:/, "").slice(0, 12);
+
+function Verdict({ verified }: { verified: boolean }) {
+  return (
+    <span
+      className={
+        verified
+          ? "font-medium text-emerald-500"
+          : "font-medium text-destructive"
+      }
+    >
+      {verified ? "verified" : "failed"}
+    </span>
+  );
+}
 
 export function TimestampControls({ id }: { id: string }) {
+  const queryClient = useQueryClient();
   const status = useQuery({ queryKey: ["anchor", id], queryFn: () => getAnchorStatus(id) });
+  const history = useQuery({
+    queryKey: ["anchor-history", id],
+    queryFn: () => getAnchorHistory(id),
+  });
+  const refresh = () => {
+    void status.refetch();
+    void history.refetch();
+  };
   const submit = useMutation({
     mutationFn: () => submitAnchor(id),
+    onSuccess: refresh,
+  });
+  const verify = useMutation({
+    mutationFn: () => verifyAnchor(id),
     onSuccess: () => {
-      verify.reset();
-      void status.refetch();
+      void queryClient.invalidateQueries({ queryKey: ["evidence"] });
+      refresh();
     },
   });
-  const verify = useMutation({ mutationFn: () => verifyAnchor(id) });
+  const entries = history.data?.verifications ?? [];
+  const tokens = history.data?.tokens ?? [];
   return (
     <div className="space-y-2 border-t pt-3 text-xs">
       <h3 className="font-medium">Third-party timestamp</h3>
       <p className="leading-relaxed text-muted-foreground">
-        Submit the seal’s SHA-256 hash to the FreeTSA authority. The prediction itself is not
+        Submit the seal&rsquo;s SHA-256 hash to the FreeTSA authority. The prediction itself is not
         sent. A local seal time is not an independent timestamp.
       </p>
       {status.isPending ? (
@@ -26,15 +61,15 @@ export function TimestampControls({ id }: { id: string }) {
       ) : status.isError ? (
         <p role="alert" className="text-destructive">
           {status.error.message}{" "}
-          <Button size="sm" variant="link" onClick={() => void status.refetch()}>
+          <Button size="sm" variant="link" onClick={refresh}>
             Retry
           </Button>
         </p>
       ) : (
         <>
-          <p>
+          <p className="tabular-nums">
             {status.data.token_count
-              ? `${status.data.token_count} stored timestamp response(s). Signature verification is required.`
+              ? `${status.data.token_count} stored response(s) · ${status.data.verification_count} verification(s) recorded`
               : "No timestamp response stored."}
           </p>
           <div className="flex flex-wrap gap-2">
@@ -61,6 +96,13 @@ export function TimestampControls({ id }: { id: string }) {
               trusted authority CA bundle.
             </p>
           )}
+          {status.data.latest_verification && (
+            <p className="text-muted-foreground">
+              Latest recorded check:{" "}
+              <Verdict verified={status.data.latest_verification.verified} /> at{" "}
+              {new Date(status.data.latest_verification.created_at).toLocaleString()}.
+            </p>
+          )}
         </>
       )}
       {submit.isError && (
@@ -83,8 +125,8 @@ export function TimestampControls({ id }: { id: string }) {
         <div role="status">
           <p>
             {verify.data.verified
-              ? "Signature and seal digest verified against the configured CA bundle."
-              : "Verification failed; do not treat this timestamp as verified."}
+              ? "Signature and seal digest verified; the result is recorded as evidence."
+              : "Verification failed and was recorded; do not treat this timestamp as verified."}
           </p>
           {verify.data.detail && (
             <pre className="mt-1 max-h-32 overflow-auto whitespace-pre-wrap break-all text-muted-foreground">
@@ -92,6 +134,51 @@ export function TimestampControls({ id }: { id: string }) {
             </pre>
           )}
         </div>
+      )}
+      {history.isError && (
+        <p role="alert" className="text-destructive">
+          Verification history unavailable: {history.error.message}
+        </p>
+      )}
+      {entries.length > 0 && (
+        <section aria-label="Verification history" className="space-y-1">
+          <h4 className="font-medium text-muted-foreground">Verification history</h4>
+          <ul className="divide-y rounded-md border">
+            {entries.map((entry) => (
+              <li key={entry.verification_id} className="space-y-1 px-2 py-1.5">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                  <Verdict verified={entry.verified} />
+                  <span className="tabular-nums text-muted-foreground">
+                    {new Date(entry.created_at).toLocaleString()}
+                  </span>
+                </div>
+                <div className="font-mono text-[11px] leading-relaxed text-muted-foreground">
+                  <div>
+                    token {entry.token_artifact_id}
+                    {entry.gen_time ? ` · TSA time ${entry.gen_time}` : ""}
+                  </div>
+                  <div>
+                    ca {entry.ca_artifact_id}
+                    {entry.openssl_version ? ` · ${entry.openssl_version}` : ""}
+                  </div>
+                </div>
+                <details>
+                  <summary className="cursor-pointer text-muted-foreground">Command and output</summary>
+                  <pre className="mt-1 max-h-40 overflow-auto whitespace-pre-wrap break-all font-mono text-[11px] text-muted-foreground">
+                    {entry.command}
+                    {entry.detail ? `\n\n${entry.detail}` : ""}
+                  </pre>
+                </details>
+              </li>
+            ))}
+          </ul>
+          {tokens.length > 0 && (
+            <p className="font-mono text-[11px] text-muted-foreground">
+              latest response {short(tokens[tokens.length - 1].content_sha256)} ·{" "}
+              {tokens.length} stored
+            </p>
+          )}
+        </section>
       )}
     </div>
   );

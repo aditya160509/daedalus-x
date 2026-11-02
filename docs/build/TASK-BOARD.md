@@ -21,7 +21,7 @@ Take the **first `todo` whose dependencies are `accepted` or `review`**. "Lane" 
 | T13 | [Competition Mode, PDF report, AR](tasks/T13-competition-mode.md) | frontend | T06, T08, T12 | review | Claude Opus 5.5 (presenter + Typst PDF; AR not built) |
 | T14 | [App-wide polish pass](tasks/T14-polish.md) | frontend | all UI tasks | todo | |
 | T15 | Outcome objective: expected India NF points, knock-out win probability, tail risk (MASTER-PLAN 22.3) | backend-ml | T10 | review | Claude Sonnet 5.5 (branch next-wave; outcome.py, no API or UI yet) |
-| T16 | Third-party timestamps for sealed predictions | backend-api | P2-02 | review | Claude + Terra + Codex (submission/status/verification UI and API; real trusted authority verification pending) |
+| T16 | Third-party timestamps for sealed predictions | backend-api | P2-02 | review | Claude (persisted verification records + history UI connected; real trusted authority response pending) |
 | T17 | Bayesian calibration, information gain, out-of-sample validation | backend-ml | T09 | review | Terra + Codex (API/UI and separate held-out scoring; evidence persistence and physical validation pending) |
 | T18 | Cartridge thrust model (gas type to be confirmed) | backend-ml | gas confirmed | todo | |
 | T19 | Energy-loss audit | backend-ml | - | review | Claude Sonnet 5.5 (branch next-wave; energy.py, no API or UI yet) |
