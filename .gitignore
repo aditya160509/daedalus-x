@@ -18,3 +18,10 @@ data/jobs/
 data/jobs.sqlite*
 data/studies/
 vendor/
+
+# Local engineering data and agent checkouts never belong in commits.
+data/
+.claude/
+
+# Local browser sessions may contain application state.
+.playwright-cli/

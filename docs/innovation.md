@@ -43,9 +43,9 @@ After each run it uses **expected improvement**, the same method used to tune re
 
 ### C. FORGE: the rulebook built into the CAD
 
-We turned the 2026/27 STEM Racing rulebook into machine-checkable rules: 10 rules, each with its page number. Every time a design is saved, FORGE measures it and marks each rule **pass / at risk / fail / needs a physical check**, with the margin in mm.
+FORGE checks the **STEM Racing India NF 2025-26** regulations: 80 rule entries, each linked to its source page. When a design is saved, it checks the dimensions supported by the CAD and marks each rule **CAD pass / at risk / CAD fail / manual review**, with its margin and units. Rules without a supported measurement stay manual.
 
-It already caught a real problem on our baseline car: the **rear wing is 34.4 mm high, and the rule is ≥ 35 mm** (rule D8.5, page 34). That's a 10-point penalty we'd have lost.
+On the imported **`orbit_v2` CAD**, FORGE reports a **33.00 mm gap between the front wheels**, below the **38.00 mm minimum** in **T7.2.1, page 29**: a **−5.00 mm CAD margin**. The rule lists 2.5 points per mm per axle, so this flags **12.5 points of potential penalty**. It needs checking on the manufactured car; it is not an official penalty or a measured result.
 
 *Honest by design:* rules that need a scale or ruler (mass, tether guide) are never shown as green. They stay "manual review".
 
@@ -74,14 +74,14 @@ Every design, CFD run, file and prediction is stored with a **hash** and a times
 |---|---|---|
 | Design & Engineering | 180 | A real optimisation method (ORACLE), real CFD, rules checked automatically |
 | Racing | 250 | Lower drag from smarter testing, and a reaction-time trainer |
-| Scrutineering | 160 | FORGE catches illegal parts before manufacture (it already caught the rear wing) |
+| Scrutineering | 160 | FORGE flags CAD compliance risks before manufacture, including the India NF front-wheel gap |
 | Verbal presentation | 140 | A live sealed-prediction reveal and presenter mode |
 | Project management | 90 | An evidence trail and timeline of every decision |
 | Innovation award | — | Sealed prediction plus a closed design loop: we haven't seen another team do this |
 
 ## 4. What to say to a judge (30 seconds)
 
-> "Most teams test a car and hope. We built Daedalus X, which links CAD, the rulebook, CFD and the race simulation in one app. An AI optimiser picks which design to test next, so we found lower drag with fewer simulations. It also checks every rule automatically; it caught our rear wing 0.6 mm too low. And before today's race we sealed our predicted time with a cryptographic hash. Let's open it now and see if we were right."
+> "Daedalus X connects CAD, India NF rule checks, CFD and race prediction. FORGE flagged a 33 mm front-wheel gap in our imported example CAD against the 38 mm minimum. That is a CAD finding, still to verify on a manufactured car. Our optimiser proposes the next test; its current benchmark is synthetic. We can seal a predicted race-time interval before a run, then reveal it against the measured result."
 
 ## 5. Honest limits (judges respect this)
 

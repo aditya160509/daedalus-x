@@ -77,9 +77,10 @@ Copying a repo is not done until it reads and writes **our** data. Check each on
 - [ ] 👁 Once real CFD exists: replace the synthetic seed and re-check the aero map
 
 ## 6. FORGE · T11
+- [x] 🖥 2026-11-02: India NF T7.2.1 CAD example reproduced on `orbit_v2`, 33.00 mm vs 38.00 mm minimum; [log](../../evidence/STEP-1-india-honesty.md). Physical verification remains unchecked below.
 - [ ] 🧪 States, margins, cartridge excluded, bounding-box estimates are never "fail", mass stays manual
 - [ ] 🖥 Every rule's page number opens the right clause in the PDF
-- [ ] 👁 Rear wing D8.5 (34.4 mm < 35) is confirmed on the real car or CAD; fix the design if real
+- [ ] 👁 India NF T7.2.1 (p29): reproduce the `orbit_v2` front-wheel gap of 33.00 mm against the 38.00 mm minimum (−5.00 mm CAD margin); verify on the manufactured car before claiming measured compliance or an official penalty. CAD evidence: `evidence/STEP-1-india-honesty.md`.
 - [ ] 🌐 Inspections (when built): measured readings move a rule to measured pass/fail
 
 ## 7. Evidence · T12 (when built)

@@ -297,11 +297,12 @@ What the big-screen timing page should show, inspired by F1 TV, f1-dash and STEM
 - **Race-day report**: the times, calibration update and next actions.
 - **Evidence appendix**: hash list plus a QR verify link.
 
-## 23. Progress: Jainam's `next-wave` branch (checked 2026-11-02, not merged yet)
-15 commits, about 5.6k lines added and 3k removed. It merges into `main` with no conflicts, and every new module has its own tests.
+## 23. Progress on main (updated 2026-11-02)
+The next-wave changes were merged into `main` in `6d708b5`. The table tracks verified work and remaining orders; runtime checks are recorded separately from implementation.
 
 | Order | Status | Done | Still missing |
 |---|---|---|---|
+| Honesty correction | done | India NF T7.2.1 finding reproduced on `orbit_v2`: 33.00 mm front-wheel gap vs 38.00 mm minimum; pitch and checklist corrected ([evidence](../../evidence/STEP-1-india-honesty.md)) | Physical measurement and official scrutineering remain unverified |
 | 1 India rulebook | ✅ mostly | `rulebooks/stem-racing-india-nf-2025-26.yaml`, more rules measured, points at risk, scrutineering sheet (`forge_sheet.py`, `sheet.typ`) | Click a failed rule → focus that part in CAD (`daedalus:focus`) |
 | 2 Wind Tunnel analysis | ⚠️ small | Analysis API (`api/analysis.py`) | Drag by part, compare runs, grid independence, wake/vortex layers |
 | 3 Race replay rebuild | ❌ | — | All of it |
