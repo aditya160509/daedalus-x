@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import json
+from typing import Annotated
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Path, Query
 
 from daedalus import coverage
 from daedalus.api.engineering import data_root
-from daedalus.store import EvidenceStore
+from daedalus.store import EvidenceStore, StoreError
 
 router = APIRouter(prefix="/v1/evidence", tags=["evidence"])
 
@@ -86,7 +87,7 @@ def lineage(limit: int = Query(500, ge=1, le=2000)) -> dict[str, object]:
         missing: set[str] = set()
         for node in nodes:
             for field, value in node["body"].items():
-                references = []
+                references: list[str] = []
                 if field.endswith("_id") and isinstance(value, str):
                     references = [value]
                 elif field.endswith("_ids") and isinstance(value, list):
@@ -114,5 +115,21 @@ def lineage(limit: int = Query(500, ge=1, le=2000)) -> dict[str, object]:
             "outside_window": len(outside),
             "missing_references": sorted(missing),
         }
+    finally:
+        store.close()
+
+
+@router.get("/artifacts/{artifact_id}/verify")
+def verify_artifact(
+    artifact_id: Annotated[str, Path(pattern=r"^[a-z0-9_]{3,64}$")],
+) -> dict[str, object]:
+    """Verify one stored artifact without returning its contents or claiming scientific validity."""
+    store = EvidenceStore(data_root())
+    try:
+        return store.verify_artifact(artifact_id)
+    except (KeyError, StoreError) as exc:
+        raise HTTPException(404, "Artifact record not found") from exc
+    except OSError as exc:
+        raise HTTPException(503, "Artifact storage is currently unreadable") from exc
     finally:
         store.close()

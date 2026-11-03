@@ -750,7 +750,7 @@ This is the current checkbox ledger requested by the owner. `TODO.md` supplies t
 ### H. Structure
 
 - [x] ✅ H01 — Beam FEM API and Strength panel with part/load presets, deflection/stress/safety-factor metrics and handbook-source warning.
-- [ ] ⬜ H02 — Deflection/stress plots and multi-part safety-factor comparison table; existing metrics are not plots.
+- [ ] 🟨 H02 — Solver nodal deflection/stress plots and strength reference connected; multi-part safety-factor comparison table remains; browser/material validation pending.
 - [ ] ⬜ H03 — Predicted-vs-measured load-test chart and evidence-backed before/after story.
 - [ ] ⏳ H04 — Real material measurements before CalculiX 3D halo/wing-mount analysis and mesh convergence.
 
@@ -772,7 +772,7 @@ This is the current checkbox ledger requested by the owner. `TODO.md` supplies t
 - [x] ✅ J04 — Saved calibration and project forecast evidence; V&V dossier JSON/Markdown with failures and limitations.
 - [x] ✅ J05 — Judge ZIP manifest, hashes and missing-material inventory; Typst PDF and data-driven Presenter with notes/timer.
 - [ ] 🟨 J06 — Full action linkage and real export/download acceptance; a gap detector does not itself record the missing action.
-- [ ] ⬜ J07 — OpenTimestamps second anchor and public verification page/QR.
+- [ ] 🟨 J07 — Hash-pinned artifact verification page, Evidence links and native QR SVG/export connected; OpenTimestamps anchor, public deployment and browser/scan verification remain.
 - [ ] ⬜ J08 — Register official PDFs, baseline and every CFD run in evidence; signed release/seal tag workflow.
 - [ ] ⬜ J09 — Three-minute walkthrough, 60+ judge Q&A, honest limitations slide and baseline/change/predicted/measured one-pager.
 - [ ] ⬜ J10 — Complete PDF commit/rulebook/run identity, offline demo and recorded fallback.
@@ -879,3 +879,7 @@ ForceBars now has native ECharts floating waterfall bars and retained pressure/f
 ### Paired timing analysis — 2026-11-03 (§23 update)
 
 Race Calibration has lazy Model / Paired-test subviews. Native SciPy paired t-test CI and noncentral-t planning power/MDE, native ECharts difference plot and TanStack source table connected. Exact CSV/settings and derived result saved as linked estimated-source artifacts; no row filtering or automatic measured claim. Pairing protocol declaration required; formal preregistration and real paired data remain. Evidence: `evidence/S04-paired-timings.md`.
+
+### Artifact verification and QR — 2026-11-03 (§23 update)
+
+Connected `/verify/[artifactId]` from Evidence with recorded/computed/pinned SHA-256 status, native qrcode.react SVG generation/export, source provenance and missing/mismatched states. Single-artifact API exposes metadata only. All evidence hash scans now stream files with hashlib.file_digest, avoiding whole-file memory use. No authorship/time/science validity inferred; localhost links are not publicly hosted. Browser/scan/public-hosting checks remain open. Evidence: `evidence/ATLAS-artifact-verification.md`.

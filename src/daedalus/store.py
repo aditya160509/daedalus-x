@@ -7,6 +7,7 @@ so a missing dependency blocks the insert instead of producing an orphan.
 from __future__ import annotations
 
 import hashlib
+import os
 import sqlite3
 from collections.abc import Iterator
 from pathlib import Path
@@ -202,13 +203,45 @@ class EvidenceStore:
             raise IntegrityError(f"artifact {artifact_id} content does not match its hash")
         return data
 
+    def _artifact_digest(self, art: c.Artifact) -> tuple[str, int]:
+        # Stream large CFD/CAD files instead of holding them in memory just to check a hash.
+        with self._artifact_path(art.content_sha256).open("rb") as file:
+            digest = hashlib.file_digest(file, "sha256").hexdigest()
+            return "sha256:" + digest, os.fstat(file.fileno()).st_size
+
+    def verify_artifact(self, artifact_id: str) -> dict[str, object]:
+        art = self.get(artifact_id, c.Artifact)
+        try:
+            actual, size = self._artifact_digest(art)
+        except FileNotFoundError:
+            actual, size = None, None
+        return {
+            "artifact_id": art.artifact_id,
+            "kind": art.kind,
+            "source_entity_id": art.source_entity_id,
+            "provenance": art.provenance.value,
+            "created_at": art.created_at.isoformat(),
+            "expected_sha256": art.content_sha256,
+            "actual_sha256": actual,
+            "size_bytes": size,
+            "status": "missing"
+            if actual is None
+            else "match"
+            if actual == art.content_sha256
+            else "mismatch",
+        }
+
     def verify_all(self) -> list[str]:
-        """Return IDs of artifacts whose files are missing or corrupt."""
+        """Return IDs of artifacts whose files are missing or corrupt, using bounded memory."""
         bad: list[str] = []
         for art in self.records(c.Artifact):
-            path = self._artifact_path(art.content_sha256)
-            if not path.exists() or sha256_of(path.read_bytes()) != art.content_sha256:
+            try:
+                digest, _ = self._artifact_digest(art)
+            except FileNotFoundError:
                 bad.append(art.artifact_id)
+            else:
+                if digest != art.content_sha256:
+                    bad.append(art.artifact_id)
         return bad
 
     def _artifact_path(self, digest: str) -> Path:

@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SegmentedControl, Skeleton } from "@/components/ui/primitives";
@@ -35,6 +36,22 @@ function summary(r: EvidenceRow): string {
     .slice(0, 3)
     .map(([k, v]) => `${k.replace(/_/g, " ")} ${String(v).slice(0, 24)}`)
     .join(" · ");
+}
+
+function ArtifactLink({ record, close }: { record: EvidenceRow; close: () => void }) {
+  const hash = record.body.content_sha256;
+  if (record.kind !== "Artifact" || typeof hash !== "string" || !/^sha256:[a-f0-9]{64}$/.test(hash))
+    return null;
+  return (
+    <Link
+      prefetch={false}
+      href={`/verify/${encodeURIComponent(record.id)}?sha256=${hash.slice(7)}`}
+      onClick={close}
+      className="my-2 block text-xs underline underline-offset-4"
+    >
+      Verify artifact / QR
+    </Link>
+  );
 }
 
 /** ATLAS timeline: every stored record newest first, grouped by day, with its hash check. Opens with E. */
@@ -90,8 +107,7 @@ export function EvidenceDrawer() {
         .includes(needle),
   );
   const gapGroups = new Map<string, typeof openGaps>();
-  for (const gap of openGaps)
-    gapGroups.set(gap.kind, [...(gapGroups.get(gap.kind) ?? []), gap]);
+  for (const gap of openGaps) gapGroups.set(gap.kind, [...(gapGroups.get(gap.kind) ?? []), gap]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -166,6 +182,7 @@ export function EvidenceDrawer() {
                     ))}
                   </ul>
                 )}
+                <ArtifactLink record={sel} close={() => setOpen(false)} />
                 <pre className="overflow-x-auto font-mono text-[10px] leading-relaxed text-text-2">
                   {JSON.stringify(sel.body, null, 2)}
                 </pre>
@@ -175,8 +192,8 @@ export function EvidenceDrawer() {
         ) : mode === "coverage" ? (
           <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
             <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
-              Next actions derived from the stored records. A gap disappears as soon as the
-              missing record exists, so this is not a stored or editable checklist.
+              Next actions derived from the stored records. A gap disappears as soon as the missing
+              record exists, so this is not a stored or editable checklist.
             </p>
             {coverage.isPending && <Skeleton className="h-40" />}
             {coverage.isError && (
@@ -264,9 +281,12 @@ export function EvidenceDrawer() {
                         </span>
                       </button>
                       {sel?.id === r.id && (
-                        <pre className="mb-2 ml-4 max-h-64 overflow-auto rounded-md bg-black/30 p-2 font-mono text-[10px] leading-relaxed text-text-2">
-                          {JSON.stringify(r.body, null, 2)}
-                        </pre>
+                        <div className="ml-4">
+                          <ArtifactLink record={r} close={() => setOpen(false)} />
+                          <pre className="mb-2 ml-4 max-h-64 overflow-auto rounded-md bg-black/30 p-2 font-mono text-[10px] leading-relaxed text-text-2">
+                            {JSON.stringify(r.body, null, 2)}
+                          </pre>
+                        </div>
                       )}
                     </li>
                   ))}

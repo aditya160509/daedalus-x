@@ -38,6 +38,7 @@
     "maath": "0.10.8",
     "next": "16.4.3",
     "postprocessing": "6.39.6",
+    "qrcode.react": "^4.2.0",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "react-resizable-panels": "^4.15.3",

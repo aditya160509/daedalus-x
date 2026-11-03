@@ -76,7 +76,7 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 | 5 | Rule-aware optimisation | 🟨 family filter + FORGE check ✅; feasibility inside the acquisition function ⬜ |
 | 6 | Adjoint shape hints on the CAD | 🟨 adjoint tooling exists (`adjoint.py`); CAD hints ⬜, needs an accepted adjoint run |
 | 7 | ML surrogate (stretch) | ⬜ do last, only if time is left |
-| 8 | Verifiable science (hash chain, verify page) | 🟨 hashes, timestamps, coverage ✅; public verify page + QR ⬜ |
+| 8 | Verifiable science (hash chain, verify page) | 🟨 hashes, timestamps, coverage ✅; hash-pinned artifact verify page + native QR SVG connected ⏳; public hosting/authority validation pending |
 
 **If an idea is not being done:** mark it ✂️ here with a one-line reason and delete it from MASTER-PLAN. Never leave it half-listed.
 
@@ -209,7 +209,7 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 ## `TODO.md` §14 chart quality bar
 - [ ] 🟨 One shared chart theme across ECharts and uPlot (ECharts theme in `useECharts`; uPlot styled separately)
 - [ ] ⬜ Source badge on every chart
-- [ ] 🟨 PNG/SVG export everywhere (uPlot ✅ only)
+- [ ] 🟨 PNG/SVG export everywhere (uPlot and new benchmark/diagnostic/energy/beam/waterfall charts connected; remaining panels pending)
 - [ ] ⬜ Plain-English caption on every chart
 - [ ] 🟨 Compare-two-runs overlay everywhere (ΔCp and ghost compare exist on some charts)
 
@@ -352,7 +352,7 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 - [x] ✅ presenter deck
 - [x] ✅ scrutineering sheet
 - [ ] ⬜ race-day report
-- [ ] 🟨 evidence appendix (QR ⬜)
+- [ ] 🟨 evidence appendix (artifact QR page connected ⏳; PDF embedding pending)
 
 **§28 ledger items not listed above**
 - [x] ✅ Removed Drawings tab/generator/API/template and judge-pack drawing references (out of scope); saved files untouched
@@ -470,7 +470,7 @@ The only real inputs are the CAD geometry and the rulebook. Without data, judges
 
 **10. Evidence and judges**
 - [ ] ⬜ OpenTimestamps second anchor (RFC 3161 anchor ✅ only)
-- [ ] ⬜ Public verify page + QR (verify API ✅; page and QR ⬜)
+- [ ] ⏳ Artifact verify page + hash-pinned QR SVG/download and Evidence links connected; bounded-memory hash checks; browser/public hosting verification pending
 - [ ] ⬜ Signed git tag
 - [ ] ⬜ Rule PDFs and runs registered in the store (`data/reference/rules/` is empty)
 - [ ] ⬜ 3-minute judge walkthrough

@@ -62,3 +62,7 @@ Retained distribution licence texts: `docs/licenses/uplot-LICENSE.txt`, `docs/li
 ## Paired timing inference — 2026-11-03
 
 [SciPy](https://github.com/scipy/scipy), BSD-3-Clause (repository licence verified), supplies native `ttest_rel`/confidence intervals, Student-t and noncentral-t distributions, Brent root finding and quadrature for prospective paired-test power. Existing ECharts and TanStack Table supply result plotting and source-row sorting. This integrates installed libraries; no external statistics application copied.
+
+## Artifact verification QR — 2026-11-03
+
+[qrcode.react 4.2.0](https://github.com/zpao/qrcode.react), ISC, supplies the native SVG QR renderer; its bundled [Project Nayuki QR Code Generator](https://www.nayuki.io/page/qr-code-generator-library) is MIT. GitHub aggregate metadata returned NOASSERTION, so the installed distribution ISC notice and pinned v4.2.0 bundled MIT licence were inspected and retained in `docs/licenses/qrcode-react-LICENSE.txt` and `docs/licenses/qrcodegen-LICENSE.txt`. Hash-pinned artifact links and SVG download are integration code; no QR encoder was written here.

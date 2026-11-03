@@ -1304,3 +1304,18 @@ export const analyzePairedTimings = (body: PairedTimingRequest) =>
     method: "POST",
     body: JSON.stringify(body),
   });
+
+const ArtifactVerification = z.object({
+  artifact_id: z.string(),
+  kind: z.string(),
+  source_entity_id: z.string(),
+  provenance: z.enum(["measured", "simulated", "predicted", "estimated", "synthetic"]),
+  created_at: z.string(),
+  expected_sha256: z.string(),
+  actual_sha256: z.string().nullable(),
+  size_bytes: z.number().nullable(),
+  status: z.enum(["match", "mismatch", "missing"]),
+});
+export type ArtifactVerification = z.infer<typeof ArtifactVerification>;
+export const verifyArtifact = (id: string) =>
+  request(`/v1/evidence/artifacts/${encodeURIComponent(id)}/verify`, ArtifactVerification);
