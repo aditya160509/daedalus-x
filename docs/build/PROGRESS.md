@@ -1,16 +1,18 @@
 # PROGRESS: one tick-box view of the whole plan (2026-11-03)
 
-Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, with its status.
+Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, with its status. Checked line by line against the code on 2026-11-03.
 
 **Legend**
 - ✅ done (built and connected)
 - 🟨 partly done
 - ⬜ not started
 - ⏳ built but not checked in the browser or with real data
+- 📝 code exists only as an uncommitted local draft (never ticked)
 
 **Rules for whoever updates this file**
 - Update a box in the same commit as the work.
 - Never tick a box for code that only exists in a draft.
+- A line with an open ⬜ remainder is 🟨, not ✅.
 
 **Out of scope (deleted from the plan, never build)**
 - T22 drawing pack (team work, not innovation)
@@ -33,34 +35,34 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 
 ---
 
-## §15 Best feature list ("final boss"): 6 of 19 done, 8 partly done, 5 not started
+## §15 Best feature list ("final boss"): 5 of 18 done, 10 partly done, 3 not started
 
 **Pit Wall**
 - [ ] ⬜ Race-week mission control (next action, days to the event, rules at risk, best car, seal status)
-- [ ] ⬜ Points dashboard: the 1000-point breakdown with our estimate and gaps (Project scorecard is the start)
+- [ ] 🟨 Points dashboard: the 1000-point breakdown with our estimate and gaps (project scorecard exists; the 1000-point view ⬜)
 - [x] ✅ dockview layout, saved per device ⏳ visual review
 
 **Design Studio**
-- [x] 🟨 Rule overlay on the CAD: failed rule → select and frame the part ✅; red/amber colouring and dimension line ⬜
-- [ ] ⬜ Design diff with a deviation heat map
+- [ ] 🟨 Rule overlay on the CAD: failed rule → select and frame the part ✅; red/amber colouring and dimension line ⬜
+- [ ] 🟨 Design diff with a deviation heat map (two-design side-by-side compare ✅; heat map ⬜)
 - [ ] 🟨 Parametric sliders: study generator built; live sliders in the UI ⬜
 - [ ] ⬜ Mass and centre-of-gravity estimate
 - [ ] 🟨 Manufacturing check: pass probability ✅; wall thickness and CNC reach ⬜
 
 **Wind Tunnel**
-- [x] 🟨 Flow viewer: animated GPU particles + Cp ✅, Q-criterion vortices ✅, wake planes ✅; LIC streaks, probes and clip ⬜
-- [x] 🟨 Run compare (same-mesh ΔCp) ✅; drag waterfall by part ⬜
-- [ ] 🟨 Quality gate: convergence ✅; y+, mesh quality and GCI shown in the UI ⬜
+- [ ] 🟨 Flow viewer: Cp ✅, Q-criterion vortices ✅, wake planes ✅ (field viewer); animated particles 📝 uncommitted draft (`FlowTunnel3D.tsx`), not ticked; LIC streaks, probes and clip ⬜
+- [ ] 🟨 Run compare (same-mesh ΔCp) ✅; drag build-up by part ✅ (cumulative chart); true waterfall and Δwake/Δforces ⬜
+- [ ] 🟨 Quality gate: convergence ✅; GCI and mesh-quality pass/fail shown ✅; y+ and bad-cell maps ⬜
 - [ ] ⬜ Run wizard with live residuals and ETA
 
 **Race**
 - [x] ✅ Game-quality replay: real car, track, 6 cameras, f1-dash HUD, photo finish ⏳ 60 fps check
-- [ ] ⬜ Race-day mode
+- [ ] 🟨 Race-day mode: sealed-prediction reveal ✅ (Pit Wall); live time and reaction entry and calibration update ⬜
 - [x] ✅ Monte Carlo + tornado chart + "what wins"
 
 **Evidence and reports**
 - [x] ✅ React Flow lineage graph
-- [x] 🟨 PDF: report ✅, judge pack ZIP ✅; India compliance chapter, run gallery and QR ⬜
+- [ ] 🟨 PDF: report ✅, judge pack ZIP ✅; India compliance chapter, run gallery and QR ⬜
 - [x] ✅ Presenter (live slides, notes, timer)
 
 ## §16 Innovation ideas
@@ -72,17 +74,17 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 | 3 | Physics-informed race-time uncertainty | 🟨 Monte Carlo + SALib ✅; CFD grid error not yet included ⬜ |
 | 4 | Live calibration (digital twin) | 🟨 Bayesian calibration + saved studies ✅; posterior not applied to Race ⬜, error-shrinking chart ⬜ |
 | 5 | Rule-aware optimisation | 🟨 family filter + FORGE check ✅; feasibility inside the acquisition function ⬜ |
-| 6 | Adjoint shape hints on the CAD | ⬜ (needs an accepted adjoint run) |
+| 6 | Adjoint shape hints on the CAD | 🟨 adjoint tooling exists (`adjoint.py`); CAD hints ⬜, needs an accepted adjoint run |
 | 7 | ML surrogate (stretch) | ⬜ do last, only if time is left |
 | 8 | Verifiable science (hash chain, verify page) | 🟨 hashes, timestamps, coverage ✅; public verify page + QR ⬜ |
 
 **If an idea is not being done:** mark it ✂️ here with a one-line reason and delete it from MASTER-PLAN. Never leave it half-listed.
 
-## §19 Analysis catalogue (A–G): 9 of 38 done, 12 partly done, 17 not started
+## §19 Analysis catalogue (A–G): 8 of 38 done, 13 partly done, 17 not started
 
 **A. Aerodynamics**
-- [ ] 🟨 1 Drag by part: component forces ✅; waterfall chart and pressure/friction split ⬜
-- [x] ✅ 2 Run vs run ΔCp (same mesh) — design-to-design ⬜
+- [ ] 🟨 1 Drag by part: component forces ✅, pressure/friction bars ✅; true waterfall ⬜
+- [ ] 🟨 2 Run vs run ΔCp (same mesh) ✅ — design-to-design ⬜
 - [ ] 🟨 3 GCI: tooling ✅; accepted 3-mesh run ⬜
 - [ ] 🟨 4 Wake survey: planes ✅; momentum-deficit drag ⬜
 - [x] ✅ 5 Vortices (Q-criterion)
@@ -98,7 +100,7 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 - [x] ✅ 13 GP response map
 - [x] ✅ 14 Variable importance (SALib)
 - [ ] ⬜ 15 Acquisition history
-- [ ] 🟨 16 Convergence vs baselines: only the old random benchmark; Optuna, Sobol and LHS ⬜
+- [ ] 🟨 16 Convergence vs baselines: five-seed synthetic GP vs LHS mean ✅; Optuna, Sobol, 10 seeds and CIs ⬜
 - [ ] ⬜ 17 Pareto front (pymoo)
 - [ ] ⬜ 18 Leave-one-out validation
 
@@ -107,7 +109,7 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 - [x] ✅ 20 Tornado chart
 - [x] ✅ 21 ms per unit
 - [x] ✅ 22 Monte Carlo
-- [x] ✅ 23 Traces (uPlot) — annotations ⬜
+- [ ] 🟨 23 Traces (uPlot) ✅ — annotations ⬜
 - [ ] ⬜ 24 Optimal mass
 - [ ] ⬜ 25 Track-length scaling
 - [ ] 🟨 26 Head-to-head / knock-out probability: Points panel ✅; real field data ⬜
@@ -116,12 +118,12 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 - [ ] 🟨 27 Calibration: UI ✅; real data ⬜
 - [ ] ⬜ 28 Reaction stats
 - [ ] ⬜ 29 Lane / batch t-test
-- [ ] ⬜ 30 Outlier detection
+- [ ] 🟨 30 Outlier detection: flags in the timing import API ✅; not shown in the UI ⬜
 - [ ] ⬜ 31 Season trend
 
 **E. Rules**
 - [x] ✅ 32 Compliance margin map + points at risk
-- [x] 🟨 33 Tolerance stack-up: pass probability ✅; measured spread ⬜
+- [ ] 🟨 33 Tolerance stack-up: pass probability ✅; measured spread ⬜
 - [ ] 🟨 34 Mass compliance: rule ✅; density × volume ⬜
 
 **F. Manufacturing**
@@ -194,76 +196,76 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 | pmndrs/racing-game | 🟨 Only the HUD pieces; the camera and effects chain still to adopt |
 | f1-dash | 🟨 Driver components; full leaderboard for stadium mode still to adopt |
 | vtk.js | 🟨 Parsing and layers; the particle flow now uses three.js |
-| mapbox/webgl-wind technique | ✅ Animated flow |
-| Optuna, scipy.stats.qmc | ⬜ ORACLE benchmark |
+| mapbox/webgl-wind technique | 📝 Animated flow is an uncommitted draft (`FlowTunnel3D.tsx`) |
+| Optuna, scipy.stats.qmc | 🟨 scipy `qmc` Latin hypercube used for the ORACLE benchmark; Optuna ⬜ |
 | pymoo | ⬜ Pareto front |
 | ArviZ | ⬜ Calibration diagnostics |
 | OpenTimestamps | ⬜ Second anchor |
 | FoamPilot | ⬜ Run wizard |
-| Hypothesis, pint, openapi-typescript | ⬜ Quality |
-| cmdk, sonner, vaul, TanStack Table, Kibo UI, Origin UI | ⬜ UI polish (`TODO.md` §11) |
+| Hypothesis, pint, openapi-typescript | 🟨 pint used by the unit importers; Hypothesis and openapi-typescript ⬜ |
+| cmdk, sonner, vaul, TanStack Table, Kibo UI, Origin UI | 🟨 cmdk and sonner used; vaul, TanStack Table, Kibo UI and Origin UI ⬜ (`TODO.md` §11) |
 | CalculiX | ⬜ Only with real material data |
 
 ## `TODO.md` §14 chart quality bar
-- [ ] ⬜ One shared chart theme across ECharts and uPlot
+- [ ] 🟨 One shared chart theme across ECharts and uPlot (ECharts theme in `useECharts`; uPlot styled separately)
 - [ ] ⬜ Source badge on every chart
-- [ ] ⬜ PNG/SVG export everywhere (uPlot ✅ only)
+- [ ] 🟨 PNG/SVG export everywhere (uPlot ✅ only)
 - [ ] ⬜ Plain-English caption on every chart
-- [ ] ⬜ Compare-two-runs overlay everywhere
+- [ ] 🟨 Compare-two-runs overlay everywhere (ΔCp and ghost compare exist on some charts)
 
 ## Analysis: every chart, one tick each (`TODO.md` §14, merged with MASTER-PLAN §11 and §19)
 
-**Summary: 43 analyses. 13 done, 13 partly done, 17 not started.**
+**Summary: 43 analyses. 1 done, 29 partly done, 13 not started.**
 
 **Wind Tunnel (11)**
 - [ ] 🟨 1 Cd / CdA with the GCI uncertainty bar: tooling ✅, accepted 3-mesh runs ⬜
 - [ ] 🟨 2 Convergence (residuals + force history + gate line): residuals ✅, gate line ⬜
-- [ ] 🟨 3 Drag waterfall by part, pressure vs friction: forces ✅, waterfall + split ⬜
-- [ ] ⬜ 4 Cp along the centre line (top/bottom) + Cp on the surface (surface ✅, line plot ⬜)
-- [x] ✅ 5 Run vs run: ΔCp surface (same mesh) — Δ wake / Δ forces table ⬜
+- [ ] 🟨 3 Drag waterfall by part, pressure vs friction: pressure/friction bars and cumulative build-up ✅; true waterfall ⬜
+- [ ] 🟨 4 Cp along the centre line (top/bottom) + Cp on the surface: surface ✅, line plot ⬜
+- [ ] 🟨 5 Run vs run: ΔCp surface (same mesh) ✅ — Δ wake / Δ forces table ⬜
 - [ ] 🟨 6 Wake planes x/L 1, 1.5, 2 ✅ — deficit contours + momentum-deficit drag ⬜
-- [x] ✅ 7 Q-criterion vortex cores coloured by vorticity
+- [ ] 🟨 7 Q-criterion vortex cores ✅, coloured by speed — vorticity colouring ⬜
 - [ ] ⬜ 8 Surface streaks (LIC) + separation lines
 - [ ] 🟨 9 Speed sweep Cd vs speed: tooling ✅, runs ⬜; yaw / ride height ⬜
 - [ ] ⬜ 10 Frontal area vs Cd trade chart
-- [ ] ⬜ 11 Mesh quality + y+ maps + skewness histogram
+- [ ] 🟨 11 Mesh quality pass/fail ✅; y+ maps and skewness histogram ⬜
 
 **Race (9)**
-- [x] ✅ 1 Speed / accel / thrust / drag traces, linked cursors (uPlot) — event annotations ⬜
-- [ ] 🟨 2 Ghost delta-time trace: ghost in Replay ✅, delta chart ⬜
-- [x] ✅ 3 Time budget stacked bar
-- [x] ✅ 4 Tornado + SALib Sobol indices
+- [ ] 🟨 1 Speed / accel / thrust / drag traces, linked cursors (uPlot) ✅ — event annotations ⬜
+- [ ] 🟨 2 Ghost delta-time trace: ghost in Replay ✅, delta trace ✅; automatic best-run ghost ⬜
+- [ ] 🟨 3 Time budget: metrics ✅; stacked bar ⬜
+- [ ] 🟨 4 Tornado ✅ + SALib Sobol indices ⬜
 - [x] ✅ 5 Exchange rates (ms per g, per cm² CdA, per 0.001 Crr)
-- [x] ✅ 6 Monte Carlo histogram p5/p50/p95 — convergence plot ⬜
+- [ ] 🟨 6 Monte Carlo histogram p5/p50/p95 ✅ — convergence plot ⬜
 - [ ] 🟨 7 Energy breakdown: panel ✅, Sankey chart ⬜
 - [ ] 🟨 8 Expected points + knock-out probability ✅ — real field data ⬜
 - [ ] ⬜ 9 Optimal mass curve
 
 **ORACLE (7)**
-- [x] ✅ 1 Aero map heat map + uncertainty + next point
-- [ ] 🟨 2 Regret curves vs baselines: random only; Optuna/Sobol/LHS, 10 seeds ⬜
+- [ ] 🟨 1 Aero map: mean map + next point ✅; uncertainty ⬜
+- [ ] 🟨 2 Regret curves vs baselines: five-seed GP vs LHS mean ✅; regret curves, Optuna/Sobol, 10 seeds ⬜
 - [ ] ⬜ 3 Predicted vs actual per candidate
 - [ ] ⬜ 4 Interval calibration (do the 90% bands hold?)
-- [x] ✅ 5 Variable importance (SALib) — length-scales ⬜
+- [ ] 🟨 5 Variable importance (SALib) ✅ — length-scales ⬜
 - [ ] ⬜ 6 Pareto front (pymoo)
 - [ ] ⬜ 7 Acquisition history timeline
 
 **Calibration (6)**
 - [ ] 🟨 1 Prior vs posterior plots: built ✅, real data ⬜
-- [ ] ⬜ 2 Error shrinking over runs (prediction scoreboard)
+- [ ] 🟨 2 Error shrinking over runs: saved studies ✅; cross-run scoreboard ⬜
 - [ ] ⬜ 3 Posterior predictive check (ArviZ)
-- [ ] 🟨 4 Paired-test difference CI + minimum detectable effect: planner ✅, chart ⬜
+- [ ] 🟨 4 Paired-test difference CI + minimum detectable effect: D-optimal planner ✅; paired analysis and chart ⬜
 - [ ] ⬜ 5 Control chart of repeat runs
-- [ ] ⬜ 6 Uncertainty budget (variance share)
+- [ ] 🟨 6 Uncertainty budget: input rank correlations ✅; variance shares ⬜
 
 **FORGE (4)**
-- [x] ✅ 1 Margin bars sorted by points at risk — tolerance band shading ⬜
-- [x] ✅ 2 Pass probability per rule
-- [x] ✅ 3 Legal-frontier map
+- [ ] 🟨 1 Margin bars sorted by points at risk ✅ — tolerance band shading ⬜
+- [ ] 🟨 2 Pass probability per rule: overall pass probability ✅; per-rule plot ⬜
+- [ ] 🟨 3 Legal-frontier map: single-design nearest limits ✅; sampled feasible frontier ⬜
 - [ ] 🟨 4 R/A/G summary: states ✅, one-pager ⬜
 
 **Structure (3)**
-- [x] ✅ 1 Deflection / stress plots (beam)
+- [ ] 🟨 1 Deflection / stress: values ✅, plots ⬜
 - [ ] 🟨 2 Safety factor table
 - [ ] ⬜ 3 Predicted vs measured load test
 
@@ -277,7 +279,7 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 - [ ] ⬜ Thrust curve fit + cartridge variance (§11 #13)
 - [ ] ⬜ Reaction-time statistics (§19 #28)
 - [ ] ⬜ Lane / batch t-test (§19 #29)
-- [ ] ⬜ Outlier detection (§19 #30)
+- [ ] 🟨 Outlier detection (§19 #30): flags in the timing import API ✅; not shown in the UI ⬜
 - [ ] ⬜ Season trend (§19 #31)
 - [ ] ⬜ Track-length scaling (§19 #25)
 - [ ] ⬜ Mass from density × volume (§19 #34)
@@ -296,11 +298,11 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 - [ ] ⬜ 5 judging score checklist linked to screens
 
 **§2 Wind Tunnel**
-- [x] ✅ 1 one viewer (now the particle flow)
+- [ ] 📝 1 one viewer: the particle flow is an uncommitted draft; the field viewer is still mounted as the other tab
 - [ ] 🟨 2 ParaView-grade layers (LIC, probes, clip ⬜)
 - [x] ✅ 3 clean look
 - [x] ✅ 4 accepted-run default
-- [ ] 🟨 5 engineering panels (y+, mesh map, GCI chart ⬜)
+- [ ] 🟨 5 engineering panels (GCI chart ✅; y+ and mesh maps ⬜)
 - [ ] ⬜ 6 FoamPilot wizard
 
 **§3 Race**
@@ -317,8 +319,8 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 **§6 / §12 OSS** — see the open-source table above
 
 **§7 Remove**
-- [x] ✅ old flow view, toolbar clutter, duplicate badges, rejected-run default, Race slider stack
-- [ ] ⬜ Calibration and Test planner input walls are new slider stacks; fix them
+- [ ] 🟨 old flow view, toolbar clutter, duplicate badges, rejected-run default, Race slider stack (old field viewer still mounted as a second Wind Tunnel view)
+- [x] ✅ Calibration and Test planner: Lab/Track/Custom presets and Advanced sections (input walls reduced)
 
 **§8 Build order** — 1–5 mostly done; 6 partly (no multi-fidelity); 7 partly (dockview ✅, xyflow ✅, FoamPilot ⬜); 8 QA ⬜
 
@@ -346,11 +348,11 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 - [x] ✅ renders only in the report
 
 **§21 Output products**
-- [x] 🟨 portfolio PDF (chapters ⬜)
+- [ ] 🟨 portfolio PDF (chapters ⬜)
 - [x] ✅ presenter deck
 - [x] ✅ scrutineering sheet
 - [ ] ⬜ race-day report
-- [x] 🟨 evidence appendix (QR ⬜)
+- [ ] 🟨 evidence appendix (QR ⬜)
 
 ## Why real data is only ~5%, what we need, and how to get it
 
@@ -388,20 +390,20 @@ The only real inputs are the CAD geometry and the rulebook. Without data, judges
 **1. Wind Tunnel animated flow**
 - [x] ✅ Render tab removed
 - [x] ✅ Velocity texture exported
-- [x] ✅ GPU particles + Cp + camera presets
+- [ ] 📝 GPU particles + Cp + camera presets (uncommitted `FlowTunnel3D.tsx`; not ticked)
 - [x] ✅ Accepted-run default
 - [ ] ⬜ Particle trails (streaks)
 - [ ] ⬜ Faint wireframe tunnel walls
-- [ ] ⬜ Moving ground stripe
+- [ ] 📝 Moving ground stripe (in the uncommitted draft)
 - [ ] ⬜ Bloom on the particles only
 - [ ] ⬜ Slice with particles crossing it
-- [ ] ⬜ Auto-drop the particle count below 50 fps
+- [ ] 📝 Auto-drop the particle count below 50 fps (in the uncommitted draft)
 - [ ] ⏳ 60 fps on the real Mac GPU
 
 **1b. CFD speed-ups**
-- [x] ✅ Parallel solve (6 procs)
+- [x] ✅ Parallel solve (6 procs, `decomposePar`)
 - [ ] ⬜ Warm start (`mapFields`)
-- [ ] ⬜ Stop on Cd convergence
+- [ ] ⬜ Stop on Cd convergence (only residual-based stop exists)
 - [ ] ⬜ Mesh reuse / morph
 - [ ] ⬜ 10-core meshing
 - [ ] ⬜ FluidX3D GPU screening (check its licence first)
@@ -409,7 +411,7 @@ The only real inputs are the CAD geometry and the rulebook. Without data, judges
 
 **2. Race**
 - [ ] ⬜ Race tabs from 8 to 4
-- [ ] ⬜ Start trainer becomes a small tool
+- [ ] ⬜ Start trainer becomes a small tool (today it is its own Start tab)
 - [ ] ⬜ Motion blur / FOV kick
 - [ ] ⬜ Clip export
 - [ ] ⬜ Race-day mode
@@ -417,7 +419,7 @@ The only real inputs are the CAD geometry and the rulebook. Without data, judges
 
 **3. FORGE**
 - [ ] ⬜ Rule count 79 vs 80 checked against the PDF
-- [ ] ⬜ Margin in % on every rule
+- [ ] 🟨 Margin in % on every rule (margin in mm per rule ✅; percent ⬜)
 - [ ] ⬜ R/A/G one-pager
 - [ ] ⬜ Inspection log
 - [ ] ⬜ What-if drag mode
@@ -428,43 +430,44 @@ The only real inputs are the CAD geometry and the rulebook. Without data, judges
 - [ ] ⬜ Queue CFD automatically when every performance rule passes
 - [ ] ⬜ STEP-hash guard
 - [ ] ⬜ Accepted-only observation
-- [ ] ⬜ "Run CFD" button
+- [ ] 🟨 "Run CFD" button: Pit Wall → build next → run dialog ✅ (manual queue); status ⬜
 
 **6. ORACLE**
-- [ ] ⬜ Optuna/qmc benchmark, 10 seeds, pre-registered
+- [ ] 🟨 Optuna/qmc benchmark, 10 seeds, pre-registered (scipy qmc, five seeds ✅; Optuna, 10 seeds and pre-registration ⬜)
 - [ ] ⬜ Nugget noise term
 - [ ] ⬜ Acquisition history
 - [ ] ⬜ Pareto chart
 - [ ] ⬜ Engineer veto mode
 
 **7. CFD campaign**
-- [ ] ⬜ 3-mesh GCI
-- [ ] ⬜ Speed sweep
+- [ ] 🟨 3-mesh GCI: GCI panel ✅; accepted 3-mesh study ⬜
+- [ ] 🟨 Speed sweep: tooling ✅; runs ⬜
 - [ ] ⬜ 2 turbulence models
 - [ ] ⬜ One-page acceptance rule
 - [ ] ⬜ OpenFOAM version pinned + case hash stored per run
 - [ ] ⬜ Run wizard with residuals and ETA
 
 **8. Calibration and tests**
-- [ ] ⬜ Presets + Advanced on Calibration and Test planner
-- [ ] ⬜ ArviZ diagnostics
-- [ ] ⬜ Paired-test protocol + power analysis
-- [ ] ⬜ Physical tests (weigh, measure, 10–20 track runs)
-- [ ] ⬜ Sealed prediction checked against a real run
+- [x] ✅ Presets + Advanced on Calibration and Test planner (Lab/Track/Custom protocols)
+- [ ] 🟨 Error shrinking over runs: saved studies ✅; cross-run scoreboard ⬜
+- [ ] ⬜ ArviZ diagnostics (R-hat unavailable for the current importance sampler)
+- [ ] 🟨 Paired-test protocol + power analysis: D-optimal planner ✅; paired protocol, CI and power analysis ⬜
+- [ ] 🟨 Physical tests: timing and thrust CSV import ✅; mass, caliper, coast-down and load-test entry ⬜
+- [ ] ⏳ Sealed prediction checked against a real run: seal/score workflow ✅; no real run scored yet
 
 **9. Structure**
-- [ ] ⬜ Beam FEM vs closed-form test
+- [x] ✅ Beam FEM vs closed-form test (cantilever PL³/3EI test in `tests/test_structure.py`)
 - [ ] ⬜ CalculiX (real material data only)
 - [ ] 🟨 Safety factor
 - [ ] ⬜ Before/after load test
 
 **10. Evidence and judges**
-- [ ] ⬜ OpenTimestamps
-- [ ] ⬜ Public verify page + QR
+- [ ] ⬜ OpenTimestamps second anchor (RFC 3161 anchor ✅ only)
+- [ ] ⬜ Public verify page + QR (verify API ✅; page and QR ⬜)
 - [ ] ⬜ Signed git tag
-- [ ] ⬜ Rule PDFs and runs registered in the store
+- [ ] ⬜ Rule PDFs and runs registered in the store (`data/reference/rules/` is empty)
 - [ ] ⬜ 3-minute judge walkthrough
-- [ ] ⬜ Speaker notes
+- [x] ✅ Speaker notes (Presenter, `N` key)
 - [ ] ⬜ 60-question Q&A bank
 - [ ] ⬜ Limitations slide
 - [ ] ⬜ Innovation one-pager
@@ -484,22 +487,22 @@ The only real inputs are the CAD geometry and the rulebook. Without data, judges
 | Presenter | 🟨 |
 | Settings | ⬜ |
 
-- [ ] ⬜ Adopt cmdk/sonner/vaul/TanStack Table/Kibo/Origin
-- [ ] ⬜ No form with more than 6 visible inputs
-- [ ] ⬜ Every page re-scored in `RATINGS.md`
+- [ ] 🟨 Adopt cmdk/sonner/vaul/TanStack Table/Kibo/Origin (cmdk and sonner used; the rest ⬜)
+- [ ] 🟨 No form with more than 6 visible inputs (Calibration and Planner done; other forms ⬜)
+- [ ] 🟨 Every page re-scored in `RATINGS.md` (file exists; re-scoring pending)
 
 **12. Engineering quality**
-- [ ] ⬜ CI on every push (ruff, pytest, tsc, oxlint, vitest, knip, gitleaks)
+- [ ] 🟨 CI on every push: workflow in `ci/github-actions-ci.yml` is not in `.github/workflows/`, so it does not run; `lefthook.yml` runs ruff, pyrefly, tsc, oxlint and gitleaks on commit
 - [ ] ⬜ 80% coverage on the core modules
 - [ ] ⬜ Hypothesis tests
 - [ ] ⬜ Golden-file baseline tests
 - [ ] ⬜ OpenAPI → TS types
-- [ ] ⬜ Playwright golden path
-- [ ] ⬜ Analytic physics benchmarks + pint
-- [ ] ⬜ pip-audit / pnpm audit / licence scan
+- [ ] ⬜ Playwright golden path (`@playwright/test` installed, no golden-path test)
+- [ ] 🟨 Analytic physics benchmarks + pint (cantilever closed-form test ✅; pint in unit importers ✅; more benchmarks ⬜)
+- [ ] 🟨 pip-audit / pnpm audit / licence scan (pip-audit in the CI file, not running; licence scan ⬜)
 
 **13. Project and enterprise**
-- [ ] 🟨 Timeline
+- [ ] 🟨 Timeline (forecast ✅; Gantt ⬜)
 - [ ] ⬜ Decision log
 - [ ] ⬜ Risk register
 - [ ] ⬜ Meeting minutes
