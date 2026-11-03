@@ -871,3 +871,7 @@ M06 complete: removed drawing UI/API/generator/template and judge-pack hooks, me
 ### Analysis chart batch — 2026-11-03 (§23 update)
 
 Native ECharts energy Sankey replaces the hand-built share bar, preserving signed numerical closure error and explicit missing tether term. Beam charts now use solver nodal deflection/stress, estimated strength line and PNG export. Zero-load safety factor is JSON-safe null (UI infinity), not non-finite JSON. R07 remains partial for tether; T01 chart software built, browser/material validation pending. Evidence: `evidence/ANALYSIS-energy-structure.md`.
+
+### Signed drag waterfall — 2026-11-03 (§23 update)
+
+ForceBars now has native ECharts floating waterfall bars and retained pressure/friction view, using existing signed component force records. Computed component sum is labelled separately from solver total-force acceptance. Negative contributions/zero crossings preserved; PNG export added. No CFD launched. Evidence: `evidence/W03-component-waterfall.md`.

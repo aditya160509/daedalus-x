@@ -51,7 +51,7 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 
 **Wind Tunnel**
 - [ ] 🟨 Flow viewer: Cp ✅, Q-criterion vortices ✅, wake planes ✅ (field viewer); animated particles 📝 uncommitted draft (`FlowTunnel3D.tsx`), not ticked; LIC streaks, probes and clip ⬜
-- [ ] 🟨 Run compare (same-mesh ΔCp) ✅; drag build-up by part ✅ (cumulative chart); true waterfall and Δwake/Δforces ⬜
+- [ ] 🟨 Run compare (same-mesh ΔCp) ✅; drag build-up by part ✅ (cumulative chart); signed component waterfall connected ⏳ browser review; Δwake/Δforces ⬜
 - [ ] 🟨 Quality gate: convergence ✅; GCI and mesh-quality pass/fail shown ✅; y+ and bad-cell maps ⬜
 - [ ] ⬜ Run wizard with live residuals and ETA
 
@@ -83,7 +83,7 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 ## §19 Analysis catalogue (A–G): status per row
 
 **A. Aerodynamics**
-- [ ] 🟨 1 Drag by part: component forces ✅, pressure/friction bars ✅; true waterfall ⬜
+- [ ] ⏳ 1 Drag by part: signed component waterfall + pressure/friction bars + PNG export connected; browser/accepted-run validation pending
 - [ ] 🟨 2 Run vs run ΔCp (same mesh) ✅ — design-to-design ⬜
 - [ ] 🟨 3 GCI: tooling ✅; accepted 3-mesh run ⬜
 - [ ] 🟨 4 Wake survey: planes ✅; momentum-deficit drag ⬜
@@ -220,7 +220,7 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 **Wind Tunnel (11)**
 - [ ] 🟨 1 Cd / CdA with the GCI uncertainty bar: tooling ✅, accepted 3-mesh runs ⬜
 - [ ] 🟨 2 Convergence (residuals + force history + gate line): residuals ✅, gate line ⬜
-- [ ] 🟨 3 Drag waterfall by part, pressure vs friction: pressure/friction bars and cumulative build-up ✅; true waterfall ⬜
+- [ ] ⏳ 3 Signed component waterfall + pressure/friction view + longitudinal build-up connected; browser/accepted-run validation pending
 - [ ] 🟨 4 Cp along the centre line (top/bottom) + Cp on the surface: surface ✅, line plot ⬜
 - [ ] 🟨 5 Run vs run: ΔCp surface (same mesh) ✅ — Δ wake / Δ forces table ⬜
 - [ ] 🟨 6 Wake planes x/L 1, 1.5, 2 ✅ — deficit contours + momentum-deficit drag ⬜
