@@ -23,7 +23,7 @@ type FieldSource = "measured" | "estimated" | "synthetic";
 const SOURCE_OPTIONS = [
   { value: "synthetic", label: "Synthetic" },
   { value: "estimated", label: "Estimated" },
-  { value: "measured", label: "Measured" },
+  // Measured must remain unavailable until actual timing data is supplied.
 ] as const;
 
 /** Deterministic samples keep the scenario stable between renders. */
@@ -233,7 +233,7 @@ export function PointsPanel({
               />
             </div>
             <p className="text-2xs leading-4 text-muted-foreground">
-              Choose measured only when the field times come from real timing data.
+              Field times are generated from the assumptions above. Measured provenance requires an actual timing-data import.
             </p>
           </section>
 
