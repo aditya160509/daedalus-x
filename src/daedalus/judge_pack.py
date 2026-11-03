@@ -1,7 +1,7 @@
 """One downloadable judge pack (T13): existing exports plus an honest missing list.
 
 The pack reuses what the app already generates instead of duplicating it: the Typst engineering
-report, the drawing pack, FORGE rule findings, stored run manifests, the design's ORACLE manifest
+report, FORGE rule findings, stored run manifests, the design's ORACLE manifest
 and the evidence store's own hash verification and coverage report. Anything that cannot be
 produced is named in `MISSING.txt` with the reason it failed; a missing artefact is never
 replaced by a placeholder or an invented result.
@@ -44,15 +44,6 @@ def _report_bytes(design: str) -> bytes:  # pragma: no cover - exercised through
     from daedalus.api import report
 
     return bytes(report.report_pdf(design=design).body)
-
-
-def _drawing_bytes(design: str, team: str, number: str) -> bytes:  # pragma: no cover
-    from daedalus.api import drawings
-
-    request = drawings.DrawingRequest(
-        design=design, team=team, number=number, finish="", decal="", annotations={}
-    )
-    return bytes(drawings.export(request).body)
 
 
 def _rules(design: str, rulebook: str) -> dict[str, Any]:  # pragma: no cover
@@ -102,7 +93,6 @@ def build_pack(
     *,
     design: str,
     team: str,
-    number: str,
     rulebook: str = "india-nf-2025-26",
 ) -> Pack:
     """Compile the pack. Never raises for a missing export; records it instead."""
@@ -116,14 +106,6 @@ def build_pack(
             _add(bundle, "report.pdf", _report_bytes(design), files)
         except Exception as exc:  # the report is optional, but the failure must be visible
             missing.append(f"report.pdf — engineering report unavailable: {exc}")
-
-        try:
-            _add(bundle, f"drawings/{design}.pdf", _drawing_bytes(design, team, number), files)
-        except Exception as exc:
-            missing.append(
-                f"drawings/{design}.pdf — drawing pack unavailable "
-                f"(source STEP or annotations missing): {exc}"
-            )
 
         try:
             rules = _rules(design, rulebook)
@@ -202,14 +184,13 @@ def build_pack(
         _add(
             bundle,
             "README.txt",
-            _readme_text(design=design, team=team, number=number, rulebook=rulebook).encode(),
+            _readme_text(design=design, team=team, rulebook=rulebook).encode(),
             files,
         )
         manifest: dict[str, Any] = {
             "generated": generated,
             "design": design,
             "team": team,
-            "drawing_number": number,
             "rulebook": rulebook,
             "files": files,
             "missing": missing,
@@ -226,15 +207,14 @@ def _json(payload: object) -> bytes:
     return json.dumps(payload, indent=2, sort_keys=True, default=str).encode()
 
 
-def _readme_text(*, design: str, team: str, number: str, rulebook: str) -> str:
+def _readme_text(*, design: str, team: str, rulebook: str) -> str:
     return (
         "Daedalus X judge pack\n"
         "=====================\n\n"
-        f"Design: {design}\nTeam: {team}\nDrawing number: {number}\nRulebook: {rulebook}\n\n"
+        f"Design: {design}\nTeam: {team}\nRulebook: {rulebook}\n\n"
         "Contents\n"
         "--------\n"
         "- report.pdf: the app's existing Typst engineering report.\n"
-        "- drawings/<design>.pdf: the A4 drawing pack, if a STEP source and annotations exist.\n"
         "- rules/<design>-checks.json: FORGE rule findings, including CAD-only verdicts.\n"
         "- designs/*-oracle.json: stored ORACLE candidate manifests.\n"
         "- runs/*-manifest.json and *-result.json: stored solver case metadata.\n"

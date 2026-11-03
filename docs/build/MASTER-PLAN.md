@@ -323,7 +323,7 @@ Added 2026-11-02 after reading both India NF PDFs (Technical and Competition Reg
 | 7 | **Cartridge.** T1.20 says "compressed air"; C9.12 says "compressed gas". Supplied by the organisers, kept at 21 C, weighed within 0.5 g. Full pack 28.9-29.4 g, 65 mm long, 18 mm diameter. | T1.20, C9.12, Appendix vi | Confirm the gas before building the thrust model (T18 assumed CO2). |
 | 8 | **Tether is 0.6 mm monofilament**, fixed at the finish, over one pulley at the start. Track is 20 m. | C9.10.1 | Re-set the tether friction prior; the Australian rules used a 0.2 mm braid. |
 | 9 | **Originality.** "All design work, text and scripting ... must be wholly undertaken and created by the team", including CAD, CAM, portfolio and graphics. An Originality Declaration is part of registration, and plagiarism can be penalised or excluded. There is no statement about AI tools or software-generated designs. | C2.9.2, C2.16, T2.10 | Ask the organisers for a text clarification (allowed under C2.6.2 and T2.2.2; design-compliance rulings are not, T2.6). Keep evidence of the team's own authorship and understanding of every part. |
-| 10 | **The drawing pack is 60 scrutineering points** (drawings /20, 3D renders /20, finish and assembly /20) and has a mandatory 13-item contents list, plus 5-pt penalties for missing identification (T4.3, T7.12.2, T8.1, T9.1). | C2.10.6, p40, p53 | T22: generate it from the CAD. |
+| 10 | **The drawing pack is 60 scrutineering points** (drawings /20, 3D renders /20, finish and assembly /20) and has a mandatory 13-item contents list, plus 5-pt penalties for missing identification (T4.3, T7.12.2, T8.1, T9.1). | C2.10.6, p40, p53 | Team deliverable; software generation is out of innovation scope. |
 | 11 | **Halo and helmet are fixed standard parts** that must appear unmodified. The halo pocket is cut with a 6.35 mm ball-nose tool to 3.175 mm depth; the pocket bottom is 24.0 mm above the track and the notch centre 34.0 mm +/- 1.0 mm. | T4.4, T1.21, Appendix ix | Include the halo in every CFD geometry. |
 | 12 | **Points:** specification and scrutineering 160, design and engineering 180, project management 90, enterprise 180, verbal presentation 140, racing 250. Total 1000. | C3.5 | Use these weights in the score checklist (section 1.5). |
 
@@ -342,20 +342,12 @@ Build order is roughly top to bottom. "Needs" lists what the code cannot work wi
 | T19 | ✅ Built | **Energy-loss audit:** where every joule of thrust went. | dynamics | none |
 | T20 | 🟨 Partial | **FORGE v2:** build the missing measures (height, wheelbase, wheel diameter and width, clearance, overhangs, wall thickness, chamber, halo notch, wing thickness), pass probability from the manufacturing spread, and live "points at risk". | geometry, rulebook | measured part spread |
 | T21 | 🟨 Partial | **Structural analysis.** Start with beam FEM (numpy) on the wings, axle and halo; model the rules' own load tests (halo 1 kg, wheel 100 g, tether guide 200 g). Add 3D FEA with CalculiX when installed. | geometry | material properties of the real block, resin or foam; solver install for 3D |
-| T22 | 🟨 Partial | **Engineering drawing pack generator:** the 13-item contents list from build123d (orthographic with dimensions, exploded view, virtual cargo highlighted, sections), plus a 2D drawing importer (DXF, SVG) with a deviation check against the rebuilt 3D model. | geometry | a sample drawing to test the importer |
 | T23 | 🟨 Partial | **Test planner:** which physical test (mass ballast, air density, track length) most reduces the calibration uncertainty. | T17 | none |
-| T24 | ⬜ Remaining | **Gradient-enhanced and multi-fidelity ORACLE** (adjoint gradients, quick and final meshes in one GP). | T05 adjoint, T10 | working adjoint |
 | T25 | ⬜ Remaining | **Free-form adjoint shape optimisation** inside the FORGE constraints. | T05, T20, CFD | accepted CFD runs |
-| T26 | ✂️ Out of scope | **Exhaust base-bleed study:** thrust and wake as one design problem (research, may be negligible; check T3.3 and T5.6 first). | T18, CFD | compressible CFD, gas confirmed |
 | T27 | ⬜ Remaining | **Physical-in-the-loop optimiser** with a model-discrepancy term. | T15, T17 | several real runs |
-| T28 | ✂️ Out of scope | **Field intelligence** from public portfolios and results: where winners sit in design space. | none | curated public data, cited |
 | T29 | 🟨 Partial | **Legal-frontier map:** the edge of the rule-feasible design space, with rule and page for every boundary. | T20 | none |
-| T30 | ✂️ Out of scope | **Virtual scrutineer from photos:** rule dimensions with uncertainty. | T20 | photos with a scale reference |
-| T31 | ✂️ Out of scope | **Video test lab:** trajectory, wobble and snag detection from phone video. | T17 | video |
-| T32 | ✂️ Out of scope | **As-built twin:** photogrammetry of the finished car back into the prediction. | T20, CFD | photo scan |
 | T33 | 🟨 Partial | **Project twin:** Monte Carlo schedule and budget risk tied to engineering evidence, mapped to the 90-point project management scorecard. | none | the team's plan |
 | T34 | ⬜ Remaining | **Red-team mode, V&V dossier, post-event regret report.** | T10, T17 | CFD and runs |
-| T35 | ✂️ Out of scope | **Community calibration** across teams. | T17 | other teams |
 
 ### 22.4 Questions for the organisers
 1. Are software-generated geometry or AI-assisted code acceptable under C2.9.2 and C2.16, and what must be declared?
@@ -372,7 +364,6 @@ The next-wave changes were merged into `main` in `6d708b5`. The table tracks ver
 | Honesty correction | ✅ Implemented | India NF T7.2.1 finding reproduced on `orbit_v2`: 33.00 mm front-wheel gap vs 38.00 mm minimum; pitch and checklist corrected ([evidence](../../evidence/STEP-1-india-honesty.md)) | Physical measurement and official scrutineering remain unverified |
 | 1 India rulebook | 🟨 Partial | `rulebooks/stem-racing-india-nf-2025-26.yaml`, more rules measured, points at risk, scrutineering sheet (`forge_sheet.py`, `sheet.typ`), failed-rule links select and frame named CAD parts; responsive shell | Physical verification; feature-level measures tracked below |
 | T20 FORGE v2 | 🟨 Partial | Axle layout measures retained; CAD cylinder rolling bands, sampled wing-section extremes, explicit named halo-notch arcs, rear-wing plane B location and rear overhang bound; hash-bound remeasurement sidecar + UI action | Halo absent/ambiguous features remain manual; continuous wing surfaces, contact geometry and physical tolerances still require verification |
-| T22 drawing pack | 🟨 Partial | Design Studio Drawings tab exports all 13 C2.10.6 contents items as A4 vector PDF from original STEP; sections, exploded key, CAD extents, FORGE findings, team notes and review register | Local feature dimensioning, wing-boundary markup, missing named nose/tether geometry and team finish/decal annotations require engineering completion; DXF/SVG deviation importer and separate render pack remain |
 | 2 Wind Tunnel analysis | 🟨 Partial | Component-force/drag charts and grid study wired; ✅ wake planes, Q surfaces and strict same-mesh ΔCp with exports connected; ✅ static Render tab removed and default run now the lowest-Cd accepted run; ✅ RGBA Float32 velocity texture (`/vtk/velocity.json`, `/vtk/velocity.bin`) exported for GPU advection | GPU particle layer, accepted-source/campaign validation, interpolated design-to-design comparison and remaining wake metrics |
 | 3 Race replay rebuild | 🟨 Built core; acceptance pending | Correct Z-up GLB conversion and leading-point placement; PBR car/wheel motion, studio track, tether/start/sector/finish details, six camera modes, adaptive reflections/effects, cursor timing, comparison controls, photo-finish slow motion and PNG capture | Hardware 60 fps verification, final 1024 px pass and broader final QA; no measured reaction data supplied |
 | 4 Race analysis | 🟨 Partial | Time budget, tornado chart, exchange rates, Breakdown tab, Energy panel (`raceanalysis.py`, `energy.py`) | Stadium timing / TV mode |
@@ -437,11 +428,11 @@ This is the current implementation ledger for all T01–T35 tasks. Earlier featu
 
 **Legend:** ✅ implemented core · 🟨 partly implemented · 🔄 active integration · 📝 uncommitted local draft · ⬜ planned/not started · ⏳ verification pending · ✂️ out of scope · 🚫 explicitly skipped library. A build tick does not change the task board to reviewer-accepted or tick the final QA checklist. These statuses are based on the current source and recorded evidence, not a fresh full-product acceptance audit.
 
-**Current in-scope plan: 47% checklist score.** Scope decision §27 removes six tasks: 29 remain, with three built, twenty-one partial and five remaining. Calculation: `(3 × 1 + 21 × 0.5 + 5 × 0) / 29 = 46.6%`. The prior 37.1% counted all 35 tasks; the denominator change is a scope cut, not newly completed engineering.
+**Scope-normalised historical task score: 48.1%.** The current eight cuts leave 27 tasks: three built, twenty partial, four remaining in this coarse historical ledger. `(3 + 20 × 0.5) / 27 = 48.1%`. Removing T22 and T24 changes the denominator; it is not evidence of engineering completion. Use §28 and PROGRESS for detailed current work.
 
 **Original core T01–T14: 57% checklist score.** Two built + twelve partial: `(2 + 12 × 0.5) / 14 = 57.1%`.
 
-Partial tasks receive a fixed half-point for a simple, reproducible tally; this does not mean each is halfway through its engineering effort. These are rough scope-completion indicators, not estimates of hours left, judging points or competition readiness. The six explicitly cut tasks are excluded. This is a checklist tally, not an effort-weighted estimate.
+Partial tasks receive a fixed half-point for a simple, reproducible tally; this does not mean each is halfway through its engineering effort. These are rough scope-completion indicators, not estimates of hours left, judging points or competition readiness. The eight explicitly cut tasks are excluded. This is a checklist tally, not an effort-weighted estimate.
 
 | ID | Task | Build | What is present / what remains |
 |---|---|---|---|
@@ -457,7 +448,7 @@ Partial tasks receive a fixed half-point for a simple, reproducible tally; this 
 | T10 | ORACLE optimisation | 🟨 Partial | GP/EI, SALib sensitivity and family-filtered study build/API/FORGE/evidence/UI connected; complete legal geometry, accepted-only CFD feedback, training-source separation and full objective remain. |
 | T11 | FORGE rules and inspections | 🟨 Partial | India rulebook, CAD states/margins and sheet; measured inspections and full coverage remain. |
 | T12 | ATLAS evidence | 🟨 Partial | Store, hashes, timeline, verify and React Flow lineage exist; derived missing-action coverage now ties every gap to a real design/run/calibration/prediction ID and shows it in the lineage and a Coverage view. Final acceptance remains. |
-| T13 | Competition mode and report (AR cut) | 🟨 Partial | Presenter, Typst report and drawing pack exist; a downloadable judge pack now bundles the existing exports, rule findings, run manifests and evidence verification with an honest missing list. Public verification remains; AR is out of scope. |
+| T13 | Competition mode and report (AR cut) | 🟨 Partial | Presenter and Typst report exist; a downloadable judge pack now bundles the existing exports, rule findings, run manifests and evidence verification with an honest missing list. Public verification remains; AR is out of scope. |
 | T14 | Final app polish | 🟨 Partial | ✅ `?` shortcut sheet, route error boundary, palette actions and dossier panel; consolidated responsiveness, contrast, formatting, bundle and acceptance pass remains. |
 | T15 | Racing-points objective | 🟨 Partial | ✅ Outcome core, tested API and Race Points scenario panel connected (editable assumptions, points split, knock-out chart, p05–p95); ORACLE objective integration and real field data remain; competitor scraping is cut. |
 | T16 | Third-party prediction timestamps | 🟨 Partial | ✅ Submission/status/OpenSSL verification UI and API connected; each verification is now an append-only evidence record linked to the prediction, token artifact and trust-bundle artifact, with a history view. A real authority response and trusted certificate-chain verification remain. |
@@ -466,20 +457,12 @@ Partial tasks receive a fixed half-point for a simple, reproducible tally; this 
 | T19 | Energy-loss audit | ✅ Built | Energy model, API and Race Energy panel verified in source; final reviewer acceptance remains. |
 | T20 | FORGE v2 | 🟨 Partial | Added rolling bands, sampled sections, named-notch logic, remeasurement and a manufacturing pass-probability API/Rules panel; wall/chamber measures and measured process spread remain. |
 | T21 | Structural analysis | 🟨 Partial | Beam FEM, API and Strength panel exist; material validation and 3D FEA remain. |
-| T22 | Drawing pack and drawing importer | 🟨 Partial | 13-item A4 draft generator/UI implemented; detailed annotations, DXF/SVG deviation importer and render pack remain. |
 | T23 | Test planner | 🟨 Partial | ✅ Pit Wall UI connects editable assumptions, thrust CSV and ranked timing/coast-down recommendations (`c75b9eb`); completed-outcome feedback, density comparison, physical validation and visual review remain. |
-| T24 | Gradient / multi-fidelity ORACLE | ⬜ Remaining | Combined gradient and multi-fidelity optimisation remains. |
 | T25 | Free-form shape optimisation | ⬜ Remaining | Constraint-aware free-form optimisation remains. |
-| T26 | Exhaust base-bleed study | ✂️ Out of scope | Gas confirmation, compressible study and evidence remain. |
 | T27 | Physical-in-the-loop optimiser | ⬜ Remaining | Measured trials and discrepancy-aware optimiser remain. |
-| T28 | Field intelligence | ✂️ Out of scope | Cited competitor portfolio/result dataset and connected analysis remain. |
 | T29 | Legal-frontier map | 🟨 Partial | ✅ Interactive unit-filtered nearest-limit chart/list with rule pages and CAD focus connected; sampled feasible-space frontier and acceptance remain. |
-| T30 | Photo scrutineer | ✂️ Out of scope | Scale-aware image measurements and uncertainty workflow remain. |
-| T31 | Video test lab | ✂️ Out of scope | Trajectory, wobble and snag analysis workflow remains. |
-| T32 | As-built twin | ✂️ Out of scope | Measured scan/photogrammetry-to-model workflow remains. |
 | T33 | Project twin | 🟨 Partial | Project forecast backend and Project workspace exist; assumptions, per-task source references, a declared scorecard with evidenced points, derived evidence gaps and saved forecasts (hashed plan + result artifacts) are connected. Official weights and final validation remain team-supplied. |
 | T34 | Red-team / V&V dossier | 🟨 Partial | ✅ Dossier evaluates ten requirements from stored records, lists failures/limitations/open validation and exports JSON/Markdown in the Project panel; red-team mode and post-event regret report remain. |
-| T35 | Community calibration | ✂️ Out of scope | Cross-team calibrated-data workflow remains. |
 
 **New work landed in this session:** ✅ India honesty correction; ✅ failed-rule CAD selection/focus; 🟨 FORGE v2 feature expansion; 🟨 13-item drawing draft; 🟨 replay rebuild pending final acceptance; 🟨 closed-loop study generation/API/evidence/UI now connected. Details and commit IDs are in §23.
 
@@ -518,7 +501,7 @@ Licences were checked before replay-source use, pinned source references were re
 | Postprocessing | Actual installed SMAA and Bloom components; Three tone mapping | No upstream racing-game postprocessing module was ported. Motion blur, FOV kick, speed trails and video-clip export were not implemented. |
 | drei / R3F | Actual Canvas, frame hooks, reflector material, PerformanceMonitor and Stats | These library components are reused directly. The track arrangement, adaptive-quality wiring, illustrative launch puff and replay orchestration are custom. |
 | Chili3D | Full pinned upstream application, rebuilt with our patch | Our import/export/focus bridge and cockpit messaging are custom integration code. The CAD kernel and editor were not rewritten. |
-| Drawing pack / FORGE features | Actual build123d/OpenCascade geometry APIs, polygonal hidden-line machinery and Typst compiler | `drawings.py`, drawing template/form, feature-selection logic, wing sampling, sidecar/hash checks and FORGE glue were written here. No complete upstream engineering-drawing application or rule engine was imported. |
+| Removed drawing pack / retained FORGE features | Actual build123d/OpenCascade geometry APIs, polygonal hidden-line machinery and Typst compiler | `drawings.py`, drawing template/form, feature-selection logic, wing sampling, sidecar/hash checks and FORGE glue were written here. No complete upstream engineering-drawing application or rule engine was imported. |
 | ORACLE and parametric family | Existing NumPy/SciPy and build123d libraries | The current GP/EI implementation is custom; Ax/BoTorch/Optuna were not integrated. The uncommitted `parametric.py` study family was written here, not copied from bitbybit or another car generator. bitbybit car-part ideas have not yet been researched/adopted for this draft. |
 | Remaining named tools | Existing vtk.js, PyVista, OpenFOAM and ECharts integrations retained | trame/ParaView Web, FoamPilot wizard/monitor, F3D turntables, uPlot telemetry, FastF1 layouts, dockview, xyflow, SU2/DAFoam and PyGeM were not newly integrated in this pass. CadQuery was not added as a second CAD pipeline. OpenFOAM tutorial adoption was not newly audited in this pass. |
 
@@ -863,7 +846,7 @@ These rows track the WHOLE requested chart, so partial rows can contain built co
 - [x] ✂ M03 — Windows/Linux matrix, Docker/devcontainer, mutation testing, 8-hour soak, multi-user concurrency and Zenodo/Software Heritage archive removed.
 - [x] ✂ M04 — Drawing/render packs and DXF/SVG importer belong to other team work and are removed from innovation scope by TODO.
 - [x] ✅ M05 — Wind Tunnel static Render tab removed; report-cover rendering is still allowed.
-- [ ] 🧹 M06 — Existing Drawings tab/generator and judge-pack references still need removal/decoupling; scope exclusion is not code deletion.
+- [x] ✅ M06 — Removed Drawings tab, PDF API, generator/template and judge-pack drawing hooks/metadata. Saved files remain untouched; competition drawing requirement stays in the team scorecard.
 - [ ] 🧹 M07 — Remaining duplicate badges/charts, obsolete target references, long forms and confirmed dead code need focused cleanup.
 
 ### Sprint order and tick discipline
@@ -880,3 +863,7 @@ C07 and E07 software landed; mean/SD map, held-out target and coverage charts co
 ### CFD stopping controls — 2026-11-03
 
 Existing Cd convergence settings are now auditable through API → durable queue → CLI → case manifest/controlDict: optional tolerance, window, iteration cap and disable switch. Conflicting settings and impossible windows are rejected. Independent mesh/force/averaging acceptance gates are unchanged. No solver launched and no speed-up measured. Evidence: `evidence/CFD-stop-controls.md`.
+
+### Scope cleanup — 2026-11-03 (§23 update)
+
+M06 complete: removed drawing UI/API/generator/template and judge-pack hooks, metadata and false missing-deliverable warnings. Existing output/data untouched. Cut T22/T24/T26/T28/T30/T31/T32/T35 rows removed from active task tables; historical scope score normalised to 27 tasks, not treated as new engineering progress. Competition drawing obligations remain team work. Evidence: `evidence/M06-drawing-cleanup.md`.

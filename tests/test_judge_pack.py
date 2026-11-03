@@ -37,9 +37,6 @@ def data_root(tmp_path: Path) -> Path:
 def fake_exports(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(judge_pack, "_report_bytes", lambda design: b"%PDF-fake-report")
     monkeypatch.setattr(
-        judge_pack, "_drawing_bytes", lambda design, team, number: b"%PDF-fake-drawings"
-    )
-    monkeypatch.setattr(
         judge_pack,
         "_rules",
         lambda design, rulebook: {"revision": "2025.1", "is_reference_only": False, "checks": []},
@@ -51,7 +48,7 @@ def _zip(pack: judge_pack.Pack) -> zipfile.ZipFile:
 
 
 def test_pack_contains_real_exports_and_hashed_manifest(data_root: Path) -> None:
-    pack = judge_pack.build_pack(data_root, design="demo", team="Veloira", number="DX-001")
+    pack = judge_pack.build_pack(data_root, design="demo", team="Veloira")
     bundle = _zip(pack)
     names = set(bundle.namelist())
     assert {
@@ -59,7 +56,6 @@ def test_pack_contains_real_exports_and_hashed_manifest(data_root: Path) -> None
         "MISSING.txt",
         "manifest.json",
         "report.pdf",
-        "drawings/demo.pdf",
         "rules/demo-checks.json",
         "designs/demo-oracle.json",
         "runs/run_1-manifest.json",
@@ -87,15 +83,15 @@ def test_missing_export_is_named_and_not_replaced(
     data_root: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     def broken(*_args: object) -> bytes:
-        raise RuntimeError("no STEP source")
+        raise RuntimeError("report compiler unavailable")
 
-    monkeypatch.setattr(judge_pack, "_drawing_bytes", broken)
-    pack = judge_pack.build_pack(data_root, design="demo", team="Veloira", number="DX-001")
+    monkeypatch.setattr(judge_pack, "_report_bytes", broken)
+    pack = judge_pack.build_pack(data_root, design="demo", team="Veloira")
     bundle = _zip(pack)
-    assert "drawings/demo.pdf" not in bundle.namelist()
+    assert "report.pdf" not in bundle.namelist()
     missing = bundle.read("MISSING.txt").decode()
-    assert "drawings/demo.pdf" in missing and "no STEP source" in missing
-    assert any("drawings/demo.pdf" in item for item in pack.missing)
+    assert "report.pdf" in missing and "report compiler unavailable" in missing
+    assert any("report.pdf" in item for item in pack.missing)
 
 
 def test_reference_rulebook_and_empty_store_are_flagged(
@@ -106,7 +102,7 @@ def test_reference_rulebook_and_empty_store_are_flagged(
         "_rules",
         lambda design, rulebook: {"revision": "ref", "is_reference_only": True, "checks": []},
     )
-    pack = judge_pack.build_pack(tmp_path, design="demo", team="Veloira", number="DX-001")
+    pack = judge_pack.build_pack(tmp_path, design="demo", team="Veloira")
     text = pack.missing
     assert any("reference copy" in item for item in text)
     assert any("no solver run manifest" in item for item in text)
@@ -133,3 +129,12 @@ def test_endpoint_returns_a_zip_and_rejects_traversal(
     assert zipfile.ZipFile(io.BytesIO(response.content)).namelist()
     assert response.headers["X-Daedalus-Missing"].isdigit()
     assert client.get("/v1/report/judge-pack?design=../etc").status_code == 422
+
+
+def test_removed_drawing_generator_is_not_a_gap(data_root: Path) -> None:
+    pack = judge_pack.build_pack(data_root, design="demo", team="Veloira")
+    bundle = _zip(pack)
+    assert not any(name.startswith("drawings/") for name in bundle.namelist())
+    assert "drawings" not in bundle.read("MISSING.txt").decode()
+    assert "drawings" not in bundle.read("README.txt").decode()
+    assert "drawing_number" not in pack.manifest

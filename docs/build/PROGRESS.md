@@ -26,10 +26,10 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 - T24 multi-fidelity
 - BoTorch, OpenMDAO, trame
 
-> **For the next Claude/Codex:** delete the ✂️ rows (T22, T26, T28, T30, T31, T32, T35) from the `MASTER-PLAN.md` §22.3 and §24 tables, delete the T22 row in §23, and recount the §24 score.
+> Active task tables now exclude all eight cuts, including T22 and T24. Historical coarse task score is 48.1% over 27 tasks; the denominator change is a scope correction.
 
 ## Overall
-- **In-scope tasks:** about **47%** (MASTER-PLAN §24 score).
+- **In-scope tasks:** **48.1% historical coarse checklist score** (27-task scope; not effort or readiness).
 - **Software built:** about 65%.
 - **Real data:** about 5%. No accepted CFD campaign, no measured race, no physical tests. **This is the biggest gap.**
 
@@ -355,7 +355,7 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 - [ ] 🟨 evidence appendix (QR ⬜)
 
 **§28 ledger items not listed above**
-- [ ] ⬜ Remove the Drawings tab/generator and the judge-pack references still in code (out of scope)
+- [x] ✅ Removed Drawings tab/generator/API/template and judge-pack drawing references (out of scope); saved files untouched
 - [ ] ⬜ Keep synthetic and physical/accepted-CFD training data separate in ORACLE
 - [ ] ⬜ Official judging weights checked against real delivery (declared points are not awarded points)
 - [ ] ⬜ Red-team and post-event regret reports

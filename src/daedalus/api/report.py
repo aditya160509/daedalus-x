@@ -85,9 +85,7 @@ def verification_dossier(
         return Response(
             content=dossier_module.to_markdown(doc),
             media_type="text/markdown; charset=utf-8",
-            headers={
-                "Content-Disposition": 'attachment; filename="daedalus-x-vv-dossier.md"'
-            },
+            headers={"Content-Disposition": 'attachment; filename="daedalus-x-vv-dossier.md"'},
         )
     return doc
 
@@ -96,19 +94,16 @@ def verification_dossier(
 def judge_pack_bundle(
     design: str = Query("orbit_baseline", min_length=1, max_length=120),
     team: str = Query("Veloira", min_length=1, max_length=100),
-    number: str = Query("DX-001", min_length=1, max_length=30),
     rulebook: str = Query("india-nf-2025-26", min_length=1, max_length=60),
 ) -> Response:
     """One ZIP of the existing exports plus an honest list of what is missing."""
     from daedalus import judge_pack as pack
 
-    for label, value in (("design", design), ("team", team), ("number", number)):
+    for label, value in (("design", design), ("team", team)):
         if "/" in value or "\\" in value or ".." in value:
             raise HTTPException(422, f"{label} may not contain path separators")
     try:
-        result = pack.build_pack(
-            eng_api.data_root(), design=design, team=team, number=number, rulebook=rulebook
-        )
+        result = pack.build_pack(eng_api.data_root(), design=design, team=team, rulebook=rulebook)
     except OSError as exc:
         raise HTTPException(503, f"judge pack could not be built: {exc}") from exc
     return Response(

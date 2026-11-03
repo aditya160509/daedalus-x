@@ -84,7 +84,7 @@ export function PitWall() {
             <a
               href="/api/v1/report/judge-pack"
               download="daedalus-x-judge-pack.zip"
-              title="One ZIP with the existing report, drawings, rule checks, run manifests, evidence verification and a list of anything missing"
+              title="One ZIP with the existing report, rule checks, run manifests, evidence verification and a list of anything missing"
               className="inline-flex items-center rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
             >
               Judge pack ZIP ↓
