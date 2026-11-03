@@ -252,14 +252,22 @@ def penalty_points(penalty: str, margin: float | None) -> float | None:
     A per-mm or per-gram penalty is charged for every whole unit outside the limit, rounded up
     (T2.5.2). Anything else is charged once. Returns None when the text states no points.
     """
-    match = _PENALTY.match(penalty)
-    if match is None:
+    terms = penalty_terms(penalty)
+    if terms is None:
         return None
-    rate = float(match.group(1))
-    if match.group(2) is None:
+    rate, basis = terms
+    if basis is None:
         return rate
     units = math.ceil(max(0.0, -(margin or 0.0)))
     return rate * max(1, units)
+
+
+def penalty_terms(penalty: str) -> tuple[float, str | None] | None:
+    """Rate and proportional unit from a penalty string, or None when no points are stated."""
+    match = _PENALTY.match(penalty)
+    if match is None:
+        return None
+    return float(match.group(1)), match.group(2)
 
 
 def points_at_risk(checks: list[Check]) -> PointsAtRisk:

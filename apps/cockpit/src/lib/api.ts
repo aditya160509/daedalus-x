@@ -613,6 +613,40 @@ export const measureForge = (design: string) =>
     { method: "POST" },
   );
 
+const RuleRisk = z.object({
+  rule_id: z.string(),
+  name: z.string(),
+  unit: z.string(),
+  value: z.number(),
+  min: z.number().nullable(),
+  max: z.number().nullable(),
+  sigma: z.number(),
+  pass_probability: z.number(),
+  expected_points_lost: z.number().nullable(),
+  penalty: z.string(),
+});
+const ForgeRisk = z.object({
+  design: z.string(),
+  revision: z.string(),
+  rulebook: z.string(),
+  sigma_mm: z.number(),
+  samples: z.number(),
+  rules: z.array(RuleRisk),
+  overall_pass_probability: z.number(),
+  expected_points_lost: z.number(),
+  p95_points_lost: z.number(),
+  cvar95_points_lost: z.number(),
+  excluded_rules: z.number(),
+  unquantified_rules: z.array(z.string()),
+  assumptions: z.array(z.string()),
+});
+export type ForgeRisk = z.infer<typeof ForgeRisk>;
+export const getForgeRisk = (design: string, sigma_mm: number) =>
+  request(`/v1/forge/pass-probability`, ForgeRisk, {
+    method: "POST",
+    body: JSON.stringify({ design, sigma_mm }),
+  });
+
 // ATLAS evidence (T12)
 export const CoverageGap = z.object({
   gap_id: z.string(),

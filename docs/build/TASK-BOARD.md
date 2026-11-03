@@ -25,7 +25,7 @@ Take the **first `todo` whose dependencies are `accepted` or `review`**. "Lane" 
 | T17 | Bayesian calibration, information gain, out-of-sample validation | backend-ml | T09 | review | Claude (API/UI, separate held-out scoring, saved studies with exact inputs/results/source files and reopening; physical validation pending) |
 | T18 | Cartridge thrust model (gas type to be confirmed) | backend-ml | gas confirmed | todo | |
 | T19 | Energy-loss audit | backend-ml | - | review | Claude (Codebuff) (module, API and Race Energy panel verified; final review remains) |
-| T20 | FORGE v2: missing measures, pass probability, points at risk | backend-api + frontend-2d | T11 | todo | |
+| T20 | FORGE v2: missing measures, pass probability, points at risk | backend-api + frontend-2d | T11 | review | Claude (Codebuff) (manufacturing pass-probability API + Rules panel; wall/chamber measures and measured spread remain) |
 | T21 | Structural analysis: beam FEM first, 3D FEA later | backend-ml | - | review | Claude (branch next-wave; structure.py beam FEM, 3D FEA not started) |
 | T22 | Engineering drawing pack generator and 2D drawing importer | backend-api | T07 | todo | |
 | T23 | Test planner (expected information gain). Finding: timing runs cannot identify CdA or Crr, see evidence/T19-T23.md | backend-ml | T17 | review | Claude + Terra + Codex (ranked timing/coast-down API/UI; completed-outcome feedback and physical validation pending) |

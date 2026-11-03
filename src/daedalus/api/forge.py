@@ -7,8 +7,9 @@ from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
+from pydantic import BaseModel, ConfigDict, Field
 
-from daedalus import forge, forge_sheet
+from daedalus import forge, forge_probability, forge_sheet
 from daedalus.api.engineering import data_root
 
 router = APIRouter(prefix="/v1/forge", tags=["forge"])
@@ -89,3 +90,35 @@ def measure(design: str) -> dict[str, object]:
     except ValueError as exc:
         raise HTTPException(409, str(exc)) from exc
     return {"design": design, "parts_measured": len(features)}
+
+
+class ProbabilityRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    design: str = Field(min_length=1, max_length=120)
+    rulebook: str = Field(default=DEFAULT_RULEBOOK, max_length=120)
+    sigma_mm: float = Field(gt=0, le=10)
+    rule_sigmas: dict[str, float] = Field(default_factory=dict, max_length=200)
+    samples: int = Field(default=forge_probability.DEFAULT_SAMPLES, ge=1_000, le=100_000)
+
+
+@router.post("/pass-probability")
+def pass_probability(request: ProbabilityRequest) -> dict[str, object]:
+    """T20: P(pass) and expected points lost under a declared manufacturing sigma."""
+    path = _rulebook_path(request.rulebook)
+    book = forge.load_rulebook(path)
+    checks = forge.check_design(_design_dir(request.design), path)
+    try:
+        result = forge_probability.manufacturing_risk(
+            checks,
+            sigma_mm=request.sigma_mm,
+            rule_sigmas=request.rule_sigmas,
+            samples=request.samples,
+        )
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    return {
+        "design": request.design,
+        "rulebook": request.rulebook,
+        "revision": book["revision"],
+        **asdict(result),
+    }

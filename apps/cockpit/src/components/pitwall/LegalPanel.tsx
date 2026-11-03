@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useDeferredValue, useState } from "react";
 import { cadFocusHref } from "@/lib/cadFocus";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -8,11 +9,13 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   forgeSheetUrl,
   getForgeChecks,
+  getForgeRisk,
   listDesigns,
   measureForge,
   type RuleCheck,
 } from "@/lib/api";
-import { Panel, Skeleton } from "@/components/ui/primitives";
+import { NumberField, Panel, Skeleton } from "@/components/ui/primitives";
+import { fmt, fmtPct } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 const STATE: Record<RuleCheck["state"], { label: string; dot: string }> = {
@@ -40,10 +43,18 @@ export function LegalPanel({
   const router = useRouter();
   const designs = useQuery({ queryKey: ["designs"], queryFn: listDesigns });
   const design = picked ?? designs.data?.[0]?.design_id;
+  const [sigma, setSigma] = useState(0.05);
+  const riskSigma = useDeferredValue(Number.isFinite(sigma) && sigma > 0 ? sigma : 0.05);
   const q = useQuery({
     queryKey: ["forge", design],
     queryFn: () => getForgeChecks(design!),
     enabled: !!design,
+  });
+  const risk = useQuery({
+    queryKey: ["forge-risk", design, riskSigma],
+    queryFn: () => getForgeRisk(design!, riskSigma),
+    enabled: !!design && !!q.data,
+    staleTime: 30_000,
   });
   const measurement = useMutation({
     mutationFn: () => measureForge(design!),
@@ -145,6 +156,72 @@ export function LegalPanel({
               </a>
             )}
           </div>
+          <details className="group border-b border-border/50 px-4 py-2">
+            <summary className="flex cursor-pointer list-none flex-wrap items-center gap-x-2 gap-y-1 text-2xs text-muted-foreground [&::-webkit-details-marker]:hidden">
+              <span className="font-medium text-text-2">Manufacturing risk</span>
+              {risk.data ? (
+                <>
+                  <span
+                    className={cn(
+                      "tabular font-mono",
+                      risk.data.overall_pass_probability < 0.8
+                        ? "text-destructive"
+                        : risk.data.overall_pass_probability < 0.95
+                          ? "text-risk"
+                          : "text-ok",
+                    )}
+                  >
+                    {fmtPct(risk.data.overall_pass_probability, 1)}% pass
+                  </span>
+                  <span>· {fmt(risk.data.expected_points_lost, 1)} pts expected</span>
+                  <span>· p95 {fmt(risk.data.p95_points_lost, 1)}</span>
+                </>
+              ) : risk.isError ? (
+                <span className="text-destructive">unavailable</span>
+              ) : (
+                <span>calculating…</span>
+              )}
+              <span className="ml-auto group-open:hidden">expand</span>
+              <span className="ml-auto hidden group-open:inline">hide</span>
+            </summary>
+            <div className="mt-3 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+              <NumberField
+                id="forge-sigma"
+                label="Process σ"
+                unit="mm"
+                value={sigma}
+                onChange={setSigma}
+                min={0.001}
+                max={1}
+                step={0.005}
+              />
+              {risk.data && (
+                <div className="grid grid-cols-4 gap-2 text-center">
+                  {[
+                    {
+                      label: "pass",
+                      value: `${fmtPct(risk.data.overall_pass_probability, 1)}%`,
+                    },
+                    { label: "expected", value: fmt(risk.data.expected_points_lost, 1) },
+                    { label: "p95", value: fmt(risk.data.p95_points_lost, 1) },
+                    { label: "tail", value: fmt(risk.data.cvar95_points_lost, 1) },
+                  ].map((stat) => (
+                    <div key={stat.label} className="rounded-md border border-border/60 px-2 py-1">
+                      <div className="tabular font-mono text-xs text-foreground">{stat.value}</div>
+                      <div className="text-[10px] text-muted-foreground">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            {risk.isError && <p className="mt-2 text-2xs text-destructive">{risk.error.message}</p>}
+            {risk.data && (
+              <p className="mt-2 text-2xs leading-4 text-muted-foreground">
+                Normal, independent process model at the declared σ. CAD nominal, not a measured
+                capability. {risk.data.excluded_rules} manual or non-length rules excluded.
+              </p>
+            )}
+          </details>
           <table className="w-full text-xs">
             <tbody>
               {checks.map((c) => (

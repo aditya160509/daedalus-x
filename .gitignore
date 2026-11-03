@@ -7,6 +7,7 @@ __pycache__/
 node_modules/
 .next/
 out/
+output/
 *.log
 .DS_Store
 data/runs/

@@ -452,7 +452,7 @@ Partial tasks receive a fixed half-point for a simple, reproducible tally; this 
 | T17 | Bayesian calibration | 🟨 Partial | ✅ Race UI, timing-file preview, explicit priors and optional separate held-out scoring connected; saved studies now persist exact inputs, results and uploaded source files as evidence, with browsing and reopening. Real held-out validation and applying the posterior to the Race model remain. |
 | T18 | Cartridge thermodynamic thrust model | ⬜ Remaining | Organiser gas confirmation and measured thrust curves remain. |
 | T19 | Energy-loss audit | ✅ Built | Energy model, API and Race Energy panel verified in source; final reviewer acceptance remains. |
-| T20 | FORGE v2 | 🟨 Partial | Added rolling bands, sampled sections, named-notch logic and remeasurement; missing features and tolerance probabilities remain. |
+| T20 | FORGE v2 | 🟨 Partial | Added rolling bands, sampled sections, named-notch logic, remeasurement and a manufacturing pass-probability API/Rules panel; wall/chamber measures and measured process spread remain. |
 | T21 | Structural analysis | 🟨 Partial | Beam FEM, API and Strength panel exist; material validation and 3D FEA remain. |
 | T22 | Drawing pack and drawing importer | 🟨 Partial | 13-item A4 draft generator/UI implemented; detailed annotations, DXF/SVG deviation importer and render pack remain. |
 | T23 | Test planner | 🟨 Partial | ✅ Pit Wall UI connects editable assumptions, thrust CSV and ranked timing/coast-down recommendations (`c75b9eb`); completed-outcome feedback, density comparison, physical validation and visual review remain. |
