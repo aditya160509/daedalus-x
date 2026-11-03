@@ -66,6 +66,9 @@ pnpm --dir apps/cockpit exec vitest run
 - Multi-fidelity ORACLE
 - BoTorch cross-check
 
+**Not ours (other team work, not innovation)**
+- Drawing pack generator, render pack, DXF/SVG importer, finish/assembly pages
+
 **UI and data clean-up**
 - Static hero renders inside the Wind Tunnel (see task 1)
 - Duplicate badges and charts
@@ -164,19 +167,6 @@ pnpm --dir apps/cockpit exec vitest run
 6. Add a one-page red/amber/green summary.
 7. Add an inspection log (who, tool, when) and a what-if mode that drags a dimension and updates margins live.
 8. Add a tolerance stack-up that reports pass probability. Finish the uncommitted `forge_probability.py` work first.
-
-## 4. Drawing pack generator (60 pts)
-
-- Generate an A4 PDF from build123d + Typst covering all 13 C2.10.6 items:
-  - orthographic views with dimensions
-  - exploded view
-  - sections
-  - virtual cargo highlighted
-  - identification marks
-- Add a title block, revision letters and a bill of materials whose masses sum to the weighed car.
-- Add a render pack for the 20-pt renders criterion. Renders are fine **here**, because they are a deliverable rather than the live UI.
-- Add a finish and assembly page.
-- Add a DXF/SVG importer with a deviation check against the 3D model.
 
 ## 5. Closed loop: finish the CFD hand-off
 
@@ -345,4 +335,70 @@ Do Pit Wall, Wind Tunnel, Design Studio, Race, Project, Evidence, Presenter and 
 
 ## Order of work
 
-1 → 3 (honesty fix + rule→CAD) → 2 → 5 → 6 → 7 (start the CFD runs overnight from day one) → 4 → 8 → 11 → 9 → 10 → 12 → 13.
+1 → 3 (honesty fix + rule→CAD) → 2 → 14 (analysis, alongside every task) → 5 → 6 → 7 (start the CFD runs overnight from day one) → 8 → 11 → 9 → 10 → 12 → 13.
+
+## 14. Analysis and charts: every type, highest quality (build these as part of the tasks above)
+
+**Quality bar for every chart**
+- One shared theme (ECharts for rich charts, uPlot for long time series): dark plot, hairline grid, units on every axis, a source badge (measured / simulated / synthetic), uncertainty bands wherever we have them, hover read-out, PNG/SVG export, and a one-line plain-English "what this means" caption.
+- Linked cursors between charts on the same page.
+- Compare mode: overlay two runs or designs on any chart.
+
+**Wind Tunnel (aero)**
+1. Cd and CdA with the grid-uncertainty bar (Richardson/GCI)
+2. Convergence: residuals plus force history with the acceptance gate line
+3. Drag waterfall by part, split into pressure and friction
+4. Cp along the centre line (top and bottom), plus Cp on the surface
+5. Run vs run: ΔCp on the surface, Δ wake, Δ forces table
+6. Wake planes at x/L = 1, 1.5 and 2, with velocity-deficit contours and a momentum-deficit drag check
+7. Q-criterion vortex cores coloured by vorticity
+8. Surface streaks (LIC) and separation lines
+9. Speed sweep (Cd vs speed) and yaw/ride-height sensitivity
+10. Frontal area vs Cd trade chart
+11. Mesh quality and y+ maps, with a skewness histogram
+
+**Race (TITAN)**
+1. Speed, acceleration, thrust and drag traces with linked cursors and annotations (launch, burnout, peak, finish)
+2. Ghost delta-time trace vs the best run
+3. Time budget stacked bar: drag, rolling, mass, reaction
+4. Tornado chart plus SALib Sobol indices
+5. Exchange rates: ms per gram, per cm² of CdA, per 0.001 Crr
+6. Monte Carlo histogram with p5/p50/p95, and a convergence plot
+7. Energy Sankey: thrust → drag, rolling, tether, kinetic
+8. Points: expected points distribution, knock-out round probability, head-to-head win chance
+9. Optimal mass curve
+
+**ORACLE**
+1. Aero map heat map with uncertainty and the next point marked
+2. Regret curves vs Optuna, Sobol, LHS and random, with confidence bands over 10+ seeds
+3. Predicted vs actual for every candidate
+4. Calibration of predictive intervals (do the 90% bands hold 90%?)
+5. Length-scale and Sobol variable importance
+6. Pareto front (pymoo): drag vs mass vs rule margin
+7. Acquisition history timeline
+
+**Calibration and statistics**
+1. Prior vs posterior plots for CdA, Crr and thrust scale
+2. Error shrinking over runs (prediction scoreboard)
+3. Posterior predictive check (ArviZ)
+4. Paired-test difference with its confidence interval, and a minimum detectable effect
+5. Control chart of repeat runs (drift in the track or cartridges)
+6. Uncertainty budget: share of race-time variance from CFD, thrust, mass, friction, reaction and timing
+
+**FORGE (rules)**
+1. Margin bars with the tolerance band shaded, sorted by points at risk
+2. Pass probability per rule from the manufacturing spread
+3. Legal-frontier map with rule and page on every boundary
+4. Red/amber/green summary
+
+**Structure**
+1. Deflection and stress plots
+2. Safety factor table
+3. Predicted vs measured load test
+
+**Project**
+1. Planned vs actual timeline from the evidence log
+2. Risk matrix
+3. Effort and CFD-hours chart
+
+**Done when** every chart above exists, is connected to real data (or labelled synthetic), passes the quality bar, and is checked in the browser with screenshots in `evidence/`.

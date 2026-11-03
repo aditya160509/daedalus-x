@@ -3,8 +3,7 @@
 > **Priority tiers (a school team cannot do all ~600 bullets; work P0 → P1 → P2):**
 > - **P0, before Nationals:**
 >   - §2 FORGE India rules and rule→CAD jump
->   - §4 drawing pack (60 pts)
->   - §5 accepted CFD campaign with grid study, Wind Tunnel defaulting to the best accepted run
+>   - >   - §5 accepted CFD campaign with grid study, Wind Tunnel defaulting to the best accepted run
 >   - §6 equal-budget ORACLE benchmark (Optuna TPE, scipy.stats.qmc Sobol/LHS, random)
 >   - §7 slider stacks into presets
 >   - §8 calibration and the paired physical tests
@@ -250,44 +249,6 @@ Section 3 extras: Add
 • Link each CAD part to its physical measurement record and manufacturing step.
 Section 3 extras: Remove
 • Chili3D menus and tools the team never uses, hidden by default to reduce clutter.
-4. Drawing pack (60 scrutineering points)
-Test
-• Verify all 13 C2.10.6 contents items exist in the exported A4 PDF.
-• Check every dimension printed against the CAD and against the physical car.
-• Check sections, exploded view key, virtual cargo highlight and identification marks.
-• Print at A4 and confirm line weights, text size and scale are legible.
-Edit
-• Complete local chamber and bore dimensions, wing boundary markup, nose and tether geometry labels, finish and decal notes.
-• Fill the review register with real reviewer names and dates.
-Remove
-• Draft watermarks and placeholder text before submission.
-Improve
-• Add title block consistency, revision letters and a drawing number scheme.
-Add
-• DXF and SVG importer with deviation check against the rebuilt 3D model.
-• A separate render pack for the 20 point 3D renders criterion.
-• A finish and assembly page for the 20 point finish criterion.
-Section 4 extras: Test
-• Have a person outside the team read the drawings and rebuild one dimension chain by hand to prove they are unambiguous.
-• Check that every dimension is toleranced or covered by a general tolerance note.
-• Check that views are projected consistently (first or third angle, stated on the sheet).
-• Run the PDF through a validator and open it in three viewers to confirm identical rendering.
-• Compare the printed scale with a ruler on the paper copy.
-Section 4 extras: Edit
-• Add a drawing index page with revision table and approval signatures.
-• Add a materials and finish schedule consistent with the manufacturing route.
-• Add a bill of materials with part numbers, quantities and masses that sum to the weighed car.
-Section 4 extras: Improve
-• Use consistent line weights, fonts and symbol standards across every sheet.
-• Add datum references and geometric tolerances where precision matters for rule compliance.
-• Add a mass summary that cross references the scale readings.
-Section 4 extras: Add
-• Render pack: hero, three quarter, front, rear, top, side and exploded renders with consistent lighting and neutral background.
-• Assembly instruction sheet showing build order and adhesive or fastener use.
-• Finish specification page showing paint, decal positions and surface treatment.
-• A quality review checklist signed by two team members before submission.
-Section 4 extras: Remove
-• Auto generated clutter such as duplicated centre lines, overlapping text and unlabelled sections.
 5. CFD and Wind Tunnel
 Test
 • Run the baseline car through the full case setup and confirm residuals, y plus, mesh quality and convergence gates.
