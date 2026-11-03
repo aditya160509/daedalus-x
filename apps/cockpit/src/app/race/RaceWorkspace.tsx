@@ -104,7 +104,7 @@ import { SpreadPanel } from "./SpreadPanel";
 import { EnergyPanel } from "@/components/race/EnergyPanel";
 import { PointsPanel } from "@/components/race/PointsPanel";
 import { BreakdownPanel } from "@/components/race/BreakdownPanel";
-import { CalibrationPanel } from "@/components/race/CalibrationPanel";
+import { CalibrationWorkbench } from "@/components/race/CalibrationWorkbench";
 import {
   DEFAULT_CAR,
   DEFAULT_ESTIMATE,
@@ -666,7 +666,7 @@ export function RaceWorkspace() {
           )}
           {tab === "calibration" && (
             <div className="mx-auto h-full max-w-5xl p-3 [&>section]:h-full">
-              <CalibrationPanel />
+              <CalibrationWorkbench />
             </div>
           )}
           {tab === "analysis" && analysis === "breakdown" && (

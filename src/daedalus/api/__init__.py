@@ -13,6 +13,7 @@ from daedalus.api import (
     forge,
     jobs,
     oracle,
+    paired,
     race,
     report,
 )
@@ -30,6 +31,7 @@ def create_app() -> FastAPI:
     app.include_router(evidence.router)
     app.include_router(report.router)
     app.include_router(analysis.router)
+    app.include_router(paired.router)
 
     @app.get("/v1/health")
     def health() -> dict[str, str]:

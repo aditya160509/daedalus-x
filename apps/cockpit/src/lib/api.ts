@@ -1264,3 +1264,43 @@ const OracleDiagnostics = z.object({
 });
 export type OracleDiagnostics = z.infer<typeof OracleDiagnostics>;
 export const getOracleDiagnostics = () => request("/v1/oracle/diagnostics", OracleDiagnostics);
+
+const PairedTimingResult = z.object({
+  provenance: z.literal("user_entered"),
+  source_label: z.string(),
+  pairing_basis: z.string(),
+  pairs: z.number(),
+  mean_difference_ms: z.number(),
+  sd_difference_ms: z.number(),
+  ci_ms: z.tuple([z.number(), z.number()]),
+  p_two_sided: z.number(),
+  alpha: z.number(),
+  planned_pairs: z.number(),
+  target_power: z.number(),
+  minimum_detectable_ms: z.number(),
+  rows: z.array(
+    z.object({
+      pair_id: z.string(),
+      baseline_s: z.number(),
+      candidate_s: z.number(),
+      difference_ms: z.number(),
+    }),
+  ),
+  assumptions: z.array(z.string()),
+  source_artifact_id: z.string(),
+  result_artifact_id: z.string(),
+});
+export type PairedTimingResult = z.infer<typeof PairedTimingResult>;
+export interface PairedTimingRequest {
+  csv_text: string;
+  source_label: string;
+  pairing_basis: string;
+  alpha: number;
+  target_power: number;
+  planned_pairs: number;
+}
+export const analyzePairedTimings = (body: PairedTimingRequest) =>
+  request("/v1/analysis/paired", PairedTimingResult, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });

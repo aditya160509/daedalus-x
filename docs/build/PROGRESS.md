@@ -254,7 +254,7 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 - [ ] 🟨 1 Prior vs posterior plots: built ✅, real data ⬜
 - [ ] 🟨 2 Error shrinking over runs: saved studies ✅; cross-run scoreboard ⬜
 - [ ] ⬜ 3 Posterior predictive check (ArviZ)
-- [ ] 🟨 4 Paired-test difference CI + minimum detectable effect: D-optimal planner ✅; paired analysis and chart ⬜
+- [ ] ⏳ 4 Paired-test difference CI, plot and prospective minimum detectable effect connected with native SciPy; exact source/result evidence saved; browser/real-data validation pending
 - [ ] ⬜ 5 Control chart of repeat runs
 - [ ] 🟨 6 Uncertainty budget: input rank correlations ✅; variance shares ⬜
 
@@ -458,7 +458,7 @@ The only real inputs are the CAD geometry and the rulebook. Without data, judges
 - [x] ✅ Presets + Advanced on Calibration and Test planner (Lab/Track/Custom protocols)
 - [ ] 🟨 Error shrinking over runs: saved studies ✅; cross-run scoreboard ⬜
 - [ ] ⬜ ArviZ diagnostics (R-hat unavailable for the current importance sampler)
-- [ ] 🟨 Paired-test protocol + power analysis: D-optimal planner ✅; paired protocol, CI and power analysis ⬜
+- [ ] 🟨 Paired CSV analysis, mean CI, prospective power/MDE and declared pairing basis connected; preregistered field protocol and real paired measurements pending
 - [ ] 🟨 Physical tests: timing and thrust CSV import ✅; mass, caliper, coast-down and load-test entry ⬜
 - [ ] ⏳ Sealed prediction checked against a real run: seal/score workflow ✅; no real run scored yet
 
