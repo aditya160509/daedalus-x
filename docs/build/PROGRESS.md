@@ -211,24 +211,80 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 - [ ] ⬜ Plain-English caption on every chart
 - [ ] ⬜ Compare-two-runs overlay everywhere
 
-## Analysis: full count (`TODO.md` §14, merged with MASTER-PLAN §11 and §19)
+## Analysis: every chart, one tick each (`TODO.md` §14, merged with MASTER-PLAN §11 and §19)
 
-**Summary: 43 analyses — 14 done, 13 partly done, 16 not started (≈ 48%).**
+**Summary: 43 analyses. 13 done, 13 partly done, 17 not started.**
 
-| Area | Done | Partly done | Not started |
-|---|---|---|---|
-| Wind Tunnel (11) | ΔCp run vs run, Q-criterion vortices | Cd ± GCI, convergence gate, drag waterfall, wake planes, speed sweep | Cp along lines, LIC/separation, yaw/ride height, frontal-area trade, y+ and mesh maps |
-| Race (9) | traces, time budget, tornado + Sobol, exchange rates, Monte Carlo | ghost delta, points / win probability | energy Sankey (only a panel today), optimal mass |
-| ORACLE (7) | aero map, variable importance | benchmark (random only) | predicted vs actual, interval calibration, Pareto, acquisition history |
-| Calibration (6) | — | posterior / prior plots, paired test (planner only) | error shrinking, posterior predictive check (ArviZ), control chart, uncertainty budget |
-| FORGE (4) | margin bars + points, pass probability, frontier map | R/A/G summary | — |
-| Structure (3) | deflection / stress | safety factor | predicted vs measured load |
-| Project (3) | — | timeline (forecast) | risk matrix, effort / CFD-hours |
+**Wind Tunnel (11)**
+- [ ] 🟨 1 Cd / CdA with the GCI uncertainty bar: tooling ✅, accepted 3-mesh runs ⬜
+- [ ] 🟨 2 Convergence (residuals + force history + gate line): residuals ✅, gate line ⬜
+- [ ] 🟨 3 Drag waterfall by part, pressure vs friction: forces ✅, waterfall + split ⬜
+- [ ] ⬜ 4 Cp along the centre line (top/bottom) + Cp on the surface (surface ✅, line plot ⬜)
+- [x] ✅ 5 Run vs run: ΔCp surface (same mesh) — Δ wake / Δ forces table ⬜
+- [ ] 🟨 6 Wake planes x/L 1, 1.5, 2 ✅ — deficit contours + momentum-deficit drag ⬜
+- [x] ✅ 7 Q-criterion vortex cores coloured by vorticity
+- [ ] ⬜ 8 Surface streaks (LIC) + separation lines
+- [ ] 🟨 9 Speed sweep Cd vs speed: tooling ✅, runs ⬜; yaw / ride height ⬜
+- [ ] ⬜ 10 Frontal area vs Cd trade chart
+- [ ] ⬜ 11 Mesh quality + y+ maps + skewness histogram
 
-**MASTER-PLAN §11, top 15 (ranked list)**
-- ✅ 1 compliance sheet, 5 tornado, 10 ms per unit, 11 Monte Carlo
-- 🟨 2 drag by part, 3 run vs run, 4 GCI, 7 calibration, 8 wake / vortex, 9 mass budget, 12 ORACLE maps (benchmark partial), 15 acceptance audit
-- ⬜ 6 adjoint map, 13 thrust curve fit, 14 reaction stats
+**Race (9)**
+- [x] ✅ 1 Speed / accel / thrust / drag traces, linked cursors (uPlot) — event annotations ⬜
+- [ ] 🟨 2 Ghost delta-time trace: ghost in Replay ✅, delta chart ⬜
+- [x] ✅ 3 Time budget stacked bar
+- [x] ✅ 4 Tornado + SALib Sobol indices
+- [x] ✅ 5 Exchange rates (ms per g, per cm² CdA, per 0.001 Crr)
+- [x] ✅ 6 Monte Carlo histogram p5/p50/p95 — convergence plot ⬜
+- [ ] 🟨 7 Energy breakdown: panel ✅, Sankey chart ⬜
+- [ ] 🟨 8 Expected points + knock-out probability ✅ — real field data ⬜
+- [ ] ⬜ 9 Optimal mass curve
+
+**ORACLE (7)**
+- [x] ✅ 1 Aero map heat map + uncertainty + next point
+- [ ] 🟨 2 Regret curves vs baselines: random only; Optuna/Sobol/LHS, 10 seeds ⬜
+- [ ] ⬜ 3 Predicted vs actual per candidate
+- [ ] ⬜ 4 Interval calibration (do the 90% bands hold?)
+- [x] ✅ 5 Variable importance (SALib) — length-scales ⬜
+- [ ] ⬜ 6 Pareto front (pymoo)
+- [ ] ⬜ 7 Acquisition history timeline
+
+**Calibration (6)**
+- [ ] 🟨 1 Prior vs posterior plots: built ✅, real data ⬜
+- [ ] ⬜ 2 Error shrinking over runs (prediction scoreboard)
+- [ ] ⬜ 3 Posterior predictive check (ArviZ)
+- [ ] 🟨 4 Paired-test difference CI + minimum detectable effect: planner ✅, chart ⬜
+- [ ] ⬜ 5 Control chart of repeat runs
+- [ ] ⬜ 6 Uncertainty budget (variance share)
+
+**FORGE (4)**
+- [x] ✅ 1 Margin bars sorted by points at risk — tolerance band shading ⬜
+- [x] ✅ 2 Pass probability per rule
+- [x] ✅ 3 Legal-frontier map
+- [ ] 🟨 4 R/A/G summary: states ✅, one-pager ⬜
+
+**Structure (3)**
+- [x] ✅ 1 Deflection / stress plots (beam)
+- [ ] 🟨 2 Safety factor table
+- [ ] ⬜ 3 Predicted vs measured load test
+
+**Project (3)**
+- [ ] 🟨 1 Planned vs actual timeline: forecast ✅, Gantt from the evidence log ⬜
+- [ ] ⬜ 2 Risk matrix
+- [ ] ⬜ 3 Effort / CFD-hours chart
+
+**Extra analysis from MASTER-PLAN §11 and §19 not in the 43 above**
+- [ ] ⬜ Adjoint drag map on the car (§11 #6)
+- [ ] ⬜ Thrust curve fit + cartridge variance (§11 #13)
+- [ ] ⬜ Reaction-time statistics (§19 #28)
+- [ ] ⬜ Lane / batch t-test (§19 #29)
+- [ ] ⬜ Outlier detection (§19 #30)
+- [ ] ⬜ Season trend (§19 #31)
+- [ ] ⬜ Track-length scaling (§19 #25)
+- [ ] ⬜ Mass from density × volume (§19 #34)
+- [ ] ⬜ Measured vs CAD deviation (§19 #35)
+- [ ] ⬜ Wall thickness / CNC reach (§19 #36)
+- [ ] ⬜ Leave-one-out ORACLE validation (§19 #18)
+- [ ] 🟨 Acceptance audit per run (§11 #15): reason shown ✅, full audit page ⬜
 
 ## MASTER-PLAN sections not covered above
 
