@@ -211,6 +211,122 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 - [ ] ⬜ Plain-English caption on every chart
 - [ ] ⬜ Compare-two-runs overlay everywhere
 
+## Analysis: full count (`TODO.md` §14, merged with MASTER-PLAN §11 and §19)
+
+**Summary: 43 analyses — 14 done, 13 partly done, 16 not started (≈ 48%).**
+
+| Area | Done | Partly done | Not started |
+|---|---|---|---|
+| Wind Tunnel (11) | ΔCp run vs run, Q-criterion vortices | Cd ± GCI, convergence gate, drag waterfall, wake planes, speed sweep | Cp along lines, LIC/separation, yaw/ride height, frontal-area trade, y+ and mesh maps |
+| Race (9) | traces, time budget, tornado + Sobol, exchange rates, Monte Carlo | ghost delta, points / win probability | energy Sankey (only a panel today), optimal mass |
+| ORACLE (7) | aero map, variable importance | benchmark (random only) | predicted vs actual, interval calibration, Pareto, acquisition history |
+| Calibration (6) | — | posterior / prior plots, paired test (planner only) | error shrinking, posterior predictive check (ArviZ), control chart, uncertainty budget |
+| FORGE (4) | margin bars + points, pass probability, frontier map | R/A/G summary | — |
+| Structure (3) | deflection / stress | safety factor | predicted vs measured load |
+| Project (3) | — | timeline (forecast) | risk matrix, effort / CFD-hours |
+
+**MASTER-PLAN §11, top 15 (ranked list)**
+- ✅ 1 compliance sheet, 5 tornado, 10 ms per unit, 11 Monte Carlo
+- 🟨 2 drag by part, 3 run vs run, 4 GCI, 7 calibration, 8 wake / vortex, 9 mass budget, 12 ORACLE maps (benchmark partial), 15 acceptance audit
+- ⬜ 6 adjoint map, 13 thrust curve fit, 14 reaction stats
+
+## MASTER-PLAN sections not covered above
+
+**§1 Legal**
+- [ ] ⬜ 1 PDFs archived in `data/reference/rules/` + evidence store
+- [ ] 🟨 2 every T-rule in YAML
+- [ ] 🟨 3 advanced measures (wall, chamber ⬜)
+- [ ] 🟨 4 rule → CAD (overlay ⬜)
+- [ ] ⬜ 5 judging score checklist linked to screens
+
+**§2 Wind Tunnel**
+- [x] ✅ 1 one viewer (now the particle flow)
+- [ ] 🟨 2 ParaView-grade layers (LIC, probes, clip ⬜)
+- [x] ✅ 3 clean look
+- [x] ✅ 4 accepted-run default
+- [ ] 🟨 5 engineering panels (y+, mesh map, GCI chart ⬜)
+- [ ] ⬜ 6 FoamPilot wizard
+
+**§3 Race**
+- [x] ✅ 1 real car
+- [x] ✅ 2 track + cameras
+- [x] ✅ 3 HUD
+- [ ] 🟨 4 one chart theme
+- [x] ✅ 5 Monte Carlo + tornado
+
+**§4 Chart bar** — 🟨 (see the chart quality bar list above)
+
+**§5 Innovation** — same as §16
+
+**§6 / §12 OSS** — see the open-source table above
+
+**§7 Remove**
+- [x] ✅ old flow view, toolbar clutter, duplicate badges, rejected-run default, Race slider stack
+- [ ] ⬜ Calibration and Test planner input walls are new slider stacks; fix them
+
+**§8 Build order** — 1–5 mostly done; 6 partly (no multi-fidelity); 7 partly (dockview ✅, xyflow ✅, FoamPilot ⬜); 8 QA ⬜
+
+**§9 UI bar** — 🟨 shell is good. Per-page pass to 8/10 ⬜ (`TODO.md` §11).
+
+**§10 Cuts**
+- [x] ✅ all 6 cuts done
+- [ ] ⬜ Inspect → CAD side-panel merge
+
+**§13 Race rebuild, 8 points**
+- [x] ✅ 1 car, 2 track, 3 cameras, 5 HUD, 7 photo finish
+- [ ] 🟨 4 effects (no motion blur / FOV kick), 6 ghost / compare (split-screen delta ⬜), 8 60 fps (unverified)
+- [ ] ⬜ clip export
+
+**§14 Chart rules** — 🟨 uPlot has export and linked cursors; ECharts theme unification, annotations and source badges everywhere ⬜
+
+**§17 Overbuilt review**
+- [ ] 🟨 Chili3D: keep
+- [x] ✅ two 3D engines accepted
+- [ ] ⬜ M1 under Advanced
+- [ ] ⬜ reaction trainer into race-day mode
+- [x] ✅ ORACLE stays at 4 variables
+- [x] ✅ keep the evidence store
+- [ ] ⬜ merge Race tabs (8 → 4)
+- [x] ✅ renders only in the report
+
+**§21 Output products**
+- [x] 🟨 portfolio PDF (chapters ⬜)
+- [x] ✅ presenter deck
+- [x] ✅ scrutineering sheet
+- [ ] ⬜ race-day report
+- [x] 🟨 evidence appendix (QR ⬜)
+
+## Why real data is only ~5%, what we need, and how to get it
+
+**Why 5%:** almost every number in the app is either *synthetic* (made-up seed data so the screens work) or *simulated on settings nobody has accepted yet*.
+- ORACLE has 8 observations, all synthetic.
+- No CFD run has passed the acceptance gate on the real car with a grid study.
+- No real race time, mass, dimension or thrust curve has been entered.
+
+The only real inputs are the CAD geometry and the rulebook. Without data, judges can't verify any claim.
+
+**What we need (minimum for a defensible story)**
+
+| Data | How much | Who / how | Unlocks |
+|---|---|---|---|
+| Accepted CFD: baseline on 3 meshes | 3 runs (~3 nights on the Mac) | Codex queues them, 1 per night | GCI, Cd ± error, trust badge |
+| Speed sweep 15 / 20 / 25 m/s | 3 runs | overnight | constant-Cd check |
+| ORACLE design runs | 10–15 runs (~2 weeks of nights) | closed loop queues them | real aero map, benchmark, Pareto |
+| Physical mass + dimensions | every part, 2 people × 3 times | team, scale + calipers | FORGE measured, gauge R&R |
+| Thrust curves | 5+ cartridges at 21 °C | team (needs a load cell) | thrust model T18 |
+| Track runs (paired) | 20–30 timed runs, baseline vs candidate | team at the track | calibration, sealed prediction test |
+| Coast-down / spin-down | 10 runs | team | Crr, wheel friction |
+| Reaction times | 50+ practice starts | driver with the Start trainer | reaction stats, points model |
+| Material properties + load test | 1 datasheet + 3 load tests | team | FEA validation, CalculiX |
+
+**Plan**
+1. Start CFD tonight, one run per night, and never run it alongside the dev servers.
+2. The team buys or borrows a 0.01 g scale, calipers and a small load cell.
+3. Book track time: 2 sessions of about 15 runs each.
+4. Enter every number through the app (Calibration / Project) so it gets hashed as evidence.
+
+**Target:** 50% real data in about 6–8 weeks, and 90% before Nationals.
+
 ## Next 5 to do
 1. Run CFD overnight: baseline on 3 meshes plus the speed sweep. This unlocks GCI, the waterfall, ORACLE on real data and the closed loop.
 2. ORACLE benchmark with Optuna and qmc, plus the Pareto front with pymoo.
