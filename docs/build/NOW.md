@@ -1,4 +1,4 @@
-> **Review (2026-11-03, Claude).** This is the master test/edit/remove/add checklist. `MASTER-PLAN.md` holds the background; this file is what to work through.
+> **Exact to-do with how-to: `TODO.md`.** **Review (2026-11-03, Claude).** This is the master test/edit/remove/add checklist. `MASTER-PLAN.md` holds the background; this file is what to work through.
 >
 > **Priority tiers (a school team cannot do all ~600 bullets; work P0 → P1 → P2):**
 > - **P0, before Nationals:**
@@ -20,15 +20,7 @@
 >   - §11 OpenTimestamps and the QR verify page
 >   - pymoo Pareto front
 >   - stadium/TV mode
-> - **P2, nice to have (do not block on these):**
->   - OS matrix (Windows/Ubuntu)
->   - Docker
->   - mutation testing
->   - 8-hour soak test
->   - multi-user concurrency
->   - Zenodo archive
->   - multi-fidelity
->   - BoTorch cross-check
+> - **Removed (not doing):** see the "Removed for good" list in `TODO.md`.
 >
 > **Corrections:**
 > - The India rulebook YAML has 79 entries, not 80 (§2 Test). Recount against the PDF.
@@ -69,8 +61,6 @@ Prepared 2 November 2026 for the STEM Racing India National Finals. Scope: the D
 • Clean clone test: clone on a machine that has never run the project, follow the README only, and log every step that fails or is undocumented.
 • One command installs all backend and frontend dependencies with pinned versions and lockfiles committed (uv or pip-tools for Python, package-lock or pnpm-lock for Node).
 • Fresh virtual environment test: install on Python and Node versions stated in the README, then on one version newer and one older, and record what breaks.
-• OS matrix: macOS (Apple Silicon and Intel), Windows 11, Ubuntu 22.04 and 24.04. Record OpenFOAM, Typst, build123d and Chili3D behaviour on each.
-• Docker or devcontainer build: confirm the whole stack runs from one container recipe, so any teammate or judge machine can reproduce it.
 • Cold start test: start API and frontend from nothing and time the first usable screen. Target under 10 seconds on the demo laptop.
 • Warm start test: time restart with cached data.
 • Disk and repository size test: record repository size, Chili3D bundle size and evidence store growth per run.
@@ -83,7 +73,6 @@ Prepared 2 November 2026 for the STEM Racing India National Finals. Scope: the D
 1.2 Automated test suite and static checks
 • Typecheck, lint, formatter and knip all pass on main with zero errors and zero new warnings.
 • Unit tests pass, with a coverage report for physics, FORGE, ORACLE, calibration and evidence code. Target at least 80 percent on those modules.
-• Mutation testing (mutmut or cosmic-ray) on the race physics and FORGE measure code, so the tests are proven to catch real errors.
 • Property based tests (Hypothesis): random legal and illegal designs never crash FORGE, rule margins are monotonic in the dimension, energy is never created.
 • Golden file regression tests: freeze outputs for the baseline car (rule sheet, race time, Cd, hashes) and fail the build if they drift without a logged reason.
 • Contract tests for every API endpoint: schema, status codes, error bodies, pagination, and that no endpoint returns NaN or Infinity.
@@ -95,8 +84,6 @@ Prepared 2 November 2026 for the STEM Racing India National Finals. Scope: the D
 • Golden path test: import car, run FORGE, view rules, jump to CAD, launch a job, view accepted result, run race prediction, seal it, generate report, open presenter. Script it with Playwright and run it nightly.
 • Failure path tests for each step: missing file, corrupted STEP, solver crash, full disk, API timeout, rejected CFD run.
 • Undo and recovery: kill the API and the browser at random points and confirm no half written design, run or evidence record is left.
-• Concurrency test: two browser tabs and two users editing and launching jobs at once, with no lost updates.
-• Long session test: leave the app running for 8 hours and watch memory, file handles and queue health.
 • Large data test: 1,000 evidence records, 50 CFD runs, 10,000 Monte Carlo samples and a 5 million cell result load without freezing.
 • Idempotency test: pressing any action twice, or reloading mid action, never creates duplicate records.
 • Deep link test: every screen, run and rule has a stable URL that reopens the same view.
@@ -379,8 +366,6 @@ Add
 • Constraint aware acquisition with a feasibility model.
 • Expected racing points objective in place of drag only.
 • Pareto front of drag, mass and rule margin.
-• Multi fidelity runs (coarse and fine) only after the adjoint or coarse mesh is validated.
-• Optional BoTorch noisy expected improvement as a cross check of the custom GP.
 Section 6 extras: Test
 • Test on standard optimisation benchmarks (Branin, Hartmann, Rosenbrock in four dimensions) and compare with published performance.
 • Test with deliberately noisy objectives to confirm the noise term stops the model chasing noise.
@@ -657,7 +642,6 @@ Add
 • Design of experiments (fractional factorial) for the physical tests so few runs reveal the main effects.
 • Minimum detectable effect calculator shown beside every comparison so claims never exceed what the data can resolve.
 • Reproducibility package: a single archive with inputs, seeds, scripts and expected outputs that anyone can rerun to reach the same numbers.
-• Zenodo or Software Heritage archive of the final sealed prediction for a permanent citable record.
 20.2 Engineering decision features
 • Decision log: for every design change, the question, options, evidence, decision, owner and date, linked to evidence records.
 • Change value table: milliseconds gained per gram, per square centimetre of CdA and per 0.001 of rolling resistance, so every proposed change has a price tag.
