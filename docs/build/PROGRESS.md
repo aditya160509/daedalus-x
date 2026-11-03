@@ -327,6 +327,136 @@ The only real inputs are the CAD geometry and the rulebook. Without data, judges
 
 **Target:** 50% real data in about 6–8 weeks, and 90% before Nationals.
 
+## `TODO.md` task by task (items not ticked elsewhere in this file)
+
+**1. Wind Tunnel animated flow**
+- [x] ✅ Render tab removed
+- [x] ✅ Velocity texture exported
+- [x] ✅ GPU particles + Cp + camera presets
+- [x] ✅ Accepted-run default
+- [ ] ⬜ Particle trails (streaks)
+- [ ] ⬜ Faint wireframe tunnel walls
+- [ ] ⬜ Moving ground stripe
+- [ ] ⬜ Bloom on the particles only
+- [ ] ⬜ Slice with particles crossing it
+- [ ] ⬜ Auto-drop the particle count below 50 fps
+- [ ] ⏳ 60 fps on the real Mac GPU
+
+**1b. CFD speed-ups**
+- [x] ✅ Parallel solve (6 procs)
+- [ ] ⬜ Warm start (`mapFields`)
+- [ ] ⬜ Stop on Cd convergence
+- [ ] ⬜ Mesh reuse / morph
+- [ ] ⬜ 10-core meshing
+- [ ] ⬜ FluidX3D GPU screening (check its licence first)
+- [ ] ⬜ Cloud burst (Inductiva / AWS) if needed
+
+**2. Race**
+- [ ] ⬜ Race tabs from 8 to 4
+- [ ] ⬜ Start trainer becomes a small tool
+- [ ] ⬜ Motion blur / FOV kick
+- [ ] ⬜ Clip export
+- [ ] ⬜ Race-day mode
+- [ ] ⬜ Stadium / TV mode
+
+**3. FORGE**
+- [ ] ⬜ Rule count 79 vs 80 checked against the PDF
+- [ ] ⬜ Margin in % on every rule
+- [ ] ⬜ R/A/G one-pager
+- [ ] ⬜ Inspection log
+- [ ] ⬜ What-if drag mode
+- [ ] ⬜ Halo/helmet standard-part check
+- [ ] ⬜ Wall thickness, chamber, cylinder-fit wheel
+
+**5. Closed loop**
+- [ ] ⬜ Queue CFD automatically when every performance rule passes
+- [ ] ⬜ STEP-hash guard
+- [ ] ⬜ Accepted-only observation
+- [ ] ⬜ "Run CFD" button
+
+**6. ORACLE**
+- [ ] ⬜ Optuna/qmc benchmark, 10 seeds, pre-registered
+- [ ] ⬜ Nugget noise term
+- [ ] ⬜ Acquisition history
+- [ ] ⬜ Pareto chart
+- [ ] ⬜ Engineer veto mode
+
+**7. CFD campaign**
+- [ ] ⬜ 3-mesh GCI
+- [ ] ⬜ Speed sweep
+- [ ] ⬜ 2 turbulence models
+- [ ] ⬜ One-page acceptance rule
+- [ ] ⬜ OpenFOAM version pinned + case hash stored per run
+- [ ] ⬜ Run wizard with residuals and ETA
+
+**8. Calibration and tests**
+- [ ] ⬜ Presets + Advanced on Calibration and Test planner
+- [ ] ⬜ ArviZ diagnostics
+- [ ] ⬜ Paired-test protocol + power analysis
+- [ ] ⬜ Physical tests (weigh, measure, 10–20 track runs)
+- [ ] ⬜ Sealed prediction checked against a real run
+
+**9. Structure**
+- [ ] ⬜ Beam FEM vs closed-form test
+- [ ] ⬜ CalculiX (real material data only)
+- [ ] 🟨 Safety factor
+- [ ] ⬜ Before/after load test
+
+**10. Evidence and judges**
+- [ ] ⬜ OpenTimestamps
+- [ ] ⬜ Public verify page + QR
+- [ ] ⬜ Signed git tag
+- [ ] ⬜ Rule PDFs and runs registered in the store
+- [ ] ⬜ 3-minute judge walkthrough
+- [ ] ⬜ Speaker notes
+- [ ] ⬜ 60-question Q&A bank
+- [ ] ⬜ Limitations slide
+- [ ] ⬜ Innovation one-pager
+- [ ] ⬜ Commit/rulebook hash in every PDF
+- [ ] ⬜ Offline demo + fallback video
+
+**11. UI to 8/10**
+
+| Page | Status |
+|---|---|
+| Pit Wall | 🟨 |
+| Wind Tunnel | 🟨 |
+| Design Studio | 🟨 |
+| Race | 🟨 |
+| Project | 🟨 |
+| Evidence | 🟨 |
+| Presenter | 🟨 |
+| Settings | ⬜ |
+
+- [ ] ⬜ Adopt cmdk/sonner/vaul/TanStack Table/Kibo/Origin
+- [ ] ⬜ No form with more than 6 visible inputs
+- [ ] ⬜ Every page re-scored in `RATINGS.md`
+
+**12. Engineering quality**
+- [ ] ⬜ CI on every push (ruff, pytest, tsc, oxlint, vitest, knip, gitleaks)
+- [ ] ⬜ 80% coverage on the core modules
+- [ ] ⬜ Hypothesis tests
+- [ ] ⬜ Golden-file baseline tests
+- [ ] ⬜ OpenAPI → TS types
+- [ ] ⬜ Playwright golden path
+- [ ] ⬜ Analytic physics benchmarks + pint
+- [ ] ⬜ pip-audit / pnpm audit / licence scan
+
+**13. Project and enterprise**
+- [ ] 🟨 Timeline
+- [ ] ⬜ Decision log
+- [ ] ⬜ Risk register
+- [ ] ⬜ Meeting minutes
+- [ ] ⬜ Budget with receipts
+- [ ] ⬜ Lessons learned
+- [ ] ⬜ Sponsor report
+- [ ] ⬜ Tool cost vs commercial
+
+**MASTER-PLAN §22.4: organiser questions**
+- [ ] ⬜ Email sent (AI use, air vs CO₂, manual vs auto launch, presentation split)
+
+**`NOW.md`:** it is the detailed test checklist (~550 bullets). Tick those in `NOW.md` itself; this file tracks the build.
+
 ## Next 5 to do
 1. Run CFD overnight: baseline on 3 meshes plus the speed sweep. This unlocks GCI, the waterfall, ORACLE on real data and the closed loop.
 2. ORACLE benchmark with Optuna and qmc, plus the Pareto front with pymoo.
