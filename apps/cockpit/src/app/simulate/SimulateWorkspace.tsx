@@ -11,10 +11,10 @@ import { ForceBars } from "@/components/charts/ForceBars";
 import { HistoryChart } from "@/components/charts/HistoryChart";
 import { EmptyState, Panel, ProvenanceBadge } from "@/components/ui/primitives";
 import { type CfdRunDetail, getCfdRun, getDragBuildup, listCfdRuns } from "@/lib/api";
+import { defaultRunId } from "@/lib/cfdRuns";
 import { SERIES, SERIES_CYCLE } from "@/lib/colormap";
 import { useSelectedRun } from "@/lib/runSelection";
 import { cn } from "@/lib/utils";
-import { RenderPanel } from "@/components/render/HeroRender";
 import { GridStudyPanel } from "./GridStudyPanel";
 import { StatusBar, useTab, WorkspaceTabs } from "@/components/shell/WorkspaceTabs";
 
@@ -23,7 +23,6 @@ const ignoreMarker = () => undefined;
 
 const TUNNEL_TABS = [
   { id: "flow", label: "Flow" },
-  { id: "render", label: "Render" },
   { id: "forces", label: "Forces" },
   { id: "convergence", label: "Convergence" },
   { id: "mesh", label: "Mesh" },
@@ -46,9 +45,7 @@ export function SimulateWorkspace() {
   const [picked] = useSelectedRun();
   const runId =
     (picked && runs.data?.some((r) => r.run_id === picked) ? picked : null) ??
-    runs.data?.find((r) => r.state === "succeeded" && r.has_viz)?.run_id ??
-    runs.data?.[0]?.run_id ??
-    null;
+    defaultRunId(runs.data ?? []);
   const detail = useQuery({
     queryKey: ["cfd-run", runId],
     queryFn: () => (runId ? getCfdRun(runId) : Promise.reject(new Error("no run selected"))),
@@ -78,6 +75,13 @@ export function SimulateWorkspace() {
         <div className="flex min-h-0 flex-1">
           <EmptyState icon={<Wind />} title="No CFD runs yet">
             Import a design, then use New run to queue an approved case.
+          </EmptyState>
+        </div>
+      ) : runs.data && runId == null ? (
+        <div className="flex min-h-0 flex-1">
+          <EmptyState icon={<XCircle />} title="No accepted run">
+            Every solved run was rejected. Fix the mesh or solver gates before using a flow field as
+            evidence.
           </EmptyState>
         </div>
       ) : detail.data ? (
@@ -185,6 +189,16 @@ function RunView({
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <WorkspaceTabs tabs={TUNNEL_TABS} value={tab} onChange={setTab} />
+      {run.result?.acceptance === "rejected" && (
+        <div
+          role="status"
+          className="border-b border-danger/30 bg-danger/5 px-4 py-1.5 text-2xs text-danger"
+        >
+          Rejected run
+          {run.result.reasons.length ? ` · ${run.result.reasons[0]}` : ""} · never used as a default
+          or as evidence.
+        </div>
+      )}
       <div className="flex min-h-0 flex-1 gap-3 p-3">
         {tab === "flow" &&
           (hasViz ? (
@@ -203,11 +217,6 @@ function RunView({
               Pick a solved run with flow data.
             </EmptyState>
           ))}
-        {tab === "render" && (
-          <div className="min-h-0 min-w-0 flex-1">
-            <RenderPanel runId={run.run_id} />
-          </div>
-        )}
         {tab === "forces" && (
           <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-0 xl:flex-row xl:overflow-hidden">
             <div className="flex min-h-[520px] min-w-0 flex-1 flex-col gap-3 xl:min-h-0">

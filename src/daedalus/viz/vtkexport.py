@@ -5,7 +5,9 @@ zlib-compressed, base64-inline VTK XML files that vtk.js parses directly:
 
 - ``surface.vtp``: decimated car surface, point array ``Cp`` = p / (0.5 U^2);
 - ``streamlines.vtp``: polylines from an upstream rake, point array ``U_Uinf``;
-- ``volume.vti``: field resampled onto a ~64^3 image (``U_Uinf``, ``Ux_Uinf``, ``Cp``) for slicing.
+- ``volume.vti``: field resampled onto a ~64^3 image (``U_Uinf``, ``Ux_Uinf``, ``Cp``) for slicing;
+- ``velocity.bin``: RGBA Float32 3D texture of ``U/U∞`` plus a validity mask, for GPU particle
+  advection, with ``velocity.json`` holding its dimensions, origin and spacing.
 
 Files are cached under ``<run>/viz/vtk`` and rebuilt when the solved fields are newer.
 """
@@ -31,9 +33,10 @@ LAYERS: dict[str, str] = {
     **dict.fromkeys(WAKE_POSITIONS, "vtp"),
     "vortex": "vtp",
 }
-EXPORT_VERSION = 3
+EXPORT_VERSION = 4
 GRID_MAX = 64
 SURFACE_TARGET_CELLS = 120_000
+VELOCITY_COMPONENTS = ("u_over_uinf", "v_over_uinf", "w_over_uinf", "valid")
 
 
 def _write(data: pv.DataSet, path: Path) -> None:
@@ -99,21 +102,34 @@ def _streamlines(internal: pv.UnstructuredGrid, car: dict, u_inf: float) -> pv.P
     return _mirror(lines)
 
 
-def _volume(internal: pv.UnstructuredGrid, car: dict, u_inf: float, q: float) -> pv.ImageData:
+def _sample_grid(
+    internal: pv.UnstructuredGrid, car: dict
+) -> tuple[pv.ImageData, np.ndarray, np.ndarray, np.ndarray]:
+    """Resample the half-model fields onto a uniform grid, mirrored about y = 0.
+
+    Points are ordered x fastest, then y, then z. The returned ``valid`` mask is false where the
+    structured probe falls outside the OpenFOAM mesh (for example the solid car interior).
+    """
     length, width, height = car["length_m"], car["width_m"], car["height_m"]
     lo = np.array([-0.06, -(width / 2 + 0.03), 0.0])
     hi = np.array([length + 0.12, width / 2 + 0.03, height + 0.04])
     spacing = float(np.max(hi - lo)) / (GRID_MAX - 1)
     dims = np.clip(np.ceil((hi - lo) / spacing - 1e-9).astype(int) + 1, 2, GRID_MAX)
     grid = pv.ImageData(dimensions=tuple(dims), spacing=(spacing,) * 3, origin=tuple(lo))
-    # The case is a half model on y >= 0: sample at |y| (only magnitudes and Ux are exported).
     pts = np.array(grid.points)
     pts[:, 1] = np.abs(pts[:, 1])
-    probe = pv.PolyData(pts)
-    sampled = probe.sample(internal)
+    sampled = pv.PolyData(pts).sample(internal)
     valid = np.asarray(sampled.point_data["vtkValidPointMask"], bool)
-    u = np.asarray(sampled.point_data["U"], float)
-    p = np.asarray(sampled.point_data["p"], float)
+    return (
+        grid,
+        valid,
+        np.asarray(sampled.point_data["U"], float),
+        np.asarray(sampled.point_data["p"], float),
+    )
+
+
+def _volume(internal: pv.UnstructuredGrid, car: dict, u_inf: float, q: float) -> pv.ImageData:
+    grid, valid, u, p = _sample_grid(internal, car)
     speed = np.where(valid, np.linalg.norm(u, axis=1) / u_inf, np.nan)
     ux = np.where(valid, u[:, 0] / u_inf, np.nan)
     cp = np.where(valid, p / q, np.nan)
@@ -161,6 +177,75 @@ def _vortices(internal: pv.UnstructuredGrid, car: dict, u_inf: float) -> pv.Poly
     if surface.n_cells > SURFACE_TARGET_CELLS // 2:
         surface = surface.decimate_pro(1 - (SURFACE_TARGET_CELLS // 2) / surface.n_cells)
     return _mirror(surface)
+
+
+def _velocity_texture(
+    internal: pv.UnstructuredGrid, car: dict, u_inf: float
+) -> tuple[np.ndarray, dict[str, object]]:
+    """RGBA Float32 texture: u/U∞, v/U∞, w/U∞ and a validity mask, x fastest."""
+    grid, valid, u, _ = _sample_grid(internal, car)
+    y = np.asarray(grid.points)[:, 1]
+    # The case is a half model on y >= 0: mirror the lateral component about the symmetry plane.
+    v_half = u[:, 1] / u_inf
+    ux = np.where(valid, u[:, 0] / u_inf, 0.0)
+    uy = np.where(valid, np.where(y >= 0, v_half, -v_half), 0.0)
+    uz = np.where(valid, u[:, 2] / u_inf, 0.0)
+    texture = np.column_stack([ux, uy, uz, valid.astype(np.float32)]).astype("<f4")
+    speed = np.linalg.norm(np.column_stack([ux, uy, uz]), axis=1)[valid]
+    meta: dict[str, object] = {
+        "version": EXPORT_VERSION,
+        "format": "float32-le",
+        "components": list(VELOCITY_COMPONENTS),
+        "order": "x fastest, then y, then z; one RGBA texel per grid point",
+        "dims": [int(v) for v in grid.dimensions],
+        "origin_m": [float(v) for v in grid.origin],
+        "spacing_m": [float(v) for v in grid.spacing],
+        "bounds_m": [float(v) for v in grid.bounds],
+        "U_m_s": u_inf,
+        "valid_fraction": float(np.mean(valid)),
+        "speed_ratio_range": [
+            float(np.min(speed)) if speed.size else 0.0,
+            float(np.max(speed)) if speed.size else 0.0,
+        ],
+        "provenance": "simulated",
+    }
+    return texture, meta
+
+
+def export_velocity(case: Path, cache_dir: Path | None = None) -> tuple[Path, Path]:
+    """Return cached ``velocity.bin`` and ``velocity.json`` for GPU particle advection."""
+    case = Path(case)
+    out_dir = cache_dir or case / "viz" / "vtk"
+    path = out_dir / "velocity.bin"
+    meta_path = out_dir / "velocity.json"
+    stamp = out_dir / "velocity.stamp.json"
+    latest = _latest_time(case)
+    if latest is None:
+        raise FileNotFoundError(f"{case} has no solved time directory")
+    key = {"version": EXPORT_VERSION, "time": latest.name, "mtime": latest.stat().st_mtime}
+    if (
+        path.exists()
+        and meta_path.exists()
+        and stamp.exists()
+        and json.loads(stamp.read_text()) == key
+    ):
+        return path, meta_path
+
+    manifest = json.loads((case / "daedalus_manifest.json").read_text())
+    u_inf = float(manifest["reference"]["U_m_s"])
+    if not np.isfinite(u_inf) or u_inf <= 0:
+        raise ValueError("run manifest needs a positive finite reference speed")
+    mesh = _reader(case, [])
+    internal = mesh["internalMesh"]
+    if not isinstance(internal, pv.UnstructuredGrid):
+        raise ValueError(f"{case}: unexpected OpenFOAM reader output for internalMesh")
+    texture, meta = _velocity_texture(internal, manifest["car"], u_inf)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(texture.tobytes(order="C"))
+    meta = {**meta, "bytes": path.stat().st_size, "time": latest.name, "source": case.name}
+    meta_path.write_text(json.dumps(meta, indent=1))
+    stamp.write_text(json.dumps(key))
+    return path, meta_path
 
 
 def _latest_time(case: Path) -> Path | None:

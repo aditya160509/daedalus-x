@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 from collections.abc import Iterator
 from pathlib import Path
 
+import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 
@@ -65,3 +66,31 @@ def test_vtk_layer(client: TestClient, name: str, kind: str, array: str) -> None
 def test_vtk_layer_rejects_unknown(client: TestClient) -> None:
     assert client.get(f"/v1/cfd/runs/{RUN}/vtk/surface.vti").status_code == 404
     assert client.get(f"/v1/cfd/runs/{RUN}/vtk/mesh.vtp").status_code == 404
+
+
+def test_velocity_texture_matches_its_metadata(client: TestClient) -> None:
+    meta_response = client.get(f"/v1/cfd/runs/{RUN}/vtk/velocity.json")
+    assert meta_response.status_code == 200, meta_response.text
+    meta = meta_response.json()
+    assert meta["format"] == "float32-le"
+    assert meta["components"] == ["u_over_uinf", "v_over_uinf", "w_over_uinf", "valid"]
+    dims = meta["dims"]
+    assert len(dims) == 3 and max(dims) <= 64
+    assert len(meta["origin_m"]) == 3 and len(meta["spacing_m"]) == 3
+    assert meta["provenance"] == "simulated"
+    assert 0.0 < meta["valid_fraction"] <= 1.0
+
+    response = client.get(f"/v1/cfd/runs/{RUN}/vtk/velocity.bin")
+    assert response.status_code == 200, response.text
+    assert len(response.content) == meta["bytes"]
+    texture = np.frombuffer(response.content, dtype="<f4")
+    assert texture.size == dims[0] * dims[1] * dims[2] * 4
+    texels = texture.reshape((*tuple(reversed(dims)), 4))
+    assert np.isfinite(texels).all()
+    valid = texels[..., 3]
+    assert set(np.unique(valid)) <= {0.0, 1.0}
+    assert 0.0 < float(valid.mean()) <= 1.0
+    # The inlet column is upstream of the car (x = -0.06 m at 20 m/s).
+    assert float(np.abs(texels[..., 0]).max()) > 0.5
+    cached = Path(os.environ["DAEDALUS_DATA"]) / "runs" / RUN / "viz/vtk/velocity.bin"
+    assert cached.read_bytes() == response.content
