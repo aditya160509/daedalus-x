@@ -1,0 +1,1913 @@
+{
+  "date": "2026-11-03",
+  "tool": "TinyFish search",
+  "query_count": 42,
+  "searches": [
+    {
+      "query": "GPU 3D flow",
+      "results": [
+        {
+          "title": "fluid-dynamics",
+          "url": "https://github.com/topics/fluid-dynamics?l=typescript",
+          "snippet": "A fluid simulator than runs inside your browser! Based on Smoothed Particle Hydrodynamics, accelerated by WebGPU API. gpu fluid-dynamics fluid-simulation webgpu ..."
+        },
+        {
+          "title": "jamportz/fibre: WebGL 3d dynamical systems visualization",
+          "url": "https://github.com/jamportz/fibre",
+          "snippet": "Fibre is a WebGL application for visualizing and coding 3d vector fields and dynamical systems. A number of presets with well-known or interesting dynamical ..."
+        },
+        {
+          "title": "WebGPU 3D fluid simulation",
+          "url": "https://www.reddit.com/r/webgpu/comments/1r1qpld/webgpu_3d_fluid_simulation/",
+          "snippet": "Just a sneak peek of a WebGPU 3D fluid simulation that I am working on in spare time, porting and expanding upon the Smoothed Particle ..."
+        },
+        {
+          "title": "Interactive fluid dynamics simulation in WebGL",
+          "url": "https://www.facebook.com/groups/cometmeted/posts/10152518529442257/",
+          "snippet": "High-quality fluid dynamics at your fingertips or maybe \"mousetips\". This requires a strong graphics processor, and a modern, non-IE browser ..."
+        },
+        {
+          "title": "computational-fluid-dynamics",
+          "url": "https://github.com/topics/computational-fluid-dynamics",
+          "snippet": "The fastest and most memory efficient lattice Boltzmann CFD software, running on all GPUs and CPUs via OpenCL. Free for non-commercial use."
+        },
+        {
+          "title": "amandaghassaei/FluidSimulation: WebGL shader for ...",
+          "url": "https://github.com/amandaghassaei/FluidSimulation",
+          "snippet": "This simulation solves the Navier-Stokes equations for incompressible fluids in a GPU fragment shader. On top of the grid-based fluid simulation are thousands ..."
+        },
+        {
+          "title": "OpenGraphic/Physics.md at master",
+          "url": "https://github.com/Gforcex/OpenGraphic/blob/master/Physics.md",
+          "snippet": "FluidX3D The fastest and most memory efficient lattice Boltzmann CFD software, running on any GPU via OpenCL. Trinity Programmable 3D GPU (WebGL) fluid ..."
+        },
+        {
+          "title": "CFD codes for HPC",
+          "url": "https://arc4cfd.github.io/cfd_codes/",
+          "snippet": "Open-source codes used in ARC4CFD. OpenFoam. Description: OpenFOAM is the free, open source CFD software developed primarily by OpenCFD Ltd since 2004."
+        },
+        {
+          "title": "fluid-dynamics · GitHub Topics",
+          "url": "https://github.com/topics/fluid-dynamics?l=c%2B%2B",
+          "snippet": "The Shamrock Framework, an open-source, multi-GPU hydrodynamics framework for astrophysics. Scales seamlessly from laptops to exascale supercomputers ..."
+        },
+        {
+          "title": "MarcosAsh/Lattice_Fluid_Dynamics: A 3D cfd software that ...",
+          "url": "https://ithub.global.ssl.fastly.net/MarcosAsh/Lattice_Fluid_Dynamics",
+          "snippet": "GPU-accelerated wind tunnel that simulates fluid flow around 3D objects using Lattice Boltzmann Methods and OpenGL compute shaders."
+        }
+      ]
+    },
+    {
+      "query": "site:github.com build123d ocp cad viewer three cad viewer CAD inspection",
+      "results": [
+        {
+          "title": "bernhard-42/vscode-ocp-cad-viewer: A ...",
+          "url": "https://github.com/bernhard-42/vscode-ocp-cad-viewer",
+          "snippet": "OCP CAD Viewer for VS Code is an extension to show CadQuery and build123d objects in VS Code via the three-cad-viewer viewer component."
+        },
+        {
+          "title": "Yet Another CAD Viewer - yeicor-3d",
+          "url": "https://github.com/yeicor-3d/yet-another-cad-viewer",
+          "snippet": "A CAD viewer capable of displaying (and editing) OCP models (CadQuery/Build123d) in a web browser. Load multiple models at once, load external models and even ..."
+        },
+        {
+          "title": "Releases · build123d/build123d-portable",
+          "url": "https://github.com/jdegenstein/build123d-portable/releases",
+          "snippet": "A cross-platform portable build123d installation with VSCode and OCP CAD Viewer. This provides faster extraction speed and avoids issues with too long of paths ..."
+        },
+        {
+          "title": "save_screenshot seems to be broken on standalone server",
+          "url": "https://github.com/bernhard-42/vscode-ocp-cad-viewer/issues/147",
+          "snippet": "In another terminal: python -c 'from ocp_vscode import show, save_screenshot; from build123d import Box; show(Box(1,2,3)); print(save_screenshot ..."
+        },
+        {
+          "title": "superWorldSavior/mcp-build123d: MCP server ...",
+          "url": "https://github.com/Casys-AI/mcp-build123d",
+          "snippet": "The approximate measurement is an inspection aid; All three viewers use the shared MCP View presentation. The 2D output is for visual inspection."
+        },
+        {
+          "title": "CHANGELOG.md - bernhard-42/jupyter-cadquery",
+          "url": "https://github.com/bernhard-42/jupyter-cadquery/blob/master/CHANGELOG.md",
+          "snippet": "Jupyter CadQuery 4 is a complete re-architecture: it is now a thin integration layer that reuses OCP CAD Viewer for VS Code ( ocp_vscode ) for the show logic ..."
+        },
+        {
+          "title": "new interface for split() · gumyr build123d · Discussion #555",
+          "url": "https://github.com/gumyr/build123d/discussions/555",
+          "snippet": "In the OCP-CAD-Viewer (a great and very valuable tool) you can inspect the model from every side. Now you try to apply some refinements, may be adding a circle"
+        },
+        {
+          "title": "MCP server for build123d to improve AI cognition when ...",
+          "url": "https://github.com/pzfreo/build123d-mcp",
+          "snippet": "build123d-mcp lets the assistant create build123d CAD models, render previews, measure geometry, fix mistakes, and export files such as STEP, STL, SVG, and DXF ..."
+        },
+        {
+          "title": "README.md - cyberchitta/cad-khana",
+          "url": "https://github.com/cyberchitta/cad-khana/blob/main/README.md",
+          "snippet": "khana view pushes geometry to the OCP CAD Viewer, a standalone web server. The easiest host is the VS Code extension, which embeds the viewer in an editor pane."
+        },
+        {
+          "title": "Invalid cadquery version · Issue #95 · bernhard-42/jupyter- ...",
+          "url": "https://github.com/bernhard-42/jupyter-cadquery/issues/95",
+          "snippet": "Unfortunately, even when you use build123d, jupyter cadquery needs cadquery. ... The \"invalid constraint\" message can be ignored as far as I see."
+        }
+      ]
+    },
+    {
+      "query": "site:github.com Deltares webgl streamline visualizer mapbox webgl wind license",
+      "results": [
+        {
+          "title": "Deltares/webgl-streamline-visualizer: An animated particle ...",
+          "url": "https://github.com/Deltares/webgl-streamline-visualizer",
+          "snippet": "An animated particle based WebGL visualizer for vector fields. Can be used with different map libraries, as such MapBox and MapLibre."
+        }
+      ]
+    },
+    {
+      "query": "site:github.com ArviZ uncertainty propagation UQpy Chaospy SALib calibration",
+      "results": []
+    },
+    {
+      "query": "site:github.com mesh quality grid convergence GCI CFD python pyGCS",
+      "results": [
+        {
+          "title": "tomrobin-teschner/pyGCS: A package to establish grid ...",
+          "url": "https://github.com/tomrobin-teschner/pyGCS",
+          "snippet": "pyGCS (Grid Convergence Study) is a python package that calculates the Grid Convergence Index (GCI), which quantifies the influence a computational mesh has on ..."
+        }
+      ]
+    },
+    {
+      "query": "site:github.com OpenFOAM Python workflow automation FoamPilot pyFoam fluidfoam",
+      "results": []
+    },
+    {
+      "query": "site:github.com finite element CalculiX scikit fem PyNite structural python",
+      "results": [
+        {
+          "title": "joreilly86/Python-Libraries-for-Engineers: A growing ...",
+          "url": "https://github.com/joreilly86/Python-Libraries-for-Engineers",
+          "snippet": "Structural Pynite General finite element solver. Structural pycalculix 2D FEM solver via CalculiX Structural. A Python package to support research and design"
+        },
+        {
+          "title": "awesome-civil-engineering/README.md at main",
+          "url": "https://github.com/QuantumNovice/awesome-civil-engineering/blob/main/README.md",
+          "snippet": "CalculiX - Free finite element package for linear and nonlinear structural, dynamic, and thermal analysis. Finite element analysis software. examples for ..."
+        }
+      ]
+    },
+    {
+      "query": "site:github.com motorsport telemetry viewer FastF1 Fastlytics f1-dash",
+      "results": []
+    },
+    {
+      "query": "site:github.com React engineering dashboard Kibo UI coss shadcn gantt",
+      "results": [
+        {
+          "title": "birobirobiro/awesome-shadcn-ui",
+          "url": "https://github.com/birobirobiro/awesome-shadcn-ui",
+          "snippet": "UIAble is a free, open-source UI system that extends shadcn/ui with a vivid design system, reusable React components, and complete code ownership."
+        },
+        {
+          "title": "shadcnblockscom/shadcn-ui-blocks: ShadcnUI ...",
+          "url": "https://github.com/shadcnblockscom/shadcn-ui-blocks",
+          "snippet": "UI shadcn/ui offers accessible, customizable React components. Copy-paste to build your unique component library using Radix UI and Tailwind CSS."
+        },
+        {
+          "title": "stars/README.md at master · DavidWells/stars",
+          "url": "https://github.com/DavidWells/stars/blob/master/README.md",
+          "snippet": "EvilCharts is an open-source chart UI website built with shadcn and Recharts, Works with Claude Code, Cursor and other AI tools. customizable components for AI ..."
+        },
+        {
+          "title": "star-list/README.md at master · Cygra ...",
+          "url": "https://github.com/Cygra/star-list/blob/master/README.md",
+          "snippet": ": A custom registry of composable, accessible and extensible components designed for use with shadcn/ui. Free and open source, forever. : accessible ..."
+        },
+        {
+          "title": "pipeabellos/thetoolforthat: 500+ curated tools, resources, ...",
+          "url": "https://github.com/pipeabellos/thetoolforthat",
+          "snippet": "Kibo UI Registry of composable components like Gantt, Kanban, Editor built on shadcn/ui Origin UI / coss ui Modern React component library built on Base UI … ..."
+        },
+        {
+          "title": "awesome-stars/README.md at main · mehdichaouch ...",
+          "url": "https://github.com/mehdichaouch/awesome-stars/blob/main/README.md",
+          "snippet": "Free and open source admin dashboard UI kit built. React library for audio recording and visualization. Built on top of Shadcn UI. build and share AI apps with ..."
+        },
+        {
+          "title": "SaschaLucius/my-awesome-stars",
+          "url": "https://github.com/SaschaLucius/my-awesome-stars",
+          "snippet": "shadcn-ui/ui - Composable, accessible components with thoughtful defaults. Build your own component library with code you can customize, extend, and make ..."
+        }
+      ]
+    },
+    {
+      "query": "site:github.com engineering experiment tracking evidence provenance aim DVC OpenTimestamps",
+      "results": [
+        {
+          "title": "systempromptio/awesome-ai-agent-governance",
+          "url": "https://github.com/systempromptio/awesome-ai-agent-governance",
+          "snippet": "DVC - Git-like versioning for ML datasets and models. Reproducible pipelines, experiment tracking, and audit trail for training data and model ..."
+        },
+        {
+          "title": "Changed Paths · GitHub",
+          "url": "https://gist.github.com/GrahamcOfBorg/1fbb154801d79f65bbb3bcc2396b6c98",
+          "snippet": "GitHub Gist: instantly share code, notes, and snippets. Changed Paths This file has been truncated, but you can view the full file. s.dvc-ssh x86_64-linux ..."
+        },
+        {
+          "title": "Changed Paths · GitHub",
+          "url": "https://gist.github.com/GrahamcOfBorg/87f5292b7c04461812b9080be981720a",
+          "snippet": "GitHub Gist: instantly share code, notes, and snippets."
+        },
+        {
+          "title": "Changed Paths · GitHub",
+          "url": "https://gist.github.com/GrahamcOfBorg/f32c8a64c3bf7287d206827f1e9c7ef7",
+          "snippet": "GitHub Gist: instantly share code, notes, and snippets."
+        },
+        {
+          "title": "Changed Paths · GitHub",
+          "url": "https://gist.github.com/GrahamcOfBorg/7c2ba1d21ed908a6f32fcba28aa15ee8",
+          "snippet": "GitHub Gist: instantly share code, notes, and snippets."
+        },
+        {
+          "title": "Changed Paths · GitHub",
+          "url": "https://gist.github.com/GrahamcOfBorg/7c5f7d7348288f9a0c2dbdbc40a6b7b6",
+          "snippet": "GitHub Gist: instantly share code, notes, and snippets."
+        },
+        {
+          "title": "Changed Paths - Discover gists - GitHub",
+          "url": "https://gist.github.com/GrahamcOfBorg/d4d90951e0545c607554ec1a076f3fb5",
+          "snippet": "GitHub Gist: instantly share code, notes, and snippets. you can view the full file. s.dvc-render x86_64-linux … s.opentimestamps x86_64-linux msgpack-tools"
+        },
+        {
+          "title": "Changed Paths · GitHub",
+          "url": "https://gist.github.com/GrahamcOfBorg/271911e5b894f60fdb83216b37c301da",
+          "snippet": "GitHub Gist: instantly share code, notes, and snippets."
+        },
+        {
+          "title": "Changed Paths · GitHub",
+          "url": "https://gist.github.com/GrahamcOfBorg/ef6dd0e296dd3fd88b8a394b8b9f853f",
+          "snippet": "GitHub Gist: instantly share code, notes, and snippets."
+        },
+        {
+          "title": "Changed Paths · GitHub",
+          "url": "https://gist.github.com/GrahamcOfBorg/491aa1094c2b4730c09859fcf7e0ab66",
+          "snippet": "GitHub Gist: instantly share code, notes, and snippets."
+        }
+      ]
+    },
+    {
+      "query": "site:github.com optimization Optuna pymoo Nevergrad benchmark multi objective",
+      "results": [
+        {
+          "title": "CHANGELOG.md - FraunhoferIWES/iwopy",
+          "url": "https://github.com/FraunhoferIWES/iwopy/blob/main/CHANGELOG.md",
+          "snippet": "Added lazy optional Nevergrad, Optuna, and DEAP interfaces for bounded single-objective problems, general constraints, and evaluated-candidate results."
+        },
+        {
+          "title": "automl/hposuite: A lightweight framework for benchmarking ...",
+          "url": "https://github.com/automl/hposuite",
+          "snippet": "A lightweight framework for benchmarking HPO algorithms, providing wrappers for HPO benchmarks and optimizers. Provides a simple API for large-scale HPO ..."
+        },
+        {
+          "title": "FeiLiu36/EoH: Evolution of Heuristics",
+          "url": "https://github.com/FeiLiu36/EOH",
+          "snippet": "tackling complex search and optimization problems. 2_pymoo Design a crossover pymoo on ZDT problems. for nevergrad's (1+1)-ES on 10-D benchmarks."
+        },
+        {
+          "title": "epic: ecosystem integration — consume upstream + descriptors ...",
+          "url": "https://github.com/breimanntools/aaanalysis/issues/210",
+          "snippet": "Optuna → CPPGrid objective ... Conformal/MAPIE uncertainty + pymoo/Nevergrad/DEAP design recipes → ... Uncertainty-aware XAI (robustness) #53 / ML-guided directed ..."
+        },
+        {
+          "title": "awesome-stars/README.md at master",
+          "url": "https://github.com/saforem2/awesome-stars/blob/master/README.md",
+          "snippet": "facebookresearch/nevergrad - A Python toolbox for performing gradient-free optimization ... optuna/optuna - A hyperparameter optimization framework; jinxu06/ ..."
+        },
+        {
+          "title": "Ranking of direct dependencies for all PyPI packages that ...",
+          "url": "https://gist.github.com/lmmx/0805dc2fb3eb715c865072c5b14891a5",
+          "snippet": "Ranking of direct dependencies for all PyPI packages that were first released in 2024 or later"
+        },
+        {
+          "title": "top-100-python.json",
+          "url": "https://gist.github.com/lukehinds/4cce6aed7dfc148ef5b3140b3a52cf74",
+          "snippet": "GitHub Gist: instantly share code, notes, and snippets. \"optuna\" },"
+        },
+        {
+          "title": "Source: https://hugovk.github.io/top-pypi-packages ...",
+          "url": "https://gist.github.com/MartinThoma/c95c955352bd30b4cee06c0e9eff9715",
+          "snippet": "Source: https://hugovk.github.io/top-pypi-packages/top-pypi-packages-30-days.min.json. Instantly share code, notes, and snippets. Created 2 ..."
+        }
+      ]
+    },
+    {
+      "query": "Fastlytics telemetry GitHub",
+      "results": [
+        {
+          "title": "F1 Telemetry Server and Web Based Client Application",
+          "url": "https://github.com/gegehprast/f1-telemetry",
+          "snippet": "This is my implementation of the F1 22 UDP Telemetry . This repo contains both the UDP server and client UI application. The server makes uses of https:// github . Read more"
+        },
+        {
+          "title": "data sprintrace · theOehrly Fast-F1 · Discussion #160",
+          "url": "https://github.com/theOehrly/Fast-F1/discussions/160",
+          "snippet": "Anyone able to get some data from the sprintrace? core INFO Loading data for Emilia Romagna Grand Prix - Sprint Qualifying [v2.2.2] api INFO No cached data ... Read more"
+        },
+        {
+          "title": "The RaceOptiData API provides fast and structured access ...",
+          "url": "https://github.com/raceoptidata/API-docs",
+          "snippet": "The RaceOptiData API provides fast and structured access to comprehensive Formula 1 data , from historical records to modern telemetry insights."
+        },
+        {
+          "title": "Best way to get the path that a car took during a lap #356",
+          "url": "https://github.com/theOehrly/Fast-F1/discussions/356",
+          "snippet": "Hello everyone, my goal with this API is to use it inside a 3D Software to generate a path. This is my code comparing 2 laps of the 2023 Australian GP, ... Read more"
+        },
+        {
+          "title": "A F1 Telemetry Monitor web application which shows real- ...",
+          "url": "https://github.com/GuillemGarciaDev/F1-telemetry-monitor",
+          "snippet": "A F1 Telemetry Monitor web application which shows real-time data of F1 videogame - GuillemGarciaDev/F1-telemetry-monitor."
+        },
+        {
+          "title": "theOehrly Fast-F1 Q A · Discussions",
+          "url": "https://github.com/theOehrly/Fast-F1/discussions/categories/q-a",
+          "snippet": "How can i get accurate gap / position data throughout the lap? (i am still new to this so sorry if its stupid i am still learning). Read more"
+        },
+        {
+          "title": "[Question and Suggestion] · theOehrly Fast-F1",
+          "url": "https://github.com/theOehrly/Fast-F1/discussions/83",
+          "snippet": "I use this issue to ask a question without opening another one.is it possible to do the plotting of all the telemetry for all the laps of the race for example? Read more"
+        },
+        {
+          "title": "Schedule & Testing Session · theOehrly Fast-F1",
+          "url": "https://github.com/theOehrly/Fast-F1/discussions/516",
+          "snippet": "Feb 6, 2024 — Timing and telemetry data will likely be available for the pre-season test (like last year), but that remains to be seen. Also, the sprint ... Read more"
+        },
+        {
+          "title": "CS236340/Formula-Car-Telemetry",
+          "url": "https://github.com/CS236340/Formula-Car-Telemetry",
+          "snippet": "The telemetry will help the team to detect potential problems and inform the driver about the current state. For example, if the driver is too aggressive and ... Read more"
+        }
+      ]
+    },
+    {
+      "query": "Optuna optimization GitHub official",
+      "results": [
+        {
+          "title": "Optuna - A hyperparameter optimization framework · GitHub",
+          "url": "https://github.com/optuna/optuna",
+          "snippet": "Optuna is an automatic hyperparameter optimization software framework, particularly designed for machine learning. It features an imperative, define-by-run ..."
+        },
+        {
+          "title": "Optuna - A hyperparameter optimization framework",
+          "url": "https://optuna.org/",
+          "snippet": "Optuna is an automatic hyperparameter optimization software framework, particularly designed for machine learning. pip. Python 3.10 or newer is supported."
+        },
+        {
+          "title": "optuna-optimization · GitHub Topics",
+          "url": "https://github.com/topics/optuna-optimization",
+          "snippet": "A reinforcement learning trading agent that uses Proximal Policy Optimization (PPO) with automated hyperparameter tuning via Optuna to learn optimal trading ..."
+        },
+        {
+          "title": "Optuna: A hyperparameter optimization framework — Optuna ...",
+          "url": "https://optuna.readthedocs.io/",
+          "snippet": "Optuna is an automatic hyperparameter optimization software framework, particularly designed for machine learning. It features an imperative, define-by-run ..."
+        },
+        {
+          "title": "optuna",
+          "url": "https://github.com/optuna",
+          "snippet": "We develop open source software, including the Optuna framework for black-box and hyperparameter optimization, an interactive Optuna-Dashboard, ..."
+        },
+        {
+          "title": "Optuna Examples",
+          "url": "https://github.com/optuna/optuna-examples",
+          "snippet": "This page contains a list of example codes written with Optuna. The optimization finishes after evaluating 1000 times or 3 seconds. The following example ..."
+        },
+        {
+          "title": "Optuna Integration",
+          "url": "https://github.com/optuna/optuna-integration",
+          "snippet": "This package is an integration module of Optuna, an automatic Hyperparameter optimization software framework. The modules in this package provide users with ..."
+        },
+        {
+          "title": "Optuna GSoC 2022",
+          "url": "https://github.com/optuna/optuna/wiki/Optuna-GSoC-2022",
+          "snippet": "Optuna is an open source hyperparameter optimization framework to automate hyperparameter search. Optuna provides eager search spaces for ..."
+        },
+        {
+          "title": "An Introduction to the Implementation of Optuna, a ...",
+          "url": "https://medium.com/optuna/an-introduction-to-the-implementation-of-optuna-a-hyperparameter-optimization-framework-33995d9ec354",
+          "snippet": "Optuna [1] is a popular Python library for hyperparameter optimization, and is an easy-to-use and well-designed software that supports a variety ..."
+        },
+        {
+          "title": "Optuna",
+          "url": "https://en.wikipedia.org/wiki/Optuna",
+          "snippet": "Optuna is an open-source Python library for automatic hyperparameter tuning of machine learning models. It was first introduced in 2018 by Preferred ..."
+        }
+      ]
+    },
+    {
+      "query": "pymoo multi objective optimization GitHub",
+      "results": [
+        {
+          "title": "anyoptimization/pymoo: NSGA2, NSGA3, R ...",
+          "url": "https://github.com/anyoptimization/pymoo",
+          "snippet": "Our open-source framework pymoo offers state of the art single- and multi-objective algorithms and many more features related to multi-objective optimization"
+        },
+        {
+          "title": "pymoo: Multi-objective Optimization in Python — pymoo: Multi ...",
+          "url": "https://pymoo.org/",
+          "snippet": "pymoo: An open source framework for multi-objective optimization in Python. It provides not only state of the art single- and multi-objective optimization ..."
+        },
+        {
+          "title": "Source Code",
+          "url": "https://pymoo.org/getting_started/source_code.html",
+          "snippet": "A guide which introduces the most important steps to get started with pymoo, an open-source multi-objective optimization framework in Python."
+        },
+        {
+          "title": "Constructing a custom problem in Pymoo (Picking a subset ...",
+          "url": "https://github.com/anyoptimization/pymoo/discussions/397",
+          "snippet": "I have a bag of N=100 vehicles which have certain properties. For example cost, rank, and mpg. I am looking to find k=5 subsets of vehicles that have higher mpg ..."
+        },
+        {
+          "title": "multi-objective-optimization",
+          "url": "https://github.com/topics/multi-objective-optimization",
+          "snippet": "A C++ platform to perform parallel computations of optimisation tasks (global and local) via the asynchronous generalized island model."
+        },
+        {
+          "title": "Multi-objective Optimization in Python - pymoo",
+          "url": "https://arxiv.org/pdf/2002.04504",
+          "snippet": "by J Blank · 2020 · Cited by 3637 — pymoo, a multi-objective optimization framework in Python. We provide a guide to getting started with our framework … https://github.com/ ..."
+        },
+        {
+          "title": "Implementing a multi-objective optimization problem using ...",
+          "url": "https://stackoverflow.com/questions/76731074/implementing-a-multi-objective-optimization-problem-using-pymoo",
+          "snippet": "I am trying to write objective functions and constraints of a multi-objective optimization problem using pymoo. The problem is that I cannot transform ..."
+        },
+        {
+          "title": "pysamoo - anyoptimization",
+          "url": "https://github.com/anyoptimization/pysamoo",
+          "snippet": "Multi-objective Optimization python … measuring solution quality and developing better algorithms/models. Multi-Objective Optimization in Python."
+        },
+        {
+          "title": "A Practical Guide to Multi-Objective Optimization with Pymoo",
+          "url": "https://aipractitioner.substack.com/p/balancing-conflicting-goals-a-practical",
+          "snippet": "All experiments were conducted using the Python libraries pymoo and plotly. You can find the code here on GitHub. Subscribe. 1. The Problem ..."
+        },
+        {
+          "title": "(PDF) Pymoo: Multi-Objective Optimization in Python",
+          "url": "https://www.researchgate.net/publication/340976217_Pymoo_Multi-Objective_Optimization_in_Python",
+          "snippet": "To address this issue, we have developed pymoo, a multiobjective optimization framework in Python. We provide a guide to getting started with our framework by ..."
+        }
+      ]
+    },
+    {
+      "query": "Chaospy uncertainty quantification GitHub",
+      "results": [
+        {
+          "title": "chaospy/docs/user_guide/quick_tutorial.ipynb at master",
+          "url": "https://github.com/jonathf/chaospy/blob/master/docs/user_guide/quick_tutorial.ipynb",
+          "snippet": "Chaospy - Toolbox for performing uncertainty quantification. chaospy is created to work well inside numerical Python ecosystem through numpy ."
+        },
+        {
+          "title": "Uncertainty Quantification Research Group at KIT",
+          "url": "https://github.com/UQatKIT",
+          "snippet": "Uncertainty Quantification Research Group at KIT has 22 repositories available. Follow their code on GitHub."
+        },
+        {
+          "title": "List of Python Libraries for Uncertainty Quantification (UQ ...",
+          "url": "https://www.reddit.com/r/UncertaintyQuantified/comments/1ffza3j/list_of_python_libraries_for_uncertainty/",
+          "snippet": "Chaospy is a numerical toolbox for performing uncertainty quantification using polynomial chaos expansions. It offers tools for constructing ..."
+        },
+        {
+          "title": "uncertainpy/docs/source/uncertainty_estimation.rst at master",
+          "url": "https://github.com/simetenn/uncertainpy/blob/master/docs/source/uncertainty_estimation.rst",
+          "snippet": "UncertaintyQuantification` class is used to define the problem, perform the uncertainty quantification and sensitivity analysis, and save and visualize the ... Read more"
+        },
+        {
+          "title": "Chaospy: An open source tool for designing methods ...",
+          "url": "https://www.semanticscholar.org/paper/Chaospy%3A-An-open-source-tool-for-designing-methods-Feinberg-Langtangen/3490ecec85b1b91c93f1b489abc0bb6ad91b35c3",
+          "snippet": "Chaospy : An open source tool for designing methods of uncertainty quantification … general purpose Python package and development environment for uncertainty ..."
+        },
+        {
+          "title": "Polynomial chaos expansions part I: Method Introduction",
+          "url": "https://www.sintef.no/globalassets/project/evitameeting/2015/feinberg_lecture1.pdf",
+          "snippet": "Jan 27, 2015 — Lectures will include many examples using the Chaospy software. Modelling require uncertainty quantification . Parameters containting  ... 93 pages"
+        },
+        {
+          "title": "chaospy does not support numpy 2.0 · Issue #424",
+          "url": "https://github.com/jonathf/chaospy/issues/424",
+          "snippet": "Jul 1, 2024 — Importing the module makes Python fail when chaospy is installed from pip using numpy 2.0. It is likely to be a problem related to the support ... Read more"
+        },
+        {
+          "title": "Relatively slow evaluation of moments and sensitivities #170",
+          "url": "https://github.com/jonathf/chaospy/issues/170",
+          "snippet": "Sep 12, 2019 — The problem lies in how to enforce that distribution index matches with polynomial index. Either chaospy has to enforce the qN convension, or as ... Read more"
+        },
+        {
+          "title": "UQ4DD: Uncertainty Quantification for Drug Discovery",
+          "url": "https://github.com/MolecularAI/uq4dd",
+          "snippet": "This package provides the full methodology used in a collection of publication for uncertainty quantification during the prediction of properties of molecular ... Read more"
+        }
+      ]
+    },
+    {
+      "query": "fluidfoam python GitHub",
+      "results": [
+        {
+          "title": "fluiddyn/fluidfoam: OpenFoam postprocessing python tool",
+          "url": "https://github.com/fluiddyn/fluidfoam",
+          "snippet": "The fluidfoam package provides Python classes useful to perform some plot with OpenFoam data. We recommend installing fluidfoam in a Python virtual environment ..."
+        },
+        {
+          "title": "FluidFoam documentation — fluidfoam 0.3.1 documentation",
+          "url": "https://fluidfoam.readthedocs.io/",
+          "snippet": "The fluidfoam package provides Python classes useful to perform some plot with OpenFoam data. You can get the source code from github or from the Python ..."
+        },
+        {
+          "title": "fluidfoam/doc/index.rst at master",
+          "url": "https://github.com/fluiddyn/fluidfoam/blob/master/doc/index.rst",
+          "snippet": "The fluidfoam package provides Python classes useful to perform some plot with OpenFoam data. What is this repository for? Openfoam Tools; Version : 0.2.9 ..."
+        },
+        {
+          "title": "README.rst - fluiddyn/fluidfoam",
+          "url": "https://github.com/fluiddyn/fluidfoam/blob/master/README.rst",
+          "snippet": "The fluidfoam package provides Python classes useful to perform some plot with OpenFoam data. We recommend installing fluidfoam in a Python virtual environment ..."
+        },
+        {
+          "title": "[Other] [fluidfoam] python package to read and plot ...",
+          "url": "https://www.cfd-online.com/Forums/openfoam-community-contributions/224709-fluidfoam-python-package-read-plot-openfoam-data.html",
+          "snippet": "The fluidfoam package (https://github.com/fluiddyn/fluidfoam) provides useful Python classes for easily reading and manipulating OpenFoam output ..."
+        },
+        {
+          "title": "fluidfoam - conda-forge",
+          "url": "https://anaconda.org/conda-forge/fluidfoam",
+          "snippet": "Install fluidfoam with Anaconda.org. Openfoam PostProcessing Python Tools. Home https://github.com/fluiddyn/fluidfoam"
+        },
+        {
+          "title": "fluiddyn/fluidfoam dependencies | GitHub",
+          "url": "https://data.code.gouv.fr/hosts/GitHub/repositories/fluiddyn%2Ffluidfoam/dependencies?sha=v0.2.9",
+          "snippet": "GitHub / fluiddyn / fluidfoam ; Stars: 200. Forks: 54. Open issues ; License: gpl-3.0. Language: Python Size ; Created at: over 8 years ago. Updated at: 9 days ago"
+        },
+        {
+          "title": "Security - Overview · fluiddyn/fluidfoam",
+          "url": "https://github.com/fluiddyn/fluidfoam/security",
+          "snippet": "GitHub is where people build software. More than 150 million people use GitHub to discover, fork, and contribute to over 420 million projects. Overview · ..."
+        },
+        {
+          "title": "fluidfoam",
+          "url": "https://pypi.org/project/fluidfoam/",
+          "snippet": "Developed and maintained by the Python Software Foundation and Python community, for the Python community. ... Contribute on GitHub · Translate PyPI · Sponsor ..."
+        },
+        {
+          "title": "fluidsimfoam",
+          "url": "https://github.com/fluiddyn/fluidsimfoam",
+          "snippet": "OpenFOAM is a very popular open-source C++ CFD framework. With Fluidsimfoam, we try to design and propose a new workflow for OpenFOAM based on Python."
+        }
+      ]
+    },
+    {
+      "query": "OpenTimestamps python client GitHub",
+      "results": [
+        {
+          "title": "OpenTimestamps client",
+          "url": "https://github.com/opentimestamps/opentimestamps-client",
+          "snippet": "Command-line tool to create and validate timestamp proofs with the OpenTimestamps protocol, using the Bitcoin blockchain as a timestamp notary."
+        },
+        {
+          "title": "OpenTimestamps",
+          "url": "https://github.com/opentimestamps",
+          "snippet": "Scalable, Trust-Minimized, Distributed Timestamping with Bitcoin - OpenTimestamps. Public OpenTimestamps client Python 433 121 opentimestamps-server. Public ..."
+        },
+        {
+          "title": "Timestamping GitHub Commits with Blockchain-based ...",
+          "url": "https://medium.com/@bbkilboz/timestamping-github-commits-with-blockchain-based-opentimestamps-for-permanent-records-d5a824c699ba",
+          "snippet": "OpenTimestamps, a blockchain-based timestamping tool. You can stamp and verify files directly from their main page, or use their libraries in ..."
+        },
+        {
+          "title": "python-opentimestamps",
+          "url": "https://github.com/opentimestamps/python-opentimestamps",
+          "snippet": "Python3 library for creating and verifying OpenTimestamps proofs. Installation From the PyPi repository: pip3 install opentimestamps"
+        },
+        {
+          "title": "OpenTimestamps",
+          "url": "https://opentimestamps.org/",
+          "snippet": "OpenTimestamps aims to be a standard format for blockchain timestamping. OpenTimestamps defines a set of operations for creating provable timestamps and later ..."
+        },
+        {
+          "title": "Adding verified timestamps · bluesky-social atproto",
+          "url": "https://github.com/bluesky-social/atproto/discussions/2166",
+          "snippet": "OpenTimestamps can return a timestamp within a second or so because it relies on having a small set of calendars, that the community can back up,"
+        },
+        {
+          "title": "Issues · opentimestamps/opentimestamps-client",
+          "url": "https://github.com/opentimestamps/opentimestamps-client/issues",
+          "snippet": "OpenTimestamps client. Contribute to opentimestamps/opentimestamps-client development by creating an account on GitHub. python command opentimestamps/ ..."
+        },
+        {
+          "title": "OpenTimestamps",
+          "url": "https://en.wikipedia.org/wiki/OpenTimestamps",
+          "snippet": "OpenTimestamps (OTS) is an open-source [3] project that aims to provide a standard format for blockchain timestamping. With opentimestamps-client in Python;"
+        },
+        {
+          "title": "OpenTimestamps Client",
+          "url": "https://context7.com/opentimestamps/opentimestamps-client",
+          "snippet": "OpenTimestamps Client is a command-line tool to create and validate timestamp proofs using the OpenTimestamps protocol and Bitcoin blockchain, with support ..."
+        },
+        {
+          "title": "OpenTimestamps client",
+          "url": "https://trendshift.io/repositories/322723",
+          "snippet": "OpenTimestamps client — Star growth, trending history, Reddit & Hacker News discussions, and similar repos on Trendshift."
+        }
+      ]
+    },
+    {
+      "query": "ArviZ Bayesian diagnostics GitHub importance sampling",
+      "results": [
+        {
+          "title": "ArviZ - Exploratory analysis of Bayesian models with Python",
+          "url": "https://github.com/arviz-devs/arviz",
+          "snippet": "ArviZ (pronounced \"AR-vees\") is a Python package for exploratory analysis of Bayesian models. It includes functions for posterior analysis, data storage, model ..."
+        },
+        {
+          "title": "Exploratory analysis of Bayesian models",
+          "url": "https://python.arviz.org/en/v0.11.4/",
+          "snippet": "ArviZ is a Python package for exploratory analysis of Bayesian models. Includes functions for posterior analysis, data storage, sample diagnostics, model ..."
+        },
+        {
+          "title": "Home · ArviZ.jl",
+          "url": "https://arviz-devs.github.io/ArviZ.jl/dev/",
+          "snippet": "ArviZ.jl is a Julia meta-package for exploratory analysis of Bayesian models. It is part of the ArviZ project, which also includes a related Python package."
+        },
+        {
+          "title": "ArviZ v0.10: exploratory analysis of Bayesian models, now ...",
+          "url": "https://discourse.julialang.org/t/arviz-v0-10-exploratory-analysis-of-bayesian-models-now-all-in-julia/102654",
+          "snippet": "ArviZ provides stats, diagnostics, and plots for exploratory analysis of Bayesian models. importance sampling PosteriorStats.jl:"
+        },
+        {
+          "title": "ArviZ",
+          "url": "https://github.com/arviz-devs",
+          "snippet": "ArviZ has 34 repositories available. Public Exploratory analysis of Bayesian models with Python ・ wide website, documents, logos and governance Python ・ ..."
+        },
+        {
+          "title": "ArviZ-stats — arviz-stats dev documentation",
+          "url": "https://arviz-stats.readthedocs.io/",
+          "snippet": "This library focuses on statistical functions and diagnostics for exploratory analysis of Bayesian models. It is one of the 3 components of the ArviZ library,"
+        },
+        {
+          "title": "Address any Arviz integration issues #26",
+          "url": "https://github.com/stan-dev/cmdstanpy/issues/26",
+          "snippet": "ArviZ (pronounced \"AR-vees\") is a Python package for exploratory analysis of Bayesian models. Includes functions for posterior analysis, model ..."
+        },
+        {
+          "title": "(PDF) ArviZ: a modular and flexible library for exploratory ...",
+          "url": "https://www.researchgate.net/publication/401670208_ArviZ_a_modular_and_flexible_library_for_exploratory_analysis_of_Bayesian_models",
+          "snippet": "We introduce a practical and computationally efficient sensitivity analysis approach using importance sampling to estimate properties of ..."
+        },
+        {
+          "title": "arviz-stats",
+          "url": "https://pypi.org/project/arviz-stats/",
+          "snippet": "ArviZ (pronounced \"AR-vees\") is a Python package for exploratory analysis of Bayesian models. It includes functions for posterior analysis, data storage, model ..."
+        },
+        {
+          "title": "Community — ArviZ 1.1.0 documentation",
+          "url": "https://python.arviz.org/en/v1.1.0/community.html",
+          "snippet": "Our main goal is to provide backend-agnostic tools for diagnostics and visualizations of Bayesian inference. We do this by: Creating and maintaining the ArviZ ..."
+        }
+      ]
+    },
+    {
+      "query": "aim experiment tracker GitHub",
+      "results": [
+        {
+          "title": "Aim 💫 — An easy-to-use & supercharged open-source ...",
+          "url": "https://github.com/aimhubio/aim",
+          "snippet": "Aim is an open-source, self-hosted ML experiment tracking tool designed to handle 10,000s of training runs. Aim provides a performant and beautiful UI"
+        },
+        {
+          "title": "experiment-tracking · GitHub Topics",
+          "url": "https://github.com/topics/experiment-tracking",
+          "snippet": "— An easy-to-use & supercharged open-source experiment tracker. track your experiments. auto-generate tasks from configs, run in parallel, and track results ..."
+        },
+        {
+          "title": "Integrate Aim - an open-source experiment tracker #167",
+          "url": "https://github.com/tatsu-lab/stanford_alpaca/issues/167",
+          "snippet": "Aim is an open-source, easy-to-use and supercharged experiment tracker. We would be more than happy to submit an integration PR. aim."
+        },
+        {
+          "title": "[Project] Aim - a super-easy way to record, search and ...",
+          "url": "https://www.reddit.com/r/MachineLearning/comments/jfgbij/project_aim_a_supereasy_way_to_record_search_and/",
+          "snippet": "Aim is an open source AI Development Environment. It helps to record, search and compare 100s of experiments within minutes. Tracking the git ..."
+        },
+        {
+          "title": "Aim",
+          "url": "https://github.com/aimhubio",
+          "snippet": "An easy-to-use & supercharged open-source experiment tracker. Python 6.3k 413."
+        },
+        {
+          "title": "Experiment Tracker - Aim 4.0.3 documentation",
+          "url": "https://aimstack.readthedocs.io/en/stable/apps/experiment_tracker.html",
+          "snippet": "The Aim Experiment Tracker app helps to track and manage ML experiments. For most ML frameworks, we have extended the experiment tracker app and created an app ..."
+        },
+        {
+          "title": "Integrate Aim - an open-source experiment tracker · Issue ...",
+          "url": "https://github.com/lucidrains/vit-pytorch/issues/263",
+          "snippet": "Aim is an open source, easy-to-use and supercharged experiment tracker. Integrating vit-pytorch with aim would make it easier for users to track ..."
+        },
+        {
+          "title": "Issues · aimhubio/aim",
+          "url": "https://github.com/aimhubio/aim/issues",
+          "snippet": "An easy-to-use & supercharged open-source experiment tracker. Automated static analysis findings for aimhubio/aim (academic research) remote tracking ..."
+        },
+        {
+          "title": "Aim: Open-Source Experiment Tracker",
+          "url": "https://tamohannes.com/projects/aim/",
+          "snippet": "Aim is an open-source experiment tracker built for flexible machine learning workflows. It records runs in detail and makes them easy to monitor and compare ..."
+        },
+        {
+          "title": "aimhubio/aim — GitHub trending stats & insights",
+          "url": "https://trendshift.io/repositories/124698",
+          "snippet": "The AI developer platform. Use Weights & Biases to train and fine-tune models, and manage models from experimentation to production. 11.3k ..."
+        }
+      ]
+    },
+    {
+      "query": "FastF1 telemetry GitHub",
+      "results": [
+        {
+          "title": "theOehrly/Fast-F1: FastF1 is a python package for ...",
+          "url": "https://github.com/theOehrly/Fast-F1",
+          "snippet": "FastF1 is a python package for accessing and analyzing Formula 1 results, schedules, timing data and telemetry"
+        },
+        {
+          "title": "FastF1: 2026 ERS Deployment & Energy Management Data",
+          "url": "https://github.com/theOehrly/Fast-F1/discussions/861",
+          "snippet": "FastF1 API release include ERS traces for analyzing energy deployment and management. I have pulled the full Melbourne field telemetry via the current FastF1 ..."
+        },
+        {
+          "title": "F1 Data Analysis using FastF1 and python : r/F1DataAnalysis",
+          "url": "https://www.reddit.com/r/F1DataAnalysis/comments/1d7e347/f1_data_analysis_using_fastf1_and_python/",
+          "snippet": "FastF1 GitHub resources. I made a tool to visualise F1 telemetry data in 3D using the FastF1 API."
+        },
+        {
+          "title": "renan293820938/Fast-F1: 🏎️ Access and analyze ...",
+          "url": "https://github.com/renan293820938/Fast-F1",
+          "snippet": "Access and analyze Formula 1 results, schedules, and telemetry easily with this Python package, featuring fast data handling and visualization tools."
+        },
+        {
+          "title": "fastf1",
+          "url": "https://pypi.org/project/fastf1/",
+          "snippet": "A python package for accessing and analyzing Formula 1 results, schedules, timing data and telemetry. Main Features. Access to F1 timing data, telemetry, ..."
+        },
+        {
+          "title": "Missing CircuitLength in some sessions #859",
+          "url": "https://github.com/theOehrly/Fast-F1/discussions/859",
+          "snippet": "FastF1 library—it's a game-changer for F1 telemetry analysis. () does not return the circuit length (CircuitLength) or CircuitLengthKm. to calculate official ..."
+        },
+        {
+          "title": "theOehrly Fast-F1 · Discussions",
+          "url": "https://github.com/theOehrly/Fast-F1/discussions",
+          "snippet": "Explore the GitHub Discussions forum for theOehrly Fast-F1. Discuss code, ask questions. Telemetry Alignment Mapping: Isolating Dynamic MGU-K De-Rating Loops ..."
+        },
+        {
+          "title": "Unable to load weather and telemetry data for seasons ...",
+          "url": "https://github.com/theOehrly/Fast-F1/discussions/647",
+          "snippet": "FastF1 currently does not support loading this data for seasons before 2018. The only data that is available before 2018 are session results (with limited data ..."
+        },
+        {
+          "title": "FastF1 Playbook: 10 Notebooks to Master Formula 1 Data ...",
+          "url": "https://medium.com/formula-one-forever/fastf1-playbook-10-notebooks-to-master-formula-1-data-in-2026-23c347a462b3",
+          "snippet": "FastF1 ( pip install fastf1 ) is an open-source Python library for accessing and analyzing Formula 1 data from F1's official live-timing API. It ..."
+        },
+        {
+          "title": "What is the source of the data? · theOehrly Fast-F1",
+          "url": "https://github.com/theOehrly/Fast-F1/discussions/634",
+          "snippet": "Most of the data is taken from the F1 livetiming API (the API that powers their timing and telemetry information in the F1 app). Additional data is taken ..."
+        }
+      ]
+    },
+    {
+      "query": "FoamPilot OpenFOAM GitHub",
+      "results": [
+        {
+          "title": "foampilot - plateform to openfoam management with python",
+          "url": "https://github.com/stevendaix/foampilot",
+          "snippet": "foampilot is a Python platform designed to fully orchestrate OpenFOAM simulations — from case definition and meshing to execution, post-processing, and ..."
+        },
+        {
+          "title": "FoamPilot — open-source desktop GUI for OpenFOAM ...",
+          "url": "https://www.cfd-online.com/Forums/openfoam/262356-foampilot-open-source-desktop-gui-openfoam-electron-fastapi-docker-seeki.html",
+          "snippet": "FoamPilot is an open-source (MIT licensed) desktop application for running OpenFOAM simulations through a guided visual interface."
+        },
+        {
+          "title": "FoamPilot — open-source desktop GUI for OpenFOAM with ...",
+          "url": "https://www.reddit.com/r/OpenFOAM/comments/1s9jvfs/foampilot_opensource_desktop_gui_for_openfoam/",
+          "snippet": "I've been building an open-source desktop app called FoamPilot that wraps OpenFOAM in an Electron + React frontend with a FastAPI/Python backend ..."
+        },
+        {
+          "title": "FoamAI: Making computational fluid dynamics (CFD) more ...",
+          "url": "https://github.com/bbaserdem/FoamAI",
+          "snippet": "AI-powered computational fluid dynamics (CFD) assistant that converts natural language descriptions into OpenFOAM simulations with ParaView visualization."
+        },
+        {
+          "title": "LLM Agent for Fire Dynamics Simulations",
+          "url": "https://arxiv.org/html/2412.17146v1",
+          "snippet": "In this work we introduce FoamPilot, a proof-of-concept LLM agent designed to enhance the usability of FireFOAM, a specialized solver for fire ..."
+        },
+        {
+          "title": "Machine learning-aided CFD with OpenFOAM and PyTorch",
+          "url": "https://andreweiner.github.io/reveal.js/ofw_training_2021.html",
+          "snippet": "Machine learning-aided CFD with OpenFOAM and. ML and CFD in a nutshell Applications Validating a boundary layer model for species. Github: Docker + OpenFOAM + ..."
+        },
+        {
+          "title": "OpenFOAM® Repositories",
+          "url": "https://www.openfoam.com/download/openfoam-repositories",
+          "snippet": "OpenFOAM can be downloaded from https://gitlab.com/openfoam/core/openfoam. This site hosts the repository for the most up-to-date version including the ..."
+        },
+        {
+          "title": "openfoam-cfd-cases",
+          "url": "https://github.com/topics/openfoam-cfd-cases",
+          "snippet": "This repository contains different cases from OpenFOAM-7 Tutorials which serve as foundational ground to further built and develope more advance runs."
+        },
+        {
+          "title": "FoamPilot/DESIGN.md at main - olaafrossi",
+          "url": "https://github.com/olaafrossi/FoamPilot/blob/main/DESIGN.md",
+          "snippet": "What this is: Desktop CFD simulation launcher and GUI for OpenFOAM; Project type: Electron + React desktop application; Design reference: VS Code layout ..."
+        },
+        {
+          "title": "fluiddyn/fluidfoam: OpenFoam postprocessing python tool",
+          "url": "https://github.com/fluiddyn/fluidfoam",
+          "snippet": "OpenFoam postprocessing python tool. Contribute to fluiddyn/fluidfoam development by creating an account on GitHub."
+        }
+      ]
+    },
+    {
+      "query": "UQpy uncertainty quantification GitHub",
+      "results": [
+        {
+          "title": "UQpy (Uncertainty Quantification with python) is a general ...",
+          "url": "https://github.com/SURGroup/UQpy",
+          "snippet": "UQpy (Uncertainty Quantification with python) is a general purpose Python toolbox for modeling uncertainty in physical and mathematical systems."
+        },
+        {
+          "title": "UQpy v4.1: Uncertainty quantification with Python",
+          "url": "https://www.sciencedirect.com/science/article/pii/S2352711023002571",
+          "snippet": "by D Tsapetis · 2023 · Cited by 23 — UQpy is a Python-based toolbox that provides a series of computational methodologies and algorithms for wide-ranging UQ problems."
+        },
+        {
+          "title": "Welcome to UQpy's documentation! — UQpy v4.2.0 ...",
+          "url": "https://uqpyproject.readthedocs.io/",
+          "snippet": "UQpy (Uncertainty Quantification with python) is a general purpose python toolbox for modeling uncertainty in physical and mathematical systems."
+        },
+        {
+          "title": "Andrew Wichmann's Post",
+          "url": "https://www.linkedin.com/posts/andrewkw_github-surgroupuqpy-uqpy-uncertainty-activity-7313923560400457729-KZZi",
+          "snippet": "Apr 4, 2025 — UQpy (Uncertainty Quantification with python) is a general purpose Python toolbox for modeling uncertainty in physical and mathematical systems."
+        },
+        {
+          "title": "UQpy",
+          "url": "https://surg.engineering.jhu.edu/uqpy/",
+          "snippet": "SURG collectively develops the Uncertainty Quantification with Python ( UQpy ) software. ... You can find it on Github here and it is extensively documented here. Read more"
+        },
+        {
+          "title": "UQpy",
+          "url": "https://sites.google.com/site/jhusurg/UQpy",
+          "snippet": "UQpy , \"Uncertainty Quantification with Python,\" is a general purpose Python toolbox for modeling uncertainty in the simulation of physical and mathematical ... Read more"
+        },
+        {
+          "title": "List of Python Libraries for Uncertainty Quantification (UQ ...",
+          "url": "https://www.reddit.com/r/UncertaintyQuantified/comments/1ffza3j/list_of_python_libraries_for_uncertainty/",
+          "snippet": "UQpy (Uncertainty Quantification with Python) is a comprehensive framework that offers tools for stochastic modeling, sampling, surrogate ..."
+        },
+        {
+          "title": "5.9. Custom UQ for UQpy",
+          "url": "https://nheri-simcenter.github.io/quoFEM-Documentation/common/user_manual/examples/desktop/qfem-0017/README.html",
+          "snippet": "A simple forward propagation is conducted using UQpy , a python package for general uncertainty quantification problems. implement UQpy as a custom UQ engine ..."
+        },
+        {
+          "title": "UQpy v4.2: Uncertainty Quantification with Python",
+          "url": "https://codeocean.com/capsule/3638957/tree/v1",
+          "snippet": "Aug 20, 2025 — UQpy (Uncertainty Quantification with python) is a general purpose python toolbox for modeling uncertainty in physical and mathematical systems. Read more"
+        }
+      ]
+    },
+    {
+      "query": "coss ui Base UI GitHub",
+      "results": [
+        {
+          "title": "GitHub - cosscom/ui: coss.com/ui is the official design ...",
+          "url": "https://github.com/cosscom/ui",
+          "snippet": "coss ui is a collection of beautifully designed, accessible, and composable components for your React apps . Built on top of Base UI and styled with Tailwind CSS ... Read more"
+        },
+        {
+          "title": "Introduction - coss ui",
+          "url": "https://coss.com/ui/docs",
+          "snippet": "coss ui is a collection of beautifully designed, accessible, and composable components for your React apps . Built on top of Base UI and styled with Tailwind ... Read more"
+        },
+        {
+          "title": "cosscom/coss",
+          "url": "https://github.com/cosscom/coss",
+          "snippet": "3 days ago — Contribute to cosscom/coss development by creating an account on GitHub. coss ui repository : ui → coss-com-ui.vercel.app"
+        },
+        {
+          "title": "Show HN: Base UI v1.0 Unstyled UI Components from ...",
+          "url": "https://news.ycombinator.com/item?id=46245401",
+          "snippet": "Base UI is an unstyled UI library for building accessible component libraries and user interfaces with React . trialled by larger companies like GitHub and ..."
+        },
+        {
+          "title": "[Registry Directory]: coss ui · Issue #8586 · shadcn-ui/ui",
+          "url": "https://github.com/shadcn-ui/ui/issues/8586",
+          "snippet": "Oct 27, 2025 — Description. A new, modern UI component library built on top of Base UI . Built for developers and AI. Logo. Image. Checklist. Read more"
+        },
+        {
+          "title": "Community",
+          "url": "https://base-ui.com/react/overview/community",
+          "snippet": "coss ui : a modern UI component library. Built by the people behind cal.com. Fragments: a design system platform that includes a component library built on Base ... Read more"
+        },
+        {
+          "title": "coss — 74 React Components, Preview & Copy",
+          "url": "https://21st.dev/@coss.com/library/coss",
+          "snippet": "coss ui is a collection of beautifully designed, accessible, and composable components for your React apps. Built on top of Base UI and styled with Tailwind CSS ... Read more"
+        },
+        {
+          "title": "Is there a changelog available? · Issue #673 · cosscom/coss",
+          "url": "https://github.com/cosscom/coss/issues/673",
+          "snippet": "Feb 8, 2026 — This gives you full ownership of the code and the flexibility to customize components to your needs which is core to how coss ui is designed. Read more"
+        },
+        {
+          "title": "coss ui (formerly Origin UI) – React + Tailwind CSS ...",
+          "url": "https://tailkits.com/components/coss-ui/",
+          "snippet": "coss ui is a modern React + Tailwind CSS component system built on top of the Base UI primitives . It continues the copy-&-paste ethos of the original ... Read more"
+        }
+      ]
+    },
+    {
+      "query": "three-mesh-bvh raycast thickness GitHub",
+      "results": [
+        {
+          "title": "gkjohnson/three-mesh-bvh: A BVH implementation to ...",
+          "url": "https://github.com/gkjohnson/three-mesh-bvh",
+          "snippet": "A Bounding Volume Hierarchy (BVH) implementation to speed up raycasting and enable spatial queries against three.js meshes. See the associated Wikipedia article ..."
+        },
+        {
+          "title": "Three-mesh-bvh: A plugin for fast geometry raycasting and ...",
+          "url": "https://discourse.threejs.org/t/three-mesh-bvh-a-plugin-for-fast-geometry-raycasting-and-spatial-queries/26394",
+          "snippet": "A BVH implementation to speed up raycasting and enable spatial queries against three.js meshes. - GitHub - gkjohnson/three-mesh-bvh: A BVH ..."
+        },
+        {
+          "title": "Potential bug raycasting on mesh vertices. · Issue #169",
+          "url": "https://github.com/gkjohnson/three-mesh-bvh/issues/169",
+          "snippet": "Hi again, I'm getting an issue when a raycast exactly lines up with one of the input mesh vertices. The raycaster returns nothing when it ..."
+        },
+        {
+          "title": "three-mesh-bvh",
+          "url": "https://app.unpkg.com/three-mesh-bvh@0.1.3/files/README.md",
+          "snippet": "A BVH implementation to speed up raycasting against three.js meshes. github.com/gkjohnson/three-mesh-bvh · gkjohnson ..."
+        },
+        {
+          "title": "three-mesh-bvh serialized data #429 - glTF-Transform",
+          "url": "https://github.com/donmccurdy/glTF-Transform/discussions/429",
+          "snippet": "For each THREE.BufferGeometry, compute BVH with three-mesh-bvh; Serialize the BVH, storing the binary data either in spare accessors identified by Extras, or a ..."
+        },
+        {
+          "title": "three-mesh-bvh/CHANGELOG.md at master - gkjohnson",
+          "url": "https://github.com/gkjohnson/three-mesh-bvh/blob/master/CHANGELOG.md",
+          "snippet": "A BVH implementation to speed up raycasting and enable spatial queries against three.js meshes. - three-mesh-bvh/CHANGELOG.md at master ..."
+        },
+        {
+          "title": "three-mesh-bvh",
+          "url": "https://classic.yarnpkg.com/en/package/three-mesh-bvh",
+          "snippet": "A Bounding Volume Hierarchy (BVH) implementation to speed up raycasting and enable spatial queries against three.js meshes. See the associated Wikipedia article ..."
+        },
+        {
+          "title": "Feasibility of doing 40000 raycasts onto a 100000 face, ...",
+          "url": "https://discourse.threejs.org/t/feasibility-of-doing-40000-raycasts-onto-a-100000-face-animated-and-skinned-mesh/72143",
+          "snippet": "In this example three-mesh-bvh - Skinned Mesh BVH they are showcasing what I need. But this can not regerate the BVH at 60 fps. PavelBoytchev ..."
+        },
+        {
+          "title": "SkinnedMesh acceleratedRaycast · Issue #547",
+          "url": "https://github.com/gkjohnson/three-mesh-bvh/issues/547",
+          "snippet": "This causes it to no longer inherit the three-mesh-bvh accelerated raycast added to Mesh. I changed my setup from: // Add the extension ..."
+        },
+        {
+          "title": "Raytracing in three.js with three-mesh-bvh library",
+          "url": "https://www.facebook.com/groups/threejs/posts/1810891265764860/",
+          "snippet": "Raytracing in three?? It's possible with this library. https://github.com/gkjohnson/three-mesh-bvh I've been playing with it tonight."
+        }
+      ]
+    },
+    {
+      "query": "Kibo UI Gantt GitHub",
+      "results": [
+        {
+          "title": "shadcnblocks/kibo: A custom registry of composable ...",
+          "url": "https://github.com/shadcnblocks/kibo",
+          "snippet": "Kibo UI is a custom registry of composable, accessible and open source components designed for use with shadcn/ui. The components use the shadcn/ui CSS ..."
+        },
+        {
+          "title": "Kibo UI",
+          "url": "https://www.kibo-ui.com/",
+          "snippet": "Kibo UI is a custom registry of composable, accessible and open source components. Adds complex, open-source components like Gantt, Kanban, Editor, Color ..."
+        },
+        {
+          "title": "[feat]: Gantt Chart · Issue #7477 · shadcn-ui/ui",
+          "url": "https://github.com/shadcn-ui/ui/issues/7477",
+          "snippet": "Check out Kibo UI and this Gantt page: https://www.kibo-ui.com/components/gantt . Kibo is an extension to shadcn."
+        },
+        {
+          "title": "Issues · shadcnblocks/kibo",
+          "url": "https://github.com/haydenbleasel/kibo/issues",
+          "snippet": "A custom registry of composable, accessible and extensible components designed for use with shadcn/ui. Free and open source, forever. Gantt Component ..."
+        },
+        {
+          "title": "Releases · shadcnblocks/kibo",
+          "url": "https://github.com/haydenbleasel/kibo/releases",
+          "snippet": "A custom registry of composable, accessible and extensible components designed for use with shadcn/ui. Free and open source, forever."
+        },
+        {
+          "title": "Kibo UI (websites/kibo-ui)",
+          "url": "https://context7.com/websites/kibo-ui",
+          "snippet": "Use this command to add a specific Kibo UI component, such as the Gantt Chart, to your project. The CLI handles code integration and dependency installation."
+        },
+        {
+          "title": "gantt · GitHub Topics",
+          "url": "https://github.com/topics/gantt",
+          "snippet": "The AI-native JSON Gantt chart engine. Dependency-free interactive timelines with React, script-tag, CLI, topological DAG solver, and formal JSON schema. react ..."
+        },
+        {
+          "title": "KIBO UI",
+          "url": "https://daily.dev/posts/kibo-ui-x0eomuq0d",
+          "snippet": "Kibo UI is an open-source component library. Gantt charts, and AI chatbot interfaces."
+        },
+        {
+          "title": "Kibo UI, an Open Source React Component Registry ...",
+          "url": "https://www.shadcn.io/template/haydenbleasel-kibo",
+          "snippet": "Kibo UI is a custom registry of composable, accessible and extensible components designed for use with shadcn/ui. Free and open source, forever. Browse ..."
+        },
+        {
+          "title": "[discussion] Add Gantt Chart component? · Issue #4781",
+          "url": "https://github.com/mui/base-ui/issues/4781",
+          "snippet": "In this base-ui repo we are, currently, focused on the core set of components needed to create a great design system, so the probability we ..."
+        }
+      ]
+    },
+    {
+      "query": "scikit-fem finite element GitHub",
+      "results": [
+        {
+          "title": "kinnala/scikit-fem: Simple finite element assemblers",
+          "url": "https://github.com/kinnala/scikit-fem",
+          "snippet": "scikit-fem is a pure Python 3.10+ library for performing finite element assembly. Its main purpose is the transformation of bilinear forms into sparse matrices ..."
+        },
+        {
+          "title": "Vinc0110/Helmi_FEM: Finite element method for solving ...",
+          "url": "https://github.com/Vinc0110/Helmi_FEM",
+          "snippet": "An open-source implementation of the Helmholtz equation for finite element analysis of electromagnetic wave propagation and scattering. Based on scikit-fem ..."
+        },
+        {
+          "title": "Documentation of scikit-fem — scikit-fem documentation",
+          "url": "https://scikit-fem.readthedocs.io/",
+          "snippet": "scikit-fem is a pure Python 3.10+ library for performing finite element assembly. Its main purpose is the transformation of bilinear forms into sparse matrices ..."
+        },
+        {
+          "title": "native assembly for scikit-fem-style Python workflows",
+          "url": "https://github.com/kevin-tofu/scikit-fem-native",
+          "snippet": "This project exists because scikit-fem demonstrated how effective a finite-element library can be when mathematical forms remain concise, readable Python."
+        },
+        {
+          "title": "scikit-fem - conda-forge",
+          "url": "https://anaconda.org/conda-forge/scikit-fem",
+          "snippet": "Install scikit-fem with Anaconda.org. Simple finite element assemblers. To install this package, run one of the following: https://github.com/ ..."
+        },
+        {
+          "title": "skfem.ivp · Issue #531 · kinnala/scikit-fem",
+          "url": "https://github.com/kinnala/scikit-fem/issues/531",
+          "snippet": "The entire scipy.integrate.solve_ivp framework is useless here since it assumes the form y ' = f (y, t) which doesn't cover finite element ..."
+        },
+        {
+          "title": "kinnala scikit-fem · Discussions",
+          "url": "https://github.com/kinnala/scikit-fem/discussions",
+          "snippet": "Explore the GitHub Discussions forum for kinnala scikit-fem. Discuss code, ask questions & collaborate with the developer community."
+        },
+        {
+          "title": "scikit-fem 2.2.2",
+          "url": "https://pypi.org/project/scikit-fem/2.2.2/",
+          "snippet": "scikit-fem is a lightweight Python 3.6+ library for performing finite element assembly. Its main purpose is the transformation of bilinear forms into sparse ..."
+        },
+        {
+          "title": "ex1.ipynb",
+          "url": "https://colab.research.google.com/github/kinnala/scikit-fem-notebooks/blob/master/ex1.ipynb",
+          "snippet": "Tutorial for scikit-fem · Create mesh · Define the finite element · Define the forms · Assemble and solve the linear system · Visualize the solution."
+        },
+        {
+          "title": "scikit-fem: A Python package for finite element assembly",
+          "url": "https://www.researchgate.net/publication/343795943_scikit-fem_A_Python_package_for_finite_element_assembly",
+          "snippet": "scikit-fem is a lightweight Python library for the creation, or assembly, of the finite element matrix A and vector b. The user loads a ..."
+        }
+      ]
+    },
+    {
+      "query": "OpenFOAM verification validation python benchmark grid convergence GitHub",
+      "results": [
+        {
+          "title": "rithikrn/foamgci: OpenFOAM verification toolkit for grid ...",
+          "url": "https://github.com/rithikrn/foamgci",
+          "snippet": "OpenFOAM verification toolkit for grid convergence, GCI, and autocorrelation-aware uncertainty reporting in CFD studies. Topics. cfdcomputational-fluid-dynamics ..."
+        },
+        {
+          "title": "yushan-lab/openfoam-cfd-minilab ...",
+          "url": "https://github.com/yushan-lab/openfoam-cfd-minilab",
+          "snippet": "This repository collects two reproducible OpenFOAM CFD studies for numerical validation and paired model diagnostics. The Re=100 lid-driven cavity component ..."
+        },
+        {
+          "title": "CFD Solver Benchmark and Comparison - OpenFOAM ...",
+          "url": "https://www.featool.com/cfd/2018/07/02/FEniCS-OpenFOAM-MATLAB-CFD-Flow-Solver-Benchmark/?srsltid=AYCX9vJsvBCadiJ0n35bG8jMfgpl6enB5kcL-Y5Wuq5LH4gSRYdc0Qav",
+          "snippet": "Comparison of the OpenFOAM, FEniCS, and FEATool Multiphysics Navier-Stokes solvers for a fluid dynamics (CFD) benchmark and validation test ..."
+        },
+        {
+          "title": "CRC-1194/b01-wetting-benchmark",
+          "url": "https://github.com/CRC-1194/b01-wetting-benchmark",
+          "snippet": "To set up parametric studies for verification and validation of the numerical method. Post-processing dependencies. We use OpenFOAM Function Objects to create ..."
+        },
+        {
+          "title": "Hron-Turek Benchmark in OpenFOAM and Foam-Extend",
+          "url": "https://ts-cubed.github.io/roam/20210101123431-hron_turek_benchmark_in_openfoam_and_foam_extend.html",
+          "snippet": "Validation and verification is particularly difficult for FSI problems due to the scarcity of dedicated validation experiments. In many ..."
+        },
+        {
+          "title": "Validation cases - Forums",
+          "url": "https://www.cfd-online.com/Forums/openfoam/81446-validation-cases.html",
+          "snippet": "I am interested in performing a set of verification/validation cases for openfoam applications. Is there already a validation case repository ..."
+        },
+        {
+          "title": "(PDF) Testing Strategies for OpenFOAM Projects",
+          "url": "https://www.researchgate.net/publication/391207698_Testing_Strategies_for_OpenFOAM_Projects",
+          "snippet": "This paper addresses these issues by discussing established test types in the context of OpenFOAM, identifying common challenges in developing ..."
+        },
+        {
+          "title": "argonne-lcf/PythonFOAM: In-situ data analyses and ...",
+          "url": "https://github.com/argonne-lcf/PythonFOAM",
+          "snippet": "What you see in this repository, is OpenFOAM calling Python functions and classes for in-situ data analytics. You may offload some portion of your compute task ..."
+        },
+        {
+          "title": "VERIFICATION AND VALIDATION STUDY OF OPENFOAM ...",
+          "url": "https://upcommons.upc.edu/bitstreams/1cadab84-a327-43a3-8771-a0be1fae73a5/download",
+          "snippet": "by J Li · 2019 · Cited by 17 — The paper presents the first series of results obtained in an ongoing validation and verification study of inter-dynamic OpenFOAM solver framework on a new set ..."
+        },
+        {
+          "title": "OpenFOAM, SU2, FVCOM, Basilisk (Gerris), etc. : r/CFD",
+          "url": "https://www.reddit.com/r/CFD/comments/8x6fzf/july_personal_experiences_of_using_open_source/",
+          "snippet": "I developed a workflow using a combination of bash and python so one command was required to do all the work; run the case then produce all the ..."
+        }
+      ]
+    },
+    {
+      "query": "site:github.com statsmodels paired tests power analysis control charts",
+      "results": [
+        {
+          "title": "ktwyw/engstat: Engineering statistics in Python: validated ...",
+          "url": "https://github.com/ktwyw/engstat",
+          "snippet": "engstat puts the statistics engineers actually use - control charts, capability, designed experiments, calibration curves, gauge R&R, Weibull life analysis, ..."
+        },
+        {
+          "title": "cogstat/changelog.md at master",
+          "url": "https://github.com/cogstat/cogstat/blob/master/changelog.md",
+          "snippet": "A simple to use statistical package. Paired two-samples. Sensitivity power analysis for one-sample t-test, two-sample test, paired samples t-test, Hypothesis ..."
+        },
+        {
+          "title": "ML-foundations/notebooks/6-statistics.ipynb at master",
+          "url": "https://github.com/jonkrohn/ML-foundations/blob/master/notebooks/6-statistics.ipynb",
+          "snippet": "With paired samples, we capture this power by comparing the difference between x and y, e.g., the difference in forgetfulness for a given patient"
+        },
+        {
+          "title": "power_2.ipynb - jooh.github.io",
+          "url": "https://github.com/jooh/jooh.github.io/blob/source/content/blog/power_2.ipynb",
+          "snippet": "There are many flavours of d , which fall into two broad categories for between-subjects unpaired (Cohen's d s ) and within-subjects paired (Cohen's d z ) T ..."
+        },
+        {
+          "title": "DataCamp.Course_054_Hypothesis Testing in Python.ipynb",
+          "url": "https://github.com/mcabas/Datacamp_Notebook/blob/main/DataCamp.Course_054_Hypothesis%20Testing%20in%20Python.ipynb",
+          "snippet": "Hypothesis testing lets you answer questions about your datasets in a statistically rigorous way."
+        },
+        {
+          "title": "mainkoon81/Study-02-AB-Testing: Hypothesis ...",
+          "url": "https://github.com/mainkoon81/Study-02-AB-Testing",
+          "snippet": "The sign test is considered a weaker test because it tests the pair value below or above the median and it does not measure the pair difference."
+        },
+        {
+          "title": "scientific-agent-skills/docs/examples.md at main",
+          "url": "https://github.com/K-Dense-AI/scientific-agent-skills/blob/main/docs/examples.md",
+          "snippet": "statsmodels - Association testing and covariate models statistical-analysis. Design, randomization, blinding, and controls for each aim statistical-power - A ..."
+        },
+        {
+          "title": "claude-scientific-skills/docs/examples.md at main",
+          "url": "https://github.com/Polster-lab/claude-scientific-skills/blob/main/docs/examples.md",
+          "snippet": "Objective: Analyze resting-state fMRI data to identify altered brain connectivity patterns in disease. models - Statistical testing"
+        },
+        {
+          "title": "Kehinde Obidele Kenny0bi",
+          "url": "https://github.com/Kenny0bi",
+          "snippet": "Graduate Student. Kenny0bi has 36 repositories available. Follow their code on GitHub."
+        },
+        {
+          "title": "amazing-psycoder-skills/docs/README_EN.md at main",
+          "url": "https://github.com/soupandpsy/amazing-psycoder-skills/blob/main/docs/README_EN.md",
+          "snippet": "AI skills for psychology experiment programming and data analysis, a paired t-test. Power Meta-analysis, power analysis, equivalence testing"
+        }
+      ]
+    },
+    {
+      "query": "site:github.com FluidX3D license non commercial",
+      "results": [
+        {
+          "title": "ProjectPhysX/FluidX3D: The fastest and most memory ...",
+          "url": "https://github.com/ProjectPhysX/FluidX3D",
+          "snippet": "Free for non-commercial use. Anyone can use FluidX3D for free for public research, education or personal use. Yes, you can use FluidX3D free of charge. This is ..."
+        },
+        {
+          "title": "kesperinc/FluidX3D_LBM",
+          "url": "https://github.com/kesperinc/FluidX3D_LBM",
+          "snippet": "Yes, you can use FluidX3D free of charge. This is considered research/education, not commercial use. Commercial use is not allowed with the current license. ..."
+        },
+        {
+          "title": "Noelok/CFD: FluidX3D test",
+          "url": "https://github.com/Noelok/CFD",
+          "snippet": "This is a Python-based GUI frontend for FluidX3D, License: FluidX3D is free for non-commercial use (see FluidX3D-master/LICENSE )."
+        },
+        {
+          "title": "caijt961117/FluidX3D-LBM: The fastest and most memory ...",
+          "url": "https://github.com/caijt961117/FluidX3D-LBM",
+          "snippet": "The fastest and most memory efficient lattice Boltzmann CFD software, running on all GPUs via OpenCL. Free for non-commercial use."
+        },
+        {
+          "title": "heikogleu-dev/maxattack-cfd-bench",
+          "url": "https://github.com/heikogleu-dev/maxattack-cfd-bench",
+          "snippet": "Licensed under the unaltered FluidX3D license — non-commercial use only, no military use. See NOTICE.md and MODIFICATIONS.md. Built on FluidX3D by Dr."
+        },
+        {
+          "title": "Is this suitable for 3D real-time ship sinking or flooding ...",
+          "url": "https://github.com/ProjectPhysX/FluidX3D/issues/86",
+          "snippet": "The software is described as being free for non-commercial use. If you intend to use the simulation for commercial purposes, you may need to ..."
+        },
+        {
+          "title": "freecad-mcp/docs/openfoam.md at master",
+          "url": "https://github.com/sandraschi/freecad-mcp/blob/master/docs/openfoam.md",
+          "snippet": "5k stars, OpenCL, runs on ANY GPU (AMD/Intel/NVIDIA/Apple ... License: Free for non-commercial use. Setup: Write C++ setup files (like ..."
+        },
+        {
+          "title": "heiko_gleu heikogleu-dev",
+          "url": "https://github.com/heikogleu-dev",
+          "snippet": "FluidX3D (Dr. Moritz Lehmann). Wall-modelled LBM-LES for vehicle aerodynamics at 4 mm on a single Intel Arc Pro B70. Non-commercial, FluidX3D license."
+        },
+        {
+          "title": "computational-fluid-dynamics",
+          "url": "https://github.com/topics/computational-fluid-dynamics",
+          "snippet": "FluidX3D ProjectPhysX. The fastest and most memory efficient lattice Boltzmann CFD software, running on all GPUs and CPUs via OpenCL. Free for non-commercial ..."
+        },
+        {
+          "title": "cleanroom.md - Andrew-Keenlyside/zvCFD",
+          "url": "https://github.com/Andrew-Keenlyside/zvCFD/blob/main/docs/how_to/cleanroom.md?plain=true",
+          "snippet": "| FluidX3D | custom, non-commercial, no military use | its terms would bind derived code |. | HemeLB | LGPL-3.0 | reading is fine, but keep implementation ..."
+        }
+      ]
+    },
+    {
+      "query": "site:github.com scikit-learn MAPIE conformal prediction uncertainty",
+      "results": [
+        {
+          "title": "GitHub - scikit-learn-contrib/MAPIE",
+          "url": "https://github.com/scikit-learn-contrib/MAPIE",
+          "snippet": "\"Flexible and systematic uncertainty estimation with conformal prediction via the MAPIE library.\" Conformal and Probabilistic Prediction with Applications."
+        },
+        {
+          "title": "conformal-prediction · GitHub Topics",
+          "url": "https://github.com/topics/conformal-prediction?o=desc&s=",
+          "snippet": "A scikit-learn-compatible library for estimating prediction intervals and controlling risks, based on conformal predictions. python data-science sklearn ..."
+        },
+        {
+          "title": "CITATION.cff - scikit-learn-contrib/MAPIE",
+          "url": "https://github.com/scikit-learn-contrib/MAPIE/blob/master/CITATION.cff",
+          "snippet": "A scikit-learn-compatible library for estimating prediction intervals and controlling risks, based on conformal predictions."
+        },
+        {
+          "title": "Adaptative / Conditional Conformal Prediction · Issue #300",
+          "url": "https://github.com/scikit-learn-contrib/MAPIE/issues/300",
+          "snippet": "The objective of this enhancement is to propose conditional / adaptative conformal prediction for MapieRegressor and MapieClassifier (in two different issues/ ..."
+        },
+        {
+          "title": "AGENTS.md - scikit-learn-contrib/MAPIE",
+          "url": "https://github.com/scikit-learn-contrib/MAPIE/blob/master/AGENTS.md",
+          "snippet": "MAPIE is a scikit-learn-compatible library for uncertainty quantification (conformal prediction) and risk control. It wraps any base estimator to produce ..."
+        },
+        {
+          "title": "nilslacroix/MAPIE_advanced: Scoring / Conformal Quantile ...",
+          "url": "https://github.com/nilslacroix/MAPIE_advanced",
+          "snippet": "Prediction intervals output by MAPIE encompass both aleatoric and epistemic uncertainties and are backed by strong theoretical guarantees thanks to conformal ..."
+        },
+        {
+          "title": "A measure of uncertainty for multioutput regression #437",
+          "url": "https://github.com/scikit-learn-contrib/MAPIE/issues/437",
+          "snippet": "I often need to perform active learning in the context of multioutput regression. I thus need a measure of uncertainty for my regressor."
+        },
+        {
+          "title": "MapieQuantileRegressor with prefit model from Keras/ ...",
+          "url": "https://github.com/scikit-learn-contrib/MAPIE/issues/448",
+          "snippet": "However, you should keep in mind that conformal predictions estimate the uncertainty of your model (the one you use to make point predictions)."
+        },
+        {
+          "title": "Releases · scikit-learn-contrib/MAPIE",
+          "url": "https://github.com/scikit-learn-contrib/MAPIE/releases",
+          "snippet": "A scikit-learn-compatible library for estimating prediction intervals and controlling risks, based on conformal predictions."
+        },
+        {
+          "title": "MAPIE/mapie/classification.py at master",
+          "url": "https://github.com/scikit-learn-contrib/MAPIE/blob/master/mapie/classification.py",
+          "snippet": "The `conformalize` method estimates the uncertainty of the base classifier by computing conformity scores on the conformalization set."
+        }
+      ]
+    },
+    {
+      "query": "site:github.com tanstack table virtual engineering data grid",
+      "results": [
+        {
+          "title": "RamBeer6/react-virtual-datagrid: Large-scale ...",
+          "url": "https://github.com/RamBeer6/react-virtual-datagrid",
+          "snippet": "The grid uses TanStack Virtual to render only the rows currently visible in the viewport while simulating the full scroll height. This keeps the DOM size stable ..."
+        },
+        {
+          "title": "sv-grid/docs/help/migrating-from-tanstack-table.md at main",
+          "url": "https://github.com/sv-grid/sv-grid/blob/main/docs/help/migrating-from-tanstack-table.md",
+          "snippet": "TanStack Table (formerly React Table) is the closest conceptual sibling to sv-grid - both are \"headless data grid\" libraries with explicit row-model ..."
+        },
+        {
+          "title": "Vitashev/react-data-grid-benchmark",
+          "url": "https://github.com/Vitashev/react-data-grid-benchmark",
+          "snippet": "React data grid comparison with shared fixtures, raw browser measurements, and explicit limitations. TanStack Table with TanStack Virtual Handsontable using ..."
+        },
+        {
+          "title": "Any guidance on a reversed virtual list with dynamic ...",
+          "url": "https://github.com/TanStack/virtual/discussions/195",
+          "snippet": "The engineering effort to implement a ChatRoom-like feature with TanStack virtual seems massive. A bidirectional, infinite loader just doesn't seem possible ..."
+        },
+        {
+          "title": "Add pattern for virtualized table #3594 - twilio-labs paste",
+          "url": "https://github.com/twilio-labs/paste/discussions/3594",
+          "snippet": "If it is just a Table, then using something like TanStack Virtual would work well. If there's interactive content, you'll want to use a Data ..."
+        },
+        {
+          "title": "revolist/revogrid: Powerful virtual data table smartsheet ...",
+          "url": "https://github.com/revolist/revogrid",
+          "snippet": "Powerful virtual data table smartsheet with advanced customization. Render 1M+ rows, millions of cells, and thousands of columns efficiently"
+        },
+        {
+          "title": "Ram Be'er RamBeer6",
+          "url": "https://github.com/RamBeer6",
+          "snippet": "Highlights: React, TypeScript, TanStack Table, TanStack Virtual, Vite. Two-Pass Assembler. ANSI C implementation of a two-pass assembler that parses assembly ..."
+        },
+        {
+          "title": "large-datasets",
+          "url": "https://github.com/topics/large-datasets",
+          "snippet": "tanstack-table tanstack-query. JavaScript data grid for large client-side datasets, using virtual scrolling, paging, disposal, and server-side processing. High ..."
+        },
+        {
+          "title": "TanStack table · Discussions",
+          "url": "https://github.com/tanstack/table/discussions",
+          "snippet": "Explore the GitHub Discussions forum for TanStack table. Discuss code, ask questions & collaborate with the developer community."
+        },
+        {
+          "title": "A spreadsheet-style GST reconciliation workspace built with ...",
+          "url": "https://github.com/devesh-kumar-03/gst-reconciliation-workspace-spreadsheet-style",
+          "snippet": "TanStack Table v8, Headless spreadsheet data grid ; TanStack Virtual, Efficient row virtualization for large datasets ; SheetJS (xlsx), Excel and CSV import/ ..."
+        }
+      ]
+    },
+    {
+      "query": "site:github.com meshio gmsh python mesh processing",
+      "results": [
+        {
+          "title": "meshio/src/meshio/gmsh/_gmsh22.py at main",
+          "url": "https://github.com/nschloe/meshio/blob/main/src/meshio/gmsh/_gmsh22.py",
+          "snippet": "input/output for many mesh formats. I/O for Gmsh's msh format, Mesh from .common import … python indices are 0-based. sh:physical and gmsh:geometrical are tags ..."
+        },
+        {
+          "title": "Converting the mesh file generated from GMSH to a ...",
+          "url": "https://github.com/nschloe/meshio/discussions/1406",
+          "snippet": "Converting the mesh file generated from GMSH to a mesh file that can be read on ANSYS. I tried to use meshio code to convert it:"
+        },
+        {
+          "title": "meshio · GitHub Topics",
+          "url": "https://github.com/topics/meshio?o=desc&s=forks",
+          "snippet": "This library is used to read the nodes, elements, clement types, materials, etc. Mesh quality metrics, facet statistics, visualization, and MMG3D remeshing ..."
+        },
+        {
+          "title": "loumalouomega/meshioplusplus: 🚀 A high-performance ...",
+          "url": "https://github.com/loumalouomega/meshioplusplus",
+          "snippet": "This project serves as the ultimate \"Swiss Army knife\" for mesh manipulation workflows, providing blazing-fast and reliable data handling."
+        },
+        {
+          "title": "implement regions · Issue #175 · nschloe/meshio",
+          "url": "https://github.com/nschloe/meshio/issues/175",
+          "snippet": "Some data formats have the concept of regions/submeshes/domains, e.g., gmsh and Exodus. Think about how to best integrate this into meshio."
+        },
+        {
+          "title": "A collection of mesh utilities for neuron morphology ...",
+          "url": "https://github.com/CNS-OIST/meshing",
+          "snippet": "meshio: Python library and command-line tool to read, write, and convert between many mesh formats — Gmsh. Mesh processing & repair (Python libraries)"
+        },
+        {
+          "title": "Converting Gmsh mesh format to MDPA - Kratos",
+          "url": "https://github.com/KratosMultiphysics/Kratos/wiki/Converting-Gmsh-mesh-format-to-MDPA",
+          "snippet": "It is possible to convert Gmsh native mesh format (.msh) to MDPA, Kratos' native mesh format) using meshio's mdpa module. Create a simple python script"
+        },
+        {
+          "title": "Gost65/STL_to_MSH: This python script was made to mesh ...",
+          "url": "https://github.com/Gost65/STL_to_MSH",
+          "snippet": "This python script was made to mesh STL files. The code uses GMSH library. The script uses multiprocessing. uses meshio. Gmsh: a three-dimensional finite ..."
+        },
+        {
+          "title": "Issue with reading .msh file in meshio version 2.3.6 #358",
+          "url": "https://github.com/nschloe/meshio/issues/358",
+          "snippet": "I am using Windows 10, Python 3.7.2. am also not able to read in the .msh using GMSH 4.2.2. Can you help with the command for converting the ..."
+        },
+        {
+          "title": "Th0masLavigne/FEniCSx_GMSH_tutorials: This repository ...",
+          "url": "https://github.com/Th0masLavigne/FEniCSx_GMSH_tutorials",
+          "snippet": "Python scripts demonstrating a range of finite element simulations (Elasticity, Fluid Dynamics, Thermal Analysis) and advanced GMSH meshing techniques. Core ..."
+        }
+      ]
+    },
+    {
+      "query": "site:github.com Optuna dashboard licensed",
+      "results": [
+        {
+          "title": "Optuna - A hyperparameter optimization framework · GitHub",
+          "url": "https://github.com/optuna/optuna",
+          "snippet": "Optuna Dashboard is a real-time web dashboard for Optuna. You can check the ... MIT License (see LICENSE). Optuna uses the codes from SciPy and fdlibm ..."
+        },
+        {
+          "title": "Real-time Web Dashboard for Optuna.",
+          "url": "https://github.com/optuna/optuna-dashboard",
+          "snippet": "Real-time Web Dashboard for Optuna. Contribute to optuna/optuna-dashboard. You can install optuna-dashboard via PyPI or Anaconda Cloud."
+        },
+        {
+          "title": "optuna-dashboard/LICENSE at main",
+          "url": "https://github.com/optuna/optuna-dashboard/blob/main/LICENSE",
+          "snippet": "Optuna Dashboard contains the codes from SQLAlchemy project. Copyright 2005-2019 SQLAlchemy authors and contributors <see AUTHORS file>. Permission is hereby ..."
+        },
+        {
+          "title": "Releases · optuna/optuna-dashboard",
+          "url": "https://github.com/optuna/optuna-dashboard/releases",
+          "snippet": "Real-time Web Dashboard for Optuna. an account on GitHub. This release adds the support for Rustuna and Optuna v5.0!"
+        },
+        {
+          "title": "Optimization for ASReview models using the optuna ...",
+          "url": "https://github.com/asreview/asreview-optuna",
+          "snippet": "This repository provides tools for testing and optimizing the models found in ASReview via the Optuna package. This project is licensed under the MIT License. ..."
+        },
+        {
+          "title": "Optuna: A hyperparameter optimization framework",
+          "url": "https://github.com/optuna/optuna?ref=dagshub.com",
+          "snippet": "Optuna Dashboard is a real-time web dashboard for Optuna. You can check the ... MIT License (see LICENSE). Optuna uses the codes from SciPy and fdlibm ..."
+        },
+        {
+          "title": "Optuna Examples",
+          "url": "https://github.com/optuna/optuna-examples",
+          "snippet": "This page contains a list of example codes written with Optuna. If you are interested in a quick start of Optuna Dashboard with in-memory storage, please take ..."
+        },
+        {
+          "title": "The Optuna MCP Server is a Model Context Protocol ...",
+          "url": "https://github.com/optuna/optuna-mcp",
+          "snippet": "Optuna dashboard provides various visualizations to analyze the optimization results, such as optimization history, parameter importances, and more. License ..."
+        },
+        {
+          "title": "optuna-dashboard/pyproject.toml at main",
+          "url": "https://github.com/optuna/optuna-dashboard/blob/main/pyproject.toml",
+          "snippet": "Real-time Web Dashboard for Optuna. Contribute to optuna/optuna-dashboard development by creating an account on GitHub."
+        },
+        {
+          "title": "optuna repositories",
+          "url": "https://github.com/orgs/optuna/repositories",
+          "snippet": "Extended functionalities for Optuna in combination with third-party libraries. Python. •. MIT License. • 48 ..."
+        }
+      ]
+    },
+    {
+      "query": "site:github.com react racing telemetry replay f1-dash racing-game",
+      "results": [
+        {
+          "title": "subinium/awesome-f1: 🏎️ A curated collection ...",
+          "url": "https://github.com/subinium/awesome-f1",
+          "snippet": "F1 Race Replay - F1 replay and telemetry app with track rendering and rich race-state visualization. f1-dash - Real-time F1 dashboard (Next.js) showing ..."
+        },
+        {
+          "title": "Nicxe/f1_sensor: A Home Assistant Custom Integration ...",
+          "url": "https://github.com/Nicxe/f1_sensor",
+          "snippet": "I'm F1 Sensor 🏎️, a custom integration for Home Assistant that brings Formula 1 race weekends into your home. Follow schedules, live timing, results, weather, ..."
+        },
+        {
+          "title": "motorsports · GitHub Topics",
+          "url": "https://github.com/topics/motorsports",
+          "snippet": "Interactive Formula 1 race replay viewer with real 2025 telemetry data. Built with React + Three.js - watch races on 3D track maps with live timing and variable ..."
+        },
+        {
+          "title": "Releases · SpeedHQ/RaceIQ",
+          "url": "https://github.com/SpeedHQ/RaceIQ/releases",
+          "snippet": "Free open-source sim racing telemetry & Motorsport, F1 25, RaceIQ captures are no longer supported for import and replay. Replay recorded frame times ..."
+        },
+        {
+          "title": "irdashies - iRacing Overlays with Electron and TypeScript",
+          "url": "https://github.com/tariknz/irdashies",
+          "snippet": "This project is built with React and Electron and retrieves live telemetry from iRacing and Le Mans Ultimate to power configurable overlays and race utilities."
+        },
+        {
+          "title": "starred/README.md at main · fluteds/starred",
+          "url": "https://github.com/fluteds/starred/blob/main/README.md",
+          "snippet": "A curated collection of high-quality Formula 1 and motorsport resources telemetry tools, visualization, sim racing, and learning materials. Terminal-based ..."
+        },
+        {
+          "title": "Releases · giantorth/AZOM",
+          "url": "https://github.com/giantorth/AZOM/releases",
+          "snippet": "it streams game telemetry and engine vibration like Motion Manager, right track map for ACC, LMU, F1 and AC layouts. dash gets telemetry back after its hub or ..."
+        },
+        {
+          "title": "Releases · SHWotever/SimHub",
+          "url": "https://github.com/SHWotever/SimHub/releases",
+          "snippet": "Improved telemetry stability and ignition detection for Farming Simulator 22 and Farming Simulator 25. Updated the telemetry setup instructions ..."
+        },
+        {
+          "title": "awesome-deepseek-harness-plugins/catalog/README.md ...",
+          "url": "https://github.com/imsai-sh/awesome-deepseek-harness-plugins/blob/main/catalog/README.md",
+          "snippet": "dsh-f1-skin — An F1 Race Control themed skin for the DeepSeek Harness Web UI — Red Bull, Ferrari, McLaren & Mercedes team themes, broadcast ..."
+        },
+        {
+          "title": "NEEDLE/docs/plan/plan.md at main · jedarden/NEEDLE",
+          "url": "https://github.com/jedarden/NEEDLE/blob/main/docs/plan/plan.md",
+          "snippet": "F1 owns the profile/configuration artifact. Busy-queue, restart, replay, ineligible cohort and harmful-guidance-withdrawal cases are acceptance variants of that ..."
+        }
+      ]
+    },
+    {
+      "query": "FoamPilot Electron React FastAPI MIT github OpenFOAM",
+      "results": [
+        {
+          "title": "FoamPilot — open-source desktop GUI for OpenFOAM ...",
+          "url": "https://www.cfd-online.com/Forums/openfoam/262356-foampilot-open-source-desktop-gui-openfoam-electron-fastapi-docker-seeki.html",
+          "snippet": "open-source desktop GUI for OpenFOAM (Electron + FastAPI + Docker). Seeki · What it is · Architecture · Current capabilities · What it does NOT do (yet)."
+        },
+        {
+          "title": "FoamPilot — open-source desktop GUI for OpenFOAM with ...",
+          "url": "https://www.reddit.com/r/OpenFOAM/comments/1s9jvfs/foampilot_opensource_desktop_gui_for_openfoam/",
+          "snippet": "I've been building an open-source desktop app called FoamPilot that wraps OpenFOAM in an Electron + React frontend with a FastAPI/Python backend ..."
+        },
+        {
+          "title": "foampilot - plateform to openfoam management with python",
+          "url": "https://github.com/stevendaix/foampilot",
+          "snippet": "foampilot is a Python platform designed to fully orchestrate OpenFOAM simulations — from case definition and meshing to execution, post-processing, and ..."
+        },
+        {
+          "title": "jmedia65/fastapi-react-full-stack: A hands-on tutorial that ...",
+          "url": "https://github.com/jmedia65/fastapi-react-full-stack",
+          "snippet": "A hands-on tutorial that teaches you the production-grade patterns of building full-stack applications with FastAPI (Python), React (TypeScript), and React ..."
+        },
+        {
+          "title": "Electron + React + FastAPI Template for Cross-Platform ...",
+          "url": "https://medium.com/@shakeef.rakin321/electron-react-fastapi-template-for-cross-platform-desktop-apps-cf31d56c470c",
+          "snippet": "The backend is a FastAPI application, structured to allow growth from a simple app.py to a full service-based architecture. It is packaged using ..."
+        },
+        {
+          "title": "FoamPilot/DESIGN.md at main - olaafrossi",
+          "url": "https://github.com/olaafrossi/FoamPilot/blob/main/DESIGN.md",
+          "snippet": "What this is: Desktop CFD simulation launcher and GUI for OpenFOAM; Project type: Electron + React desktop application; Design reference: VS Code layout ..."
+        },
+        {
+          "title": "The Ultimate FastAPI + React Full Stack Project (Deploy This ...",
+          "url": "https://www.youtube.com/watch?v=_1P0Uqk50Ps",
+          "snippet": "In this video, you'll learn how to build a full stack application using FastAPI in Python and JavaScript and React. Now I'll cover databases ..."
+        },
+        {
+          "title": "Built a React + FastAPI app in 5 minutes with GitHub Copilot",
+          "url": "https://www.linkedin.com/posts/mayanksoni7_codewithgithubcopilot-aicodingagent-githubcopilot-activity-7368737088675991553-nTXF",
+          "snippet": "Spun up a React + FastAPI (python) app in under 5 minutes using GitHub Copilot. With just a few prompts, React frontend and FastAPI backend ..."
+        },
+        {
+          "title": "using76/foamstudio: Real-time OpenFOAM GUI ...",
+          "url": "https://github.com/using76/foamstudio",
+          "snippet": "A real-time OpenFOAM desktop GUI (Electron + React + TypeScript) that Claude Code can remote-control. Load a case, mesh it, run the solver, ..."
+        },
+        {
+          "title": "Ship a Full-Stack App in Minutes with FastAPI + React + Expo",
+          "url": "https://dev.to/sreeraj-sreenivasan/stop-writing-boilerplate-ship-a-full-stack-app-in-minutes-with-fastapi-react-expo-3123",
+          "snippet": "description: Three production-ready open-source templates — FastAPI backend, React 19 web frontend, and Expo mobile app — pre-wired to talk ..."
+        }
+      ]
+    },
+    {
+      "query": "site:github.com hypothesis hypothesis python pint units",
+      "results": [
+        {
+          "title": "gitignore - gkjohnson/pint-unit-investigation",
+          "url": "https://github.com/gkjohnson/pint-unit-investigation/blob/master/.gitignore",
+          "snippet": "Basic scripts to investigate the available data that can be extracted from Pint - pint-unit-investigation/.gitignore at master ..."
+        },
+        {
+          "title": "PINT/CHANGELOG.md at master - nanograv",
+          "url": "https://github.com/nanograv/PINT/blob/master/CHANGELOG.md",
+          "snippet": "This file contains the released changes to the codebase. pintk uses downhill fitters by default. Limited hypothesis to <= 6.72.0 to avoid numpy problems in ..."
+        },
+        {
+          "title": "BUG: Inconsistent apply(axis=1) behavior · Issue #50607",
+          "url": "https://github.com/pandas-dev/pandas/issues/50607",
+          "snippet": "I've changed all the units to Pint-native units, shrinking the scope of the problem down to Pandas/Pint/Pint-Pandas. import numpy as np import pandas as pd ..."
+        },
+        {
+          "title": "gitignore - django-pint-field",
+          "url": "https://github.com/OmenApps/django-pint-field/blob/main/.gitignore",
+          "snippet": "Store, validate, and convert physical quantities in Django using Pint. - django-pint-field/.gitignore at main · OmenApps/django-pint-field."
+        },
+        {
+          "title": "TomNicholas/Python-for-Scientists: A list of recommended ...",
+          "url": "https://github.com/TomNicholas/Python-for-Scientists",
+          "snippet": "pint - Package to define, operate and manipulate physical quantities. hypothesis - Hypothesis testing for python. Hypothesis tests check that your function ..."
+        },
+        {
+          "title": "BUG: maybe_downcast_numeric interferes with PintPandas ...",
+          "url": "https://github.com/pandas-dev/pandas/issues/55824",
+          "snippet": "Pint (version 0.22) treats a generic attempt to construct an array from list of Quantities as a request for just their magnitudes, and then it complains that it ..."
+        },
+        {
+          "title": "Public testing framework for duck array integration · Issue #6894",
+          "url": "https://github.com/pydata/xarray/issues/6894",
+          "snippet": "Automatic duck array testing - reductions #4972 shows how to do this for checking the units of resulting pint arrays. User-created data? - Some array libraries ..."
+        },
+        {
+          "title": "Reusable constraint types to use with typing.Annotated",
+          "url": "https://github.com/annotated-types/annotated-types",
+          "snippet": "This package was designed at the PyCon 2022 sprints by the maintainers of Pydantic and Hypothesis, with the goal of making it as easy as possible for end-users ..."
+        },
+        {
+          "title": "SANDBOX/pyproject.toml at main · reflective-org/SANDBOX",
+          "url": "https://github.com/reflective-org/SANDBOX/blob/main/pyproject.toml",
+          "snippet": "studio = [ \"pydantic>=2.7\", \"pint>=0.23\", # units at the presentation boundary only, never inside the model call \"fastapi>=0.110\", \"uvicorn[standard]>=0.29 ..."
+        },
+        {
+          "title": "Fix broken test dependencies — pint, plotly, deepdiff missing ...",
+          "url": "https://github.com/vamseeachanta/workspace-hub/issues/1647",
+          "snippet": "Multiple test suites across digitalmodel fail at collection time due to missing Python dependencies. These are not test failures — the tests never run because ..."
+        }
+      ]
+    },
+    {
+      "query": "r3f-perf github performance monitor",
+      "results": [
+        {
+          "title": "utsuboco/r3f-perf: Easily monitor your ThreeJS performances.",
+          "url": "https://github.com/utsuboco/r3f-perf",
+          "snippet": "R3F-Perf Changelog Easily monitor the performances of your @react-three/fiber application. Add the Perf component anywhere in your Canvas."
+        },
+        {
+          "title": "package.json - utsuboco/r3f-perf",
+          "url": "https://github.com/utsuboco/r3f-perf/blob/main/package.json",
+          "snippet": "Easily monitor your ThreeJS performances. Contribute to utsuboco/r3f-perf development by creating an account on GitHub."
+        },
+        {
+          "title": "R3F Perf (utsuboco/r3f-perf)",
+          "url": "https://context7.com/utsuboco/r3f-perf",
+          "snippet": "R3F Perf is a performance monitoring tool for @react-three/fiber applications, providing insights into FPS, GPU usage, memory, and custom data."
+        },
+        {
+          "title": "r3f-perf",
+          "url": "https://classic.yarnpkg.com/en/package/r3f-perf",
+          "snippet": "Easily monitor the performances of your @react-three/fiber application. Add the Perf component anywhere in your Canvas."
+        },
+        {
+          "title": "Anderson Mancini on X: \"🚀 I'm launching r3f-webgpu-perf ...",
+          "url": "https://x.com/Andersonmancini/status/2064337545366827436",
+          "snippet": "Three Fiber was a performance monitor similar to r3f-perf. Supports both WebGL and WebGPU ✅ Modern and customizable UI ✅ Lightweight and easy ..."
+        },
+        {
+          "title": "Just created port of r3f perf stats monitor for vanilla! : r/threejs",
+          "url": "https://www.reddit.com/r/threejs/comments/154iz0a/just_created_port_of_r3f_perf_stats_monitor_for/",
+          "snippet": "Just created port of r3f perf stats monitor for vanilla! Atm has main base features of stats visualize [cpu/gpu/fps/render stats and graphs] ..."
+        },
+        {
+          "title": "ektogamat/r3f-webgpu-perf",
+          "url": "https://github.com/ektogamat/r3f-webgpu-perf",
+          "snippet": "r3f-webgpu-perf is a lightweight performance monitoring tool for React Three Fiber applications running on WebGPU. It provides real-time insights into frame ..."
+        },
+        {
+          "title": "anhldh/r3f-monitor: An easy tool to ...",
+          "url": "https://github.com/anhldh/r3f-monitor",
+          "snippet": "An advanced, easy-to-use performance monitoring tool for @react-three/fiber applications. Add the <PerfMonitor /> component anywhere in your R3F Canvas — or go ..."
+        },
+        {
+          "title": "three-perf",
+          "url": "https://www.npmjs.com/package/three-perf",
+          "snippet": "Easily monitor the performances of your vanilla threeJS application. Add the ThreePerf component anywhere in your Canvas [example]. Screenshot ..."
+        },
+        {
+          "title": "Issues · utsuboco/r3f-perf",
+          "url": "https://github.com/utsuboco/r3f-perf/issues",
+          "snippet": "Easily monitor your ThreeJS performances. Contribute to utsuboco/r3f-perf development by creating an account on GitHub."
+        }
+      ]
+    },
+    {
+      "query": "site:statsmodels.org TTestPower paired differences",
+      "results": [
+        {
+          "title": "statsmodels.stats.power.TTestPower.solve_power",
+          "url": "https://www.statsmodels.org/stable/generated/statsmodels.stats.power.TTestPower.solve_power.html",
+          "snippet": "This test can also be used for a paired t-test, where effect size is defined in terms of the mean difference, and nobs is the number of pairs."
+        },
+        {
+          "title": "statsmodels.stats.power.TTestPower.solve_power",
+          "url": "https://statsmodels.org/v0.14.4/generated/statsmodels.stats.power.TTestPower.solve_power.html",
+          "snippet": "This test can also be used for a paired t-test, where effect size is defined in terms of the mean difference, and nobs is the number of pairs."
+        },
+        {
+          "title": "statsmodels.stats.weightstats.ttost_paired",
+          "url": "https://www.statsmodels.org/devel/generated/statsmodels.stats.weightstats.ttost_paired.html",
+          "snippet": "If the pvalue is smaller than a threshold, say 0.05, then we reject the hypothesis that the difference between the two samples is larger than the thresholds ..."
+        },
+        {
+          "title": "statsmodels.stats.power",
+          "url": "https://www.statsmodels.org/v0.11.1/_modules/statsmodels/stats/power.html",
+          "snippet": "This test can also be used for a paired t-test, where effect size is defined in terms of the mean difference, and nobs is the number of pairs. Parameters ..."
+        },
+        {
+          "title": "Statistics stats",
+          "url": "https://www.statsmodels.org/stable/stats.html",
+          "snippet": "Statistical Power calculations for t-test for two independent sample. TTestPower (). Statistical Power calculations for one sample or paired sample t-test."
+        },
+        {
+          "title": "Source code for statsmodels.stats.power",
+          "url": "https://www.statsmodels.org/stable/_modules/statsmodels/stats/power.html",
+          "snippet": "This test can also be used for a paired t-test, where effect size is defined in terms of the mean difference, and nobs is the number of pairs."
+        },
+        {
+          "title": "Statistics stats — statsmodels 0.6.1 documentation",
+          "url": "https://www.statsmodels.org/0.6.1/stats.html",
+          "snippet": "Statistical Power calculations for t-test for two independent sample. TTestPower (**kwds), Statistical Power calculations for one sample or paired sample t-test."
+        },
+        {
+          "title": "Statistics stats — statsmodels 0.8.0 documentation",
+          "url": "https://www.statsmodels.org/0.8.0/stats.html",
+          "snippet": "Statistical Power calculations for t-test for two independent sample. TTestPower (**kwds), Statistical Power calculations for one sample or paired sample t-test."
+        },
+        {
+          "title": "statsmodels.stats.proportion.confint_proportions_paired",
+          "url": "https://www.statsmodels.org/dev/generated/statsmodels.stats.proportion.confint_proportions_paired.html",
+          "snippet": "Confidence interval for the difference of two paired proportions This assumes that each of n units is classified twice as success or failure,"
+        },
+        {
+          "title": "statsmodels.stats.proportion.proportions_ztest",
+          "url": "https://www.statsmodels.org/devel/generated/statsmodels.stats.proportion.proportions_ztest.html",
+          "snippet": "In the two sample test, smaller means that the alternative hypothesis is p1 < p2 and larger means p1 > p2 where p1 is the proportion of the first sample and p2 ..."
+        }
+      ]
+    },
+    {
+      "query": "site:python.arviz.org rhat at least 2 chains importance sampling",
+      "results": []
+    },
+    {
+      "query": "site:github.com engstat engineering statistics license",
+      "results": [
+        {
+          "title": "ktwyw/engstat: Engineering statistics in Python: validated ...",
+          "url": "https://github.com/ktwyw/engstat",
+          "snippet": "MIT license. More items. engstat. Validated engineering statistics in Python - for practising engineers and researchers. tests · validation · notebooks · python ..."
+        },
+        {
+          "title": "ktwyw/engrheo: Rheology for engineers in Python: validated ...",
+          "url": "https://github.com/ktwyw/engrheo",
+          "snippet": "Also by the author: engmath (numerical methods), engstat (engineering statistics) and fluidmech (fluid mechanics). License. MIT - see LICENSE. Contributions ..."
+        },
+        {
+          "title": "engthermo/README.md at main",
+          "url": "https://github.com/ktwyw/engthermo/blob/main/README.md",
+          "snippet": "Also by the author: engmath (numerical methods), engstat (engineering statistics), fluidmech (fluid mechanics) and engrheo (rheology). License. MIT - see ..."
+        },
+        {
+          "title": "GitHub - ktwyw/engcolloid: Colloid and surface chemistry in Python",
+          "url": "https://github.com/ktwyw/engcolloid",
+          "snippet": "Also by the author: engmath (numerical methods), engstat (engineering statistics), fluidmech (fluid mechanics), engrheo (rheology) and engthermo (chemical ..."
+        },
+        {
+          "title": "tmgu17/visualization/data/FTDA-1991-0902.xml.json at ...",
+          "url": "https://github.com/kln-courses/tmgu17/blob/master/visualization/data/FTDA-1991-0902.xml.json",
+          "snippet": "Contribute to kln-courses/tmgu17 development by creating an account on GitHub."
+        }
+      ]
+    },
+    {
+      "query": "site:github.com opentimestamps client LGPL license",
+      "results": [
+        {
+          "title": "An OpenTimestamps client written in TypeScript - lacrypta",
+          "url": "https://github.com/lacrypta/typescript-opentimestamps",
+          "snippet": "This project aims to provide a fully-tested, fully typed, OpenTimestamps Client. It currently supports stamping, upgrading, and verifying timestamps."
+        },
+        {
+          "title": "javascript-opentimestamps",
+          "url": "https://github.com/opentimestamps/javascript-opentimestamps",
+          "snippet": "The OpenTimestamps Client is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by ..."
+        },
+        {
+          "title": "maxkuminov/cairn: Self-hosted file-integrity monitor ...",
+          "url": "https://github.com/maxkuminov/cairn",
+          "snippet": "License. Licensed under the Apache License 2.0. Cairn invokes the OpenTimestamps client ( ots ) as a separate subprocess; it does not link or import the LGPL ..."
+        },
+        {
+          "title": "SinAi-Inc/istampit-cli: [RETIRED] Archived OpenTimestamps ...",
+          "url": "https://github.com/SinAi-Inc/istampit-cli",
+          "snippet": "Lightweight CLI around the official OpenTimestamps client to stamp, verify, upgrade, and inspect cryptographic timestamp proofs (\".ots\" receipts) for your files ..."
+        },
+        {
+          "title": "SatoshiPortal/keystamp: A desktop application for applied ...",
+          "url": "https://github.com/SatoshiPortal/keystamp",
+          "snippet": "A desktop application allowing users to sign and verify PGP messages and to create and validate timestamp proofs with the OpenTimestamps protocol,"
+        },
+        {
+          "title": "SinAi-Inc/istampit-action: [RETIRED] Archived ...",
+          "url": "https://github.com/SinAi-Inc/istampit-action",
+          "snippet": "License. MIT (wrapper code). OTS client is LGPL-3.0. The moving tag v1 always points to the latest stable, parser-verified release. About. [RETIRED] ..."
+        },
+        {
+          "title": "OTSkit",
+          "url": "https://github.com/OTSkit",
+          "snippet": "OpenTimestamps is an open standard for decentralized timestamp proofs. When you stamp a file, its cryptographic hash is submitted to public ..."
+        },
+        {
+          "title": "DeiFlagellum/sigelith-desktop - BeatStamp",
+          "url": "https://github.com/DeiFlagellum/sigelith-desktop",
+          "snippet": "NOTICE lists every component with its licence and tells you where to get the sources of the LGPL libraries; the full licence texts are in licenses/ . The ..."
+        },
+        {
+          "title": "UlrichRaab/nostr_client: A nostr client",
+          "url": "https://github.com/UlrichRaab/nostr_client",
+          "snippet": "LICENSE · Add license. 4 years ago. README ... NIP-03: OpenTimestamps Attestations for Events ... About. A nostr client. Resources. Readme. License. LGPL-3.0 ..."
+        },
+        {
+          "title": "sigelith-desktop/README.md at main - DeiFlagellum",
+          "url": "https://github.com/DeiFlagellum/sigelith-desktop/blob/main/README.md",
+          "snippet": "NOTICE lists every component with its licence and tells you where to get the sources of the LGPL libraries; the full licence texts are in licenses/ . The ..."
+        }
+      ]
+    },
+    {
+      "query": "FoamPilot github Electron guided GUI",
+      "results": [
+        {
+          "title": "FoamPilot — open-source desktop GUI for OpenFOAM ...",
+          "url": "https://www.cfd-online.com/Forums/openfoam/262356-foampilot-open-source-desktop-gui-openfoam-electron-fastapi-docker-seeki.html",
+          "snippet": "FoamPilot — open-source desktop GUI for OpenFOAM (Electron + FastAPI + Docker). Seeki · Guided wizard workflow that auto-generates system/, constant/, and 0/ ..."
+        },
+        {
+          "title": "FoamPilot — open-source desktop GUI for OpenFOAM with ...",
+          "url": "https://www.reddit.com/r/OpenFOAM/comments/1s9jvfs/foampilot_opensource_desktop_gui_for_openfoam/",
+          "snippet": "I've been building an open-source desktop app called FoamPilot that wraps OpenFOAM in an Electron + React frontend with a FastAPI/Python backend ..."
+        },
+        {
+          "title": "FoamPilot/DESIGN.md at main - olaafrossi",
+          "url": "https://github.com/olaafrossi/FoamPilot/blob/main/DESIGN.md",
+          "snippet": "What this is: Desktop CFD simulation launcher and GUI for OpenFOAM; Project type: Electron + React desktop application; Design reference: VS Code layout ..."
+        },
+        {
+          "title": "Overview of OpenFOAM GUIs -",
+          "url": "https://docs.gwdg.de/lib/exe/fetch.php?media=en:services:application_services:high_performance_computing:coffee:openfoam_guis_goehpcoffee.pdf",
+          "snippet": "Open Source Pre- and Post Processing Tool. □ Available for Windows and Linux. □ More focused on code_saturne and Code_Aster."
+        },
+        {
+          "title": "foampilot - plateform to openfoam management with python",
+          "url": "https://github.com/stevendaix/foampilot",
+          "snippet": "foampilot is a Python platform designed to fully orchestrate OpenFOAM simulations — from case definition and meshing to execution, post-processing, and ..."
+        },
+        {
+          "title": "GUI",
+          "url": "https://openfoamwiki.net/index.php/GUI",
+          "snippet": "CFD and Multiphysics Toolbox with fully integrated and easy-to-use OpenFOAM GUI Interface with optional MATLAB programming API. ... Foam ..."
+        },
+        {
+          "title": "LLM Agent for Fire Dynamics Simulations",
+          "url": "https://arxiv.org/html/2412.17146v1",
+          "snippet": "In this work, we introduce FoamPilot, an LLM agent designed to address three core functionalities within the scientific simulation workflow for ..."
+        },
+        {
+          "title": "Building local AI apps using Electron and llama.cpp | ASYNC",
+          "url": "https://www.youtube.com/watch?v=RdTco89hUFQ",
+          "snippet": "Roger Carvalho, Product Manager @ Proton, talks about building local AI apps using Electron and llama.cpp at ASYNC — 2nd July, 19:30-21:00 ..."
+        },
+        {
+          "title": "ORNL/DEDFOAM: High-fidelity simulations of directed ...",
+          "url": "https://www.osti.gov/servlets/purl/code-186894",
+          "snippet": "DEDFoam is an OpenFOAM-based package for high-fidelity simulations of directed energy deposition (DED), a form of metal additive manufacturing."
+        },
+        {
+          "title": "VisualFOAM | OpenFOAM GUI on Web Browser",
+          "url": "https://visualfoam.com/",
+          "snippet": "Simplify OpenFOAM simulations with VisualFOAM, a free browser-based GUI for OpenFOAM. Easy setup, no installation needed. Try now!"
+        }
+      ]
+    }
+  ]
+}

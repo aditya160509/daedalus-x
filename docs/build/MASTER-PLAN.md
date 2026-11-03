@@ -1,6 +1,6 @@
-# Master plan: final form (2026-11-02)
+# Master plan: feature and analysis checklist (2026-11-03)
 
-The goal: every screen at commercial quality, every rule checked, every feature connected, and innovation the judges can't miss. **Build in progress. Current task checkmarks and percentage: §24. Open-source reuse audit: §25.**
+The goal: every screen at commercial quality, every rule checked, every feature connected, and innovation the judges can't miss. **Build in progress. Current per-area feature ticks and all 43 analysis/chart targets: §28. Current scope: TODO.md. §24 is a historical task score, not the current completion percentage. Open-source reuse audit: §25; researched candidates: references/OSS-LANDSCAPE-2026-11-03.md.**
 
 ---
 
@@ -168,7 +168,9 @@ Cuts being done now:
 - Colour maps: Cp = blue–white–red (diverging, centred at 0); speed = turbo/jet; never rainbow for diverging data.
 - Animate in only on the first load (150 ms); no bouncing.
 
-## 15. Best feature list per area (the target "final boss" state)
+## 15. Best feature list per area (targets; live ticks in §28)
+
+**Current built/partial/missing/removed checklist: §28 A–M.** The target prose below is not a completion claim; TODO.md scope overrides older targets.
 ### Pit Wall
 - A **race-week mission control**: next action, days to the event, rules at risk (points), best car, sealed prediction status.
 - **Points dashboard**: the 1,000-point scoring broken down (Racing 250, D&E 180, Enterprise 180, Scrutineering 160, Verbal 140, PM 90) with our estimated score and the gaps.
@@ -180,7 +182,7 @@ Cuts being done now:
 - **Mass and centre-of-gravity** estimate from the volumes × material density.
 - **Manufacturing check**: minimum wall thickness, CNC tool reach, overhangs.
 ### Wind Tunnel
-- Flow viewer (vtk.js now, trame later): surface Cp, LIC surface streaks, Q-criterion vortices, wake planes, probes, clip.
+- Flow viewer (animated Three.js plus existing field parsing/analysis; trame excluded): surface Cp, LIC surface streaks, Q-criterion vortices, wake planes, probes, clip.
 - **Run compare** (ΔCp, Δwake, Δforces) and a **drag build-up waterfall** by part.
 - **Quality gate**: convergence, y+, mesh quality and grid independence (GCI), with a clear ACCEPTED/REJECTED reason.
 - Run wizard (FoamPilot pattern) with live residuals and an ETA.
@@ -195,7 +197,7 @@ Cuts being done now:
 
 ## 16. Our own innovation ideas (thought through, ranked)
 1. **Closed-loop autonomous design** (ORACLE → CAD → FORGE → CFD → ORACLE). The headline innovation.
-2. **Multi-fidelity Bayesian optimisation**: coarse and fine CFD in one model; about 3× more designs for the same compute.
+2. ✂ **Multi-fidelity Bayesian optimisation — removed by current TODO; do not build.**
 3. **Physics-informed race-time uncertainty**: CFD grid error + thrust variance + mass + reaction → a predicted race-time distribution, then a sealed prediction with a band we can defend.
 4. **Live calibration (digital twin)**: every real race updates CdA and Crr posteriors; a "prediction error shrinking" chart over the season.
 5. **Rule-aware optimisation**: ORACLE never proposes an illegal car (FORGE as a constraint in the acquisition function).
@@ -222,7 +224,7 @@ Cuts being done now:
 
 ---
 
-## 19. Deep analysis catalogue (high-level, data-driven outputs)
+## 19. Deep analysis catalogue (targets; 43 live chart statuses in §28 K)
 Each item lists **input → method → output (what the user sees) → decision it drives**. ★ = do first.
 
 ### A. Aerodynamics (from CFD)
@@ -278,6 +280,8 @@ Each item lists **input → method → output (what the user sees) → decision 
 38. **Compute and effort log**: CFD hours, runs per week → project-management evidence.
 
 ## 20. "Full stadium" race timing view (F1 broadcast style)
+
+**Current ticks: §28 C.** Replay timing exists; the dedicated event/TV system is not built.
 What the big-screen timing page should show, inspired by F1 TV, f1-dash and STEM Racing world finals displays:
 - **Timing tower** (left): position, car, best time, last time, gap to leader, interval, delta to prediction; colour codes purple = session best, green = personal best, yellow = slower (with a legend).
 - **Mini-sectors**: 8 sectors per 20 m run with sector times and colours.
@@ -419,7 +423,9 @@ Historical pause checkpoint, subsequently resumed; retained for handoff context.
 
 ---
 
-## 24. Whole-plan checklist and completion score — 2026-11-02
+## 24. Historical T01–T35 checklist score — 2026-11-02
+
+**Historical snapshot, superseded by TODO.md scope and §28 feature ticks.** The percentage below predates removal of drawing work and multi-fidelity. Do not quote it as current feature completeness.
 
 This is the current implementation ledger for all T01–T35 tasks. Earlier feature catalogues describe targets and repeat some work; do not add those duplicates to the percentage. T01b is a subtask of T01. The paused closed-loop draft does not earn a separate completed task.
 
@@ -635,4 +641,228 @@ Checklist score remains 45%: these integrations advance existing partial tasks; 
 - T26 exhaust base-bleed study
 - AR car view
 
-**Everything else stays in scope and gets built.** Open source: add SALib (Sobol/Morris sensitivity); CalculiX only with real material data; skip BoTorch, OpenMDAO, trame.
+**This is the 2026-11-02 scope snapshot. TODO.md now additionally removes drawing work, multi-fidelity and listed infrastructure. §28 M tracks current exclusions and unfinished cleanup.** Open source: add SALib (Sobol/Morris sensitivity); CalculiX only with real material data; skip BoTorch, OpenMDAO, trame.
+
+## 28. Live feature checklist by workspace and analysis — 2026-11-03
+
+This is the current checkbox ledger requested by the owner. `TODO.md` supplies the current scope; old target lists in §§1–22 and the old §24 percentage do not override its removals. Code inventory was checked on 2026-11-03, including the local animated-flow draft. Terra checked Race/ORACLE/calibration read-only; Codex checked other areas. No new browser, CFD or physical validation was performed for this inventory.
+
+**Meaning:** `[x] ✅` = implemented and connected software; `[ ] 🟨` = partly implemented; `[ ] ⬜` = not connected/not built; `[ ] 📝` = local uncommitted draft; `[x] ✂` = intentionally out of scope; `[ ] 🧹` = excluded feature still needs code cleanup; `[ ] ⏳` = verification/data gate. A built tick is not scientific acceptance, measured compliance, GPU performance or a complete commercial-quality claim. Do not tick a chart just because an API number exists.
+
+### A. Design Studio — target: one coherent CAD and inspection workflow
+
+- [x] ✅ A01 — Real Chili3D CAD opens named STEP parts, supports editing and exports through the same-origin bridge (`DesignStudio.tsx`, `CadFrame.tsx`, `patches/chili3d.patch`).
+- [x] ✅ A02 — Save/import creates immutable geometry, display GLB, CFD surfaces, Design and STEP evidence (`api/cad.py`, `geometry.py`).
+- [x] ✅ A03 — Failed/at-risk rules select and frame named CAD parts.
+- [x] ✅ A04 — Inspection viewer has named parts, dimensions, section/measurement and comparison controls (`DesignWorkspace.tsx`, `components/viewer/design`).
+- [x] ✅ A05 — ORACLE study builds four physical parameters through build123d and the canonical importer, with FORGE and evidence (`design_loop.py`).
+- [ ] 🟨 A06 — CAD rule overlay: selection/focus exists; coloured rule states plus measured-value/limit dimension lines inside CAD remain.
+- [ ] 🟨 A07 — Two-design comparison exists; signed deviation heat map in mm remains.
+- [ ] ⬜ A08 — Four live editable parametric controls with validated regeneration inside Design Studio.
+- [ ] ⬜ A09 — Material-aware mass and centre-of-gravity estimate connected to the design.
+- [ ] ⬜ A10 — Minimum-wall map, CNC reach and manufacturing checks using canonical geometry.
+- [ ] 🟨 A11 — Consolidate overlapping inspection/editor controls without losing measurement tools.
+- [ ] ⏳ A12 — Final keyboard/responsive CAD acceptance and actual manufactured-part checks.
+
+### B. Wind Tunnel — target: moving-air view plus trustworthy engineering analysis
+
+- [x] ✅ B01 — Flow / Forces / Convergence / Mesh tabs; static Render tab removed.
+- [x] ✅ B02 — Lowest-Cd accepted-run default and honest no-accepted-run empty state (`lib/cfdRuns.ts`). Explicitly selected rejected runs retain their warning.
+- [x] ✅ B03 — Compact velocity texture/metadata export with validity mask (`viz/vtkexport.py`, `api/engineering.py`).
+- [ ] 📝 B04 — GPU RK2 animated-air scene, Cp car, moving floor, camera presets, density adaptation and hidden-tab pause (`FlowTunnel3D.tsx`): code and recorded browser evidence exist locally but are not committed at this checkpoint.
+- [x] ✅ B05 — Surface Cp, streamlines, slice controls and colour legends in the existing field viewer.
+- [x] ✅ B06 — Lazy wake planes at x/L = 1, 1.5, 2, VTP download and source labels.
+- [x] ✅ B07 — Normalised Q isosurfaces with VTP export; currently coloured by speed, not vorticity.
+- [x] ✅ B08 — Strict identical-geometry/indexed-mesh ΔCp with both sources and compatibility rejection; VTP and metadata downloads.
+- [x] ✅ B09 — Per-component pressure/friction drag bars and cumulative drag build-up.
+- [x] ✅ B10 — Cd/residual histories, acceptance-window shading and rejection explanations.
+- [x] ✅ B11 — Grid-study/speed plots and Richardson/GCI values when actual study results exist (`GridStudyPanel.tsx`).
+- [x] ✅ B12 — Existing job submission, queue/logs/cancel controls; native field exports serialize and vtk.js resources are explicitly disposed.
+- [ ] 🟨 B13 — Exactly one renderer mounts at once in the animated draft; full single-scene integration of advanced field layers remains.
+- [ ] ⬜ B14 — Surface LIC/separation lines, probe-line Cp plots, y+ and bad-cell maps.
+- [ ] ⬜ B15 — Δwake and Δforces comparison, momentum-deficit drag cross-check.
+- [ ] ⬜ B16 — Guided run wizard with residual-linked progress and defensible ETA.
+- [ ] ⬜ B17 — Declared yaw/ride-height sweeps and frontal-area/drag trade analysis.
+- [ ] ⏳ B18 — Accepted real flow sources, under-3-second initial display, physical-Mac 60 fps and final 1440/1024/375 px review. Software-renderer screenshots do not establish physical GPU performance.
+
+### C. Race replay and full stadium — target: broadcast race engineering
+
+- [x] ✅ C01 — Real CAD-derived car GLB, engineering-frame conversion and trajectory-driven motion.
+- [x] ✅ C02 — 20 m two-lane track, tether/start/finish details and model-driven wheel motion.
+- [x] ✅ C03 — Director, side/broadcast, chase, onboard, top and finish cameras (`scene/BroadcastRig.tsx`).
+- [x] ✅ C04 — Direct racing-game gauge/results and f1-dash timing/mini-sector component adaptations with retained licences.
+- [x] ✅ C05 — Scenario ghost inside Replay, eight model sector times, finish slow motion and PNG capture.
+- [x] ✅ C06 — Replay adaptive-quality mechanism and separate reaction trainer.
+- [ ] 🟨 C07 — Four-tab consolidation: currently eight tabs; target Replay / Analysis / Points / Calibration, with trainer embedded as a tool.
+- [ ] ⬜ C08 — Race-day actual time + reaction entry, prediction comparison and explicit instant calibration update.
+- [ ] ⬜ C09 — Dedicated stadium/TV mode with projector layout, fullscreen and panel rotation.
+- [ ] 🟨 C10 — Replay pair/timing tower exists; session best/last/interval/reaction history is not a complete event timing system.
+- [ ] ⬜ C11 — Session peak/finish speed trap, measured event leaderboard with manual/CSV entry and history strip.
+- [ ] ⬜ C12 — Sealed prediction scoreboard across race-day runs; day PDF/CSV export.
+- [ ] ⏳ C13 — Physical GPU 60 fps, final responsive/performance QA and independent measured replay/correlation validation.
+
+### D. Race analysis — implemented analyses, beyond the replay
+
+- [x] ✅ D01 — uPlot speed/acceleration/thrust/drag channels with shared time cursor, A/B controls, zoom and trajectory uncertainty band.
+- [x] ✅ D02 — Scenario Δtime trace; scenario/preset comparison is not automatically the best measured run.
+- [x] ✅ D03 — Monte Carlo time histogram, p5/p50/p95 and rank-correlation sensitivity tornado.
+- [x] ✅ D04 — Time-budget and ±10% sensitivity metrics, plus ms/g, ms/cm² and Crr exchange-rate metrics (`BreakdownPanel.tsx`).
+- [x] ✅ D05 — Model energy balance as stacked bars and energy metrics (`EnergyPanel.tsx`).
+- [x] ✅ D06 — Racing-points scenario, round/head-to-head probabilities and current simulation baseline adoption. Generated scenarios remain synthetic/estimated.
+- [ ] 🟨 D07 — Complete launch/burnout/peak/finish annotations, automatic best-run ghost and all chart exports/overlays.
+- [ ] ⬜ D08 — Race time-budget stacked chart including editable measured reaction; current breakdown request uses reaction 0.
+- [ ] ⬜ D09 — Race-level SALib indices, Monte Carlo convergence plot and full uncertainty variance budget.
+- [ ] ⬜ D10 — Energy Sankey with supported tether contribution; current energy chart is not a Sankey.
+- [ ] ⬜ D11 — Points distribution and optimal legal mass curve; existing what-if mass sparkline is not that curve.
+
+### E. ORACLE / optimisation — target: explainable, constrained design decisions
+
+- [x] ✅ E01 — NumPy/SciPy GP and expected-improvement recommendation; four-variable study-family filter.
+- [x] ✅ E02 — GP mean aero map with observations and next-point marker.
+- [x] ✅ E03 — Synthetic GP-vs-LHS mean benchmark, currently five seeds.
+- [x] ✅ E04 — Actual SALib Sobol/Morris analysis of the fitted GP, with confidence outputs.
+- [x] ✅ E05 — Build selected study → canonical CAD import → FORGE → parameterised Design/evidence → exact-design CAD/rules links and existing CFD dialog.
+- [x] ✅ E06 — Observation validation, serialized atomic campaign appends and retained synthetic labels.
+- [ ] ⬜ E07 — Preregistered equal-budget Optuna TPE/CMA-ES + Sobol/LHS/random benchmark, at least 10 seeds and regret confidence bands.
+- [ ] ⬜ E08 — Accepted-only CFD feedback, STEP-to-mesh hash guard and performance-rule gate in the closed-loop handoff.
+- [ ] ⬜ E09 — Separate synthetic and physical/accepted-CFD training; current manual observation interface is not independent acceptance.
+- [ ] ⬜ E10 — GP map uncertainty, predicted-vs-actual and predictive-interval coverage charts.
+- [ ] ⬜ E11 — Length-scale interpretation, acquisition history and recorded engineer veto/edit.
+- [ ] ⬜ E12 — pymoo drag/mass/margin Pareto front and racing-points optimisation objective.
+- [ ] 🟨 E13 — Adjoint tooling exists; accepted primal/adjoint, connected map and constrained shape optimisation remain. Multi-fidelity is removed by TODO.
+
+### F. Calibration and physical-test planning
+
+- [x] ✅ F01 — Unit-aware timing CSV/XLSX preview and optional thrust CSV; explicit timing definition, priors, mass, density and uncertainty.
+- [x] ✅ F02 — Bounded Bayesian importance-sampling fit, posterior summaries, importance ESS and separate supplied held-out predictions.
+- [x] ✅ F03 — Saved calibration inputs/results/source files with hashes; browse/reopen studies.
+- [x] ✅ F04 — D-optimal timing/coast-down planner, editable assumptions and expected uncertainty reduction.
+- [x] ✅ F05 — Single-fit concurrency gate and disabled input editing while fitting/planning.
+- [ ] ⬜ F06 — Lab-day/Track-day presets plus Advanced; maximum six main visible inputs in both forms.
+- [ ] ⬜ F07 — Prior-vs-posterior plots, across-run error scoreboard and posterior predictive-check plot.
+- [ ] ⬜ F08 — Paired baseline/candidate protocol, CI, power/sample-size calculation and minimum detectable effect.
+- [ ] ⬜ F09 — Repeat-run control chart and gauge R&R workflow.
+- [ ] ⬜ F10 — Explicit application of a saved posterior to Race with a linked model/source record.
+- [ ] ⏳ F11 — Team measurements: part masses, dimensions, coast-down, thrust, tether/launch repeatability and independent held-out runs. ArviZ R-hat must remain unavailable for the current importance sampler; do not invent multiple chains.
+
+### G. FORGE / scrutineering — target: honest, risk-ranked compliance
+
+- [x] ✅ G01 — India NF default rulebook, per-rule page/value/limits/state/margin and points at risk; 80 YAML entries counted by current implementation.
+- [x] ✅ G02 — Existing wheel/axle/layout, rolling-band, sampled-wing-section, named-notch and rear-wing-plane measures; unsupported geometry remains manual.
+- [x] ✅ G03 — Hash-bound CAD remeasurement and rule-to-part focus.
+- [x] ✅ G04 — Unit-filtered nearest-limit chart/list with rule/page and CAD focus (`FrontierPanel.tsx`); single-design ranking, not full feasible-space map.
+- [x] ✅ G05 — Manufacturing-spread pass-probability API and Rules summary (`forge_probability.py`); independent Normal assumptions and team-entered spread, not measured process capability.
+- [ ] 🟨 G06 — All-rule margin bars with tolerance bands, percent margins and points × failure-probability ordering remain incomplete.
+- [ ] ⬜ G07 — Canonical wall thickness, chamber hole detection, full section chord and standard halo/helmet comparison.
+- [ ] ⬜ G08 — Who/tool/when inspection log and interactive dimensional what-if.
+- [ ] ⬜ G09 — One-page red/amber/green summary and fully linked source-PDF evidence archive.
+- [ ] ⏳ G10 — Word-for-word official PDF coverage reconciliation and physical measurement/load-test acceptance. YAML count alone is not a coverage proof.
+
+### H. Structure
+
+- [x] ✅ H01 — Beam FEM API and Strength panel with part/load presets, deflection/stress/safety-factor metrics and handbook-source warning.
+- [ ] ⬜ H02 — Deflection/stress plots and multi-part safety-factor comparison table; existing metrics are not plots.
+- [ ] ⬜ H03 — Predicted-vs-measured load-test chart and evidence-backed before/after story.
+- [ ] ⏳ H04 — Real material measurements before CalculiX 3D halo/wing-mount analysis and mesh convergence.
+
+### I. Project / enterprise
+
+- [x] ✅ I01 — Editable saved plan, estimate sources, currency/start date, assumptions and scorecard/evidence-gap indicators.
+- [x] ✅ I02 — Saved Monte Carlo project forecasts with exact plan/result artifacts and history.
+- [x] ✅ I03 — Project V&V dossier panel.
+- [ ] ⬜ I04 — Actual-evidence planned-vs-actual Gantt, risk matrix and compute/effort chart.
+- [ ] ⬜ I05 — Connected decision log, risk register, minutes, receipts/budget and test-day lessons workflow.
+- [ ] ⬜ I06 — Sponsor report and sourced tool-cost comparison.
+- [ ] ⏳ I07 — Official judging weights and real-delivery validation; declared points are not awarded points.
+
+### J. Evidence, reports and judging
+
+- [x] ✅ J01 — Append-only typed SQLite records, content-addressed artifacts, timeline and hash verification.
+- [x] ✅ J02 — React Flow/Dagre lineage and ID-linked missing-action/coverage view.
+- [x] ✅ J03 — Sealed prediction/score workflow and persisted RFC3161 verification history tied to exact token and trust-bundle artifacts.
+- [x] ✅ J04 — Saved calibration and project forecast evidence; V&V dossier JSON/Markdown with failures and limitations.
+- [x] ✅ J05 — Judge ZIP manifest, hashes and missing-material inventory; Typst PDF and data-driven Presenter with notes/timer.
+- [ ] 🟨 J06 — Full action linkage and real export/download acceptance; a gap detector does not itself record the missing action.
+- [ ] ⬜ J07 — OpenTimestamps second anchor and public verification page/QR.
+- [ ] ⬜ J08 — Register official PDFs, baseline and every CFD run in evidence; signed release/seal tag workflow.
+- [ ] ⬜ J09 — Three-minute walkthrough, 60+ judge Q&A, honest limitations slide and baseline/change/predicted/measured one-pager.
+- [ ] ⬜ J10 — Complete PDF commit/rulebook/run identity, offline demo and recorded fallback.
+- [ ] ⬜ J11 — Red-team and post-event regret reports; existing V&V dossier does not implement these.
+- [ ] ⏳ J12 — Real trusted timestamp chain, independent measured race scores and accepted CFD evidence.
+
+### K. Analysis/chart catalogue — every TODO §14 target accounted for
+
+These rows track the WHOLE requested chart, so partial rows can contain built components listed above. All require the shared units/provenance/export/hover/uncertainty quality bar and final browser acceptance. No chart gets a full tick from an unconnected API.
+
+| ID | Requested analysis/chart | Build status | Connected portion and exact remainder |
+|---|---|---|---|
+| W01 | Cd/CdA + grid uncertainty | 🟨 | Grid-study Cd/CI/GCI exists; consistent CdA uncertainty presentation/accepted source remains. |
+| W02 | Residual/force convergence + gate | 🟨 | Histories/window shading exist; full explicit gate-line and linked comparison treatment remains. |
+| W03 | Component drag waterfall, pressure/friction | 🟨 | Pressure/friction bars and cumulative build-up exist; true waterfall presentation remains. |
+| W04 | Centreline Cp + surface Cp | 🟨 | Surface Cp exists; top/bottom centreline plot absent. |
+| W05 | ΔCp / Δwake / Δforces | 🟨 | Strict same-mesh ΔCp exists; Δwake/Δforces absent. |
+| W06 | Wake planes + momentum drag | 🟨 | Three native planes/velocity ratios exist; deficit contours/drag cross-check incomplete. |
+| W07 | Q cores coloured by vorticity | 🟨 | Q surfaces exist; colour is speed, not vorticity. |
+| W08 | LIC/separation lines | ⬜ | No connected surface LIC/separation presentation. |
+| W09 | Speed / yaw / ride height | 🟨 | Speed-study chart exists; yaw/ride-height automation/plots absent. |
+| W10 | Frontal area vs Cd | ⬜ | No connected trade chart. |
+| W11 | Mesh/y+ maps + skew histogram | 🟨 | Mesh/acceptance facts exist; spatial maps and histogram absent. |
+| R01 | Linked trajectory traces and events | 🟨 | uPlot tracks/cursor/bands exist; complete launch/peak annotations and all overlays/exports remain. |
+| R02 | Ghost Δtime vs best run | 🟨 | Scenario Δtime exists; automatic best real-run selection absent. |
+| R03 | Time-budget stacked bar | 🟨 | Budget metrics exist, reaction fixed to zero; requested stacked chart absent. |
+| R04 | Tornado + SALib race indices | 🟨 | Rank-correlation tornado and perturbation sensitivity exist; race Sobol indices absent. |
+| R05 | Exchange rates | ✅ | Connected ms/g, ms/cm² and Crr metrics; final shared quality/browser gate pending. |
+| R06 | MC histogram + convergence | 🟨 | Histogram/quantiles exist; sampling-convergence plot absent. |
+| R07 | Energy Sankey | 🟨 | Stacked energy chart exists; Sankey/tether contribution absent. |
+| R08 | Points distribution/round/head-to-head | 🟨 | Scenario expected points/round/head-to-head exists; full distribution absent. |
+| R09 | Optimal mass curve | 🟨 | What-if mass sparkline exists; full optimum/legal-mass curve absent. |
+| O01 | GP map + uncertainty/next point | 🟨 | Mean map and next star exist; uncertainty map absent. |
+| O02 | Regret benchmark + 10-seed CIs | 🟨 | Five-seed GP/LHS mean only; richer benchmark/regret/CIs absent. |
+| O03 | Predicted vs actual candidates | ⬜ | No connected chart. |
+| O04 | Predictive interval calibration | ⬜ | No connected coverage chart. |
+| O05 | Length scales + Sobol importance | 🟨 | GP Sobol/Morris exists; length-scale presentation absent. |
+| O06 | Pareto front | ⬜ | No connected pymoo/objective front. |
+| O07 | Acquisition history | ⬜ | No connected trial-decision timeline. |
+| S01 | Prior/posterior plots | 🟨 | Prior controls/posterior summaries exist; density plots absent. |
+| S02 | Error shrinking scoreboard | 🟨 | Saved studies/held-out rows exist; cross-run scoreboard absent. |
+| S03 | Posterior predictive checks | 🟨 | Held-out numeric intervals exist; PPC chart/appropriate diagnostics absent. |
+| S04 | Paired CI / minimum detectable effect | ⬜ | No connected paired analysis. |
+| S05 | Repeat-run control chart | ⬜ | No connected chart. |
+| S06 | Full uncertainty variance budget | 🟨 | Input rank correlations exist; CFD/reaction/timing variance decomposition absent. |
+| F01 | Margin bars + tolerance bands | 🟨 | Unit-filtered headroom bars exist; manufacturing band/points ordering incomplete. |
+| F02 | Per-rule pass probability | 🟨 | Probability API/overall summary exists; full per-rule plotted comparison incomplete. |
+| F03 | Legal-frontier boundaries | 🟨 | Single-design nearest limits/rule pages exist; sampled feasible frontier absent. |
+| F04 | Red/amber/green summary | 🟨 | Rule states/counts exist; one-page summary product absent. |
+| T01 | Deflection/stress plots | 🟨 | Beam values exist; plots absent. |
+| T02 | Per-part safety-factor table | 🟨 | Selected-part metric exists; table absent. |
+| T03 | Predicted vs measured load | ⬜ | No connected chart/data workflow. |
+| P01 | Planned vs actual evidence timeline | 🟨 | Editable plan/forecasts exist; evidence Gantt absent. |
+| P02 | Risk matrix | ⬜ | No connected matrix. |
+| P03 | Effort/CFD-hours | ⬜ | No connected chart. |
+
+### L. App quality and verification
+
+- [x] ✅ L01 — Shared dark tokens, Inter/mono numbers, Base UI controls, command palette, shortcuts and toast foundations.
+- [x] ✅ L02 — Native uPlot/ECharts, Dockview and React Flow integrations; loading/empty/error patterns exist across major workspaces.
+- [ ] 🟨 L03 — Consistent per-screen provenance, chart exports/linked cursors, all table keyboard interactions and ≤6 main form inputs remain uneven.
+- [ ] ⬜ L04 — Screenshot/fix/rescore each workspace at 1440/1024/375; no page accepted at ≥8/10 from source inspection alone.
+- [ ] ⬜ L05 — Current shared chart quality checklist passed for all 43 catalogue entries.
+- [ ] ⏳ L06 — Physical-Mac rendering/memory profile, full final fast checks and accepted-source review.
+- [ ] 🟨 L07 — Existing CI/static/unit tooling exists; coverage targets, targeted Hypothesis properties, OpenAPI-generated types and nightly golden path remain.
+
+### M. Removed scope and cleanup — never silently re-add
+
+- [x] ✂ M01 — AR, photo/video scrutineering, photogrammetry, community calibration, competitor scraping and base-bleed removed from scope (T26/T28/T30/T31/T32/T35).
+- [x] ✂ M02 — Multi-fidelity ORACLE and BoTorch cross-check removed; gradient/adjoint targets remain separately conditional.
+- [x] ✂ M03 — Windows/Linux matrix, Docker/devcontainer, mutation testing, 8-hour soak, multi-user concurrency and Zenodo/Software Heritage archive removed.
+- [x] ✂ M04 — Drawing/render packs and DXF/SVG importer belong to other team work and are removed from innovation scope by TODO.
+- [x] ✅ M05 — Wind Tunnel static Render tab removed; report-cover rendering is still allowed.
+- [ ] 🧹 M06 — Existing Drawings tab/generator and judge-pack references still need removal/decoupling; scope exclusion is not code deletion.
+- [ ] 🧹 M07 — Remaining duplicate badges/charts, obsolete target references, long forms and confirmed dead code need focused cleanup.
+
+### Sprint order and tick discipline
+
+1. Finish this complete per-area ledger and scope tags; preserve the active particle draft.
+2. Complete and land one bounded software feature at a time, updating its IDs and the relevant chart row in the same commit.
+3. Prioritise F06 short preset/Advanced forms, C07 Race tab consolidation, then E07 benchmark/uncertainty work and E08 closed-loop handoff. Keep B04 integration ahead of any competing tunnel implementation.
+4. Code ticks require connected source and focused checks. Visual/performance/scientific gates stay unchecked until their evidence exists. The old 45% half-point task score is historical and must not be presented as today's detailed feature completion.

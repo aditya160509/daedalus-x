@@ -1,0 +1,250 @@
+[
+  {
+    "archived": false,
+    "default_branch": "main",
+    "description": "An animated particle based WebGL visualizer for vector fields. Can be used with different map libraries, as such MapBox and MapLibre.  Vector field data are requested by the FEWS Web Mapping Service, currently in GeoTIFF format.",
+    "license": "MIT",
+    "pushed_at": "2026-11-01T14:24:58Z",
+    "repo": "Deltares/webgl-streamline-visualizer"
+  },
+  {
+    "archived": false,
+    "default_branch": "master",
+    "description": "Wind power visualization with WebGL particles",
+    "license": "ISC",
+    "pushed_at": "2026-08-06T18:42:10Z",
+    "repo": "mapbox/webgl-wind"
+  },
+  {
+    "archived": false,
+    "default_branch": "master",
+    "description": "WebGL 3d dynamical systems visualization",
+    "license": "MIT",
+    "pushed_at": "2019-04-15T13:29:21Z",
+    "repo": "jamportz/fibre"
+  },
+  {
+    "archived": false,
+    "default_branch": "master",
+    "description": "A BVH implementation to speed up raycasting and enable spatial queries against three.js meshes.",
+    "license": "MIT",
+    "pushed_at": "2026-11-03T04:56:45Z",
+    "repo": "gkjohnson/three-mesh-bvh"
+  },
+  {
+    "archived": false,
+    "default_branch": "master",
+    "description": "A hyperparameter optimization framework",
+    "license": "MIT",
+    "pushed_at": "2026-10-30T08:28:36Z",
+    "repo": "optuna/optuna"
+  },
+  {
+    "archived": false,
+    "default_branch": "main",
+    "description": "Real-time Web Dashboard for Optuna.",
+    "license": "NOASSERTION",
+    "pushed_at": "2026-10-27T09:11:45Z",
+    "repo": "optuna/optuna-dashboard"
+  },
+  {
+    "archived": false,
+    "default_branch": "main",
+    "description": "NSGA2, NSGA3, R-NSGA3, MOEAD, Genetic Algorithms (GA), Differential Evolution (DE), CMAES, PSO",
+    "license": "Apache-2.0",
+    "pushed_at": "2026-07-07T01:34:50Z",
+    "repo": "the-dual-space/pymoo"
+  },
+  {
+    "archived": false,
+    "default_branch": "main",
+    "description": "Exploratory analysis of Bayesian models with Python",
+    "license": "Apache-2.0",
+    "pushed_at": "2026-11-01T01:24:22Z",
+    "repo": "arviz-devs/arviz"
+  },
+  {
+    "archived": false,
+    "default_branch": "master",
+    "description": "Chaospy - Toolbox for performing uncertainty quantification.",
+    "license": "MIT",
+    "pushed_at": "2025-09-04T15:42:32Z",
+    "repo": "jonathf/chaospy"
+  },
+  {
+    "archived": false,
+    "default_branch": "main",
+    "description": "UQpy (Uncertainty Quantification with python) is a general purpose Python toolbox for modeling uncertainty in physical and mathematical systems.",
+    "license": "MIT",
+    "pushed_at": "2026-10-06T18:18:04Z",
+    "repo": "SURGroup/UQpy"
+  },
+  {
+    "archived": false,
+    "default_branch": "master",
+    "description": "OpenFoam postprocessing python tool",
+    "license": "GPL-3.0",
+    "pushed_at": "2026-10-30T21:46:26Z",
+    "repo": "fluiddyn/fluidfoam"
+  },
+  {
+    "archived": false,
+    "default_branch": "development",
+    "description": "A package to establish grid independent results for numerical analysis on computational grids.",
+    "license": "MIT",
+    "pushed_at": "2025-10-24T13:30:02Z",
+    "repo": "tomrobin-teschner/pyGCS"
+  },
+  {
+    "archived": false,
+    "default_branch": "main",
+    "description": "OpenFOAM verification toolkit for grid convergence, GCI, and autocorrelation-aware uncertainty reporting in CFD studies.",
+    "license": "MIT",
+    "pushed_at": "2026-07-23T07:43:58Z",
+    "repo": "rithikrn/foamgci"
+  },
+  {
+    "archived": false,
+    "default_branch": "main",
+    "description": "coss.com/ui is the official design system of Cal.com",
+    "license": "NOASSERTION",
+    "pushed_at": "2026-10-31T16:34:33Z",
+    "repo": "cosscom/ui"
+  },
+  {
+    "archived": false,
+    "default_branch": "main",
+    "description": "A custom registry of composable, accessible and extensible components designed for use with shadcn/ui. Free and open source, forever.",
+    "license": "MIT",
+    "pushed_at": "2026-05-04T06:00:08Z",
+    "repo": "shadcnblocks/kibo"
+  },
+  {
+    "archived": false,
+    "default_branch": "master",
+    "description": "A CAD viewer component based on three.js",
+    "license": "MIT",
+    "pushed_at": "2026-10-31T12:21:08Z",
+    "repo": "bernhard-42/three-cad-viewer"
+  },
+  {
+    "archived": false,
+    "default_branch": "master",
+    "description": "A CAD viewer capable of displaying (and editing) OCP models (CadQuery/Build123d) in a web browser.",
+    "license": "MIT",
+    "pushed_at": "2026-11-01T20:56:47Z",
+    "repo": "yeicor-3d/yet-another-cad-viewer"
+  },
+  {
+    "archived": false,
+    "default_branch": "master",
+    "description": "OpenTimestamps client",
+    "license": "NOASSERTION",
+    "pushed_at": "2026-10-27T23:13:04Z",
+    "repo": "opentimestamps/opentimestamps-client"
+  },
+  {
+    "archived": false,
+    "default_branch": "main",
+    "description": "Aim \ud83d\udcab \u2014 An easy-to-use & supercharged open-source experiment tracker.",
+    "license": "Apache-2.0",
+    "pushed_at": "2026-11-03T01:55:20Z",
+    "repo": "aimhubio/aim"
+  },
+  {
+    "archived": false,
+    "default_branch": "master",
+    "description": "Simple finite element assemblers",
+    "license": "BSD-3-Clause",
+    "pushed_at": "2026-11-01T22:16:36Z",
+    "repo": "kinnala/scikit-fem"
+  },
+  {
+    "archived": false,
+    "default_branch": "main",
+    "description": "FastF1 is a python package for accessing and analyzing Formula 1 results, schedules, timing data and telemetry",
+    "license": "MIT",
+    "pushed_at": "2026-11-02T20:19:40Z",
+    "repo": "theOehrly/Fast-F1"
+  },
+  {
+    "archived": false,
+    "default_branch": "main",
+    "description": "plateform to openfoam management with python",
+    "license": "MIT",
+    "pushed_at": "2026-09-12T14:45:26Z",
+    "repo": "stevendaix/foampilot"
+  },
+  {
+    "archived": false,
+    "default_branch": "main",
+    "description": "\ud83c\udfce Open source racing game developed by everyone willing",
+    "license": "MIT",
+    "pushed_at": "2023-02-23T07:38:01Z",
+    "repo": "pmndrs/racing-game"
+  },
+  {
+    "archived": false,
+    "default_branch": "main",
+    "description": "A real-time F1 dashboard",
+    "license": "AGPL-3.0",
+    "pushed_at": "2026-06-14T10:52:48Z",
+    "repo": "slowlydev/f1-dash"
+  },
+  {
+    "archived": false,
+    "default_branch": "main",
+    "description": "\ud83e\udd16 Headless UI for building powerful tables & datagrids for TS/JS -  React-Table, Vue-Table, Solid-Table, Svelte-Table",
+    "license": "MIT",
+    "pushed_at": "2026-11-02T21:34:42Z",
+    "repo": "TanStack/table"
+  },
+  {
+    "archived": false,
+    "default_branch": "master",
+    "description": "The property-based testing library for Python",
+    "license": "NOASSERTION",
+    "pushed_at": "2026-11-01T00:06:00Z",
+    "repo": "HypothesisWorks/hypothesis"
+  },
+  {
+    "archived": false,
+    "default_branch": "master",
+    "description": "Operate and manipulate physical quantities in Python",
+    "license": "NOASSERTION",
+    "pushed_at": "2026-11-02T20:34:50Z",
+    "repo": "hgrecco/pint"
+  },
+  {
+    "archived": false,
+    "default_branch": "main",
+    "description": "Statsmodels: statistical modeling and econometrics in Python",
+    "license": "BSD-3-Clause",
+    "pushed_at": "2026-11-02T20:40:45Z",
+    "repo": "statsmodels/statsmodels"
+  },
+  {
+    "archived": false,
+    "default_branch": "main",
+    "description": ":spider_web: input/output for many mesh formats",
+    "license": "MIT",
+    "pushed_at": "2024-07-23T14:33:18Z",
+    "repo": "nschloe/meshio"
+  },
+  {
+    "archived": false,
+    "default_branch": "master",
+    "description": "A scikit-learn-compatible library for estimating prediction intervals and controlling risks, based on conformal predictions.",
+    "license": "BSD-3-Clause",
+    "pushed_at": "2026-11-02T15:13:50Z",
+    "repo": "scikit-learn-contrib/MAPIE"
+  },
+  {
+    "archived": false,
+    "default_branch": "master",
+    "description": "The fastest and most memory efficient lattice Boltzmann CFD software, running on all GPUs and CPUs via OpenCL. Free for non-commercial use.",
+    "license": "NOASSERTION",
+    "pushed_at": "2026-10-29T16:57:03Z",
+    "repo": "ProjectPhysX/FluidX3D"
+  }
+]
