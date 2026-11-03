@@ -261,18 +261,14 @@ def anchor_prediction(prediction_id: str) -> dict[str, object]:
 
 @router.get("/predictions/{prediction_id}/anchor")
 def anchor_status(prediction_id: str) -> dict[str, object]:
-    from daedalus import anchor, contracts
+    from daedalus import anchor
     from daedalus.api.engineering import data_root
     from daedalus.store import EvidenceStore, IntegrityError
 
     store = EvidenceStore(data_root())
     try:
         anchor.manifest_digest(store, prediction_id)
-        tokens = [
-            a
-            for a in store.records(contracts.Artifact)
-            if a.kind == anchor.TOKEN_KIND and a.source_entity_id == prediction_id
-        ]
+        tokens = anchor.stored_tokens(store, prediction_id)
         history = anchor.verification_history(store, prediction_id)
         latest = history[0] if history else None
         return {
@@ -312,18 +308,14 @@ def _verification_json(v: object) -> dict[str, object]:
 @router.get("/predictions/{prediction_id}/anchor/history")
 def anchor_history(prediction_id: str) -> dict[str, object]:
     """Append-only verification history plus the stored response and trust-bundle IDs."""
-    from daedalus import anchor, contracts
+    from daedalus import anchor
     from daedalus.api.engineering import data_root
     from daedalus.store import EvidenceStore, IntegrityError
 
     store = EvidenceStore(data_root())
     try:
         anchor.manifest_digest(store, prediction_id)
-        tokens = [
-            a
-            for a in store.records(contracts.Artifact)
-            if a.kind == anchor.TOKEN_KIND and a.source_entity_id == prediction_id
-        ]
+        tokens = anchor.stored_tokens(store, prediction_id)
         return {
             "prediction_id": prediction_id,
             "tokens": [

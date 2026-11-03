@@ -129,8 +129,6 @@ def sensitivity_analysis(method: Literal["sobol", "morris"] = "sobol") -> dict[s
 
     from fastapi import HTTPException
 
-    if method not in ("sobol", "morris"):
-        raise HTTPException(422, "Sensitivity method must be sobol or morris")
     body = json.dumps([asdict(o) for o in oracle.Campaign(data_root()).load()], sort_keys=True)
     try:
         return _sensitivity(body, method)

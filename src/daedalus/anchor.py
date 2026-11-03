@@ -179,7 +179,7 @@ def verify_command(prediction_hash_hex: str, tsr_path: str, ca_path: str = "cace
     return f"openssl ts -verify -digest {prediction_hash_hex} -in {tsr_path} -CAfile {ca_path}"
 
 
-def _tokens(store: EvidenceStore, prediction_id: str) -> list[c.Artifact]:
+def stored_tokens(store: EvidenceStore, prediction_id: str) -> list[c.Artifact]:
     return [
         a
         for a in store.records(c.Artifact)
@@ -220,7 +220,7 @@ def verify_stored_timestamp(
     hash, so the bytes a judge would use are recoverable) and the command that was run.
     """
     digest = manifest_digest(store, prediction_id)
-    tokens = _tokens(store, prediction_id)
+    tokens = stored_tokens(store, prediction_id)
     if not tokens:
         raise AnchorError(f"no timestamp response is stored for {prediction_id}")
     token = tokens[-1]

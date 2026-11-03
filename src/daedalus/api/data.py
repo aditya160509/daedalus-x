@@ -330,7 +330,7 @@ class SourceFile(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     label: str = Field(min_length=1, max_length=120)
-    content_b64: str = Field(min_length=1)
+    content_b64: str = Field(min_length=1, max_length=MAX_SOURCE_BYTES * 4 // 3 + 8)
 
 
 def _decode_sources(files: list[SourceFile]) -> list[tuple[str, bytes]]:
