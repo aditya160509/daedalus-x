@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, HTTPException, Query
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from daedalus import jobs
 from daedalus.api.race import MonteCarloRequest
@@ -28,6 +28,20 @@ class CfdParams(Params):
     base_cell_m: float | None = Field(default=None, gt=0, le=0.5)
     domain_cell_m: float | None = Field(default=None, gt=0, le=0.5)
     acceptance_mode: Literal["steady", "averaged"] | None = None
+    no_early_stop: bool = False
+    early_stop_tolerance: float | None = Field(default=None, gt=0, lt=0.1)
+    early_stop_window: int | None = Field(default=None, ge=20, le=100_000)
+    max_iterations: int | None = Field(default=None, ge=50, le=100_000)
+
+    @model_validator(mode="after")
+    def stop_settings(self) -> CfdParams:
+        if self.no_early_stop and self.early_stop_tolerance is not None:
+            raise ValueError("Disable early stopping or specify tolerance, not both")
+        cap = self.max_iterations or (1200 if self.fidelity == "quick" else 1500)
+        window = self.early_stop_window or (150 if self.fidelity == "quick" else 200)
+        if not self.no_early_stop and window > cap:
+            raise ValueError("Early-stop window cannot exceed the iteration cap")
+        return self
 
 
 class VizParams(Params):

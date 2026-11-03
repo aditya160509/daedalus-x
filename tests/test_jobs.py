@@ -193,3 +193,30 @@ def test_worker_executes_real_montecarlo_job(queue: JobQueue) -> None:
     finally:
         worker.terminate()
         worker.wait(timeout=5)
+
+
+def test_stop_settings_forwarded_without_solver(queue: JobQueue, monkeypatch) -> None:
+    from daedalus.jobs import execute
+
+    captured = []
+    monkeypatch.setattr(
+        "daedalus.jobs.subprocess.run", lambda command, **kwargs: captured.append(command)
+    )
+    job = queue.submit(
+        "cfd_run",
+        {
+            "design": "car_one",
+            "run": "custom_stop",
+            "early_stop_tolerance": 0.0005,
+            "early_stop_window": 500,
+            "max_iterations": 2000,
+        },
+    )
+    execute(queue, job)
+    command = captured[0]
+    assert command[command.index("--early-stop-window") + 1] == "500"
+    assert command[command.index("--early-stop-tolerance") + 1] == "0.0005"
+    assert command[command.index("--max-iter") + 1] == "2000"
+    other = queue.submit("cfd_run", {"design": "car_one", "run": "no_stop", "no_early_stop": True})
+    execute(queue, other)
+    assert "--no-early-stop" in captured[-1]

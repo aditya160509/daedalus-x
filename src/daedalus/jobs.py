@@ -127,6 +127,9 @@ class JobQueue:
                 raise ValueError("acceptance_mode must be steady or averaged")
             if spec.get("fidelity", "quick") not in ("quick", "final"):
                 raise ValueError("fidelity must be quick or final")
+            from daedalus.api.jobs import CfdParams
+
+            spec = CfdParams.model_validate(spec).model_dump(exclude_none=True)
         elif kind == "cfd_viz":
             case = self.item_path("runs", spec.get("run"))
             if not (case / "daedalus_result.json").is_file():
@@ -433,9 +436,14 @@ def execute(queue: JobQueue, job: Job) -> None:
             ("base_cell_m", "--base-cell"),
             ("domain_cell_m", "--domain-cell"),
             ("acceptance_mode", "--acceptance-mode"),
+            ("early_stop_tolerance", "--early-stop-tolerance"),
+            ("early_stop_window", "--early-stop-window"),
+            ("max_iterations", "--max-iter"),
         ):
             if params.get(key) is not None:
                 command.extend([flag, str(params[key])])
+        if params.get("no_early_stop", False):
+            command.append("--no-early-stop")
     elif job.kind == "cfd_viz":
         command = [*base, "cfd", "viz", str(queue.item_path("runs", params["run"]))]
     elif job.kind == "geometry_import":

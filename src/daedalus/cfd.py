@@ -86,6 +86,8 @@ class CaseConfig:
             raise ValueError("n_procs >= 1 and max_iterations >= 50 required")
         if self.acceptance_mode not in (None, "steady", "averaged"):
             raise ValueError("acceptance_mode must be steady or averaged")
+        if self.early_stop_tolerance is not None and self.early_stop_window > self.max_iterations:
+            raise ValueError("early_stop_window cannot exceed max_iterations")
         if self.early_stop_window < 20:
             raise ValueError("early_stop_window must be >= 20")
         if self.early_stop_tolerance is not None and not (0 < self.early_stop_tolerance < 0.1):

@@ -55,7 +55,12 @@ def main(argv: list[str] | None = None) -> int:
     cr.add_argument(
         "--domain-cell", type=float, help="fixed domain rounding cell size for grid studies"
     )
-    cr.add_argument("--no-early-stop", action="store_true", help="always run to max-iter")
+    stopping = cr.add_mutually_exclusive_group()
+    stopping.add_argument("--no-early-stop", action="store_true", help="always run to max-iter")
+    stopping.add_argument(
+        "--early-stop-tolerance", type=float, help="Cd stopping tolerance in (0, 0.1)"
+    )
+    cr.add_argument("--early-stop-window", type=int, help="Cd averaging window, >=20 iterations")
     cr.add_argument(
         "--acceptance-mode",
         choices=("steady", "averaged"),
@@ -103,6 +108,10 @@ def main(argv: list[str] | None = None) -> int:
         overrides["acceptance_mode"] = a.acceptance_mode
     if a.ground_offset is not None:
         overrides["ground_offset_m"] = a.ground_offset
+    if a.early_stop_tolerance is not None:
+        overrides["early_stop_tolerance"] = a.early_stop_tolerance
+    if a.early_stop_window is not None:
+        overrides["early_stop_window"] = a.early_stop_window
     if a.no_early_stop:
         overrides["early_stop_tolerance"] = None
     cfg = cfd.CaseConfig.preset(a.fidelity, **overrides)

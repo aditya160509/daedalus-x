@@ -876,3 +876,7 @@ These rows track the WHOLE requested chart, so partial rows can contain built co
 ### 2026-11-03 ORACLE / Race code sprint update
 
 C07 and E07 software landed; mean/SD map, held-out target and coverage charts connected with synthetic provenance. Native Optuna/CMA-ES, SciPy qmc and TanStack v9 adopted with licences. Evidence: `evidence/ORACLE-native-benchmark.md`, `evidence/C07-race-navigation.md`. No CFD/full numerical campaign launched; browser/scientific gates remain open. Existing Cd-based early stopping confirmed in generated code, not benchmarked on v2606. This supplements §23 and §28; no completion percentage is inferred.
+
+### CFD stopping controls — 2026-11-03
+
+Existing Cd convergence settings are now auditable through API → durable queue → CLI → case manifest/controlDict: optional tolerance, window, iteration cap and disable switch. Conflicting settings and impossible windows are rejected. Independent mesh/force/averaging acceptance gates are unchanged. No solver launched and no speed-up measured. Evidence: `evidence/CFD-stop-controls.md`.

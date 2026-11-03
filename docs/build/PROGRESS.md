@@ -410,7 +410,7 @@ The only real inputs are the CAD geometry and the rulebook. Without data, judges
 **1b. CFD speed-ups**
 - [x] ✅ Parallel solve (6 procs, `decomposePar`)
 - [ ] ⬜ Warm start (`mapFields`)
-- [ ] ⏳ Cd convergence stopping already generated: tolerance 0.001 / 200 iterations (quick: 150). Independent acceptance gates retained; installed v2606 execution not verified
+- [ ] ⏳ Cd convergence stopping already generated: tolerance 0.001 / 200 iterations (quick: 150). API/queue/CLI expose disable, tolerance, window and iteration cap; effective config persisted. Independent acceptance gates retained; installed v2606 execution not verified
 - [ ] ⬜ Mesh reuse / morph
 - [ ] ⬜ 10-core meshing
 - [ ] ⬜ FluidX3D GPU screening (check its licence first)

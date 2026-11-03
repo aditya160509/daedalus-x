@@ -304,3 +304,15 @@ def test_averaged_gate_fails_closed(tmp_path: Path, design: Path, kind: str) -> 
     res = RunResult(case_dir=str(case), succeeded=True)
     evaluate(case, res)
     assert res.acceptance == "rejected", res
+
+
+def test_custom_early_stop_recorded_in_case(tmp_path: Path, design: Path) -> None:
+    case = tmp_path / "custom_stop"
+    write_case(case, design, CaseConfig(early_stop_tolerance=0.0005, early_stop_window=500))
+    dictionary: Any = FoamFile(case / "system/controlDict").as_dict()
+    condition = dictionary["functions"]["earlyStop"]["conditions"]["cdSteady"]
+    assert condition["tolerance"] == 0.0005 and condition["window"] == 500
+    manifest = json.loads((case / "daedalus_manifest.json").read_text())
+    assert manifest["config"]["early_stop_window"] == 500
+    with pytest.raises(ValueError, match="cannot exceed"):
+        CaseConfig(early_stop_window=2000)

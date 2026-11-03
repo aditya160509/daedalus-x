@@ -66,3 +66,28 @@ def test_existing_and_reserved_run_refused(client: TestClient, tmp_path: Path) -
     body["params"]["run"] = "reserved"
     assert client.post("/v1/jobs", json=body).status_code == 202
     assert client.post("/v1/jobs", json=body).status_code == 409
+
+
+def test_early_stop_controls_queue_without_solver(client: TestClient) -> None:
+    body = {
+        "kind": "cfd_run",
+        "params": {
+            "design": "car_one",
+            "run": "custom_stop",
+            "fidelity": "final",
+            "early_stop_tolerance": 0.0005,
+            "early_stop_window": 500,
+            "max_iterations": 2000,
+        },
+    }
+    response = client.post("/v1/jobs", json=body)
+    assert response.status_code == 202
+    assert response.json()["params"]["early_stop_window"] == 500
+    assert response.json()["params"]["early_stop_tolerance"] == 0.0005
+    body["params"]["run"] = "conflicting_stop"
+    body["params"]["no_early_stop"] = True
+    assert client.post("/v1/jobs", json=body).status_code == 422
+    del body["params"]["early_stop_tolerance"]
+    assert client.post("/v1/jobs", json=body).status_code == 202
+    body["params"].update(run="invalid_window", no_early_stop=False, early_stop_window=3000)
+    assert client.post("/v1/jobs", json=body).status_code == 422
