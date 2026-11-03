@@ -3,6 +3,12 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DEFAULT_CAR, DEFAULT_ESTIMATE } from "@/app/race/raceInputsState";
+import {
+  TestProtocolPicker,
+  TEST_PROTOCOLS,
+  type TestProtocolId,
+} from "@/components/forms/TestProtocolPicker";
+import { AdvancedFields } from "@/components/ui/advanced-fields";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NumberField, Panel, ProvenanceBadge, Skeleton } from "@/components/ui/primitives";
@@ -52,8 +58,8 @@ function pointsToImport(
   };
 }
 
-
 export function CalibrationPanel() {
+  const [protocol, setProtocol] = useState<TestProtocolId>("custom");
   const queryClient = useQueryClient();
   const [training, setTraining] = useState<TimingImport | null>(null);
   const [held, setHeld] = useState<TimingImport | null>(null);
@@ -121,6 +127,7 @@ export function CalibrationPanel() {
       setConfirmed(false);
       setFiles({ training: null, held: null });
       setOpenedStudy(detail.study.study_id);
+      setProtocol("custom");
       fit.reset();
     },
   });
@@ -244,11 +251,28 @@ export function CalibrationPanel() {
           className="min-w-0 space-y-4 border-b p-4 lg:border-r lg:border-b-0"
         >
           <p className="text-xs leading-relaxed text-muted-foreground">
-            Upload measured car-only finish times (CSV or XLSX). Header <code>time [s]</code> is
-            required; optional <code>mass [g]</code>, run, lane and reaction columns are previewed.
-            Reaction is not subtracted by the model. Running the calibration stores the exact
-            inputs, results and uploaded files (with hashes) in the evidence store.
+            Upload car-only times: CSV/XLSX with <code>time [s]</code> and optional{" "}
+            <code>mass [g]</code>. Reaction is not subtracted. Original files, assumptions and
+            results are saved as evidence.
           </p>
+          <TestProtocolPicker
+            value={protocol}
+            onChange={(id) => {
+              setProtocol(id);
+              if (id !== "custom") {
+                const preset = TEST_PROTOCOLS[id];
+                setValues((v) => ({
+                  ...v,
+                  track: preset.trackM,
+                  heldTrack: preset.trackM,
+                  sigma: preset.timingSdMs,
+                }));
+              }
+              setConfirmed(false);
+              setOpenedStudy(null);
+              fit.reset();
+            }}
+          />
           {(["training", "held"] as const).map((target) => (
             <div key={target} className="space-y-1">
               <label className="text-xs" htmlFor={`cal-${target}`}>
@@ -283,57 +307,95 @@ export function CalibrationPanel() {
             </p>
           )}
           <div className="space-y-3">
-            {fields.map((f) => (
-              <NumberField
-                key={f.key}
-                id={`cal-${f.key}`}
-                label={f.label}
-                unit={f.unit}
-                min={f.min}
-                max={f.max}
-                step={f.step}
-                value={values[f.key]}
-                onChange={(value) => {
-                  setValues((v) => ({ ...v, [f.key]: value }));
+            {fields
+              .filter((f) => ["mass", "track", "sigma"].includes(f.key))
+              .map((f) => (
+                <NumberField
+                  key={f.key}
+                  id={`cal-${f.key}`}
+                  label={f.label}
+                  unit={f.unit}
+                  min={f.min}
+                  max={f.max}
+                  step={f.step}
+                  value={values[f.key]}
+                  onChange={(value) => {
+                    setValues((v) => ({ ...v, [f.key]: value }));
+                    setProtocol("custom");
+                    fit.reset();
+                  }}
+                />
+              ))}
+          </div>
+          <AdvancedFields
+            description="Prior distributions, density, held-out track length and thrust source. Saved studies retain every assumption, including settings hidden here."
+            disabled={fit.isPending || upload.isPending}
+            invalidCount={
+              fields.filter(
+                (f) =>
+                  !["mass", "track", "sigma"].includes(f.key) &&
+                  (!Number.isFinite(values[f.key]) ||
+                    values[f.key] < f.min ||
+                    values[f.key] > f.max),
+              ).length + (curveError ? 1 : 0)
+            }
+          >
+            <div className="space-y-3">
+              {fields
+                .filter((f) => !["mass", "track", "sigma"].includes(f.key))
+                .map((f) => (
+                  <NumberField
+                    key={f.key}
+                    id={`cal-${f.key}`}
+                    label={f.label}
+                    unit={f.unit}
+                    min={f.min}
+                    max={f.max}
+                    step={f.step}
+                    value={values[f.key]}
+                    onChange={(value) => {
+                      setValues((v) => ({ ...v, [f.key]: value }));
+                      setProtocol("custom");
+                      fit.reset();
+                    }}
+                  />
+                ))}
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="cal-thrust" className="text-xs">
+                Thrust curve CSV (time s, force N)
+              </label>
+              <Input
+                id="cal-thrust"
+                type="file"
+                accept=".csv,text/csv"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  setCurve(null);
+                  setCurveName("");
+                  setCurveError("");
                   fit.reset();
+                  if (!file) return;
+                  try {
+                    setCurve(parseThrustCsv(await file.text()));
+                    setCurveName(file.name);
+                  } catch (error) {
+                    setCurveError(error instanceof Error ? error.message : "Could not read file");
+                  }
                 }}
               />
-            ))}
-          </div>
-          <div className="space-y-1">
-            <label htmlFor="cal-thrust" className="text-xs">
-              Thrust curve CSV (time s, force N)
-            </label>
-            <Input
-              id="cal-thrust"
-              type="file"
-              accept=".csv,text/csv"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                setCurve(null);
-                setCurveName("");
-                setCurveError("");
-                fit.reset();
-                if (!file) return;
-                try {
-                  setCurve(parseThrustCsv(await file.text()));
-                  setCurveName(file.name);
-                } catch (error) {
-                  setCurveError(error instanceof Error ? error.message : "Could not read file");
-                }
-              }}
-            />
-            <p className="text-xs text-muted-foreground">
-              {curve
-                ? `Using ${curveName}; verify its source and units.`
-                : "Default: Race estimated curve (20 N peak, 0.02 s rise, 0.06 s decay, 0.4 s burn), not a measurement."}
-            </p>
-            {curveError && (
-              <p role="alert" className="text-xs text-destructive">
-                {curveError}
+              <p className="text-xs text-muted-foreground">
+                {curve
+                  ? `Using ${curveName}; verify its source and units.`
+                  : "Default: Race estimated curve (20 N peak, 0.02 s rise, 0.06 s decay, 0.4 s burn), not a measurement."}
               </p>
-            )}
-          </div>
+              {curveError && (
+                <p role="alert" className="text-xs text-destructive">
+                  {curveError}
+                </p>
+              )}
+            </div>
+          </AdvancedFields>
           <label className="flex items-start gap-2 text-xs">
             <input
               type="checkbox"
@@ -399,8 +461,8 @@ export function CalibrationPanel() {
               </p>
             ) : !studies.data.length ? (
               <p className="text-xs text-muted-foreground">
-                No calibration has been saved yet. Running one stores its inputs, results and
-                source files as evidence.
+                No calibration has been saved yet. Running one stores its inputs, results and source
+                files as evidence.
               </p>
             ) : (
               <ul className="divide-y rounded-lg border text-xs">
@@ -413,7 +475,7 @@ export function CalibrationPanel() {
                       <Button
                         size="sm"
                         variant="outline"
-                        disabled={open.isPending}
+                        disabled={open.isPending || fit.isPending || upload.isPending}
                         onClick={() => open.mutate(study.study_id)}
                       >
                         {openedStudy === study.study_id ? "Reopen" : "Open"}

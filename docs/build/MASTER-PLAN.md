@@ -380,6 +380,12 @@ The next-wave changes were merged into `main` in `6d708b5`. The table tracks ver
 | 6 Calibration / optimisation analysis | 🟨 Partial | ✅ Bayesian calibration API/UI with timing previews and held-out scoring; saved studies persist exact inputs, results and source files with browsing/reopening. Monte Carlo and SALib Sobol/Morris API + Sensitivity UI | Applying the posterior to Race, GP uncertainty maps and measured validation; ⏳ Calibration/Sensitivity visual review |
 | 7 Remaining | 🟨 Partial | Project page, cleanup, ✅ uPlot telemetry, ✅ React Flow evidence lineage and ✅ T34 V&V dossier (JSON/Markdown + Project panel) | Run wizard, ⏳ dockview visual review, red-team/post-event reports and final browser review |
 
+### Sprint: short protocol forms (2026-11-03)
+
+- [x] F06: Calibration and Test Planner now use explicit Lab-day/Track-day/Custom assumptions and Base UI Advanced settings. Existing fit/planning APIs and saved calibration evidence stay connected.
+- [x] TypeScript/changed-file lint and brief in-app interaction checks at 1440/375 px; actual planner calculation returned three recommendations, with zero console errors and no horizontal overflow. Hidden invalid settings stay visible.
+- [ ] Complete final app acceptance, measured timing precision and real physical calibration remain pending. Owned browser tab and both servers were closed after this check.
+
 ### 23.1 Latest reuse integrations — current tags
 
 | Piece | Implementation | Verification / next gap | Landed commit |
@@ -738,7 +744,7 @@ This is the current checkbox ledger requested by the owner. `TODO.md` supplies t
 - [x] ✅ F03 — Saved calibration inputs/results/source files with hashes; browse/reopen studies.
 - [x] ✅ F04 — D-optimal timing/coast-down planner, editable assumptions and expected uncertainty reduction.
 - [x] ✅ F05 — Single-fit concurrency gate and disabled input editing while fitting/planning.
-- [ ] ⬜ F06 — Lab-day/Track-day presets plus Advanced; maximum six main visible inputs in both forms.
+- [x] ✅ F06 — Lab-day/Track-day/Custom protocols and Base UI Advanced sections connected; Calibration has six main inputs and Planner four. Hidden invalid settings reveal themselves; priors/uploads are preserved. Brief in-app 1440/375 px, overflow and planner API checks passed (see `evidence/F06-protocol-forms.md`).
 - [ ] ⬜ F07 — Prior-vs-posterior plots, across-run error scoreboard and posterior predictive-check plot.
 - [ ] ⬜ F08 — Paired baseline/candidate protocol, CI, power/sample-size calculation and minimum detectable effect.
 - [ ] ⬜ F09 — Repeat-run control chart and gauge R&R workflow.

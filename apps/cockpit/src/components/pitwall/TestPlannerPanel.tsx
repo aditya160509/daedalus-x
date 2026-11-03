@@ -3,6 +3,12 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { DEFAULT_CAR, DEFAULT_ESTIMATE } from "@/app/race/raceInputsState";
+import {
+  TestProtocolPicker,
+  TEST_PROTOCOLS,
+  type TestProtocolId,
+} from "@/components/forms/TestProtocolPicker";
+import { AdvancedFields } from "@/components/ui/advanced-fields";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NumberField, Panel, ProvenanceBadge, Skeleton } from "@/components/ui/primitives";
@@ -17,6 +23,7 @@ const PARAMETERS = {
 type Parameter = keyof typeof PARAMETERS;
 
 export function TestPlannerPanel() {
+  const [protocol, setProtocol] = useState<TestProtocolId>("custom");
   const [values, setValues] = useState({
     cda: DEFAULT_CAR.cdaCm2,
     crr: DEFAULT_CAR.crr,
@@ -41,6 +48,7 @@ export function TestPlannerPanel() {
   const plan = useMutation({ mutationFn: getTestPlan });
   const change = (key: keyof typeof values, value: number) => {
     setValues((v) => ({ ...v, [key]: value }));
+    setProtocol("custom");
     plan.reset();
   };
   const fields: {
@@ -152,40 +160,28 @@ export function TestPlannerPanel() {
             Compare timing runs at two masses and two lengths, with optional fast and slow
             coast-downs. Edit the assumptions before planning.
           </p>
+          <TestProtocolPicker
+            value={protocol}
+            onChange={(id) => {
+              setProtocol(id);
+              if (id !== "custom") {
+                const preset = TEST_PROTOCOLS[id];
+                setValues((v) => ({
+                  ...v,
+                  track: preset.trackM,
+                  shortTrack: preset.alternativeTrackM,
+                  noise: preset.timingSdMs,
+                  budget: preset.budget,
+                }));
+                setIncludeCoast(preset.coastDown);
+              }
+              plan.reset();
+            }}
+          />
           <div className="space-y-3">
-            {fields.slice(0, 11).map((f) => (
-              <NumberField
-                key={f.key}
-                id={`planner-${f.key}`}
-                label={f.label}
-                unit={f.unit}
-                min={f.min}
-                max={f.max}
-                step={f.step}
-                value={values[f.key]}
-                onChange={(v) => change(f.key, v)}
-              />
-            ))}
-          </div>
-          {values.mass + values.ballast > 1000 && (
-            <p role="alert" className="text-xs text-destructive">
-              Base mass plus ballast must not exceed 1000 g.
-            </p>
-          )}
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={includeCoast}
-              onChange={(e) => {
-                setIncludeCoast(e.target.checked);
-                plan.reset();
-              }}
-            />{" "}
-            Include coast-down candidates
-          </label>
-          {includeCoast && (
-            <div className="space-y-3">
-              {fields.slice(11).map((f) => (
+            {fields
+              .filter((f) => ["mass", "track", "noise", "budget"].includes(f.key))
+              .map((f) => (
                 <NumberField
                   key={f.key}
                   id={`planner-${f.key}`}
@@ -198,42 +194,120 @@ export function TestPlannerPanel() {
                   onChange={(v) => change(f.key, v)}
                 />
               ))}
+          </div>
+          <AdvancedFields
+            description="Car priors, density, ballast, alternative track, coast-down candidates and thrust curve. Hidden assumptions still participate in the calculation."
+            disabled={plan.isPending}
+            invalidCount={
+              fields.filter(
+                (f) =>
+                  !["mass", "track", "noise", "budget"].includes(f.key) &&
+                  (!Number.isFinite(values[f.key]) ||
+                    values[f.key] < f.min ||
+                    values[f.key] > f.max),
+              ).length +
+              (fileError ? 1 : 0) +
+              (values.mass + values.ballast > 1000 ? 1 : 0)
+            }
+          >
+            <div className="space-y-3">
+              {fields
+                .filter(
+                  (f) =>
+                    ![
+                      "mass",
+                      "track",
+                      "noise",
+                      "budget",
+                      "fastSpeed",
+                      "fastDistance",
+                      "slowSpeed",
+                      "slowDistance",
+                    ].includes(f.key),
+                )
+                .map((f) => (
+                  <NumberField
+                    key={f.key}
+                    id={`planner-${f.key}`}
+                    label={f.label}
+                    unit={f.unit}
+                    min={f.min}
+                    max={f.max}
+                    step={f.step}
+                    value={values[f.key]}
+                    onChange={(v) => change(f.key, v)}
+                  />
+                ))}
             </div>
-          )}
-          <div className="space-y-2">
-            <label htmlFor="planner-thrust" className="text-xs">
-              Thrust curve CSV (time s, force N)
-            </label>
-            <Input
-              id="planner-thrust"
-              type="file"
-              accept=".csv,text/csv"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                plan.reset();
-                setCurve(null);
-                setCurveName("");
-                setFileError("");
-                if (!file) return;
-                try {
-                  setCurve(parseThrustCsv(await file.text()));
-                  setCurveName(file.name);
-                } catch (error) {
-                  setFileError(error instanceof Error ? error.message : "Could not read file");
-                }
-              }}
-            />
-            <p className="text-xs text-muted-foreground">
-              {curve
-                ? `Using ${curveName}. Verify its source and units.`
-                : "Default: Race workspace estimated thrust curve (20 N peak, 0.02 s rise, 0.06 s decay, 0.4 s burn)."}
-            </p>
-            {fileError && (
+            {values.mass + values.ballast > 1000 && (
               <p role="alert" className="text-xs text-destructive">
-                {fileError}
+                Base mass plus ballast must not exceed 1000 g.
               </p>
             )}
-          </div>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={includeCoast}
+                onChange={(e) => {
+                  setIncludeCoast(e.target.checked);
+                  setProtocol("custom");
+                  plan.reset();
+                }}
+              />{" "}
+              Include coast-down candidates
+            </label>
+            {includeCoast && (
+              <div className="space-y-3">
+                {fields.slice(11).map((f) => (
+                  <NumberField
+                    key={f.key}
+                    id={`planner-${f.key}`}
+                    label={f.label}
+                    unit={f.unit}
+                    min={f.min}
+                    max={f.max}
+                    step={f.step}
+                    value={values[f.key]}
+                    onChange={(v) => change(f.key, v)}
+                  />
+                ))}
+              </div>
+            )}
+            <div className="space-y-2">
+              <label htmlFor="planner-thrust" className="text-xs">
+                Thrust curve CSV (time s, force N)
+              </label>
+              <Input
+                id="planner-thrust"
+                type="file"
+                accept=".csv,text/csv"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  plan.reset();
+                  setCurve(null);
+                  setCurveName("");
+                  setFileError("");
+                  if (!file) return;
+                  try {
+                    setCurve(parseThrustCsv(await file.text()));
+                    setCurveName(file.name);
+                  } catch (error) {
+                    setFileError(error instanceof Error ? error.message : "Could not read file");
+                  }
+                }}
+              />
+              <p className="text-xs text-muted-foreground">
+                {curve
+                  ? `Using ${curveName}. Verify its source and units.`
+                  : "Default: Race workspace estimated thrust curve (20 N peak, 0.02 s rise, 0.06 s decay, 0.4 s burn)."}
+              </p>
+              {fileError && (
+                <p role="alert" className="text-xs text-destructive">
+                  {fileError}
+                </p>
+              )}
+            </div>
+          </AdvancedFields>
           <Button disabled={!valid || plan.isPending} onClick={submit}>
             Calculate plan
           </Button>
