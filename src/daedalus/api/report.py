@@ -53,7 +53,7 @@ def _hero(run: Path | None) -> Path | None:
 
 @router.get("/pdf")
 def report_pdf(design: str = "orbit_baseline") -> Response:
-    data = {"oracle": oracle_api.state(), "forge": forge_api.checks(design)}
+    data: dict[str, object] = {"oracle": oracle_api.state(), "forge": forge_api.checks(design)}
     body = json.dumps(data, sort_keys=True, default=str)
     data["hash"] = "sha256:" + hashlib.sha256(body.encode()).hexdigest()[:12]
     data["generated"] = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")

@@ -237,7 +237,7 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 - [ ] 🟨 4 Tornado ✅ + SALib Sobol indices ⬜
 - [x] ✅ 5 Exchange rates (ms per g, per cm² CdA, per 0.001 Crr)
 - [ ] 🟨 6 Monte Carlo histogram p5/p50/p95 ✅ — convergence plot ⬜
-- [ ] 🟨 7 Energy breakdown: panel ✅, Sankey chart ⬜
+- [ ] 🟨 7 Energy Sankey connected using native ECharts, signed integration error and PNG export; tether unmodelled; browser review ⏳
 - [ ] 🟨 8 Expected points + knock-out probability ✅ — real field data ⬜
 - [ ] ⬜ 9 Optimal mass curve
 
@@ -265,7 +265,7 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 - [ ] 🟨 4 R/A/G summary: states ✅, one-pager ⬜
 
 **Structure (3)**
-- [ ] 🟨 1 Deflection / stress: values ✅, plots ⬜
+- [ ] ⏳ 1 Deflection / bending stress plots connected to solver nodes, estimated strength line and PNG export; browser/material validation pending
 - [ ] 🟨 2 Safety factor table
 - [ ] ⬜ 3 Predicted vs measured load test
 

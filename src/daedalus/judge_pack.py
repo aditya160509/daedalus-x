@@ -83,7 +83,7 @@ def _design_names(root: Path) -> list[str]:
 def _run_manifests(root: Path) -> Iterable[tuple[str, bytes]]:
     runs = root / "runs"
     if not runs.is_dir():
-        return []
+        return
     for path in sorted(runs.glob("*/daedalus_manifest.json")):
         yield path.parent.name, path.read_bytes()
 
@@ -131,8 +131,8 @@ def build_pack(
                 _add(bundle, f"designs/{name}-oracle.json", oracle.read_bytes(), files)
 
         run_count = 0
-        for run_id, manifest in _run_manifests(root):
-            _add(bundle, f"runs/{run_id}-manifest.json", manifest, files)
+        for run_id, manifest_bytes in _run_manifests(root):
+            _add(bundle, f"runs/{run_id}-manifest.json", manifest_bytes, files)
             result = root / "runs" / run_id / "daedalus_result.json"
             if result.is_file():
                 _add(bundle, f"runs/{run_id}-result.json", result.read_bytes(), files)

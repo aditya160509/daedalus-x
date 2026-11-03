@@ -802,7 +802,7 @@ These rows track the WHOLE requested chart, so partial rows can contain built co
 | R04 | Tornado + SALib race indices | 🟨 | Rank-correlation tornado and perturbation sensitivity exist; race Sobol indices absent. |
 | R05 | Exchange rates | ✅ | Connected ms/g, ms/cm² and Crr metrics; final shared quality/browser gate pending. |
 | R06 | MC histogram + convergence | 🟨 | Histogram/quantiles exist; sampling-convergence plot absent. |
-| R07 | Energy Sankey | 🟨 | Stacked energy chart exists; Sankey/tether contribution absent. |
+| R07 | Energy Sankey | 🟨 | Native ECharts Sankey, signed integration residual and PNG export connected; tether remains unmodelled; ⏳ browser review. |
 | R08 | Points distribution/round/head-to-head | 🟨 | Scenario expected points/round/head-to-head exists; full distribution absent. |
 | R09 | Optimal mass curve | 🟨 | What-if mass sparkline exists; full optimum/legal-mass curve absent. |
 | O01 | GP map + uncertainty/next point | ✅ | Mean/posterior-SD toggle and next point connected; ⏳ browser review. |
@@ -822,7 +822,7 @@ These rows track the WHOLE requested chart, so partial rows can contain built co
 | F02 | Per-rule pass probability | 🟨 | Probability API/overall summary exists; full per-rule plotted comparison incomplete. |
 | F03 | Legal-frontier boundaries | 🟨 | Single-design nearest limits/rule pages exist; sampled feasible frontier absent. |
 | F04 | Red/amber/green summary | 🟨 | Rule states/counts exist; one-page summary product absent. |
-| T01 | Deflection/stress plots | 🟨 | Beam values exist; plots absent. |
+| T01 | Deflection/stress plots | ✅ | Solver nodal deflection and bending-stress plots, strength reference, linked cursors and PNG export connected; ⏳ browser/physical material review. |
 | T02 | Per-part safety-factor table | 🟨 | Selected-part metric exists; table absent. |
 | T03 | Predicted vs measured load | ⬜ | No connected chart/data workflow. |
 | P01 | Planned vs actual evidence timeline | 🟨 | Editable plan/forecasts exist; evidence Gantt absent. |
@@ -867,3 +867,7 @@ Existing Cd convergence settings are now auditable through API → durable queue
 ### Scope cleanup — 2026-11-03 (§23 update)
 
 M06 complete: removed drawing UI/API/generator/template and judge-pack hooks, metadata and false missing-deliverable warnings. Existing output/data untouched. Cut T22/T24/T26/T28/T30/T31/T32/T35 rows removed from active task tables; historical scope score normalised to 27 tasks, not treated as new engineering progress. Competition drawing obligations remain team work. Evidence: `evidence/M06-drawing-cleanup.md`.
+
+### Analysis chart batch — 2026-11-03 (§23 update)
+
+Native ECharts energy Sankey replaces the hand-built share bar, preserving signed numerical closure error and explicit missing tether term. Beam charts now use solver nodal deflection/stress, estimated strength line and PNG export. Zero-load safety factor is JSON-safe null (UI infinity), not non-finite JSON. R07 remains partial for tether; T01 chart software built, browser/material validation pending. Evidence: `evidence/ANALYSIS-energy-structure.md`.

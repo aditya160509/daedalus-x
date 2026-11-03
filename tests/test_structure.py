@@ -89,3 +89,17 @@ def test_unsupported_beams_and_bad_inputs_are_rejected() -> None:
         solve_beam(0.03, ROD, AL, supports={0.05: "fixed"})
     with pytest.raises(StructureError):
         Material("bad", 0.0, 1.0, "estimated")
+
+
+def test_plot_arrays_match_beam_stress_and_zero_load_is_json_safe() -> None:
+    import json
+
+    loaded = solve_beam(0.03, ROD, AL, supports={0.0: "fixed"}, point_loads_n={0.03: 1.0})
+    mapped = loaded.to_mapping()
+    assert len(mapped["stress_mpa"]) == len(loaded.x_m)
+    assert max(mapped["stress_mpa"]) == pytest.approx(loaded.max_stress_pa / 1e6)
+    assert max(abs(m) for m in mapped["moment_nmm"]) == pytest.approx(30.0)
+    unloaded = solve_beam(0.03, ROD, AL, supports={0.0: "fixed"})
+    assert unloaded.to_mapping()["safety_factor"] is None
+    assert all(stress == 0 for stress in unloaded.to_mapping()["stress_mpa"])
+    json.dumps(unloaded.to_mapping(), allow_nan=False)

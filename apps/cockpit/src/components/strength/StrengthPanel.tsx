@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/primitives";
 import { getBeamMaterials, solveBeam, type BeamRequest } from "@/lib/api";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
+import { BeamPlots } from "./BeamPlots";
 import { Ruler } from "lucide-react";
 
 type PartId = "tether" | "axle" | "halo" | "rear_wing";
@@ -114,7 +115,7 @@ export function StrengthPanel() {
     queryFn: () => solveBeam(debounced),
     enabled: !!materials.data,
   });
-  const v = result.data ? verdict(result.data.safety_factor) : null;
+  const v = result.data ? verdict(result.data.safety_factor ?? Infinity) : null;
 
   return (
     <Panel
@@ -184,7 +185,11 @@ export function StrengthPanel() {
           step={10}
         />
       </div>
-      {result.error ? (
+      {materials.error ? (
+        <EmptyState icon={<Ruler className="size-5" />} title="Could not load materials">
+          {materials.error.message}
+        </EmptyState>
+      ) : result.error ? (
         <EmptyState icon={<Ruler className="size-5" />} title="Could not solve this part">
           {result.error.message}
         </EmptyState>
@@ -201,12 +206,13 @@ export function StrengthPanel() {
             <Metric label="Peak stress" value={result.data.max_stress_mpa.toFixed(1)} unit="MPa" />
             <Metric
               label="Safety factor"
-              value={result.data.safety_factor.toFixed(1)}
+              value={result.data.safety_factor?.toFixed(1) ?? "∞"}
               tone={v.tone}
               hint={v.text}
             />
             <Metric label="Root moment" value={result.data.max_moment_nmm.toFixed(1)} unit="N·mm" />
           </div>
+          <BeamPlots data={result.data} />
           <p className="text-2xs text-muted-foreground">
             Material values for {result.data.material} are handbook estimates. 3D-printed parts are
             weaker than moulded ones; measure your own material before quoting this number.

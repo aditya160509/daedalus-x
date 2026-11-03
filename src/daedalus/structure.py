@@ -101,7 +101,14 @@ class BeamResult:
             "max_deflection_mm": self.max_deflection_m * 1000.0,
             "max_moment_nmm": self.max_moment_nm * 1000.0,
             "max_stress_mpa": self.max_stress_pa / 1e6,
-            "safety_factor": self.safety_factor,
+            "safety_factor": self.safety_factor if math.isfinite(self.safety_factor) else None,
+            "moment_nmm": (self.moment_nm * 1000.0).tolist(),
+            "stress_mpa": (
+                np.abs(self.moment_nm) * self.max_stress_pa / self.max_moment_nm / 1e6
+                if self.max_moment_nm > 0
+                else np.zeros_like(self.moment_nm)
+            ).tolist(),
+            "strength_mpa": self.material.strength_pa / 1e6,
             "material": self.material.name,
             "material_source": self.material.source,
         }

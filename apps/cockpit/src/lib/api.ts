@@ -799,6 +799,7 @@ export const EnergyAudit = z.object({
   coast_phase_loss_j: z.number(),
   closure_error_j: z.number(),
   closure_fraction: z.number(),
+  flows: z.array(z.object({ source: z.string(), target: z.string(), value_j: z.number() })),
 });
 export type EnergyAudit = z.infer<typeof EnergyAudit>;
 export const getEnergyAudit = (race: RaceSimulationRequest) =>
@@ -993,12 +994,16 @@ const BeamResult = z.object({
   max_deflection_mm: z.number(),
   max_moment_nmm: z.number(),
   max_stress_mpa: z.number(),
-  safety_factor: z.number(),
+  safety_factor: z.number().nullable(),
+  moment_nmm: z.array(z.number()),
+  stress_mpa: z.array(z.number()),
+  strength_mpa: z.number(),
   material: z.string(),
   material_source: z.enum(["measured", "estimated"]),
   x_mm: z.array(z.number()),
   deflection_mm: z.array(z.number()),
 });
+export type BeamResult = z.infer<typeof BeamResult>;
 export interface BeamRequest {
   length_m: number;
   section:

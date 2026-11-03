@@ -54,3 +54,7 @@ Retained distribution licence texts: `docs/licenses/uplot-LICENSE.txt`, `docs/li
 
 - [Optuna 5.0.0](https://github.com/optuna/optuna), MIT: native TPESampler/CmaEsSampler ask/tell, with [cmaes 0.13.1](https://github.com/CyberAgentAILab/cmaes), MIT. Existing SciPy supplies Sobol/LHS and Student-t intervals. `oracle_benchmark.py` adapts the actual algorithms to an explicitly synthetic equal-budget objective; it does not implement substitute TPE/CMA algorithms. Distribution licences retained in `docs/licenses/optuna-LICENSE.txt` and `docs/licenses/cmaes-LICENSE.txt`.
 - [TanStack Table](https://github.com/TanStack/table), MIT: actual row/sort models and cell rendering in `components/ui/data-table.tsx`, connected to benchmark results and acquisition history. Notice retained in `docs/licenses/tanstack-react-table-LICENSE.txt`; installed version pinned in pnpm lockfile. No full upstream dashboard/application was imported.
+
+## Energy and structural charts — 2026-11-03
+
+[Apache ECharts 6.1.0](https://github.com/apache/echarts), Apache-2.0 (repository licence verified), supplies the native Sankey layout/interaction and beam line-chart engine, linked cursors and PNG export. `EnergySankey.tsx` adapts existing TITAN audit flows; the integration residual is separate, never normalised away. `BeamPlots.tsx` plots the existing FEM nodal results. No custom Sankey layout, foreign application or solver was copied. Original licence remains in the installed distribution.
