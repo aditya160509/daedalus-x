@@ -2,6 +2,8 @@
 
 import { GaugeChart, HeatmapChart, ScatterChart } from "echarts/charts";
 import { VisualMapComponent } from "echarts/components";
+import { useState } from "react";
+import { SegmentedControl } from "@/components/ui/primitives";
 import type { OracleState } from "@/lib/api";
 import {
   chartAxis,
@@ -17,11 +19,13 @@ const cm2 = (v: number) => (v * 1e4).toFixed(2); // m² → cm²
 
 /** Aero map: GP-predicted CdA over the first two variables, tested runs and the next-best star. */
 export function AeroMap({ s }: { s: OracleState }) {
+  const [metric, setMetric] = useState<"mean" | "sd">("mean");
+  const values = metric === "sd" && s.aero_map.cda_sd_m2 ? s.aero_map.cda_sd_m2 : s.aero_map.cda_m2;
   const host = useECharts(() => {
     const t = chartTheme();
     const [vx, vy] = s.variables;
     const n = s.aero_map.axis.length;
-    const flat = s.aero_map.cda_m2.flatMap((row, i) => row.map((v, j) => [i, j, v * 1e4]));
+    const flat = values.flatMap((row, i) => row.map((v, j) => [i, j, v * 1e4]));
     const vals = flat.map((d) => d[2]);
     const toIdx = (u: number) => u * (n - 1);
     const lbl = (v: { low: number; high: number }, i: number) =>
@@ -32,7 +36,12 @@ export function AeroMap({ s }: { s: OracleState }) {
       grid: { left: 44, right: 70, top: 10, bottom: 36 },
       tooltip: {
         ...chartTooltip(t),
-        formatter: (p: { value: number[] }) => `CdA ${p.value[2].toFixed(2)} cm²`,
+        formatter: (p: { value: number[]; seriesIndex: number }) =>
+          p.seriesIndex === 0
+            ? `${metric === "sd" ? "Posterior SD" : "Mean CdA"} ${p.value[2].toFixed(2)} cm²`
+            : p.seriesIndex === 1
+              ? "Stored observation projected onto this slice"
+              : "Next proposed design",
       },
       xAxis: {
         type: "category",
@@ -83,14 +92,31 @@ export function AeroMap({ s }: { s: OracleState }) {
         },
       ],
     };
-  }, [s]);
+  }, [s, values, metric]);
   return (
-    <div
-      ref={host}
-      className="size-full min-h-56"
-      role="img"
-      aria-label="Predicted drag area over the first two optimisation variables, with tested runs and the next candidate"
-    />
+    <div className="flex h-full min-h-80 flex-col gap-2">
+      {s.aero_map.cda_sd_m2 && (
+        <SegmentedControl
+          label="GP map field"
+          options={[
+            { value: "mean", label: "Mean CdA" },
+            { value: "sd", label: "Posterior SD" },
+          ]}
+          value={metric}
+          onChange={setMetric}
+        />
+      )}
+      <div
+        ref={host}
+        className="min-h-56 flex-1"
+        role="img"
+        aria-label={`${metric === "sd" ? "GP posterior standard deviation" : "Predicted drag area"} over the first two variables`}
+      />
+      <p className="text-xs leading-relaxed text-muted-foreground">
+        Other variables are fixed at the best observation. Markers project observations onto this
+        slice; the star is next. Posterior SD is model uncertainty, not measured CFD error.
+      </p>
+    </div>
   );
 }
 
@@ -98,6 +124,7 @@ export function AeroMap({ s }: { s: OracleState }) {
 export function BenchmarkChart({ s }: { s: OracleState }) {
   const host = useECharts(() => {
     const t = chartTheme();
+    if (!s.benchmark) return {};
     const x = s.benchmark.gp.map((_, i) => i + 1);
     return {
       animation: false,
@@ -157,11 +184,18 @@ export function BenchmarkChart({ s }: { s: OracleState }) {
   }, [s]);
   return (
     <div
-      ref={host}
+      ref={s.benchmark ? host : undefined}
       className="size-full min-h-40"
       role="img"
       aria-label="Best drag area found by the optimiser versus random search at the same budget"
-    />
+    >
+      {!s.benchmark && (
+        <p className="p-4 text-xs text-muted-foreground">
+          No completed registered benchmark. Open Pit Wall → ORACLE → Benchmark to register an
+          equal-budget synthetic study.
+        </p>
+      )}
+    </div>
   );
 }
 

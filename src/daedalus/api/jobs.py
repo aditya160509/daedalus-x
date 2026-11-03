@@ -56,13 +56,23 @@ class GeometryRequest(Params):
     params: GeometryParams
 
 
+class OracleBenchmarkParams(Params):
+    protocol_id: str = Field(pattern=r"^[a-z0-9_]{3,64}$")
+
+
+class OracleBenchmarkJob(Params):
+    kind: Literal["oracle_benchmark"]
+    params: OracleBenchmarkParams
+
+
 class MonteCarloBatch(Params):
     kind: Literal["montecarlo_batch"]
     params: MonteCarloRequest
 
 
 JobRequest = Annotated[
-    CfdRequest | VizRequest | GeometryRequest | MonteCarloBatch, Field(discriminator="kind")
+    CfdRequest | VizRequest | GeometryRequest | MonteCarloBatch | OracleBenchmarkJob,
+    Field(discriminator="kind"),
 ]
 
 

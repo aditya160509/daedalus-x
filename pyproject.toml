@@ -20,6 +20,8 @@ dependencies = [
     "uvicorn[standard]>=0.54.0",
     "typst>=0.15.0",
     "salib>=1.6.0",
+    "optuna>=5.0.0",
+    "cmaes>=0.13.1",
 ]
 
 [project.scripts]

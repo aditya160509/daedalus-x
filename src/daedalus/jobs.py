@@ -22,8 +22,8 @@ from uuid import uuid4
 from daedalus.contracts import JobState
 from daedalus.contracts import LocalJob as Job
 
-JobKind = Literal["cfd_run", "cfd_viz", "geometry_import", "montecarlo_batch"]
-KINDS = ("cfd_run", "cfd_viz", "geometry_import", "montecarlo_batch")
+JobKind = Literal["cfd_run", "cfd_viz", "geometry_import", "montecarlo_batch", "oracle_benchmark"]
+KINDS = ("cfd_run", "cfd_viz", "geometry_import", "montecarlo_batch", "oracle_benchmark")
 ID_PATTERN = re.compile(r"^[a-z0-9_]{3,64}$")
 LOG_LIMIT = 64 * 1024
 
@@ -144,6 +144,14 @@ class JobQueue:
                     raise ValueError(f"{key} must name a signed coordinate axis")
             if str(spec["forward"])[-1] == str(spec["up"])[-1]:
                 raise ValueError("forward and up must be perpendicular")
+        elif kind == "oracle_benchmark":
+            from daedalus.benchmark_campaign import read_protocol
+
+            protocol_id = spec.get("protocol_id")
+            if not isinstance(protocol_id, str) or not ID_PATTERN.fullmatch(protocol_id):
+                raise ValueError("protocol_id must name a stored benchmark protocol")
+            read_protocol(self.root, protocol_id)
+            spec = {"protocol_id": protocol_id}
         else:
             # Reuse the API's numerical request boundary; import it only for this job kind.
             from daedalus.api.race import MonteCarloRequest
@@ -152,7 +160,7 @@ class JobQueue:
         if output is not None and output.exists():
             raise FileExistsError(f"{output.name} already exists; choose a new output ID")
         job_id = "job_" + uuid4().hex[:16]
-        if kind == "montecarlo_batch":
+        if kind in ("montecarlo_batch", "oracle_benchmark"):
             output = self.root / "jobs" / f"{job_id}.result.json"
         job = Job(
             id=job_id,
@@ -200,9 +208,9 @@ class JobQueue:
                 """
                 UPDATE jobs SET state='running', started_at=?, pid=?
                 WHERE id=(SELECT id FROM jobs WHERE state='queued'
-                    AND (kind NOT IN ('cfd_run','cfd_viz') OR NOT EXISTS
+                    AND (kind NOT IN ('cfd_run','cfd_viz','oracle_benchmark') OR NOT EXISTS
                         (SELECT 1 FROM jobs WHERE state='running'
-                         AND kind IN ('cfd_run','cfd_viz')))
+                         AND kind IN ('cfd_run','cfd_viz','oracle_benchmark')))
                     ORDER BY created_at, id LIMIT 1)
                 AND state='queued' RETURNING *
             """,
@@ -332,7 +340,20 @@ def start_process(queue: JobQueue, job: Job, command: list[str]) -> subprocess.P
                 stdout=log,
                 stderr=subprocess.STDOUT,
                 start_new_session=True,
-                env={**os.environ, "PYTHONUNBUFFERED": "1"},
+                env={
+                    **os.environ,
+                    "PYTHONUNBUFFERED": "1",
+                    **(
+                        {
+                            "OMP_NUM_THREADS": "1",
+                            "OPENBLAS_NUM_THREADS": "1",
+                            "MKL_NUM_THREADS": "1",
+                            "VECLIB_MAXIMUM_THREADS": "1",
+                        }
+                        if job.kind == "oracle_benchmark"
+                        else {}
+                    ),
+                },
             )
         try:
             (queue.root / "jobs" / f"{job.id}.pid").write_text(str(proc.pid))
@@ -427,6 +448,11 @@ def execute(queue: JobQueue, job: Job) -> None:
             f"--forward={params['forward']}",
             f"--up={params['up']}",
         ]
+    elif job.kind == "oracle_benchmark":
+        from daedalus.benchmark_campaign import execute as execute_benchmark
+
+        execute_benchmark(queue.root, job)
+        return
     elif job.kind == "montecarlo_batch":
         from daedalus.api.race import MonteCarloRequest, race_montecarlo
 
@@ -454,7 +480,7 @@ def main(argv: list[str] | None = None) -> int:
     submit.add_argument("--step")
     submit.add_argument("--forward")
     submit.add_argument("--up")
-    submit.add_argument("--request", type=Path, help="Monte Carlo request JSON")
+    submit.add_argument("--request", type=Path, help="Numerical job request JSON")
     internal = sub.add_parser("execute")
     internal.add_argument("root", type=Path)
     internal.add_argument("id")
@@ -475,9 +501,9 @@ def main(argv: list[str] | None = None) -> int:
     elif args.action == "ls":
         print(json.dumps([j.public() for j in queue.list()], indent=2))
     else:
-        if args.kind == "montecarlo_batch":
+        if args.kind in ("montecarlo_batch", "oracle_benchmark"):
             if args.request is None:
-                parser.error("montecarlo_batch requires --request JSON")
+                parser.error(f"{args.kind} requires --request JSON")
             params = json.loads(args.request.read_text())
         elif args.kind == "cfd_run":
             params = {

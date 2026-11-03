@@ -15,7 +15,21 @@ import { loadPresets, savePresets, type RacePreset } from "@/components/race/pre
 import { deltaTimeCurve, finishGap } from "@/components/race/raceMath";
 import type { RaceTrace } from "@/components/race/useRaceCar";
 import { useWhatIfSweep } from "@/components/race/whatIf";
-import { EmptyState, Panel, ProvenanceBadge, ViewerFallback } from "@/components/ui/primitives";
+import {
+  EmptyState,
+  Panel,
+  ProvenanceBadge,
+  SegmentedControl,
+  ViewerFallback,
+} from "@/components/ui/primitives";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   designGlbUrl,
   listDesigns,
@@ -30,18 +44,62 @@ import { loadGlbUrl } from "@/lib/gltf";
 import { estimateThrust } from "@/lib/thrust";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { RaceInputs } from "./RaceInputs";
-import { StatusBar, useTab, WorkspaceTabs } from "@/components/shell/WorkspaceTabs";
+import { StatusBar, WorkspaceTabs } from "@/components/shell/WorkspaceTabs";
 
 const RACE_TABS = [
   { id: "replay", label: "Replay" },
-  { id: "telemetry", label: "Telemetry" },
-  { id: "spread", label: "Spread" },
-  { id: "start", label: "Start" },
-  { id: "energy", label: "Energy" },
+  { id: "analysis", label: "Analysis" },
   { id: "points", label: "Points" },
-  { id: "breakdown", label: "Breakdown" },
   { id: "calibration", label: "Calibration" },
 ] as const;
+const ANALYSIS_VIEWS = [
+  { value: "telemetry", label: "Telemetry" },
+  { value: "spread", label: "Spread" },
+  { value: "breakdown", label: "Breakdown" },
+  { value: "energy", label: "Energy" },
+] as const;
+type RaceTab = (typeof RACE_TABS)[number]["id"];
+type AnalysisView = (typeof ANALYSIS_VIEWS)[number]["value"];
+
+function useRaceNavigation() {
+  const [tab, setTab] = useState<RaceTab>("replay");
+  const [analysis, setAnalysis] = useState<AnalysisView>("telemetry");
+  const [trainerOpen, setTrainerOpen] = useState(false);
+  useEffect(() => {
+    const read = () => {
+      const hash = window.location.hash.slice(1);
+      const view = ANALYSIS_VIEWS.find((item) => item.value === hash);
+      if (view) {
+        setTab("analysis");
+        setAnalysis(view.value);
+        setTrainerOpen(false);
+      } else if (hash === "start") {
+        setTab("replay");
+        setTrainerOpen(true);
+      } else if (RACE_TABS.some((item) => item.id === hash)) {
+        setTab(hash as RaceTab);
+        setTrainerOpen(false);
+      }
+    };
+    read();
+    window.addEventListener("hashchange", read);
+    return () => window.removeEventListener("hashchange", read);
+  }, []);
+  const selectTab = (next: RaceTab) => {
+    setTab(next);
+    setTrainerOpen(false);
+    history.replaceState(null, "", `#${next === "analysis" ? analysis : next}`);
+  };
+  const selectAnalysis = (next: AnalysisView) => {
+    setAnalysis(next);
+    history.replaceState(null, "", `#${next}`);
+  };
+  const selectTrainer = (open: boolean) => {
+    setTrainerOpen(open);
+    history.replaceState(null, "", `#${open ? "start" : "replay"}`);
+  };
+  return { tab, analysis, trainerOpen, selectTab, selectAnalysis, selectTrainer };
+}
 import { SpreadPanel } from "./SpreadPanel";
 import { EnergyPanel } from "@/components/race/EnergyPanel";
 import { PointsPanel } from "@/components/race/PointsPanel";
@@ -312,16 +370,17 @@ export function RaceWorkspace() {
   };
 
   const dragging = sim.isFetching || mc.isFetching;
-  const [tab, setTab] = useTab(RACE_TABS);
+  const { tab, analysis, trainerOpen, selectTab, selectAnalysis, selectTrainer } =
+    useRaceNavigation();
   const energy = useQuery({
     queryKey: ["race-energy", request],
     queryFn: () => getEnergyAudit(request),
-    enabled: valid && tab === "energy",
+    enabled: valid && tab === "analysis" && analysis === "energy",
   });
   const breakdown = useQuery({
     queryKey: ["race-breakdown", request],
     queryFn: () => getRaceBreakdown(request, 0),
-    enabled: valid && tab === "breakdown",
+    enabled: valid && tab === "analysis" && analysis === "breakdown",
   });
   const [inputsOpen, setInputsOpen] = useState(false);
 
@@ -374,7 +433,7 @@ export function RaceWorkspace() {
         <WorkspaceTabs
           tabs={RACE_TABS}
           value={tab}
-          onChange={setTab}
+          onChange={selectTab}
           right={
             <>
               {dragging && <span className="text-2xs text-muted-foreground">updating…</span>}
@@ -396,6 +455,16 @@ export function RaceWorkspace() {
             </>
           }
         />
+        {tab === "analysis" && (
+          <div className="shrink-0 overflow-x-auto px-3 py-2">
+            <SegmentedControl
+              label="Analysis view"
+              value={analysis}
+              onChange={selectAnalysis}
+              options={ANALYSIS_VIEWS}
+            />
+          </div>
+        )}
         {(!valid || sim.error || mc.error) && (
           <div className="p-3">
             <MetricsRow sim={sim.data} mc={mc.data} error={sim.error ?? mc.error} valid={valid} />
@@ -447,6 +516,20 @@ export function RaceWorkspace() {
                 </Panel>
               </div>
               <div className="flex w-full shrink-0 flex-col gap-3 xl:w-72 xl:overflow-y-auto">
+                <Dialog open={trainerOpen} onOpenChange={selectTrainer}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline">Start-light trainer</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Start-light trainer</DialogTitle>
+                      <DialogDescription>
+                        Press R or tap the lights to start and react.
+                      </DialogDescription>
+                    </DialogHeader>
+                    {trainerOpen && <ReactionTrainer />}
+                  </DialogContent>
+                </Dialog>
                 {primaryTrace && (
                   <TimingTower
                     primary={primaryTrace}
@@ -503,7 +586,7 @@ export function RaceWorkspace() {
               </div>
             </>
           )}
-          {tab === "telemetry" && (
+          {tab === "analysis" && analysis === "telemetry" && (
             <>
               <Panel
                 title="Telemetry · time domain"
@@ -557,7 +640,7 @@ export function RaceWorkspace() {
               )}
             </>
           )}
-          {tab === "spread" && (
+          {tab === "analysis" && analysis === "spread" && (
             <div className="mx-auto w-full max-w-4xl">
               <SpreadPanel
                 data={mc.data}
@@ -568,7 +651,7 @@ export function RaceWorkspace() {
               />
             </div>
           )}
-          {tab === "energy" && (
+          {tab === "analysis" && analysis === "energy" && (
             <div className="mx-auto w-full max-w-4xl">
               <EnergyPanel data={energy.data} error={energy.error} fetching={energy.isFetching} />
             </div>
@@ -586,14 +669,9 @@ export function RaceWorkspace() {
               <CalibrationPanel />
             </div>
           )}
-          {tab === "breakdown" && (
+          {tab === "analysis" && analysis === "breakdown" && (
             <div className="mx-auto w-full max-w-4xl">
               <BreakdownPanel data={breakdown.data} error={breakdown.error} />
-            </div>
-          )}
-          {tab === "start" && (
-            <div className="mx-auto mt-10 w-full max-w-md">
-              <ReactionTrainer />
             </div>
           )}
         </div>

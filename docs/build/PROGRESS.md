@@ -80,7 +80,7 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 
 **If an idea is not being done:** mark it ✂️ here with a one-line reason and delete it from MASTER-PLAN. Never leave it half-listed.
 
-## §19 Analysis catalogue (A–G): 8 of 38 done, 13 partly done, 17 not started
+## §19 Analysis catalogue (A–G): status per row
 
 **A. Aerodynamics**
 - [ ] 🟨 1 Drag by part: component forces ✅, pressure/friction bars ✅; true waterfall ⬜
@@ -99,10 +99,10 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 **B. ORACLE**
 - [x] ✅ 13 GP response map
 - [x] ✅ 14 Variable importance (SALib)
-- [ ] ⬜ 15 Acquisition history
-- [ ] 🟨 16 Convergence vs baselines: five-seed synthetic GP vs LHS mean ✅; Optuna, Sobol, 10 seeds and CIs ⬜
+- [ ] 🟨 15 Acquisition history: benchmark trial reasons/table/export connected; real-campaign timeline ⬜
+- [ ] ⏳ 16 Equal-budget GP/EI, native Optuna TPE/CMA-ES, Sobol/LHS/random: preregistered 10–20-seed queue, confidence bands and export built; completed study/browser review pending
 - [ ] ⬜ 17 Pareto front (pymoo)
-- [ ] ⬜ 18 Leave-one-out validation
+- [ ] ⏳ 18 Leave-one-out refitted GP validation and predictive coverage charts built; real-data/browser review pending
 
 **C. Race**
 - [x] ✅ 19 Time budget
@@ -197,13 +197,13 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 | f1-dash | 🟨 Driver components; full leaderboard for stadium mode still to adopt |
 | vtk.js | 🟨 Parsing and layers; the particle flow now uses three.js |
 | mapbox/webgl-wind technique | 📝 Animated flow is an uncommitted draft (`FlowTunnel3D.tsx`) |
-| Optuna, scipy.stats.qmc | 🟨 scipy `qmc` Latin hypercube used for the ORACLE benchmark; Optuna ⬜ |
+| Optuna, scipy.stats.qmc | ⏳ Native TPE/CMA-ES and scrambled Sobol/LHS benchmark connected; full queued study pending |
 | pymoo | ⬜ Pareto front |
 | ArviZ | ⬜ Calibration diagnostics |
 | OpenTimestamps | ⬜ Second anchor |
 | FoamPilot | ⬜ Run wizard |
 | Hypothesis, pint, openapi-typescript | 🟨 pint used by the unit importers; Hypothesis and openapi-typescript ⬜ |
-| cmdk, sonner, vaul, TanStack Table, Kibo UI, Origin UI | 🟨 cmdk and sonner used; vaul, TanStack Table, Kibo UI and Origin UI ⬜ (`TODO.md` §11) |
+| cmdk, sonner, vaul, TanStack Table, Kibo UI, Origin UI | 🟨 cmdk, sonner and native TanStack v9 tables used; vaul, Kibo UI and Origin UI ⬜ (`TODO.md` §11) |
 | CalculiX | ⬜ Only with real material data |
 
 ## `TODO.md` §14 chart quality bar
@@ -215,7 +215,7 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 
 ## Analysis: every chart, one tick each (`TODO.md` §14, merged with MASTER-PLAN §11 and §19)
 
-**Summary: 43 analyses. 1 done, 29 partly done, 13 not started.**
+**43 analyses. Status is tracked per row; new software remains ⏳ until browser/data verification.**
 
 **Wind Tunnel (11)**
 - [ ] 🟨 1 Cd / CdA with the GCI uncertainty bar: tooling ✅, accepted 3-mesh runs ⬜
@@ -242,10 +242,10 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 - [ ] ⬜ 9 Optimal mass curve
 
 **ORACLE (7)**
-- [ ] 🟨 1 Aero map: mean map + next point ✅; uncertainty ⬜
-- [ ] 🟨 2 Regret curves vs baselines: five-seed GP vs LHS mean ✅; regret curves, Optuna/Sobol, 10 seeds ⬜
-- [ ] ⬜ 3 Predicted vs actual per candidate
-- [ ] ⬜ 4 Interval calibration (do the 90% bands hold?)
+- [ ] ⏳ 1 Aero map: mean / posterior-SD toggle + next point connected; browser review pending
+- [ ] ⏳ 2 Regret curves: six native methods, 10–20 seeds and Student-t mean CIs connected; queued study/browser review pending
+- [ ] 🟨 3 Held-out predicted vs stored targets with 90% intervals connected; accepted-data/campaign decision view pending
+- [ ] ⏳ 4 Held-out coverage chart with Wilson bounds connected; fold-dependence caveat and synthetic label; real-data/browser review pending
 - [ ] 🟨 5 Variable importance (SALib) ✅ — length-scales ⬜
 - [ ] ⬜ 6 Pareto front (pymoo)
 - [ ] ⬜ 7 Acquisition history timeline
@@ -285,7 +285,7 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 - [ ] ⬜ Mass from density × volume (§19 #34)
 - [ ] ⬜ Measured vs CAD deviation (§19 #35)
 - [ ] ⬜ Wall thickness / CNC reach (§19 #36)
-- [ ] ⬜ Leave-one-out ORACLE validation (§19 #18)
+- [ ] ⏳ Leave-one-out ORACLE validation (§19 #18): refitted folds + diagnostics connected; browser/real data pending
 - [ ] 🟨 Acceptance audit per run (§11 #15): reason shown ✅, full audit page ⬜
 
 ## MASTER-PLAN sections not covered above
@@ -344,7 +344,7 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 - [ ] ⬜ reaction trainer into race-day mode
 - [x] ✅ ORACLE stays at 4 variables
 - [x] ✅ keep the evidence store
-- [ ] ⬜ merge Race tabs (8 → 4)
+- [ ] ⏳ Race tabs merged to Replay / Analysis / Points / Calibration; hash links preserved; browser verification pending
 - [x] ✅ renders only in the report
 
 **§21 Output products**
@@ -410,15 +410,15 @@ The only real inputs are the CAD geometry and the rulebook. Without data, judges
 **1b. CFD speed-ups**
 - [x] ✅ Parallel solve (6 procs, `decomposePar`)
 - [ ] ⬜ Warm start (`mapFields`)
-- [ ] ⬜ Stop on Cd convergence (only residual-based stop exists)
+- [ ] ⏳ Cd convergence stopping already generated: tolerance 0.001 / 200 iterations (quick: 150). Independent acceptance gates retained; installed v2606 execution not verified
 - [ ] ⬜ Mesh reuse / morph
 - [ ] ⬜ 10-core meshing
 - [ ] ⬜ FluidX3D GPU screening (check its licence first)
 - [ ] ⬜ Cloud burst (Inductiva / AWS) if needed
 
 **2. Race**
-- [ ] ⬜ Race tabs from 8 to 4
-- [ ] ⬜ Start trainer becomes a small tool (today it is its own Start tab)
+- [ ] ⏳ Race tabs reduced to 4 with one active Analysis panel; browser verification pending
+- [ ] ⏳ Start trainer opens as a Base UI dialog from Replay; keyboard handler unmounts on close; browser verification pending
 - [ ] ⬜ Motion blur / FOV kick
 - [ ] ⬜ Clip export
 - [ ] ⬜ Race-day mode
@@ -440,7 +440,7 @@ The only real inputs are the CAD geometry and the rulebook. Without data, judges
 - [ ] 🟨 "Run CFD" button: Pit Wall → build next → run dialog ✅ (manual queue); status ⬜
 
 **6. ORACLE**
-- [ ] 🟨 Optuna/qmc benchmark, 10 seeds, pre-registered (scipy qmc, five seeds ✅; Optuna, 10 seeds and pre-registration ⬜)
+- [ ] ⏳ Preregistered Optuna/qmc benchmark implemented: immutable protocol before queue, code/version binding, six methods, 10–20 seeds, CI/export; no full study run yet
 - [ ] ⬜ Nugget noise term
 - [ ] ⬜ Acquisition history
 - [ ] ⬜ Pareto chart
@@ -494,7 +494,7 @@ The only real inputs are the CAD geometry and the rulebook. Without data, judges
 | Presenter | 🟨 |
 | Settings | ⬜ |
 
-- [ ] 🟨 Adopt cmdk/sonner/vaul/TanStack Table/Kibo/Origin (cmdk and sonner used; the rest ⬜)
+- [ ] 🟨 Adopt cmdk/sonner/vaul/TanStack Table/Kibo/Origin (cmdk, sonner and TanStack v9 used; vaul/Kibo/Origin ⬜)
 - [ ] 🟨 No form with more than 6 visible inputs (Calibration and Planner done; other forms ⬜)
 - [ ] 🟨 Every page re-scored in `RATINGS.md` (file exists; re-scoring pending)
 
@@ -529,3 +529,12 @@ The only real inputs are the CAD geometry and the rulebook. Without data, judges
 3. Closed loop to CFD with accepted-only feedback.
 4. Race-day mode + stadium/TV mode.
 5. UI polish pass on every page to 8/10.
+
+## Code sprint update: ORACLE and Race (2026-11-03)
+
+- Native Optuna/CMA-ES, SciPy qmc and TanStack Table integrations are connected, with licence copies and attribution. No CFD or full optimiser benchmark launched during this sprint.
+- Benchmark jobs and CFD share a mutual-exclusion gate; benchmark subprocess numerical thread counts are capped at one. Opening ORACLE no longer runs the legacy benchmark.
+- GP diagnostics use actual stored targets and refit each held-out fold; synthetic seed targets remain labelled synthetic.
+- Race now has four main tabs and a dialog-based trainer. Browser/performance checks remain open.
+- Speed-up claims (2–3×, 50–100×) are unmeasured. Warm start, mesh reuse, separate meshing ranks and FluidX3D remain unimplemented; no restricted solver code was bundled.
+- Evidence: `evidence/ORACLE-native-benchmark.md`, `evidence/C07-race-navigation.md`.

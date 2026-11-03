@@ -13,6 +13,7 @@ from daedalus import montecarlo, oracle
 from daedalus.api.engineering import data_root
 from daedalus.contracts import Provenance
 from daedalus.dynamics import ThrustCurve
+from daedalus.oracle_benchmark import BenchmarkSpec
 
 router = APIRouter(prefix="/v1/oracle", tags=["oracle"])
 
@@ -29,9 +30,23 @@ def race_time(cda: np.ndarray) -> np.ndarray:
     )
 
 
-@lru_cache(maxsize=1)
-def _benchmark() -> dict[str, list[float]]:
-    return oracle.benchmark()
+def _benchmark() -> dict[str, list[float]] | None:
+    """Compatibility summary from completed evidence; never run a benchmark on page load."""
+    from daedalus import benchmark_campaign, jobs
+    from daedalus.contracts import JobState
+    from daedalus.store import IntegrityError
+
+    for job in jobs.JobQueue(data_root()).list(JobState.SUCCEEDED):
+        if job.kind != "oracle_benchmark":
+            continue
+        try:
+            result = benchmark_campaign.detail(data_root(), job)["result"]
+            if isinstance(result, dict):
+                methods = {m["id"]: m["mean_cda_m2"] for m in result["methods"]}
+                return {"gp": methods["gp_ei"], "lhs": methods["lhs"]}
+        except (ValueError, OSError, KeyError, IntegrityError):
+            continue
+    return None
 
 
 @router.get("/state")
@@ -46,7 +61,7 @@ def state() -> dict[str, object]:
     g = np.linspace(0, 1, MAP_N)
     grid = np.tile(x[best_i], (MAP_N * MAP_N, 1))
     grid[:, 0], grid[:, 1] = np.repeat(g, MAP_N), np.tile(g, MAP_N)
-    map_mean, _ = gp.predict(grid)
+    map_mean, map_sd = gp.predict(grid)
 
     times = race_time(np.array([y[best_i], mean[0]]))
     names = [v.name for v in oracle.VARIABLES]
@@ -77,6 +92,7 @@ def state() -> dict[str, object]:
             "y": names[1],
             "axis": g.tolist(),
             "cda_m2": map_mean.reshape(MAP_N, MAP_N).tolist(),
+            "cda_sd_m2": map_sd.reshape(MAP_N, MAP_N).tolist(),
         },
         "benchmark": _benchmark(),
         "provenance": "synthetic"
@@ -163,3 +179,65 @@ def build_next(body: BuildNextIn) -> dict[str, object]:
         raise HTTPException(409, str(exc)) from exc
     except (ValueError, OSError, geometry.GeometryError) as exc:
         raise HTTPException(422, f"Study build failed: {exc}") from exc
+
+
+@router.post("/benchmarks", status_code=202)
+def submit_benchmark(body: BenchmarkSpec) -> dict[str, object]:
+    from daedalus import benchmark_campaign
+    from daedalus.api.cad import PROJECT_ID
+
+    return benchmark_campaign.register(data_root(), body, PROJECT_ID)
+
+
+@router.get("/benchmarks")
+def list_benchmarks() -> list[dict[str, object]]:
+    from daedalus import jobs
+
+    return [
+        job.public() for job in jobs.JobQueue(data_root()).list() if job.kind == "oracle_benchmark"
+    ]
+
+
+@router.get("/benchmarks/{job_id}")
+def get_benchmark(job_id: str) -> dict[str, object]:
+    from fastapi import HTTPException
+
+    from daedalus import benchmark_campaign, jobs
+    from daedalus.store import IntegrityError
+
+    try:
+        return benchmark_campaign.detail(data_root(), jobs.JobQueue(data_root()).get(job_id))
+    except KeyError as exc:
+        raise HTTPException(404, "Benchmark or evidence not found") from exc
+    except (ValueError, OSError, IntegrityError) as exc:
+        raise HTTPException(409, str(exc)) from exc
+
+
+@lru_cache(maxsize=4)
+def _diagnostics(snapshot: str) -> dict[str, object]:
+    import json
+
+    from daedalus.oracle_diagnostics import leave_one_out
+
+    return leave_one_out(
+        [
+            oracle.Observation(tuple(row["params"]), row["cda_m2"], row["provenance"])
+            for row in json.loads(snapshot)
+        ]
+    )
+
+
+@router.get("/diagnostics")
+def diagnostics() -> dict[str, object]:
+    import json
+    from dataclasses import asdict
+
+    from fastapi import HTTPException
+
+    snapshot = json.dumps(
+        [asdict(row) for row in oracle.Campaign(data_root()).load()], sort_keys=True
+    )
+    try:
+        return _diagnostics(snapshot)
+    except (ValueError, np.linalg.LinAlgError) as exc:
+        raise HTTPException(409, str(exc)) from exc

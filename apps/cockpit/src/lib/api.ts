@@ -372,7 +372,7 @@ export const getDragBuildup = (id: string) =>
 const JobState = z.enum(["queued", "running", "succeeded", "failed", "cancelled"]);
 export const Job = z.object({
   id: z.string(),
-  kind: z.enum(["cfd_run", "cfd_viz", "geometry_import", "montecarlo_batch"]),
+  kind: z.enum(["cfd_run", "cfd_viz", "geometry_import", "montecarlo_batch", "oracle_benchmark"]),
   params: z.record(z.string(), z.unknown()),
   state: JobState,
   created_at: z.string(),
@@ -475,8 +475,9 @@ export const OracleState = z.object({
     y: z.string(),
     axis: z.array(z.number()),
     cda_m2: z.array(z.array(z.number())),
+    cda_sd_m2: z.array(z.array(z.number())).optional(),
   }),
-  benchmark: z.object({ gp: z.array(z.number()), lhs: z.array(z.number()) }),
+  benchmark: z.object({ gp: z.array(z.number()), lhs: z.array(z.number()) }).nullable(),
   provenance: z.enum(["synthetic", "mixed"]),
 });
 export type OracleState = z.infer<typeof OracleState>;
@@ -1167,3 +1168,94 @@ const OracleStudy = z.object({
 });
 export const buildOracleStudy = (input: { baseline: string; unit: number[] }) =>
   request("/v1/oracle/build-next", OracleStudy, { method: "POST", body: JSON.stringify(input) });
+
+export const OracleBenchmarkSpec = z.object({
+  budget: z.number().int(),
+  n_init: z.number().int(),
+  seeds: z.number().int(),
+  seed: z.number().int(),
+});
+export type OracleBenchmarkSpec = z.infer<typeof OracleBenchmarkSpec>;
+const BenchmarkMethod = z.object({
+  id: z.string(),
+  label: z.string(),
+  mean_cda_m2: z.array(z.number()),
+  lower_cda_m2: z.array(z.number()),
+  upper_cda_m2: z.array(z.number()),
+  mean_regret_m2: z.array(z.number()),
+  lower_regret_m2: z.array(z.number()),
+  upper_regret_m2: z.array(z.number()),
+});
+export const OracleBenchmarkResult = z.object({
+  provenance: z.literal("synthetic"),
+  spec: OracleBenchmarkSpec,
+  reference_cda_m2: z.number(),
+  methods: z.array(BenchmarkMethod),
+  evaluations: z.array(
+    z.object({
+      method: z.string(),
+      seed: z.number().int(),
+      index: z.number().int(),
+      unit: z.array(z.number()),
+      cda_m2: z.number(),
+      reason: z.string(),
+    }),
+  ),
+  assumptions: z.array(z.string()),
+  job_id: z.string(),
+  protocol_id: z.string(),
+});
+export type OracleBenchmarkResult = z.infer<typeof OracleBenchmarkResult>;
+const OracleBenchmarkDetail = z.object({
+  job: Job,
+  protocol_id: z.string(),
+  result_artifact_id: z.string().nullable(),
+  protocol: z.object({
+    spec: OracleBenchmarkSpec,
+    objective: z.string(),
+    budget_rule: z.string(),
+    interval: z.string(),
+    reference: z.string(),
+    implementation: z.record(z.string(), z.string()),
+  }),
+  result: OracleBenchmarkResult.nullable(),
+});
+export const listOracleBenchmarks = () => request("/v1/oracle/benchmarks", z.array(Job));
+export const getOracleBenchmark = (id: string) =>
+  request(`/v1/oracle/benchmarks/${encodeURIComponent(id)}`, OracleBenchmarkDetail);
+export const submitOracleBenchmark = (spec: OracleBenchmarkSpec) =>
+  request("/v1/oracle/benchmarks", z.object({ job: Job, protocol_id: z.string() }), {
+    method: "POST",
+    body: JSON.stringify(spec),
+  });
+
+const OracleDiagnostics = z.object({
+  provenance: z.enum(["synthetic", "mixed"]),
+  observations: z.number().int(),
+  mae_m2: z.number(),
+  rmse_m2: z.number(),
+  rows: z.array(
+    z.object({
+      index: z.number().int(),
+      target_m2: z.number(),
+      predicted_m2: z.number(),
+      sd_m2: z.number(),
+      lower90_m2: z.number(),
+      upper90_m2: z.number(),
+      error_m2: z.number(),
+      provenance: Provenance,
+    }),
+  ),
+  coverage: z.array(
+    z.object({
+      nominal: z.number(),
+      observed: z.number(),
+      count: z.number().int(),
+      lower95: z.number(),
+      upper95: z.number(),
+    }),
+  ),
+  assumptions: z.array(z.string()),
+});
+export type OracleDiagnostics = z.infer<typeof OracleDiagnostics>;
+export const getOracleDiagnostics = () => request("/v1/oracle/diagnostics", OracleDiagnostics);

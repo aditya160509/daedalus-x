@@ -49,3 +49,8 @@ Retained distribution licence texts: `docs/licenses/uplot-LICENSE.txt`, `docs/li
 ## Dockview integration — reuse pass 4
 
 [Dockview React 8.8.3](https://github.com/dockview/dockview), MIT, supplies the actual Pit Wall Overview docking engine: tabs, pane splits, drag/drop, resizing and native layout serialization. `PitWallDock.tsx` adapts existing real panel content through React context; `dockLayout.ts` declares the default layout. The library is lazy-loaded with Overview. Compact and wide layouts save separately on this device; reset restores all panels. No standalone upstream application is claimed. Distribution licence retained at `docs/licenses/dockview-LICENSE.txt`; the installed package declares MIT and its full `LICENCE.md` was inspected (the old repository metadata alone returned NOASSERTION).
+
+## ORACLE benchmark and table integration — 2026-11-03
+
+- [Optuna 5.0.0](https://github.com/optuna/optuna), MIT: native TPESampler/CmaEsSampler ask/tell, with [cmaes 0.13.1](https://github.com/CyberAgentAILab/cmaes), MIT. Existing SciPy supplies Sobol/LHS and Student-t intervals. `oracle_benchmark.py` adapts the actual algorithms to an explicitly synthetic equal-budget objective; it does not implement substitute TPE/CMA algorithms. Distribution licences retained in `docs/licenses/optuna-LICENSE.txt` and `docs/licenses/cmaes-LICENSE.txt`.
+- [TanStack Table](https://github.com/TanStack/table), MIT: actual row/sort models and cell rendering in `components/ui/data-table.tsx`, connected to benchmark results and acquisition history. Notice retained in `docs/licenses/tanstack-react-table-LICENSE.txt`; installed version pinned in pnpm lockfile. No full upstream dashboard/application was imported.

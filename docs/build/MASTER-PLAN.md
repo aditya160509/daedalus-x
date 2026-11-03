@@ -699,7 +699,7 @@ This is the current checkbox ledger requested by the owner. `TODO.md` supplies t
 - [x] ✅ C04 — Direct racing-game gauge/results and f1-dash timing/mini-sector component adaptations with retained licences.
 - [x] ✅ C05 — Scenario ghost inside Replay, eight model sector times, finish slow motion and PNG capture.
 - [x] ✅ C06 — Replay adaptive-quality mechanism and separate reaction trainer.
-- [ ] 🟨 C07 — Four-tab consolidation: currently eight tabs; target Replay / Analysis / Points / Calibration, with trainer embedded as a tool.
+- [x] ✅ C07 — Four-tab consolidation built: Replay / Analysis / Points / Calibration, trainer in Base UI dialog; legacy hashes retained. ⏳ Browser/keyboard verification.
 - [ ] ⬜ C08 — Race-day actual time + reaction entry, prediction comparison and explicit instant calibration update.
 - [ ] ⬜ C09 — Dedicated stadium/TV mode with projector layout, fullscreen and panel rotation.
 - [ ] 🟨 C10 — Replay pair/timing tower exists; session best/last/interval/reaction history is not a complete event timing system.
@@ -729,7 +729,7 @@ This is the current checkbox ledger requested by the owner. `TODO.md` supplies t
 - [x] ✅ E04 — Actual SALib Sobol/Morris analysis of the fitted GP, with confidence outputs.
 - [x] ✅ E05 — Build selected study → canonical CAD import → FORGE → parameterised Design/evidence → exact-design CAD/rules links and existing CFD dialog.
 - [x] ✅ E06 — Observation validation, serialized atomic campaign appends and retained synthetic labels.
-- [ ] ⬜ E07 — Preregistered equal-budget Optuna TPE/CMA-ES + Sobol/LHS/random benchmark, at least 10 seeds and regret confidence bands.
+- [x] ✅ E07 — Preregistered equal-budget native Optuna TPE/CMA-ES + Sobol/LHS/random benchmark queue, 10–20 seeds and regret confidence bands built. ⏳ Full study/browser review; synthetic only.
 - [ ] ⬜ E08 — Accepted-only CFD feedback, STEP-to-mesh hash guard and performance-rule gate in the closed-loop handoff.
 - [ ] ⬜ E09 — Separate synthetic and physical/accepted-CFD training; current manual observation interface is not independent acceptance.
 - [ ] ⬜ E10 — GP map uncertainty, predicted-vs-actual and predictive-interval coverage charts.
@@ -822,13 +822,13 @@ These rows track the WHOLE requested chart, so partial rows can contain built co
 | R07 | Energy Sankey | 🟨 | Stacked energy chart exists; Sankey/tether contribution absent. |
 | R08 | Points distribution/round/head-to-head | 🟨 | Scenario expected points/round/head-to-head exists; full distribution absent. |
 | R09 | Optimal mass curve | 🟨 | What-if mass sparkline exists; full optimum/legal-mass curve absent. |
-| O01 | GP map + uncertainty/next point | 🟨 | Mean map and next star exist; uncertainty map absent. |
-| O02 | Regret benchmark + 10-seed CIs | 🟨 | Five-seed GP/LHS mean only; richer benchmark/regret/CIs absent. |
-| O03 | Predicted vs actual candidates | ⬜ | No connected chart. |
-| O04 | Predictive interval calibration | ⬜ | No connected coverage chart. |
+| O01 | GP map + uncertainty/next point | ✅ | Mean/posterior-SD toggle and next point connected; ⏳ browser review. |
+| O02 | Regret benchmark + 10-seed CIs | ⏳ | Six-method preregistered queue and CIs connected; full numerical study/browser pending. |
+| O03 | Predicted vs actual candidates | 🟨 | Held-out predictions vs stored targets connected; accepted campaign data pending. |
+| O04 | Predictive interval calibration | ⏳ | Refit LOO coverage/Wilson chart connected; real-data/browser verification pending. |
 | O05 | Length scales + Sobol importance | 🟨 | GP Sobol/Morris exists; length-scale presentation absent. |
 | O06 | Pareto front | ⬜ | No connected pymoo/objective front. |
-| O07 | Acquisition history | ⬜ | No connected trial-decision timeline. |
+| O07 | Acquisition history | 🟨 | Benchmark trial reasons/table/full export built; real-campaign timeline pending. |
 | S01 | Prior/posterior plots | 🟨 | Prior controls/posterior summaries exist; density plots absent. |
 | S02 | Error shrinking scoreboard | 🟨 | Saved studies/held-out rows exist; cross-run scoreboard absent. |
 | S03 | Posterior predictive checks | 🟨 | Held-out numeric intervals exist; PPC chart/appropriate diagnostics absent. |
@@ -872,3 +872,7 @@ These rows track the WHOLE requested chart, so partial rows can contain built co
 2. Complete and land one bounded software feature at a time, updating its IDs and the relevant chart row in the same commit.
 3. Prioritise F06 short preset/Advanced forms, C07 Race tab consolidation, then E07 benchmark/uncertainty work and E08 closed-loop handoff. Keep B04 integration ahead of any competing tunnel implementation.
 4. Code ticks require connected source and focused checks. Visual/performance/scientific gates stay unchecked until their evidence exists. The old 45% half-point task score is historical and must not be presented as today's detailed feature completion.
+
+### 2026-11-03 ORACLE / Race code sprint update
+
+C07 and E07 software landed; mean/SD map, held-out target and coverage charts connected with synthetic provenance. Native Optuna/CMA-ES, SciPy qmc and TanStack v9 adopted with licences. Evidence: `evidence/ORACLE-native-benchmark.md`, `evidence/C07-race-navigation.md`. No CFD/full numerical campaign launched; browser/scientific gates remain open. Existing Cd-based early stopping confirmed in generated code, not benchmarked on v2606. This supplements §23 and §28; no completion percentage is inferred.

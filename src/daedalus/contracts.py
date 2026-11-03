@@ -322,7 +322,7 @@ class LocalJob(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     id: str
-    kind: Literal["cfd_run", "cfd_viz", "geometry_import", "montecarlo_batch"]
+    kind: Literal["cfd_run", "cfd_viz", "geometry_import", "montecarlo_batch", "oracle_benchmark"]
     params_json: str
     state: JobState
     created_at: str

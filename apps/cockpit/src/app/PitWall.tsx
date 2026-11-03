@@ -1,22 +1,37 @@
 "use client";
 
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { SensitivityPanel } from "@/components/pitwall/SensitivityPanel";
 import { BuildNextControls } from "@/components/pitwall/BuildNextControls";
 import { TestPlannerPanel } from "@/components/pitwall/TestPlannerPanel";
 import { LegalPanel } from "@/components/pitwall/LegalPanel";
-import { AeroMap, BenchmarkChart } from "@/components/pitwall/PitCharts";
+import { AeroMap } from "@/components/pitwall/PitCharts";
 import { SealedReveal } from "@/components/pitwall/SealedReveal";
 import { HeroImage, useHeroRun } from "@/components/render/HeroRender";
 import { StatusBar, useTab, WorkspaceTabs } from "@/components/shell/WorkspaceTabs";
-import { Panel, ProvenanceBadge, Skeleton } from "@/components/ui/primitives";
+import { Panel, ProvenanceBadge, Skeleton, SegmentedControl } from "@/components/ui/primitives";
 import { getOracleState } from "@/lib/api";
 import { fmtCm2, fmtCount, fmtMs, fmtSec } from "@/lib/format";
 
 const PitWallDock = lazy(() =>
   import("@/components/pitwall/PitWallDock").then((m) => ({ default: m.PitWallDock })),
 );
+
+const OptimizerBenchmark = lazy(() =>
+  import("@/components/pitwall/OptimizerBenchmark").then((m) => ({
+    default: m.OptimizerBenchmark,
+  })),
+);
+
+const OracleDiagnostics = lazy(() =>
+  import("@/components/pitwall/OracleDiagnostics").then((m) => ({ default: m.OracleDiagnostics })),
+);
+const ORACLE_VIEWS = [
+  { value: "map", label: "Response map" },
+  { value: "benchmark", label: "Benchmark" },
+  { value: "validation", label: "Validation" },
+] as const;
 
 const TABS = [
   { id: "overview", label: "Overview" },
@@ -28,6 +43,7 @@ const TABS = [
 const prettify = (n: string) => n.replace(/_/g, " ");
 
 export function PitWall() {
+  const [oracleView, setOracleView] = useState<"map" | "benchmark" | "validation">("map");
   const [tab, setTab] = useTab(TABS);
   const q = useQuery({ queryKey: ["oracle"], queryFn: getOracleState, staleTime: 60_000 });
   const heroRun = useHeroRun();
@@ -153,17 +169,36 @@ export function PitWall() {
           </Suspense>
         )}
         {tab === "oracle" && (
-          <div className="grid h-full min-h-[520px] grid-cols-1 gap-3 lg:grid-cols-[1.4fr_1fr]">
-            <Panel
-              title="Aero map"
-              actions={s && <ProvenanceBadge value={prov} />}
-              bodyClassName="p-2"
-            >
-              {s ? <AeroMap s={s} /> : <Skeleton className="size-full" />}
-            </Panel>
-            <Panel title="ORACLE vs random · same budget" bodyClassName="p-2">
-              {s ? <BenchmarkChart s={s} /> : <Skeleton className="size-full" />}
-            </Panel>
+          <div className="mx-auto flex h-full min-h-[520px] max-w-6xl flex-col gap-3">
+            <div className="shrink-0 overflow-x-auto">
+              <SegmentedControl
+                options={ORACLE_VIEWS}
+                value={oracleView}
+                onChange={setOracleView}
+                label="ORACLE analysis"
+              />
+            </div>
+            <div className="min-h-0 flex-1 [&>section]:h-full">
+              {oracleView === "map" && (
+                <Panel
+                  title="GP response and uncertainty"
+                  actions={s && <ProvenanceBadge value={prov} />}
+                  bodyClassName="p-3"
+                >
+                  {s ? <AeroMap s={s} /> : <Skeleton className="size-full" />}
+                </Panel>
+              )}
+              {oracleView === "benchmark" && (
+                <Suspense fallback={<Skeleton className="h-80" />}>
+                  <OptimizerBenchmark />
+                </Suspense>
+              )}
+              {oracleView === "validation" && (
+                <Suspense fallback={<Skeleton className="h-80" />}>
+                  <OracleDiagnostics />
+                </Suspense>
+              )}
+            </div>
           </div>
         )}
         {tab === "sensitivity" && (
