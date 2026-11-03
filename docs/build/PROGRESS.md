@@ -354,6 +354,13 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 - [ ] ⬜ race-day report
 - [ ] 🟨 evidence appendix (QR ⬜)
 
+**§28 ledger items not listed above**
+- [ ] ⬜ Remove the Drawings tab/generator and the judge-pack references still in code (out of scope)
+- [ ] ⬜ Keep synthetic and physical/accepted-CFD training data separate in ORACLE
+- [ ] ⬜ Official judging weights checked against real delivery (declared points are not awarded points)
+- [ ] ⬜ Red-team and post-event regret reports
+- [ ] 🟨 Session best / last / interval / reaction history: timing tower ✅; full event timing system ⬜
+
 ## Why real data is only ~5%, what we need, and how to get it
 
 **Why 5%:** almost every number in the app is either *synthetic* (made-up seed data so the screens work) or *simulated on settings nobody has accepted yet*.
