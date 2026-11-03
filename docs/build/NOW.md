@@ -1,4 +1,4 @@
-> **Exact to-do with how-to: `TODO.md`.** **Review (2026-11-03, Claude).** This is the master test/edit/remove/add checklist. `MASTER-PLAN.md` holds the background; this file is what to work through.
+> **Tick-box status: `PROGRESS.md`.** **Exact to-do with how-to: `TODO.md`.** **Review (2026-11-03, Claude).** This is the master test/edit/remove/add checklist. `MASTER-PLAN.md` holds the background; this file is what to work through.
 >
 > **Priority tiers (a school team cannot do all ~600 bullets; work P0 → P1 → P2):**
 > - **P0, before Nationals:**
