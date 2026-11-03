@@ -887,3 +887,7 @@ Connected `/verify/[artifactId]` from Evidence with recorded/computed/pinned SHA
 ### GP fitted-parameter diagnostics — 2026-11-03 (§23 update)
 
 Sensitivity now displays normalised/physical RBF correlation lengths, optimisation convergence and bound-hit status, fitted CdA noise SD and duplicate-input count. Native ECharts/TanStack and PNG export reused. Noise is explicitly a marginal-likelihood nugget, not a repeat-run measurement; repeat-noise calibration remains open. Evidence: `evidence/O05-gp-parameters.md`.
+
+### Reaction-practice statistics — 2026-11-03 (§23 update)
+
+Trainer restores local history on open and records timestamped reactions/false starts, bounded to 500 attempts, with median/p10/p90/sample SD and native ECharts latest-50 trace/PNG plus full JSON export. Legacy numeric results keep null timestamps and do not invent historical false-start counts. Storage failures preserve a session copy; hidden-tab trials cancel; key-repeat/editable-field shortcuts ignored; immediate phase ref prevents duplicate event records. Browser latency/track validation remains open. Evidence: `evidence/RACE-reaction-statistics.md`.

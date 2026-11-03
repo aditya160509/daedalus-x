@@ -1,81 +1,96 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Panel } from "@/components/ui/primitives";
+import { reactionStats, recordReaction, useReactionHistory } from "@/lib/reactionHistory";
+import { ReactionHistory } from "./ReactionHistory";
 import { cn } from "@/lib/utils";
 
 type Phase = "idle" | "lights" | "go" | "done" | "jump";
-const KEY = "daedalus:reaction-ms";
-
-function load(): number[] {
-  try {
-    const v: unknown = JSON.parse(localStorage.getItem(KEY) ?? "[]");
-    return Array.isArray(v) ? v.filter((x): x is number => typeof x === "number") : [];
-  } catch {
-    return [];
-  }
-}
-
-/** F1 five-light start: lights on one per second, out after a random hold; react with Space or a click. */
+/** F1 five-light start: lights on one per second, out after a random hold; react with R or a click. */
 export function ReactionTrainer() {
   const [phase, setPhase] = useState<Phase>("idle");
   const [lit, setLit] = useState(0);
   const [last, setLast] = useState<number | null>(null);
-  const [log, setLog] = useState<number[]>([]);
+  const attempts = useReactionHistory();
+  const [storageError, setStorageError] = useState(false);
+  const phaseRef = useRef<Phase>("idle");
+  const transition = useCallback((next: Phase) => {
+    phaseRef.current = next;
+    setPhase(next);
+  }, []);
   const outAt = useRef(0);
   const timers = useRef<number[]>([]);
 
-  const clear = () => timers.current.splice(0).forEach(clearTimeout);
+  const clear = useCallback(() => timers.current.splice(0).forEach(clearTimeout), []);
 
-  const start = () => {
+  const start = useCallback(() => {
     clear();
-    setPhase("lights");
+    transition("lights");
+    setLast(null);
     setLit(0);
     for (let i = 1; i <= 5; i++) timers.current.push(window.setTimeout(() => setLit(i), i * 1000));
     const hold = 5000 + 200 + Math.random() * 2800;
     timers.current.push(
       window.setTimeout(() => {
         setLit(0);
-        setPhase("go");
+        transition("go");
         outAt.current = performance.now();
       }, hold),
     );
-  };
+  }, [clear, transition]);
 
-  const react = () => {
-    if (phase === "idle" || phase === "done" || phase === "jump") return start();
-    if (phase === "lights") {
+  const react = useCallback(() => {
+    const current = phaseRef.current;
+    if (current === "idle" || current === "done" || current === "jump") return start();
+    if (current === "lights") {
       clear();
       setLit(0);
-      return setPhase("jump");
+      setLast(null);
+      setStorageError(!recordReaction("false_start", null));
+      return transition("jump");
     }
     const ms = Math.round(performance.now() - outAt.current);
     setLast(ms);
-    setPhase("done");
-    setLog((prev) => {
-      const next = [...(prev.length ? prev : load()), ms].slice(-50);
-      try {
-        localStorage.setItem(KEY, JSON.stringify(next));
-      } catch {}
-      return next;
-    });
-  };
+    transition("done");
+    setStorageError(!recordReaction("reaction", ms));
+  }, [clear, start, transition]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.code !== "KeyR" || e.metaKey || e.ctrlKey) return;
+      if (
+        e.code !== "KeyR" ||
+        e.metaKey ||
+        e.ctrlKey ||
+        e.altKey ||
+        e.repeat ||
+        (e.target as HTMLElement | null)?.closest("input,textarea,select,[contenteditable]")
+      )
+        return;
       e.preventDefault();
       react();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [react]);
-  useEffect(() => clear, []);
+  useEffect(() => {
+    const pause = () => {
+      if (document.hidden) {
+        clear();
+        setLit(0);
+        transition("idle");
+      }
+    };
+    document.addEventListener("visibilitychange", pause);
+    return () => {
+      clear();
+      document.removeEventListener("visibilitychange", pause);
+    };
+  }, [clear, transition]);
 
-  const best = log.length ? Math.min(...log) : null;
-  const avg = log.length ? Math.round(log.reduce((a, b) => a + b, 0) / log.length) : null;
-  const recent = log.slice(-20);
-  const top = Math.max(400, ...recent);
+  const stats = reactionStats(attempts);
+  const best = stats.best;
+  const avg = stats.mean === null ? null : Math.round(stats.mean);
 
   return (
     <Panel
@@ -111,15 +126,13 @@ export function ReactionTrainer() {
           <span className="text-foreground">{avg ?? "—"}</span>
         </span>
       </div>
-      <div className="mt-3 flex h-10 items-end gap-0.5" aria-hidden>
-        {recent.map((ms, i) => (
-          <span
-            key={`${i}-${ms}`}
-            className={cn("flex-1 rounded-sm", ms === best ? "bg-[#a855f7]" : "bg-brand/60")}
-            style={{ height: `${(ms / top) * 100}%` }}
-          />
-        ))}
-      </div>
+      {storageError && (
+        <p role="status" className="mt-3 text-xs text-risk">
+          Browser storage is unavailable; results remain in this session. Export them before
+          leaving.
+        </p>
+      )}
+      <ReactionHistory attempts={attempts} />
     </Panel>
   );
 }

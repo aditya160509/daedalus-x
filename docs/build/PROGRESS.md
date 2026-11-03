@@ -116,7 +116,7 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 
 **D. Race-day / measured**
 - [ ] 🟨 27 Calibration: UI ✅; real data ⬜
-- [ ] ⬜ 28 Reaction stats
+- [ ] 🟨 28 Browser-practice median, sample SD, p10/p90, false-start history and export connected; field timing/latency validation pending
 - [ ] ⬜ 29 Lane / batch t-test
 - [ ] 🟨 30 Outlier detection: flags in the timing import API ✅; not shown in the UI ⬜
 - [ ] ⬜ 31 Season trend
@@ -277,7 +277,7 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 **Extra analysis from MASTER-PLAN §11 and §19 not in the 43 above**
 - [ ] ⬜ Adjoint drag map on the car (§11 #6)
 - [ ] ⬜ Thrust curve fit + cartridge variance (§11 #13)
-- [ ] ⬜ Reaction-time statistics (§19 #28)
+- [ ] 🟨 Reaction-time statistics (§19 #28): browser-practice history/statistics/export connected; real track reaction validation pending
 - [ ] ⬜ Lane / batch t-test (§19 #29)
 - [ ] 🟨 Outlier detection (§19 #30): flags in the timing import API ✅; not shown in the UI ⬜
 - [ ] ⬜ Season trend (§19 #31)
