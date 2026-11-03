@@ -58,3 +58,7 @@ Retained distribution licence texts: `docs/licenses/uplot-LICENSE.txt`, `docs/li
 ## Energy and structural charts — 2026-11-03
 
 [Apache ECharts 6.1.0](https://github.com/apache/echarts), Apache-2.0 (repository licence verified), supplies the native Sankey layout/interaction and beam line-chart engine, linked cursors and PNG export. `EnergySankey.tsx` adapts existing TITAN audit flows; the integration residual is separate, never normalised away. `BeamPlots.tsx` plots the existing FEM nodal results. No custom Sankey layout, foreign application or solver was copied. Original licence remains in the installed distribution.
+
+## Paired timing inference — 2026-11-03
+
+[SciPy](https://github.com/scipy/scipy), BSD-3-Clause (repository licence verified), supplies native `ttest_rel`/confidence intervals, Student-t and noncentral-t distributions, Brent root finding and quadrature for prospective paired-test power. Existing ECharts and TanStack Table supply result plotting and source-row sorting. This integrates installed libraries; no external statistics application copied.

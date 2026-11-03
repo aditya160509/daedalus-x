@@ -787,7 +787,7 @@ These rows track the WHOLE requested chart, so partial rows can contain built co
 |---|---|---|---|
 | W01 | Cd/CdA + grid uncertainty | 🟨 | Grid-study Cd/CI/GCI exists; consistent CdA uncertainty presentation/accepted source remains. |
 | W02 | Residual/force convergence + gate | 🟨 | Histories/window shading exist; full explicit gate-line and linked comparison treatment remains. |
-| W03 | Component drag waterfall, pressure/friction | 🟨 | Pressure/friction bars and cumulative build-up exist; true waterfall presentation remains. |
+| W03 | Component drag waterfall, pressure/friction | ⏳ | Signed waterfall, pressure/friction view and PNG export connected; browser/accepted-CFD review pending. |
 | W04 | Centreline Cp + surface Cp | 🟨 | Surface Cp exists; top/bottom centreline plot absent. |
 | W05 | ΔCp / Δwake / Δforces | 🟨 | Strict same-mesh ΔCp exists; Δwake/Δforces absent. |
 | W06 | Wake planes + momentum drag | 🟨 | Three native planes/velocity ratios exist; deficit contours/drag cross-check incomplete. |
@@ -815,7 +815,7 @@ These rows track the WHOLE requested chart, so partial rows can contain built co
 | S01 | Prior/posterior plots | 🟨 | Prior controls/posterior summaries exist; density plots absent. |
 | S02 | Error shrinking scoreboard | 🟨 | Saved studies/held-out rows exist; cross-run scoreboard absent. |
 | S03 | Posterior predictive checks | 🟨 | Held-out numeric intervals exist; PPC chart/appropriate diagnostics absent. |
-| S04 | Paired CI / minimum detectable effect | ⬜ | No connected paired analysis. |
+| S04 | Paired CI / minimum detectable effect | ⏳ | Native SciPy paired t CI, plot, prospective power/MDE and source/result evidence connected; browser/real paired validation pending. |
 | S05 | Repeat-run control chart | ⬜ | No connected chart. |
 | S06 | Full uncertainty variance budget | 🟨 | Input rank correlations exist; CFD/reaction/timing variance decomposition absent. |
 | F01 | Margin bars + tolerance bands | 🟨 | Unit-filtered headroom bars exist; manufacturing band/points ordering incomplete. |
@@ -875,3 +875,7 @@ Native ECharts energy Sankey replaces the hand-built share bar, preserving signe
 ### Signed drag waterfall — 2026-11-03 (§23 update)
 
 ForceBars now has native ECharts floating waterfall bars and retained pressure/friction view, using existing signed component force records. Computed component sum is labelled separately from solver total-force acceptance. Negative contributions/zero crossings preserved; PNG export added. No CFD launched. Evidence: `evidence/W03-component-waterfall.md`.
+
+### Paired timing analysis — 2026-11-03 (§23 update)
+
+Race Calibration has lazy Model / Paired-test subviews. Native SciPy paired t-test CI and noncentral-t planning power/MDE, native ECharts difference plot and TanStack source table connected. Exact CSV/settings and derived result saved as linked estimated-source artifacts; no row filtering or automatic measured claim. Pairing protocol declaration required; formal preregistration and real paired data remain. Evidence: `evidence/S04-paired-timings.md`.
