@@ -809,7 +809,7 @@ These rows track the WHOLE requested chart, so partial rows can contain built co
 | O02 | Regret benchmark + 10-seed CIs | ⏳ | Six-method preregistered queue and CIs connected; full numerical study/browser pending. |
 | O03 | Predicted vs actual candidates | 🟨 | Held-out predictions vs stored targets connected; accepted campaign data pending. |
 | O04 | Predictive interval calibration | ⏳ | Refit LOO coverage/Wilson chart connected; real-data/browser verification pending. |
-| O05 | Length scales + Sobol importance | 🟨 | GP Sobol/Morris exists; length-scale presentation absent. |
+| O05 | Length scales + Sobol importance | ⏳ | GP length-scale chart/table, fitted noise, optimiser status/bounds and SALib connected; browser/accepted-data review pending. |
 | O06 | Pareto front | ⬜ | No connected pymoo/objective front. |
 | O07 | Acquisition history | 🟨 | Benchmark trial reasons/table/full export built; real-campaign timeline pending. |
 | S01 | Prior/posterior plots | 🟨 | Prior controls/posterior summaries exist; density plots absent. |
@@ -883,3 +883,7 @@ Race Calibration has lazy Model / Paired-test subviews. Native SciPy paired t-te
 ### Artifact verification and QR — 2026-11-03 (§23 update)
 
 Connected `/verify/[artifactId]` from Evidence with recorded/computed/pinned SHA-256 status, native qrcode.react SVG generation/export, source provenance and missing/mismatched states. Single-artifact API exposes metadata only. All evidence hash scans now stream files with hashlib.file_digest, avoiding whole-file memory use. No authorship/time/science validity inferred; localhost links are not publicly hosted. Browser/scan/public-hosting checks remain open. Evidence: `evidence/ATLAS-artifact-verification.md`.
+
+### GP fitted-parameter diagnostics — 2026-11-03 (§23 update)
+
+Sensitivity now displays normalised/physical RBF correlation lengths, optimisation convergence and bound-hit status, fitted CdA noise SD and duplicate-input count. Native ECharts/TanStack and PNG export reused. Noise is explicitly a marginal-likelihood nugget, not a repeat-run measurement; repeat-noise calibration remains open. Evidence: `evidence/O05-gp-parameters.md`.

@@ -74,6 +74,7 @@ class GP:
             method="L-BFGS-B",
             bounds=[(-3.0, 1.5)] * DIM + [(-8.0, -1.0)],
         )
+        self.fit_success, self.fit_message = bool(res.success), str(res.message)
         self.log_ls, self.log_noise = res.x[:DIM], res.x[DIM]
         k = self._k(self.x, self.x) + np.exp(self.log_noise) * np.eye(len(self.x))
         self.chol = np.linalg.cholesky(k + 1e-9 * np.eye(len(self.x)))
@@ -99,6 +100,25 @@ class GP:
         v = np.linalg.solve(self.chol, ks.T)
         var = np.clip(1.0 - np.sum(v * v, axis=0), 1e-12, None)
         return mean * self.sd + self.mu, np.sqrt(var) * self.sd
+
+    def diagnostics(self) -> dict[str, object]:
+        return {
+            "fit_success": self.fit_success,
+            "fit_message": self.fit_message,
+            "noise_sd_m2": float(np.sqrt(np.exp(self.log_noise)) * self.sd),
+            "noise_source": "marginal_likelihood_fit_not_repeat_measurements",
+            "repeat_inputs": len(self.x) - len(np.unique(self.x, axis=0)),
+            "length_scales": [
+                {
+                    "name": variable.name,
+                    "unit": variable.unit or "1",
+                    "normalised": float(np.exp(log_scale)),
+                    "physical": float(np.exp(log_scale) * (variable.high - variable.low)),
+                    "at_bound": bool(np.isclose(log_scale, -3.0) or np.isclose(log_scale, 1.5)),
+                }
+                for variable, log_scale in zip(VARIABLES, self.log_ls, strict=True)
+            ],
+        }
 
 
 def expected_improvement(gp: GP, xs: FloatArray, best: float) -> FloatArray:

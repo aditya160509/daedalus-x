@@ -80,3 +80,22 @@ def test_study_recommendation_uses_declared_family_bounds():
     assert bool(oracle.study_feasible(candidate)[0])
     with pytest.raises(ValueError, match="No candidate"):
         oracle.next_best(x, y, candidate_filter=lambda points: np.zeros(len(points), dtype=bool))
+
+
+def test_reported_kernel_lengths_match_correlation_and_repeat_label():
+    import json
+
+    x = oracle.candidates(8, seed=19)
+    x = np.vstack([x, x[0]])
+    gp = oracle.GP(x, oracle.synthetic_cda(x))
+    diagnostics = gp.diagnostics()
+    assert diagnostics["noise_source"] == "marginal_likelihood_fit_not_repeat_measurements"
+    assert diagnostics["repeat_inputs"] == 1
+    assert diagnostics["noise_sd_m2"] > 0
+    for index, row in enumerate(diagnostics["length_scales"]):
+        a, b = np.zeros((1, oracle.DIM)), np.zeros((1, oracle.DIM))
+        b[0, index] = row["normalised"]
+        assert gp._k(a, b)[0, 0] == pytest.approx(np.exp(-0.5))
+        variable = oracle.VARIABLES[index]
+        assert row["physical"] == pytest.approx(row["normalised"] * (variable.high - variable.low))
+    json.dumps(diagnostics, allow_nan=False)

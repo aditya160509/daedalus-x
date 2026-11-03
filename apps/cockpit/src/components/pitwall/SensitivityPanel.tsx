@@ -4,8 +4,12 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Panel, ProvenanceBadge, SegmentedControl, Skeleton } from "@/components/ui/primitives";
-import { chartTheme, useECharts } from "@/components/charts/useECharts";
+import { chartTheme, echarts, useECharts } from "@/components/charts/useECharts";
+import { GpParameters } from "./GpParameters";
+import { ToolboxComponent } from "echarts/components";
 import { getOracleSensitivity, type OracleSensitivity } from "@/lib/api";
+
+echarts.use([ToolboxComponent]);
 
 function SensitivityChart({ data }: { data: OracleSensitivity }) {
   const sobol = data.method === "sobol",
@@ -15,6 +19,9 @@ function SensitivityChart({ data }: { data: OracleSensitivity }) {
     return {
       animation: false,
       textStyle: { fontFamily: t.mono, color: t.muted },
+      toolbox: {
+        feature: { saveAsImage: { type: "png", name: `oracle-${data.method}-sensitivity` } },
+      },
       grid: { left: 24, right: 24, top: 42, bottom: 36, containLabel: true },
       tooltip: {
         trigger: "axis",
@@ -74,6 +81,8 @@ function SensitivityChart({ data }: { data: OracleSensitivity }) {
   );
 }
 
+const fmt = (v: number | undefined, scale = 1) => (v == null ? "—" : (v * scale).toFixed(4));
+
 export function SensitivityPanel() {
   const [method, setMethod] = useState<"sobol" | "morris">("sobol");
   const result = useQuery({
@@ -82,7 +91,6 @@ export function SensitivityPanel() {
     staleTime: 60_000,
   });
   const data = result.data;
-  const fmt = (v: number | undefined, scale = 1) => (v == null ? "—" : (v * scale).toFixed(4));
   return (
     <Panel
       title="What matters in the current surrogate"
@@ -126,6 +134,7 @@ export function SensitivityPanel() {
       ) : (
         <>
           <SensitivityChart data={data} />
+          <GpParameters data={data.gp} />
           <div className="overflow-x-auto border-t">
             <table className="w-full text-left text-xs">
               <thead className="text-muted-foreground">

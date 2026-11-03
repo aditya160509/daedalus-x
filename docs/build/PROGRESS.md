@@ -246,7 +246,7 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 - [ ] ⏳ 2 Regret curves: six native methods, 10–20 seeds and Student-t mean CIs connected; queued study/browser review pending
 - [ ] 🟨 3 Held-out predicted vs stored targets with 90% intervals connected; accepted-data/campaign decision view pending
 - [ ] ⏳ 4 Held-out coverage chart with Wilson bounds connected; fold-dependence caveat and synthetic label; real-data/browser review pending
-- [ ] 🟨 5 Variable importance (SALib) ✅ — length-scales ⬜
+- [ ] ⏳ 5 SALib importance + fitted GP length-scale chart/table, physical units, fit-bound warnings and PNG export connected; browser review pending
 - [ ] ⬜ 6 Pareto front (pymoo)
 - [ ] ⬜ 7 Acquisition history timeline
 
@@ -441,7 +441,7 @@ The only real inputs are the CAD geometry and the rulebook. Without data, judges
 
 **6. ORACLE**
 - [ ] ⏳ Preregistered Optuna/qmc benchmark implemented: immutable protocol before queue, code/version binding, six methods, 10–20 seeds, CI/export; no full study run yet
-- [ ] ⬜ Nugget noise term
+- [ ] 🟨 Marginal-likelihood nugget already fitted and now displayed; repeat-experiment noise estimation remains pending
 - [ ] ⬜ Acquisition history
 - [ ] ⬜ Pareto chart
 - [ ] ⬜ Engineer veto mode

@@ -131,6 +131,7 @@ def _sensitivity(body: str, method: Literal["sobol", "morris"]) -> dict[str, obj
     result = sensitivity.analyze(
         lambda x: gp.predict(x)[0], [v.name for v in oracle.VARIABLES], method=method
     )
+    result["gp"] = gp.diagnostics()
     result["observations"] = len(observations)
     result["provenance"] = (
         "synthetic" if all(o["provenance"] == "synthetic" for o in observations) else "mixed"

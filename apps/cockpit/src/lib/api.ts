@@ -1136,7 +1136,24 @@ export type Dossier = z.infer<typeof Dossier>;
 export const getDossier = () => request("/v1/report/dossier", Dossier);
 export const dossierMarkdownUrl = "/api/v1/report/dossier?format=md";
 
+const OracleGpDiagnostics = z.object({
+  fit_success: z.boolean(),
+  fit_message: z.string(),
+  noise_sd_m2: z.number(),
+  noise_source: z.literal("marginal_likelihood_fit_not_repeat_measurements"),
+  repeat_inputs: z.number(),
+  length_scales: z.array(
+    z.object({
+      name: z.string(),
+      unit: z.string(),
+      normalised: z.number(),
+      physical: z.number(),
+      at_bound: z.boolean(),
+    }),
+  ),
+});
 const OracleSensitivity = z.object({
+  gp: OracleGpDiagnostics,
   method: z.enum(["sobol", "morris"]),
   samples: z.number(),
   seed: z.number(),
