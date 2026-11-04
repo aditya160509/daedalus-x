@@ -75,7 +75,7 @@ export const STUDIO_LIGHTFORMERS: readonly LightformerSpec[] = [
 
 const ENGINEERING_COLOURS: Record<string, string> = {
   body: "#8b949e",
-  front_wing: "#3dd6f0",
+  front_wing: "#5b8cff",
   rear_wing: "#b18cff",
   wheels: "#6b7280",
   cartridge: "#f5a524",

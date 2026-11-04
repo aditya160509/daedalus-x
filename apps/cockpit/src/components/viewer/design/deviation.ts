@@ -312,7 +312,7 @@ export function signedDeviation(
   };
 }
 
-/** Diverging scale: material removed is red, zero is neutral, material added is cyan. */
+/** Diverging scale: material removed is red, zero is neutral, material added is blue. */
 export function deviationColor(mm: number, rangeMm: number): [number, number, number] {
   const span = Math.max(rangeMm, 1e-6);
   const t = Math.max(-1, Math.min(1, mm / span));

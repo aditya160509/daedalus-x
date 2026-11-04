@@ -108,7 +108,7 @@ function SceneContents(props: DesignSceneProps) {
       <GizmoHelper alignment="bottom-left" margin={[72, 72]}>
         <GizmoViewcube
           color="#1c1c1f"
-          hoverColor="#3dd6f0"
+          hoverColor="#5b8cff"
           textColor="#d4d4d8"
           strokeColor="#3a3a42"
           opacity={0.95}

@@ -73,7 +73,7 @@ export function colorize(
 /** Categorical series colours for charts, in assignment order. */
 export const SERIES = {
   blue: "#5aa8ff",
-  cyan: "#3dd6f0",
+  cyan: "#5b8cff",
   violet: "#b18cff",
   amber: "#f5a524",
   green: "#7ee787",

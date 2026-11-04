@@ -18,7 +18,7 @@ export function buildTracks(sim: RaceSimulation): TelemetryTrack[] {
       id: "velocity",
       name: "Velocity",
       unit: "m/s",
-      color: "#22d3ee",
+      color: "#5b8cff",
       series: [{ label: "velocity", values: channelOf(sim, "velocity") }],
     },
     {

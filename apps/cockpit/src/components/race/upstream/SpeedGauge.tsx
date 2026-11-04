@@ -14,7 +14,7 @@ const Background = ({ offset, id }: { offset: string; id: string }) => (
     <defs>
       <linearGradient id={id} x1="1" y1="0" x2="0" y2="0">
         <stop offset={offset} stopColor="#b7c2cd" />
-        <stop stopColor="#3dd6f0" />
+        <stop stopColor="#5b8cff" />
       </linearGradient>
     </defs>
     <path

@@ -134,7 +134,7 @@ export function CarModel({
       {selectedMeshes.map((mesh) => (
         <Fragment key={mesh.uuid}>
           {createPortal(
-            <Outlines screenspace thickness={2} color="#22d3ee" renderOrder={5} />,
+            <Outlines screenspace thickness={2} color="#5b8cff" renderOrder={5} />,
             mesh,
           )}
         </Fragment>
@@ -174,7 +174,7 @@ function PartEdges({ mesh }: { mesh: THREE.Mesh }) {
       <Edges
         geometry={mesh.geometry}
         threshold={20}
-        color="#3dd6f0"
+        color="#5b8cff"
         lineWidth={0.7}
         transparent
         opacity={0.55}

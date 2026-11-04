@@ -109,7 +109,7 @@ export function ReactionTrainer() {
             key={i}
             className={cn(
               "size-6 rounded-full border border-white/10 transition-colors duration-75",
-              lit >= i ? "bg-red-600 shadow-[0_0_14px_rgb(220_38_38)]" : "bg-white/5",
+              lit >= i ? "bg-red-600" : "bg-white/5",
             )}
           />
         ))}

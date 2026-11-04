@@ -7,7 +7,7 @@ import * as THREE from "three";
 import { dimensionLines, measure, type Vec3 } from "./designMath";
 import type { MeasureState } from "./types";
 
-const DIMENSION_COLOUR = "#3dd6f0";
+const DIMENSION_COLOUR = "#5b8cff";
 const MEASURE_COLOUR = "#f5a524";
 
 /** Length, width and height dimension lines outside the display-mesh bounding box. */
@@ -34,7 +34,7 @@ export function Dimensions({ min, max, radius }: { min: Vec3; max: Vec3; radius:
             <Arrowhead at={line.start} towards={line.end} size={arrow} />
             <Arrowhead at={line.end} towards={line.start} size={arrow} />
             <group position={middle}>
-              <SceneLabel size={radius * 0.05} color="#3dd6f0">
+              <SceneLabel size={radius * 0.05} color="#5b8cff">
                 {`${(line.value * 1000).toFixed(1)} mm`}
               </SceneLabel>
             </group>

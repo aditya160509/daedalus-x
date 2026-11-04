@@ -6,9 +6,9 @@
 
 /*
  * Daedalus X design tokens (spec §7.2).
- * shadcn/ui semantic variables drive every component; Daedalus-specific roles (brand cyan,
+ * shadcn/ui semantic variables drive every component; Daedalus-specific roles (brand blue,
  * risk, provenance) are added on top. The cockpit is always dark: a calm neutral graphite with
- * a single cyan accent reserved for focus, selection and live data.
+ * a single blue accent reserved for focus, selection and live data.
  */
 :root {
   --radius: 0.5rem;
@@ -54,7 +54,7 @@
   --sidebar-foreground: #d4d4d4;
   --sidebar-border: rgb(255 255 255 / 0.08);
 
-  --brand: #4cc3d9;
+  --brand: #5b8cff;
   --risk: #fbbf24;
   --ok: #34d399;
   --surface-3: #171717;
@@ -68,7 +68,7 @@
   --prov-estimated: #e0b85c;
   --prov-synthetic: #8a8a93;
 
-  --chart-1: #3dd6f0;
+  --chart-1: #5b8cff;
   --chart-2: #b18cff;
   --chart-3: #e0b85c;
   --chart-4: #5aa8ff;
