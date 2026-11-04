@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from daedalus.api import (
     analysis,
     cad,
+    compute,
     data,
     engineering,
     evidence,
@@ -30,6 +31,7 @@ def create_app() -> FastAPI:
     app.include_router(evidence.router)
     app.include_router(analysis.router)
     app.include_router(paired.router)
+    app.include_router(compute.router)
 
     @app.get("/v1/health")
     def health() -> dict[str, str]:
