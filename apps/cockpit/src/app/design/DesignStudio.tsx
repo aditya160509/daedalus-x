@@ -12,8 +12,10 @@ import { useTab, WorkspaceTabs } from "@/components/shell/WorkspaceTabs";
 import { getForgeChecks, importCadStep, listDesigns, type RuleCheck } from "@/lib/api";
 import { CadFrame, type FocusRequest } from "./CadFrame";
 import { DesignWorkspace } from "./DesignWorkspace";
+import { OutputsPanel } from "./OutputsPanel";
 
 const TABS = [
+  { id: "outputs", label: "Outputs" },
   { id: "cad", label: "CAD" },
   { id: "inspect", label: "Inspect" },
   { id: "rules", label: "Rules" },
@@ -204,6 +206,14 @@ function Studio({
         {(tab === "inspect" || inspectOpened) && (
           <div className="size-full" hidden={tab !== "inspect"}>
             <DesignWorkspace designId={current === BLANK ? undefined : current} />
+          </div>
+        )}
+        {tab === "outputs" && (
+          <div className="mx-auto w-full max-w-7xl overflow-y-auto p-4">
+            <OutputsPanel
+              design={current === BLANK ? undefined : current}
+              onFocus={(c) => focus(c.parts)}
+            />
           </div>
         )}
         {tab === "strength" && (
