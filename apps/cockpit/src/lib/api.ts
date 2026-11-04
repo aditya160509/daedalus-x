@@ -568,6 +568,7 @@ export const RuleCheck = z.object({
   penalty: z.string(),
   parts: z.array(z.string()),
   note: z.string(),
+  axis: z.enum(["x", "y", "z"]).nullable().optional(),
 });
 export type RuleCheck = z.infer<typeof RuleCheck>;
 const PointsAtRisk = z.object({

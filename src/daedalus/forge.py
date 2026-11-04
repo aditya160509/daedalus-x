@@ -33,6 +33,9 @@ class Check:
     penalty: str
     parts: tuple[str, ...]
     note: str
+    # Axis of the measured span when one is defined; None means the CAD overlay must not draw a
+    # dimension line because the measure has no single feature axis.
+    axis: str | None = None
 
 
 def load_rulebook(path: Path) -> dict[str, object]:
@@ -326,6 +329,7 @@ def run_checks(rulebook: dict[str, object], geometry: dict[str, object]) -> list
                     r["penalty"],
                     (),
                     r.get("note", "measure on the car"),
+                    None,
                 )
             )
             continue
@@ -353,9 +357,34 @@ def run_checks(rulebook: dict[str, object], geometry: dict[str, object]) -> list
                 r["penalty"],
                 parts,
                 r.get("note", ""),
+                _measure_axis(str(r["measure"])),
             )
         )
     return checks
+
+
+_AXIS_BY_SUFFIX = (("_span", "y"), ("_chord", "x"), ("_height", "z"), ("_bottom", "z"))
+_AXIS_BY_NAME = {
+    "body_length": "x",
+    "length_excl_cartridge": "x",
+    "wheelbase": "x",
+    "front_wheel_gap": "y",
+    "rear_wheel_gap": "y",
+    "front_wheel_contact_width": "y",
+    "rear_wheel_contact_width": "y",
+    "nose_overhang": "x",
+    "rear_overhang_length": "x",
+}
+
+
+def _measure_axis(measure: str) -> str | None:
+    """Only measures whose value is a span along one axis get a CAD dimension line."""
+    if measure in _AXIS_BY_NAME:
+        return _AXIS_BY_NAME[measure]
+    for suffix, axis in _AXIS_BY_SUFFIX:
+        if measure.endswith(suffix):
+            return axis
+    return None
 
 
 def check_design(design_dir: Path, rulebook_path: Path) -> list[Check]:

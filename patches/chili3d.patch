@@ -138,14 +138,27 @@ index 10d6c60..65e0ba2 100644
                  { className: style.ribbonTitlePanel },
 diff --git a/packages/web/src/daedalusBridge.ts b/packages/web/src/daedalusBridge.ts
 new file mode 100644
-index 0000000..9af9517
+index 0000000..152cdb4
 --- /dev/null
 +++ b/packages/web/src/daedalusBridge.ts
-@@ -0,0 +1,99 @@
+@@ -0,0 +1,312 @@
 +// Part of the Chili3d Project, under the AGPL-3.0 License.
 +// See LICENSE file in the project root for full license information.
 +
-+import { type IApplication, type INode, Logger, pendingWork, quietFrames, VisualNode } from "@chili3d/core";
++import {
++    DimensionAnnotation,
++    GeometryNode,
++    type IApplication,
++    type IDocument,
++    type INode,
++    Logger,
++    Material,
++    pendingWork,
++    quietFrames,
++    VisualNode,
++    type VisualNode as VisualNodeType,
++    XYZ,
++} from "@chili3d/core";
 +
 +/**
 + * Daedalus X host bridge. The cockpit embeds this page in an iframe on the same origin and asks,
@@ -156,9 +169,81 @@ index 0000000..9af9517
 + *
 + * One STEP per part: the kernel's STEP writer drops node names, and the importer needs them
 + * (wheel / front wing / body ...) to split force groups and run the rules.
++ *
++ *   host -> cad: { type: "daedalus:rules", revision, rules: [{ part, state, value, limit, unit, axis }] }
++ *   cad -> host: { type: "daedalus:rulesApplied", revision, coloured, dimensions, missing, unavailable }
++ *
++ * Rule colours are document materials, so they are cleared by restoring each node's original
++ * material id. Dimension annotations are only drawn when the host declares an axis; without a
++ * supported anchor the rule is reported as unavailable instead of guessing an attachment.
 + */
++const RULE_COLOURS: Record<string, number> = {
++    fail_cad: 0xef4444,
++    at_risk: 0xf59e0b,
++    pass_cad_only: 0x22c55e,
++};
++const RULE_STATES = Object.keys(RULE_COLOURS);
++
++export interface RuleMessage {
++    part: string;
++    state: string;
++    value: number | null;
++    limit: number | null;
++    unit: string;
++    axis: "x" | "y" | "z" | null;
++    name?: string;
++}
++
++export function validateRules(raw: unknown): { rules: RuleMessage[] } | { error: string } {
++    if (!Array.isArray(raw) || raw.length > 128) {
++        return { error: "Rules must be a list of at most 128 entries." };
++    }
++    const rules: RuleMessage[] = [];
++    for (const item of raw) {
++        if (
++            !item ||
++            typeof item.part !== "string" ||
++            item.part.length === 0 ||
++            item.part.length > 256 ||
++            !RULE_STATES.includes(item.state) ||
++            (item.axis !== null && item.axis !== undefined && !["x", "y", "z"].includes(item.axis)) ||
++            (item.value !== null && item.value !== undefined && !Number.isFinite(item.value)) ||
++            (item.limit !== null && item.limit !== undefined && !Number.isFinite(item.limit))
++        ) {
++            return { error: "Malformed rule overlay entry." };
++        }
++        rules.push({
++            part: item.part,
++            state: item.state,
++            value: typeof item.value === "number" ? item.value : null,
++            limit: typeof item.limit === "number" ? item.limit : null,
++            unit: typeof item.unit === "string" && item.unit.length <= 16 ? item.unit : "",
++            axis: item.axis ?? null,
++            name: typeof item.name === "string" ? item.name.slice(0, 200) : undefined,
++        });
++    }
++    return { rules };
++}
++
++interface RuleOverlay {
++    materials: Map<string, string>;
++    annotations: INode[];
++    restore: Map<string, string | string[]>;
++}
++
 +export function installDaedalusBridge(app: IApplication): void {
 +    if (window.parent === window) return;
++    let overlay: RuleOverlay = { materials: new Map(), annotations: [], restore: new Map() };
++    const clearOverlay = (document: IDocument) => {
++        for (const [nodeId, materialId] of overlay.restore) {
++            const node = findNode(document, nodeId);
++            if (node instanceof GeometryNode) node.materialId = materialId;
++        }
++        for (const annotation of overlay.annotations) {
++            annotation.parent?.remove(annotation);
++        }
++        overlay = { materials: new Map(), annotations: [], restore: new Map() };
++    };
 +    window.addEventListener("message", async (event: MessageEvent) => {
 +        if (event.source !== window.parent || event.origin !== window.location.origin) return;
 +        if (event.data?.type === "daedalus:focus") {
@@ -207,6 +292,75 @@ index 0000000..9af9517
 +            }
 +            return;
 +        }
++        if (event.data?.type === "daedalus:rules") {
++            const reply = (body: Record<string, unknown>) =>
++                window.parent.postMessage(
++                    { type: "daedalus:rulesApplied", revision: event.data.revision, ...body },
++                    window.location.origin,
++                );
++            try {
++                const parsed = validateRules(event.data.rules);
++                if ("error" in parsed) return reply({ error: parsed.error });
++                const rules = parsed.rules;
++                await pendingWork.whenIdle();
++                const view = app.activeView;
++                if (!view) return reply({ error: "No CAD document is open." });
++                const document = view.document;
++                clearOverlay(document);
++                const nodes = visualNodes(document.modelManager.rootNode);
++                const normalise = (name: string) => name.replace(/[\s_-]+/g, "").toLowerCase();
++                const missing: string[] = [];
++                const unavailable: string[] = [];
++                const coloured: string[] = [];
++                const byNode = new Map<VisualNodeType, RuleMessage>();
++                for (const rule of rules) {
++                    const node = nodes.find((candidate) => normalise(candidate.name) === normalise(rule.part));
++                    if (!node) {
++                        missing.push(rule.part);
++                        continue;
++                    }
++                    const rank = (state: string) => (state === "fail_cad" ? 3 : state === "at_risk" ? 2 : 1);
++                    const previous = byNode.get(node);
++                    if (!previous || rank(rule.state) > rank(previous.state)) byNode.set(node, rule);
++                }
++                for (const [node, rule] of byNode) {
++                    const materialId = materialFor(document, rule.state, overlay);
++                    if (node instanceof GeometryNode) {
++                        if (!overlay.restore.has(node.id)) overlay.restore.set(node.id, node.materialId);
++                        node.materialId = materialId;
++                        coloured.push(node.name);
++                    }
++                    if (rule.axis === null) {
++                        unavailable.push(`${rule.part}: no supported feature axis`);
++                        continue;
++                    }
++                    const annotation = dimensionFor(document, node, rule);
++                    if (annotation) {
++                        document.modelManager.addNode(annotation);
++                        overlay.annotations.push(annotation);
++                    } else {
++                        unavailable.push(`${rule.part}: no bounding box`);
++                    }
++                }
++                view.update();
++                reply({ coloured, dimensions: overlay.annotations.length, missing, unavailable });
++            } catch (error) {
++                reply({ error: error instanceof Error ? error.message : String(error) });
++            }
++            return;
++        }
++        if (event.data?.type === "daedalus:clearRules") {
++            const view = app.activeView;
++            if (view) {
++                clearOverlay(view.document);
++                view.update();
++            }
++            window.parent.postMessage(
++                { type: "daedalus:rulesCleared", revision: event.data.revision },
++                window.location.origin,
++            );
++            return;
++        }
 +        if (event.data?.type !== "daedalus:export") return;
 +        const reply = (body: Record<string, unknown>) =>
 +            window.parent.postMessage({ type: "daedalus:exported", ...body }, window.location.origin);
@@ -228,6 +382,65 @@ index 0000000..9af9517
 +        }
 +    });
 +    window.parent.postMessage({ type: "daedalus:ready" }, window.location.origin);
++}
++
++function findNode(document: IDocument, id: string): INode | undefined {
++    const stack: INode[] = [];
++    for (let n = document.modelManager.rootNode.firstChild; n; n = n.nextSibling) stack.push(n);
++    while (stack.length) {
++        const node = stack.pop()!;
++        if (node.id === id) return node;
++        for (let c = (node as { firstChild?: INode }).firstChild; c; c = c.nextSibling) {
++            stack.push(c);
++        }
++    }
++    return undefined;
++}
++
++function materialFor(document: IDocument, state: string, overlay: RuleOverlay): string {
++    const existing = overlay.materials.get(state);
++    if (existing) return existing;
++    const material = new Material({
++        document,
++        name: `Daedalus rule · ${state}`,
++        color: RULE_COLOURS[state] ?? 0x94a3b8,
++    });
++    document.modelManager.materials.push(material);
++    overlay.materials.set(state, material.id);
++    return material.id;
++}
++
++/** A real dimension line along the host-declared axis, labelled with the CAD value and limit. */
++function dimensionFor(
++    document: IDocument,
++    node: VisualNodeType,
++    rule: { value: number | null; limit: number | null; unit: string; axis: string | null; name?: string },
++): DimensionAnnotation | null {
++    const box = node.boundingBox();
++    if (!box || rule.axis === null) return null;
++    const axis = rule.axis as "x" | "y" | "z";
++    const start = new XYZ({ x: box.min.x, y: box.min.y, z: box.min.z });
++    const end = new XYZ({ x: box.max.x, y: box.max.y, z: box.max.z });
++    const span = box.max[axis] - box.min[axis];
++    const offset = Math.max(span * 0.12, 1);
++    const text =
++        axis === "z"
++            ? new XYZ({ x: end.x + offset, y: end.y + offset, z: end.z })
++            : new XYZ({ x: end.x, y: end.y, z: end.z + offset });
++    const value = rule.value === null ? "CAD value unavailable" : `${rule.value.toFixed(2)}${rule.unit}`;
++    const limit =
++        rule.limit === null ? "limit not stated" : `limit ${rule.limit.toFixed(2)}${rule.unit}`;
++    return new DimensionAnnotation({
++        document,
++        annotationType: "dimension",
++        name: `Daedalus rule · ${rule.name ?? node.name}`,
++        color: 0x3dd6f0,
++        startPoint: start,
++        endPoint: end,
++        textPoint: text,
++        dimensionType: "linear",
++        textOverride: `${value} / ${limit} · CAD`,
++    });
 +}
 +
 +function visualNodes(root: INode): VisualNode[] {

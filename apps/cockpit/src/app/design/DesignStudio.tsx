@@ -3,13 +3,13 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { Save } from "lucide-react";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { LegalPanel } from "@/components/pitwall/LegalPanel";
 import { FrontierPanel } from "@/components/pitwall/FrontierPanel";
 import { StrengthPanel } from "@/components/strength/StrengthPanel";
 import { useTab, WorkspaceTabs } from "@/components/shell/WorkspaceTabs";
-import { importCadStep, listDesigns } from "@/lib/api";
+import { getForgeChecks, importCadStep, listDesigns, type RuleCheck } from "@/lib/api";
 import { CadFrame, type FocusRequest } from "./CadFrame";
 import { DesignWorkspace } from "./DesignWorkspace";
 
@@ -49,6 +49,17 @@ function exportStep(frame: HTMLIFrameElement): Promise<CadParts> {
  * Design Studio. CAD is our build of Chili3D (AGPL-3.0, credited in THIRD_PARTY.md): it opens
  * the picked car's STEP, and "Save as design" imports the model back as a rule-checked design.
  */
+/** The closer of the two stated limits; null when neither is stated. */
+function nearestLimit(check: RuleCheck): number | null {
+  if (check.min == null && check.max == null) return null;
+  if (check.min == null) return check.max ?? null;
+  if (check.max == null) return check.min;
+  if (check.value == null) return check.min;
+  return Math.abs(check.value - check.min) <= Math.abs(check.max - check.value)
+    ? check.min
+    : check.max;
+}
+
 export function DesignStudio() {
   const query = useSearchParams();
   const initialDesign = query.get("design") ?? undefined;
@@ -87,6 +98,28 @@ function Studio({
   const [saving, setSaving] = useState(false);
   const frame = useRef<HTMLIFrameElement>(null);
   const current = design ?? designs.data?.[0]?.design_id;
+  const forge = useQuery({
+    queryKey: ["forge-checks", current],
+    queryFn: () => getForgeChecks(current!),
+    enabled: Boolean(current) && current !== BLANK && (tab === "cad" || cadOpened),
+    staleTime: 30_000,
+  });
+  const cadRules = useMemo(() => {
+    if (!forge.data) return [];
+    return forge.data.checks.flatMap((check) => {
+      if (check.state === "manual_review" || check.value == null) return [];
+      const limit = nearestLimit(check);
+      return check.parts.map((part) => ({
+        part,
+        state: check.state,
+        value: check.value,
+        limit,
+        unit: check.unit,
+        axis: check.axis ?? null,
+        name: check.name,
+      }));
+    });
+  }, [forge.data]);
 
   const save = async () => {
     if (!frame.current) return;
@@ -163,6 +196,8 @@ function Studio({
               frame={frame}
               active={tab === "cad"}
               request={focusRequest}
+              rules={cadRules}
+              revision={forge.data?.revision ?? ""}
             />
           </div>
         )}

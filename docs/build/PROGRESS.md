@@ -145,3 +145,13 @@ This is a **planning scope change**. Existing code, saved files and historical e
 5. Advanced FORGE/manufacturing/adjoint/structure, scheduled scientific validation and practical quality fixes.
 
 Root prompt-next.md is the active implementation handoff. Old prompts and historical evidence remain history; do not restore their removed tasks. This scope-edit commit changes plans only, does not delete runtime code/data and does not claim a new implementation/verification pass.
+
+## A06 — 2026-11-04
+
+Extended the vendored Chili3D bridge with a validated `daedalus:rules` overlay: matched part
+materials for fail/at-risk/pass, restore on clear, and a CAD value/limit dimension annotation only
+where FORGE declares a supported axis. The host fetches `/v1/forge/checks` for the open design and
+applies the overlay after iframe load. `Check.axis` is derived from a deliberately small measure
+map; clearance/diameter/mass and manual rules have no axis and stay explicit. Bridge tests cover
+message validation; the vendored app was rebuilt and the bundle copied. Browser click-through is
+still not captured and is stated as the remaining A06 gate. Evidence: `evidence/A06.md`.

@@ -69,3 +69,79 @@ export function focusCad(
     else send();
   });
 }
+
+export interface CadRule {
+  part: string;
+  state: "fail_cad" | "at_risk" | "pass_cad_only" | "manual_review";
+  value: number | null;
+  limit: number | null;
+  unit: string;
+  axis: "x" | "y" | "z" | null;
+  name: string;
+}
+
+export interface CadRulesReply {
+  coloured: string[];
+  dimensions: number;
+  missing: string[];
+  unavailable: string[];
+}
+
+/** Push FORGE rule colours and value/limit dimensions into the embedded CAD overlay. */
+export function applyCadRules(
+  frame: HTMLIFrameElement,
+  revision: string,
+  rules: readonly CadRule[],
+  signal: AbortSignal,
+): Promise<CadRulesReply> {
+  return new Promise((resolve, reject) => {
+    const timer = window.setTimeout(
+      () => finish(new Error("CAD did not answer the rule overlay")),
+      20_000,
+    );
+    function finish(error?: Error, result?: CadRulesReply) {
+      window.clearTimeout(timer);
+      window.removeEventListener("message", receive);
+      signal.removeEventListener("abort", abort);
+      if (result) resolve(result);
+      else reject(error ?? new Error("CAD rule overlay failed"));
+    }
+    function abort() {
+      finish(new Error("CAD rule overlay cancelled"));
+    }
+    function receive(event: MessageEvent<unknown>) {
+      if (event.source !== frame.contentWindow) return;
+      const data = event.data as {
+        type?: string;
+        revision?: string;
+        error?: string;
+        coloured?: string[];
+        dimensions?: number;
+        missing?: string[];
+        unavailable?: string[];
+      };
+      if (data?.type !== "daedalus:rulesApplied" || data.revision !== revision) return;
+      if (data.error) return finish(new Error(data.error));
+      finish(undefined, {
+        coloured: data.coloured ?? [],
+        dimensions: data.dimensions ?? 0,
+        missing: data.missing ?? [],
+        unavailable: data.unavailable ?? [],
+      });
+    }
+    window.addEventListener("message", receive);
+    signal.addEventListener("abort", abort, { once: true });
+    frame.contentWindow?.postMessage(
+      { type: "daedalus:rules", revision, rules },
+      window.location.origin,
+    );
+  });
+}
+
+/** Remove rule materials and dimension annotations from the embedded CAD. */
+export function clearCadRules(frame: HTMLIFrameElement, revision: string): void {
+  frame.contentWindow?.postMessage(
+    { type: "daedalus:clearRules", revision },
+    window.location.origin,
+  );
+}
