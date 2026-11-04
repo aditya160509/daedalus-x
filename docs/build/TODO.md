@@ -5,7 +5,7 @@ Authoritative active scope: build the race-engineering platform. This replaces p
 ## Working rules
 
 - Main only; pull/rebase first, preserve other contributors' dirty work, make small commits and push finished pieces. Update PROGRESS in the same commit. Read only relevant unchanged source/docs, not the entire repository again.
-- These owner-approved plans override conflicting historical tasks in MASTER-PLAN, BUILD-ORDERS, NOW and the completed EASY prompt. Use surviving master IDs as cross-references; do not restore cut deliverables or count them as unfinished engineering.
+- These owner-approved plans override conflicting historical tasks in MASTER-PLAN. Use surviving master IDs as cross-references; do not restore cut deliverables or count them as unfinished engineering.
 - Reuse installed/licensed OpenFOAM, build123d/OCCT, Chili3D, Three/R3F/drei, VTK/PyVista field tools, ECharts, uPlot, TanStack Table v9, SciPy, SALib, Optuna and existing jobs/storage. Use pymoo where actual eligible objectives exist. No duplicate solver, renderer, chart engine or database.
 - Verify actual upstream licences before copying; retain notices and THIRD_PARTY credit. NOASSERTION requires real licence inspection. No licence means no copying/translation. Use TinyFish and primary docs for external research.
 - Quiet engineering UI, existing Base UI/shadcn controls and project tokens, one accent, units, accessible keyboard/focus and loading/empty/error states. Keep forms compact and layouts usable at 1440/1024/375 px.

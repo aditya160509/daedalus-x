@@ -1,4 +1,4 @@
-"""Race analysis (BUILD-ORDERS ORDER 4, C19-C21): where the race time goes and what moves it.
+"""Race analysis : where the race time goes and what moves it.
 
 Three views a team and a judge can act on, all computed with TITAN M2 through the vectorised
 `montecarlo.race_times`, so every number comes from the same model as the race prediction:

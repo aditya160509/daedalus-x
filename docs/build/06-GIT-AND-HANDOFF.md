@@ -24,7 +24,7 @@
   ```
 - Then `git add -A && git commit && git pull --rebase origin main && git push origin main`.
 
-## Handoff note: `evidence/<TASK-ID>.md`
+## Handoff note (in the commit message)
 ```markdown
 # <TASK-ID> — <title>
 **Model:** <name> · **Date:** YYYY-MM-DD · **Status:** review
@@ -47,4 +47,4 @@
 ## References
 - docs/build/references/<TASK-ID>.md
 ```
-Then set the task to `review` in `TASK-BOARD.md`, update `STATUS.md`, commit as `Docs: <TASK-ID> handoff`, and push.
+Then tick the item in `PLAN.md` and `PROGRESS.md`, commit as `Docs: <TASK-ID> handoff`, and push.

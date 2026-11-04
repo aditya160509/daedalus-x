@@ -1,9 +1,0 @@
-# F06: compact calibration and planner forms
-
-Connected Lab day / Track day / Custom presets using the existing Base UI segmented control. The shared protocol defaults set track length/timing SD; Planner also sets alternative length, test budget and coast-down inclusion. Values are explicitly assumed and editable, never measured instrument precision. Car priors, mass and uploaded files are preserved.
-
-Calibration shows two file inputs, mass, track, timing SD and confirmation (six main inputs). Planner shows mass, track, timing SD and budget (four). Existing priors, density, thrust and coast-down settings remain available under a real installed Base UI Collapsible, with keep-mounted contents preserving uploads/settings. Invalid hidden assumptions force the section open. A browser check caught missing closed-state visibility styling; data-closed hiding fixes it. Reopening a saved study is also disabled during active fitting/upload to avoid replacing inputs underneath a result. No new library or copied upstream application code.
-
-Checks: TypeScript and focused Oxlint pass (existing planner list-index warning remains). Brief in-app checks at 1440x900 and 375x812: Lab preset gives 10 m / 1 ms; Track gives 20 m / 5 ms. Planner Track budget 3 returned three real model recommendations. Calibration had six and Planner four visible inputs while collapsed; page width matched viewport at both sizes. Invalid CdA remained visible when collapse was attempted; restoring the valid value allowed collapse. Console error log empty. Screenshots inspected in the in-app tool, not saved as tracked artifacts.
-
-No timing files were uploaded or fitted, no measurements fabricated, and no CFD ran. Physical precision/calibration validation and consolidated app acceptance remain separate. Owned in-app tab and both dev servers were stopped.

@@ -1,4 +1,6 @@
-# PLAN — Daedalus X end-to-end (2026-11-04)
+# PLAN — Daedalus X end-to-end (updated 2026-11-04)
+
+Physical-test items are out of scope and removed. Source of truth for what is left; `PROGRESS.md` records what is done.
 
 This is the single source of truth. It merges MASTER-PLAN, TODO, PROGRESS, UI-REDO and NOW.
 Those five files stay in place as history. When they disagree with this file, this file wins.
@@ -88,16 +90,16 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [x] ✅ Default run is the lowest-Cd accepted run.
 - [x] ✅ When no run is accepted, the latest solved run loads as a preview with an amber "not accepted" badge and greyed numbers (`ae73c0e`).
 - [x] ✅ Compute table: cells, iterations, solver wall time, CPU time and status per run (`9672ffb`, Compute page).
-- [ ] 📝 Animated GPU air, moving floor and camera presets (`FlowTunnel3D.tsx`, `vizBinary.ts`). Uncommitted draft from another contributor.
+- [x] ✅ Animated GPU air coloured by speed, moving floor, camera presets (`6142cd0`).
 - [ ] 🟨 One renderer and one scene for the advanced field layers.
 - [ ] ⬜ Surface LIC and separation lines.
 - [ ] ⬜ Cp probe lines.
 - [ ] ⬜ y+ and bad-cell maps, skewness histogram.
 - [ ] ⬜ Δwake and Δforces, momentum-deficit drag cross-check.
 - [ ] ⬜ Guided run wizard with residual progress and a defensible ETA.
-- [ ] ⬜ Yaw and ride-height sweeps, frontal-area versus drag trade.
+- [x] ✅ Frontal-area versus Cd trade chart with iso-drag curves (`ff6bf40`).
+- [ ] ⬜ Yaw and ride-height sweeps.
 - [ ] ⏳ Accepted current-car baseline, three-mesh GCI, physical correlation.
-- [ ] ⏳ Physical Mac frame rate, memory and first-display time under 3 s.
 
 ### 3.3 Race, replay and timing
 - [x] ✅ CAD-derived car model, 20 m track, tether, start and finish, broadcast cameras.
@@ -110,17 +112,17 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [x] ✅ Optimal legal mass curve from 50.0 g upward with the rule line dashed (`7de8fa2`).
 - [x] ✅ Speed trap: peak and finish speed from the trace, m/s and km/h (`7de8fa2`).
 - [x] ✅ Timing export: CSV and JSON of the trace and speed trap (`7de8fa2`).
-- [ ] 🟨 Event annotations: launch, burnout, peak and finish markers. Built in the other contributor's uncommitted `raceTracks.ts`. Not yet committed.
+- [x] ✅ Event annotations: launch, burnout, peak and finish markers (`aafbe8f`).
 - [ ] 🟨 Session timing: best, last, interval and reaction history. The tower exists. A full saved timing ledger does not.
 - [ ] 🟨 Points distribution. Scenario averages exist. A full distribution does not.
 - [ ] ⬜ Stacked time-budget chart with measured reaction (reaction is fixed at 0 now).
 - [ ] ⬜ Race-level SALib indices and a full variance budget.
 - [ ] ⬜ Best eligible real-run ghost (scenario ghost exists).
 - [ ] ⬜ Leaderboard and history strip in stadium mode.
-- [ ] ⬜ Stadium and TV view: projector layout, fullscreen, panel rotation (F1ReplayTiming pattern, MIT).
+- [x] ✅ Stadium view: fullscreen race-day big numbers (`/race/day`, `750b64f`). Panel rotation still open.
 - [ ] ⬜ Supported tether model through dynamics and energy balance.
-- [ ] ⬜ Race-day actual time and reaction entry, prediction comparison, explicit calibration update.
-- [ ] ⏳ Physical GPU frame rate, input latency, measured replay correlation.
+- [x] ✅ Race-day time and reaction entry with prediction comparison and CSV/JSON export (`750b64f`).
+- [ ] ⬜ Explicit calibration update from race-day runs.
 
 ### 3.4 ORACLE and closed loop
 - [x] ✅ Gaussian process with expected improvement, next-point recommendation, mean and SD map.
@@ -149,7 +151,6 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [ ] ⬜ Across-run error scoreboard over new measurements.
 - [ ] ⬜ Repeat-run control chart and gauge R&R.
 - [ ] ⬜ Entry for part masses, caliper dimensions, coast-down, tether and load-test data.
-- [ ] ⏳ Real material properties and independent held-out validation.
 
 ### 3.6 FORGE (India rules, in app)
 - [x] ✅ India NF rulebook loaded with page, value, limits, state, margin, points at risk.
@@ -163,7 +164,6 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [ ] ⬜ Wall thickness, chamber holes, full section chord, halo comparison.
 - [ ] ⬜ Inspection log: who, tool, when, raw readings, physical part identity.
 - [ ] ⬜ Interactive dimensional what-if.
-- [ ] ⏳ Physical measurement and load-test acceptance.
 
 ### 3.7 Structure (strength)
 - [x] ✅ Beam FEM API and Strength panel with part and load presets. Analytic beam checks.
@@ -171,7 +171,6 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [x] ✅ Configured-part comparison table for up to four captured cases.
 - [ ] ⬜ Safety-factor table across all four strength parts in one view. The comparison table covers captured cases only.
 - [ ] ⬜ Predicted versus measured load-test chart.
-- [ ] ⏳ Real material measurements before CalculiX 3D halo and wing-mount work.
 
 ### 3.8 Records, quality and operations
 - [x] ✅ Saved source, design, run, experiment and model records with content-addressed files and lineage.
@@ -186,12 +185,8 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [ ] 🟨 Practical quality: coverage targets are not set. Property tests are partial. OpenAPI-generated types are not in place.
 - [ ] ⏳ Grouped browser, keyboard, download and responsive review at 1440, 1024 and 375 px.
 
-### 3.9 Pending pushes and dirty work (as of 2026-11-04)
-- [ ] ⏳ Push blocked by the token's missing `workflow` scope. Local commits wait for the owner's token.
-- [ ] 📝 Other contributors' uncommitted files: `raceTracks.ts`, `race.py`, `api.ts`, `FlowTunnel3D.tsx`, `vizBinary.ts`, `HeroRender.tsx`, `MASTER-PLAN.md` and two evidence notes.
-- [x] ✅ Test commit `d42e65f` imports the `markers` API from `raceTracks.ts`. The test passes only with the other contributor's uncommitted `raceTracks.ts`.
-
----
+### 3.9 Repo state
+- [x] ✅ All work committed and pushed; CI workflow lives in `.github/workflows/ci.yml`. Old planning docs (NOW, HANDOFF, TASK-BOARD, BUILD-ORDERS, CUT-AND-ADD, RATINGS, UI-MASTER-PLAN, task files, agent notes) removed 2026-11-04.
 
 ## 4. Analyses and charts (one status per chart)
 
@@ -251,13 +246,13 @@ Each chart needs: shared theme, units on axes, a source tag, hairline grid, dash
 **Bar:** Linear, Vercel dashboard, T3 Code. Quiet, dense, precise. No glow, gradient cards, emoji or decorative icons.
 
 - [ ] ⬜ 0. Fix the Next.js "1 Issue" runtime error. Not checked since the last screenshot.
-- [ ] 🟨 1. Moving air. The preview fallback is built. The particle view is still an uncommitted draft.
-- [ ] 🟨 2. Outputs tab. Built (`b261ced`). Needs the Wind Tunnel and Strength cards.
+- [x] ✅ 1. Moving air: GPU particles coloured by speed, preview fallback.
+- [x] ✅ 2. Outputs tab (`b261ced`) and Wind Tunnel Analysis tab (`b22461b`). Strength card still open.
 - [ ] ⬜ 3. Inspect redo: smooth shading, rule colours on parts, dimension lines, View, Measure, Section, Compare tabs, model table with units.
 - [ ] ⬜ 4. Strength redo: part sketch with the load arrow, one compact input row, one deflection chart and one stress chart with the limit band, one summary row, all-part table.
-- [ ] 🟨 5. Visual system. Tokens exist. Chart theme exists. Port t3code primitives to `components/ui` and align buttons and cards.
+- [x] ✅ 5. Visual system: T3 Code / affectUI tokens (#111113 cards, 8% hairline borders, desaturated accent, flat status colours), 32 px compact buttons, white primary, underline tabs, 8 px radius, no glows.
 - [ ] ⬜ 6. Performance: lazy 3D, one WebGL context per page, dispose resources, demand-driven frames, bundle check.
-- [ ] ⬜ 7. Apply the system to Pit Wall, Race and Project. Project is cut.
+- [ ] 🟨 7. Tokens apply app-wide. Pit Wall Flow panel still blank; Race replay needs the display mesh.
 - [ ] ⏳ 8. Screenshot at 1440, compare with Linear and Vercel, fix anything louder than them.
 
 **Visual tokens (target):** background `#0B0B0C`; surfaces `#111113` and `#161618`; borders `rgba(255,255,255,0.08)`; text `#EDEDEF`, `#A0A0A8`, `#6B6B73`; one accent for selected tab, focus and the primary series; status as 6 px flat dots or text, no glow.
@@ -310,13 +305,11 @@ Verify a licence before copying code. Keep the notice. No licence means no copyi
 
 These items cannot be finished in software alone.
 - [ ] ⏳ Accepted CFD: a three-mesh GCI study, a speed sweep, and a baseline run that passes the gates. Needs an explicit go-ahead to run solvers.
-- [ ] ⏳ Physical timing: paired track runs, reaction samples, coast-down data, thrust cartridge repeatability.
 - [ ] ⏳ Mass and dimensions: part masses and caliper measurements for the car.
 - [ ] ⏳ Material properties: measured yield and modulus for the strength parts.
 - [ ] ⏳ Load tests: measured deflection and failure load to compare with the beam FEM.
 - [ ] ⏳ Rule text: the official India rule pages, to reconcile the 79 YAML rule entries.
 - [ ] ⏳ Race-day timing: a live or recorded event ledger for calibration and the stadium view.
-- [ ] ⏳ Physical GPU: a real Mac for frame rate and memory checks.
 
 ---
 

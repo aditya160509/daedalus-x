@@ -12,10 +12,10 @@ The owner reviews and verifies. **You build.** Do not ask the owner questions. W
 5. `04-UI-QUALITY-BAR.md`: the visual standard (commercial F1 or CFD-vendor grade)
 6. `05-RESEARCH-PROTOCOL.md`: how to research with TinyFish and record links
 7. `06-GIT-AND-HANDOFF.md`: GitHub, commits, pushing, handoff notes
-8. Then **one task file** from `tasks/`, the next one marked `todo` in `TASK-BOARD.md`.
+8. `PLAN.md`: what is left and how to build it (pick the next unchecked item). `PROGRESS.md` tracks what is done; `UI-REDO.md` is the visual standard.
 
 ## 2. Mission in one paragraph
-Daedalus X is a local-first race-engineering cockpit for a STEM Racing (F1 in Schools) CO₂ car. It imports the car's CAD and runs real OpenFOAM CFD on a Mac. It shows the airflow like a commercial wind tunnel (AETHER) and predicts race time with uncertainty (TITAN). It suggests the next best design experiment (ORACLE), checks the rulebook (FORGE), and keeps a tamper-proof record of every claim (ATLAS). It also presents everything to judges (Competition Mode). Everything is free and open source and runs on one Apple-silicon Mac (10 cores, 16 GB).
+Daedalus X is a local-first race-engineering cockpit for a STEM Racing (F1 in Schools) CO₂ car. It imports the car's CAD and runs real OpenFOAM CFD on a Mac. It shows the airflow like a commercial wind tunnel (AETHER) and predicts race time with uncertainty (TITAN). It suggests the next best design experiment (ORACLE), checks the rulebook (FORGE), and keeps a tamper-proof record of every claim (ATLAS). Everything is free and open source and runs on one Apple-silicon Mac (10 cores, 16 GB).
 
 ## 3. Hard constraints
 - **Free only.** No paid APIs, SaaS, cloud CFD or licence-locked software.
@@ -31,14 +31,13 @@ Daedalus X is a local-first race-engineering cockpit for a STEM Racing (F1 in Sc
 | Write production code, unit tests and type-clean code | Browser or visual QA, screenshots, Playwright runs (the reviewer does this) |
 | Run `ruff`, `pyrefly check`, `pytest` (only the tests you touched, plus the full suite once at the end), `npm run check` (tsrs + type-aware oxlint + vitest) | Long CFD campaigns. Run at most **one** `quick` case to prove a pipeline works, in the background |
 | Research with TinyFish and record links | Invent features beyond the task file |
-| Update `STATUS.md`, `TASK-BOARD.md` and write an evidence note | Touch other tasks' files unless the task says so |
+| Tick the item in `PLAN.md` and `PROGRESS.md` | Touch other tasks' files unless the task says so |
 
 ## 5. Definition of done (every task)
-1. Every acceptance item in the task file is met.
+1. The `PLAN.md` item's acceptance is met.
 2. Checks are green: `uv run ruff check . && uv run pyrefly check && uv run pytest -q`, and in `apps/cockpit`: `pnpm check`.
-3. `evidence/<TASK-ID>.md` is written: what was built, files, commands run with output, decisions, known gaps.
-4. `TASK-BOARD.md` row set to `review`, and the `STATUS.md` row updated.
-5. Committed and pushed to `origin main`.
+3. The item is ticked in `PLAN.md` and `PROGRESS.md`.
+4. Committed and pushed to `origin main`.
 
 ## 6. Order of work
-See `TASK-BOARD.md`. Tasks are ordered so each builds on finished work. Two models may work at once **only** on tasks marked parallel-safe there, because they touch disjoint files.
+Follow `PLAN.md` top to bottom. Two models may work at once only on items that touch disjoint files.

@@ -35,10 +35,9 @@ daedalus-x/
 │       │   └── viewer/                  CarViewer (GLB), FlowViewer (fields)
 │       └── lib/                         api.ts (Zod + fetchers), colormap.ts, gltf.ts, thrust.ts, utils.ts
 ├── data/ (git-ignored)        designs/<id>/, runs/<id>/, reference/
-├── evidence/                  one markdown note per finished task (+ screens/)
+├── evidence/                  screenshots (screens/)
 ├── docs/SPEC.md               the spec (Appendix B = visual feature list)
 ├── docs/build/                THIS PACK
-└── STATUS.md                  step table
 ```
 
 ## Data on disk you can use now
