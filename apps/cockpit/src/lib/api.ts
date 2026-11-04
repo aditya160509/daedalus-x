@@ -541,8 +541,12 @@ const OraclePareto = z.object({
       params: z.record(z.string(), z.number()),
       cda_m2: z.number(),
       cda_sd_m2: z.number(),
+      race_p50_s: z.number(),
+      race_p90_s: z.number(),
     }),
   ),
+  robust_index: z.number(),
+  race_spread: z.record(z.string(), z.number()),
   provenance: z.literal("predicted"),
 });
 type OraclePareto = z.infer<typeof OraclePareto>;

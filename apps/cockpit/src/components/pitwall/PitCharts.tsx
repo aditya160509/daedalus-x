@@ -130,6 +130,8 @@ export function AeroMap({ s }: { s: OracleState }) {
 export function ParetoFront() {
   const q = useQuery({ queryKey: ["oracle-pareto"], queryFn: getOraclePareto, staleTime: 60_000 });
   const pts = q.data?.points ?? [];
+  const robust = q.data?.robust_index ?? -1;
+  const pick = pts[robust];
   const host = useECharts(() => {
     const t = chartTheme();
     return {
@@ -143,6 +145,7 @@ export function ParetoFront() {
           const d = pts[p.dataIndex];
           return [
             `CdA ${(d.cda_m2 * 1e4).toFixed(3)} cm² ± ${(d.cda_sd_m2 * 1e4).toFixed(3)}`,
+            `Race P50 ${d.race_p50_s.toFixed(3)} s · P90 ${d.race_p90_s.toFixed(3)} s`,
             ...Object.entries(d.params).map(([k, v]) => `${k}: ${v.toFixed(2)}`),
           ].join("<br/>");
         },
@@ -171,11 +174,37 @@ export function ParetoFront() {
           symbolSize: 7,
           lineStyle: { color: t.lineStrong, width: 1 },
           itemStyle: { color: t.brand },
-          data: pts.map((d) => [d.cda_m2 * 1e4, d.cda_sd_m2 * 1e4]),
+          data: pts.map((d, i) => ({
+            value: [d.cda_m2 * 1e4, d.cda_sd_m2 * 1e4],
+            symbolSize: i === robust ? 14 : 7,
+            itemStyle:
+              i === robust ? { color: t.ok, borderColor: t.text, borderWidth: 1 } : undefined,
+          })),
         },
       ],
     };
-  }, [pts]);
+  }, [pts, robust]);
   if (q.error) return <p className="p-4 text-sm text-destructive">{q.error.message}</p>;
-  return <div ref={host} className="h-full min-h-80 w-full" />;
+  return (
+    <div className="flex h-full flex-col gap-2">
+      {pick && (
+        <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 rounded-lg border border-border px-3 py-2 text-xs">
+          <span className="text-ok">Robust pick (best P90 race time)</span>
+          <span className="tabular font-mono">
+            P50 {pick.race_p50_s.toFixed(3)} s · P90 {pick.race_p90_s.toFixed(3)} s
+          </span>
+          <span className="tabular font-mono text-muted-foreground">
+            {Object.entries(pick.params)
+              .map(([k, v]) => `${k} ${v.toFixed(1)}`)
+              .join(" · ")}
+          </span>
+        </div>
+      )}
+      <div ref={host} className="min-h-80 w-full flex-1" />
+      <p className="text-[11px] text-text-3">
+        P90 = the time you beat 9 runs in 10, with cartridge ±3%, rolling ±0.002 and mass ±0.5 g
+        (assumed until calibrated) plus the model&apos;s own drag uncertainty.
+      </p>
+    </div>
+  );
 }

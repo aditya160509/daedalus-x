@@ -12,3 +12,11 @@ def test_pareto_front_is_nondominated_and_feasible() -> None:
     assert oracle.study_feasible(front["unit"]).all()
     for i, a in enumerate(f):
         assert not any((b <= a).all() and (b < a).any() for j, b in enumerate(f) if j != i)
+
+
+def test_robust_times_penalise_uncertainty() -> None:
+    from daedalus.api.oracle import robust_times
+
+    p50, p90 = robust_times(np.array([0.0025, 0.0025]), np.array([1e-5, 4e-4]))
+    assert (p90 > p50).all()
+    assert p90[1] > p90[0]

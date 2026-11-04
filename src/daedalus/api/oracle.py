@@ -116,6 +116,8 @@ def pareto_front() -> dict[str, object]:
     gp = oracle.GP(np.array([o.params for o in obs]), np.array([o.cda_m2 for o in obs]))
     front = oracle.pareto(gp)
     names = [v.name for v in oracle.VARIABLES]
+    p50, p90 = robust_times(front["cda_m2"], front["cda_sd_m2"])
+    best = int(np.nanargmin(p90))
     return {
         "objectives": ["cda_m2", "cda_sd_m2"],
         "points": [
@@ -123,11 +125,39 @@ def pareto_front() -> dict[str, object]:
                 "params": dict(zip(names, oracle.to_physical(u).tolist(), strict=True)),
                 "cda_m2": float(m),
                 "cda_sd_m2": float(s),
+                "race_p50_s": float(a),
+                "race_p90_s": float(b),
             }
-            for u, m, s in zip(front["unit"], front["cda_m2"], front["cda_sd_m2"], strict=True)
+            for u, m, s, a, b in zip(
+                front["unit"], front["cda_m2"], front["cda_sd_m2"], p50, p90, strict=True
+            )
         ],
+        "robust_index": best,
+        "race_spread": ROBUST_SPREAD,
         "provenance": "predicted",
     }
+
+
+# Declared 1-sigma race-day spreads (assumed until calibrated): cartridge, rolling, mass.
+ROBUST_SPREAD = {"thrust_scale": 0.03, "crr": 0.002, "mass_kg": 0.0005}
+ROBUST_N = 400
+
+
+def robust_times(cda: np.ndarray, cda_sd: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Median and 90th-percentile race time per design under GP and race-day uncertainty."""
+    rng = np.random.default_rng(7)
+    n, k = len(cda), ROBUST_N
+    c = np.clip(np.repeat(cda, k) + rng.standard_normal(n * k) * np.repeat(cda_sd, k), 1e-5, None)
+    times = montecarlo.race_times(
+        THRUST,
+        1 + rng.standard_normal(n * k) * ROBUST_SPREAD["thrust_scale"],
+        MASS_KG + rng.standard_normal(n * k) * ROBUST_SPREAD["mass_kg"],
+        c,
+        np.clip(CRR + rng.standard_normal(n * k) * ROBUST_SPREAD["crr"], 0.0, None),
+        RHO,
+        TRACK_M,
+    ).reshape(n, k)
+    return np.nanpercentile(times, 50, axis=1), np.nanpercentile(times, 90, axis=1)
 
 
 @router.post("/observations")
