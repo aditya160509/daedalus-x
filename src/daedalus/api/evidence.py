@@ -6,6 +6,7 @@ import json
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Path, Query
+from fastapi.responses import PlainTextResponse
 
 from daedalus import coverage
 from daedalus.api.engineering import data_root
@@ -133,3 +134,23 @@ def verify_artifact(
         raise HTTPException(503, "Artifact storage is currently unreadable") from exc
     finally:
         store.close()
+
+
+@router.get("/ai-log")
+def ai_log() -> dict[str, object]:
+    """AI Assistance and Verification Log rows from the repository history."""
+    from daedalus import ailog
+
+    rows = ailog.entries(data_root().parent)
+    return {"rule": "STEM Racing C2.18.3", "count": len(rows), "rows": rows}
+
+
+@router.get("/ai-log.csv", response_class=PlainTextResponse)
+def ai_log_csv() -> PlainTextResponse:
+    from daedalus import ailog
+
+    return PlainTextResponse(
+        ailog.to_csv(ailog.entries(data_root().parent)),
+        media_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="ai-assistance-log.csv"'},
+    )

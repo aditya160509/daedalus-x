@@ -124,6 +124,14 @@ export function EvidenceDrawer() {
         <div className="flex items-center gap-2 border-b p-4 pr-12">
           <FileStack className="size-4 text-muted-foreground" aria-hidden />
           <SheetTitle className="text-sm font-medium">Evidence</SheetTitle>
+          <a
+            href="/api/v1/evidence/ai-log.csv"
+            download
+            title="AI Assistance and Verification Log (STEM Racing C2.18.3), from the git history"
+            className="rounded-md border border-border px-2 py-0.5 text-[11px] text-muted-foreground hover:bg-accent hover:text-foreground"
+          >
+            AI log CSV
+          </a>
           {mode === "timeline" && rows.data && (
             <span
               className={cn(

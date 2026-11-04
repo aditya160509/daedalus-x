@@ -95,7 +95,8 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [ ] ⬜ Surface LIC and separation lines.
 - [ ] ⬜ Cp probe lines.
 - [ ] ⬜ y+ and bad-cell maps, skewness histogram.
-- [ ] ⬜ Δwake and Δforces, momentum-deficit drag cross-check.
+- [x] ✅ Momentum-deficit wake drag cross-check, wake loss map, drag by part (`1d4a1f3`).
+- [ ] ⬜ Δwake and Δforces between two runs.
 - [x] ✅ Run monitor: residual chart per field and ETA in the Jobs drawer (`4853264`).
 - [x] ✅ Frontal-area versus Cd trade chart with iso-drag curves (`ff6bf40`).
 - [ ] ⬜ Yaw and ride-height sweeps.
@@ -125,6 +126,7 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [ ] ⬜ Explicit calibration update from race-day runs.
 
 ### 3.4 ORACLE and closed loop
+- [x] ✅ Robust pick: P50/P90 race time per Pareto design under drag and race-day uncertainty (`9744fab`).
 - [x] ✅ Gaussian process with expected improvement, next-point recommendation, mean and SD map.
 - [x] ✅ Study-family feasibility filter.
 - [x] ✅ SALib sensitivity on the fitted GP. Length scales, noise, optimiser status.
@@ -182,6 +184,7 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [ ] 🟨 Per-screen provenance labels are not yet consistent everywhere.
 - [ ] 🟨 Chart exports (PNG on every new chart), linked cursors and keyboard access for every table.
 - [ ] ⬜ Source-linked decision log and engineering rationale record.
+- [x] ✅ AI Assistance and Verification Log (rule C2.18.3) exported from git history as CSV in the Evidence drawer.
 - [ ] 🟨 Practical quality: coverage targets are not set. Property tests are partial. OpenAPI-generated types are not in place.
 - [ ] ⏳ Grouped browser, keyboard, download and responsive review at 1440, 1024 and 375 px.
 
@@ -260,6 +263,10 @@ Each chart needs: shared theme, units on axes, a source tag, hairline grid, dash
 **Spacing:** 4 px grid. Cards 16 px padding, radius 8, 1 px border, no shadow.
 
 ---
+
+## 5b. Innovation backlog (researched 2026-11-04)
+- [ ] ⬜ Live wind tunnel: GPU lattice-Boltzmann preview while editing. FluidX3D (non-commercial licence: run as a separate optional program, never vendored) or MarcosAsh/Lattice_Fluid_Dynamics (MIT).
+- [ ] ⬜ Neural field surrogate: fine-tune NVIDIA Transolver (DrivAerML, PhysicsNeMo, Apache-2.0) on our runs for instant pressure/wake fields; label "predicted".
 
 ## 6. Open-source map
 
