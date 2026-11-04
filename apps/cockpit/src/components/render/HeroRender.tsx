@@ -1,9 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Download } from "lucide-react";
 import { useState } from "react";
-import { listCfdRuns, RENDER_VIEWS, type RenderView, renderUrl } from "@/lib/api";
+import { listCfdRuns, type RenderView, renderUrl } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 /** The lowest-Cd solved run with a flow field: the one the hero renders show. */
@@ -52,41 +51,6 @@ export function HeroImage({
           {status === "loading" ? "Rendering flow image…" : "Render unavailable for this run"}
         </div>
       )}
-    </div>
-  );
-}
-
-/** Wind Tunnel "Render" tab: hero still with view switcher and download. */
-export function RenderPanel({ runId }: { runId: string }) {
-  const [view, setView] = useState<RenderView>("iso");
-  return (
-    <div className="flex h-full min-h-0 flex-col gap-2">
-      <div className="flex items-center gap-1">
-        {RENDER_VIEWS.map((v) => (
-          <button
-            key={v}
-            type="button"
-            onClick={() => setView(v)}
-            aria-pressed={view === v}
-            className={cn(
-              "rounded-md px-2.5 py-1 text-xs capitalize",
-              view === v
-                ? "bg-foreground text-background"
-                : "text-muted-foreground hover:bg-accent",
-            )}
-          >
-            {v}
-          </button>
-        ))}
-        <a
-          href={renderUrl(runId, view)}
-          download={`${runId}_${view}.png`}
-          className="ml-auto inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
-        >
-          <Download className="size-3.5" /> PNG
-        </a>
-      </div>
-      <HeroImage runId={runId} view={view} fit="contain" className="min-h-0 flex-1" />
     </div>
   );
 }

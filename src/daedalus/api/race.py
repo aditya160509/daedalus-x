@@ -75,10 +75,9 @@ def _downsample(n: int) -> np.ndarray:
     return np.unique(np.linspace(0, n - 1, MAX_CHANNEL_SAMPLES).round().astype(int))
 
 
-@router.post("/simulate", response_model=RaceSimulationResponse)
-def simulate_race(req: RaceSimulationRequest) -> RaceSimulationResponse:
+def _car(req: RaceSimulationRequest) -> CarParams:
     thrust = ThrustCurve(np.asarray(req.thrust.t_s, float), np.asarray(req.thrust.force_n, float))
-    car = CarParams(
+    return CarParams(
         mass_kg=req.mass_kg,
         track_length_m=req.track_length_m,
         thrust=thrust,
@@ -86,7 +85,11 @@ def simulate_race(req: RaceSimulationRequest) -> RaceSimulationResponse:
         crr=req.crr,
         rho_kg_m3=req.rho_kg_m3,
     )
-    res = simulate(car, ModelLevel(req.model))
+
+
+@router.post("/simulate", response_model=RaceSimulationResponse)
+def simulate_race(req: RaceSimulationRequest) -> RaceSimulationResponse:
+    res = simulate(_car(req), ModelLevel(req.model))
     idx = _downsample(res.t.size)
     terms = res.force_terms
     net = terms["thrust_n"] - terms["drag_n"] - terms["rolling_n"]
@@ -112,6 +115,129 @@ def simulate_race(req: RaceSimulationRequest) -> RaceSimulationResponse:
             ch("rolling_resistance", "N", terms["rolling_n"]),
         ],
     )
+
+
+class GhostCandidate(BaseModel):
+    """A saved run configuration, not a measured run."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(min_length=1, max_length=80)
+    name: str = Field(min_length=1, max_length=60)
+    mass_kg: float = Field(gt=0, le=1)
+    track_length_m: float = Field(gt=0, le=100)
+    cda_m2: float = Field(ge=0, le=0.05)
+    crr: float = Field(ge=0, le=1)
+    rho_kg_m3: float = Field(default=1.204, gt=0.5, lt=1.5)
+    model: Literal["M1", "M2"] = "M2"
+
+
+class BestGhostRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    race: RaceSimulationRequest
+    candidates: list[GhostCandidate] = Field(default_factory=list, max_length=50)
+
+
+class GhostCandidateResult(BaseModel):
+    id: str
+    name: str
+    eligible: bool
+    reason: str
+    time_s: float | None
+    gap_ms: float | None
+
+
+class BestGhostResponse(BaseModel):
+    best: GhostCandidateResult | None
+    candidates: list[GhostCandidateResult]
+
+
+@router.post("/best-ghost", response_model=BestGhostResponse)
+def best_ghost(req: BestGhostRequest) -> BestGhostResponse:
+    """Rank saved configurations for ghost comparison against the current run.
+
+    A candidate is eligible only when it runs the same finish distance, differs from the primary
+    configuration, and actually finishes. The primary run's thrust curve and air density are used,
+    so the comparison isolates the saved mass/CdA/Crr/model change.
+    """
+    primary = req.race
+    primary_run = simulate(_car(primary), ModelLevel(primary.model))
+    primary_time = primary_run.time_s if primary_run.finished else None
+    results: list[GhostCandidateResult] = []
+    for candidate in req.candidates:
+        if abs(candidate.track_length_m - primary.track_length_m) > 1e-9:
+            results.append(
+                GhostCandidateResult(
+                    id=candidate.id,
+                    name=candidate.name,
+                    eligible=False,
+                    reason=(
+                        "different finish distance: "
+                        f"{candidate.track_length_m:g} m vs {primary.track_length_m:g} m"
+                    ),
+                    time_s=None,
+                    gap_ms=None,
+                )
+            )
+            continue
+        same = (
+            abs(candidate.mass_kg - primary.mass_kg) < 1e-12
+            and abs(candidate.cda_m2 - primary.cda_m2) < 1e-12
+            and abs(candidate.crr - primary.crr) < 1e-12
+            and abs(candidate.rho_kg_m3 - primary.rho_kg_m3) < 1e-12
+            and candidate.model == primary.model
+        )
+        if same:
+            results.append(
+                GhostCandidateResult(
+                    id=candidate.id,
+                    name=candidate.name,
+                    eligible=False,
+                    reason="same configuration as the primary run",
+                    time_s=None,
+                    gap_ms=None,
+                )
+            )
+            continue
+        run = RaceSimulationRequest(
+            model=candidate.model,
+            mass_kg=candidate.mass_kg,
+            track_length_m=candidate.track_length_m,
+            thrust=primary.thrust,
+            cda_m2=candidate.cda_m2,
+            crr=candidate.crr,
+            rho_kg_m3=candidate.rho_kg_m3,
+            input_provenance=primary.input_provenance,
+        )
+        res = simulate(_car(run), ModelLevel(run.model))
+        if not res.finished or res.time_s is None:
+            results.append(
+                GhostCandidateResult(
+                    id=candidate.id,
+                    name=candidate.name,
+                    eligible=False,
+                    reason=f"does not finish: {res.stop_reason}",
+                    time_s=None,
+                    gap_ms=None,
+                )
+            )
+            continue
+        gap_ms = (res.time_s - primary_time) * 1000.0 if primary_time is not None else None
+        results.append(
+            GhostCandidateResult(
+                id=candidate.id,
+                name=candidate.name,
+                eligible=True,
+                reason="finished",
+                time_s=res.time_s,
+                gap_ms=gap_ms,
+            )
+        )
+
+    eligible = [result for result in results if result.eligible]
+    best = min(eligible, key=lambda result: result.time_s or float("inf")) if eligible else None
+    return BestGhostResponse(best=best, candidates=results)
 
 
 class UncertaintyInput(BaseModel):

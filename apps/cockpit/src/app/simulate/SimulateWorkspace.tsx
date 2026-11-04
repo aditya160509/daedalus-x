@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, CheckCircle2, CircleDashed, Wind, XCircle } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useMemo } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { JobsDrawer } from "@/components/jobs/JobsDrawer";
 import { NewRunDialog } from "@/components/jobs/NewRunDialog";
 import { DragBuildupChart } from "@/components/charts/DragBuildupChart";
@@ -36,11 +36,23 @@ const FlowViewer3D = dynamic(() => import("./FlowViewer3D").then((m) => m.FlowVi
   loading: () => <p className="p-4 text-xs text-muted-foreground">Loading 3D viewer…</p>,
 });
 
+const FlowTunnel3D = dynamic(() => import("./FlowTunnel3D").then((m) => m.FlowTunnel3D), {
+  ssr: false,
+  loading: () => <p className="p-4 text-xs text-muted-foreground">Loading particles…</p>,
+});
+
 const RHO = 1.204; // kg/m³, matches the case template
 const CD_WINDOW = 200; // iterations used by the acceptance gate
 
 const fmt = (v: number | null | undefined, digits = 4) =>
   v == null || !Number.isFinite(v) ? "—" : v.toPrecision(digits);
+
+// The query cache can fill before the route boundary hydrates. Render the server's loading
+// shell on the first client pass so hydration never compares fetched data against SSR markup.
+const subscribeNever = () => () => undefined;
+const clientHydrated = () => true;
+const serverHydrated = () => false;
+const useHydrated = () => useSyncExternalStore(subscribeNever, clientHydrated, serverHydrated);
 
 export function SimulateWorkspace() {
   const runs = useQuery({ queryKey: ["cfd-runs"], queryFn: listCfdRuns, refetchInterval: 15_000 });
@@ -55,12 +67,7 @@ export function SimulateWorkspace() {
     refetchInterval: (q) => (q.state.data?.state === "running" ? 10_000 : false),
   });
 
-  if (runs.isError)
-    return (
-      <EmptyState icon={<AlertTriangle />} title="API unreachable">
-        Start the API with <code className="font-mono">uv run daedalus-api</code>.
-      </EmptyState>
-    );
+  const hydrated = useHydrated();
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -73,7 +80,13 @@ export function SimulateWorkspace() {
           <JobsDrawer />
         </div>
       </header>
-      {runs.data?.length === 0 ? (
+      {!hydrated ? (
+        <div className="flex-1 animate-pulse rounded-lg bg-surface-2" />
+      ) : runs.isError ? (
+        <EmptyState icon={<AlertTriangle />} title="API unreachable">
+          Start the API with <code className="font-mono">uv run daedalus-api</code>.
+        </EmptyState>
+      ) : runs.data?.length === 0 ? (
         <div className="flex min-h-0 flex-1">
           <EmptyState icon={<Wind />} title="No CFD runs yet">
             Import a design, then use New run to queue an approved case.
@@ -93,7 +106,7 @@ export function SimulateWorkspace() {
           runs={runs.data ?? []}
         />
       ) : (
-        <div className="flex-1 animate-pulse rounded-xl bg-surface-2" />
+        <div className="flex-1 animate-pulse rounded-lg bg-surface-2" />
       )}
     </div>
   );
@@ -109,6 +122,7 @@ function RunView({
   runs: { run_id: string; state: string }[];
 }) {
   const [tab, setTab] = useTab(TUNNEL_TABS);
+  const [flowView, setFlowView] = useState<"particles" | "layers">("particles");
   const buildup = useQuery({
     queryKey: ["drag-buildup", run.run_id],
     queryFn: () => getDragBuildup(run.run_id),

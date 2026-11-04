@@ -54,13 +54,71 @@ export function buildTracks(sim: RaceSimulation): TelemetryTrack[] {
   ];
 }
 
-export function markers(sim: RaceSimulation, time: number[]): Array<{ t: number; label: string }> {
-  const out: Array<{ t: number; label: string }> = [];
-  const burn = channelOf(sim, "thrust");
-  const lastBurn = burn.findLastIndex((v) => v > 0);
-  if (lastBurn > 0 && time[lastBurn] !== undefined) {
-    out.push({ t: time[lastBurn], label: "burn end" });
+export type RaceMarkerKind = "launch" | "burnout" | "peak" | "finish" | "stop";
+
+export interface RaceMarker {
+  t: number;
+  label: string;
+  kind: RaceMarkerKind;
+}
+
+const stamp = (t: number) => `${t.toFixed(3)} s`;
+
+/**
+ * Event annotations derived from the returned trace, never from assumed constants:
+ *
+ * - launch = first sample with positive thrust (time zero for a constant-acceleration run);
+ * - burnout = last sample with positive thrust;
+ * - peak = sample with the highest velocity;
+ * - finish = the model's finish time, only when `finished` is true;
+ * - stop = final sample of a non-finishing run, labelled with the solver's stop reason.
+ *
+ * Coincident events share one marker so labels cannot overdraw on the chart.
+ */
+export function markers(sim: RaceSimulation, time: number[]): RaceMarker[] {
+  const out: RaceMarker[] = [];
+  const push = (t: number | undefined, label: string, kind: RaceMarkerKind) => {
+    if (t === undefined || !Number.isFinite(t)) return;
+    out.push({ t, label: `${label} ${stamp(t)}`, kind });
+  };
+
+  const thrust = channelOf(sim, "thrust");
+  const velocity = channelOf(sim, "velocity");
+
+  const launchIndex = thrust.findIndex((value) => value > 0);
+  if (launchIndex >= 0) push(time[launchIndex], "launch", "launch");
+  else push(time[0], "launch", "launch");
+
+  const burnIndex = thrust.findLastIndex((value) => value > 0);
+  if (burnIndex >= 0) push(time[burnIndex], "burnout", "burnout");
+
+  let peakIndex = -1;
+  let peak = -Infinity;
+  velocity.forEach((value, index) => {
+    if (Number.isFinite(value) && value > peak) {
+      peak = value;
+      peakIndex = index;
+    }
+  });
+  if (peakIndex >= 0) push(time[peakIndex], "peak", "peak");
+
+  if (sim.finished && sim.time_s !== null) {
+    push(sim.time_s, "finish", "finish");
+  } else {
+    const reason = sim.stop_reason.trim();
+    push(
+      time[time.length - 1],
+      reason ? `stop · ${reason}` : "stop",
+      "stop",
+    );
   }
-  if (sim.time_s !== null) out.push({ t: sim.time_s, label: "finish" });
-  return out;
+
+  const merged = new Map<number, RaceMarker>();
+  for (const marker of out) {
+    const key = Math.round(marker.t * 1e6) / 1e6;
+    const previous = merged.get(key);
+    if (previous) previous.label = `${previous.label} · ${marker.label}`;
+    else merged.set(key, { ...marker });
+  }
+  return [...merged.values()].sort((a, b) => a.t - b.t);
 }

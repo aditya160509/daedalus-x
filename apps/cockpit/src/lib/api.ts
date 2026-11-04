@@ -179,7 +179,7 @@ const CfdRunSummary = z.object({
 type CfdRunSummary = z.infer<typeof CfdRunSummary>;
 export const listCfdRuns = () => request("/v1/cfd/runs", z.array(CfdRunSummary));
 
-export const RENDER_VIEWS = ["iso", "side", "top", "front"] as const;
+const RENDER_VIEWS = ["iso", "side", "top", "front"] as const;
 export type RenderView = (typeof RENDER_VIEWS)[number];
 /** Server-rendered hero still (PNG, cached on disk after the first request). */
 export const renderUrl = (runId: string, view: RenderView = "iso") =>
@@ -345,6 +345,38 @@ export const VizMeta = z.object({
 });
 export type VizMeta = z.infer<typeof VizMeta>;
 type BufRef = z.infer<typeof BufRef>;
+
+export const velocityMetaUrl = (runId: string) =>
+  `/api/v1/cfd/runs/${encodeURIComponent(runId)}/vtk/velocity.json`;
+export const velocityTextureUrl = (runId: string) =>
+  `/api/v1/cfd/runs/${encodeURIComponent(runId)}/vtk/velocity.bin`;
+export const vizMetaUrl = (runId: string) =>
+  `/api/v1/cfd/runs/${encodeURIComponent(runId)}/viz.json`;
+export const vizBinUrl = (runId: string) => `/api/v1/cfd/runs/${encodeURIComponent(runId)}/viz.bin`;
+
+export const VelocityMeta = z.object({
+  version: z.number(),
+  format: z.literal("float32-le"),
+  components: z.tuple([
+    z.literal("u_over_uinf"),
+    z.literal("v_over_uinf"),
+    z.literal("w_over_uinf"),
+    z.literal("valid"),
+  ]),
+  order: z.string(),
+  dims: z.tuple([z.number(), z.number(), z.number()]),
+  origin_m: z.tuple([z.number(), z.number(), z.number()]),
+  spacing_m: z.tuple([z.number(), z.number(), z.number()]),
+  bounds_m: z.array(z.number()).length(6),
+  U_m_s: z.number().positive(),
+  valid_fraction: z.number().min(0).max(1),
+  speed_ratio_range: z.tuple([z.number(), z.number()]),
+  bytes: z.number().int().nonnegative(),
+  time: z.string(),
+  source: z.string(),
+  provenance: z.literal("simulated"),
+});
+export type VelocityMeta = z.infer<typeof VelocityMeta>;
 
 export const DragBuildup = z.discriminatedUnion("wall_shear", [
   z.object({

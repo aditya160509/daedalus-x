@@ -23,5 +23,7 @@
 
 - The texture is simulated RANS data from a **rejected** reference run; it is not accepted CFD
   evidence.
-- Particles, surface Cp in three.js, slice controls and the 60 fps budget are not built yet.
+- Particles, surface Cp in three.js, slice controls and the 60 fps budget were not built in this
+  step. Follow-up: the particle layer now exists and is the default Flow view; see
+  [`WIND-TUNNEL-particles.md`](WIND-TUNNEL-particles.md).
 - No browser or GPU validation was performed in this step.

@@ -69,6 +69,63 @@ def test_unsorted_thrust_rejected() -> None:
     assert r.status_code == 422
 
 
+def test_best_ghost_ranks_compatible_finished_runs() -> None:
+    candidate = {
+        "id": "light",
+        "name": "Light",
+        "mass_kg": 0.04,
+        "track_length_m": 20.0,
+        "cda_m2": 0.0,
+        "crr": 0.0,
+        "model": "M1",
+    }
+    payload = {
+        "race": body(),
+        "candidates": [
+            candidate,
+            {
+                "id": "heavy",
+                "name": "Heavy",
+                "mass_kg": 0.1,
+                "track_length_m": 20.0,
+                "cda_m2": 0.0,
+                "crr": 0.0,
+                "model": "M1",
+            },
+            {**candidate, "id": "short", "name": "Short track", "track_length_m": 10.0},
+            {**candidate, "id": "same", "name": "Same", "mass_kg": 0.05},
+            {
+                "id": "stalled",
+                "name": "Stalled",
+                "mass_kg": 1.0,
+                "track_length_m": 20.0,
+                "cda_m2": 0.0,
+                "crr": 1.0,
+                "model": "M2",
+            },
+        ],
+    }
+    data = client.post("/v1/race/best-ghost", json=payload).json()
+    assert data["best"]["id"] == "light"
+    assert data["best"]["time_s"] < 1.0
+    assert data["best"]["gap_ms"] < 0
+    by_id = {row["id"]: row for row in data["candidates"]}
+    assert by_id["light"]["eligible"] is True
+    assert by_id["heavy"]["eligible"] is True
+    assert by_id["heavy"]["gap_ms"] > 0
+    assert "different finish distance" in by_id["short"]["reason"]
+    assert "same configuration" in by_id["same"]["reason"]
+    assert "does not finish" in by_id["stalled"]["reason"]
+
+
+def test_best_ghost_without_eligible_candidates() -> None:
+    data = client.post(
+        "/v1/race/best-ghost",
+        json={"race": body(), "candidates": []},
+    ).json()
+    assert data == {"best": None, "candidates": []}
+
+
 def test_montecarlo_endpoint() -> None:
     from fastapi.testclient import TestClient
 
