@@ -1,624 +1,121 @@
-# PROGRESS: one tick-box view of the whole plan (2026-11-04)
-
-Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, with its status. Checked line by line against the code on 2026-11-03.
-
-**Legend**
-- ✅ done (built and connected)
-- 🟨 partly done
-- ⬜ not started
-- ⏳ built but not checked in the browser or with real data
-- 📝 code exists only as an uncommitted local draft (never ticked)
-
-**Rules for whoever updates this file**
-- Update a box in the same commit as the work.
-- Never tick a box for code that only exists in a draft.
-- A line with an open ⬜ remainder is 🟨, not ✅.
-
-**Out of scope (deleted from the plan, never build)**
-- T22 drawing pack (team work, not innovation)
-- T26 base-bleed
-- T28 rival data
-- T30 photo scrutineer
-- T31 video lab
-- T32 photogrammetry
-- T35 community calibration
-- AR view
-- T24 multi-fidelity
-- BoTorch, OpenMDAO, trame
-
-> Active task tables now exclude all eight cuts, including T22 and T24. Historical coarse task score is 48.1% over 27 tasks; the denominator change is a scope correction.
-
-## Overall
-- **In-scope tasks:** **48.1% historical coarse checklist score** (27-task scope; not effort or readiness).
-- **Software ledger:** 58/118 entries built-tagged (49.2%); see the dated checkpoint below for the remaining breakdown.
-- **Real data:** the earlier ~5% was a rough estimate, not an audited ratio. No accepted CFD campaign, no measured race, no physical tests. **This is the biggest gap.**
-
-**2026-11-04 bounded sprint:** EASY-01…EASY-15 implemented and checked in software; evidence files are `evidence/EASY-01.md`…`EASY-15.md`. This adds the Presenter limitations slide, per-row outlier flags, native PNG exports and chart source captions, a per-rule risk plot/table, percent-of-span margins, posterior and held-out plots, comparable saved-study errors, a beam comparison table, a compact FORGE summary, PDF source identity and the judge walkthrough/one-pager. The 58/118 ledger count was not re-audited. Accepted CFD, measured race, physical load tests, browser acceptance and the 60-question Q&A remain open.
-
-**2026-11-04 review fixes R1/R2:** `evidence/REVIEW-EASY-SPRINT-2026-11-04.md` found two P2 issues in that sprint. R1 replaces saved-study identity with the actual stored held-out inputs/targets, row order, per-row conditions and shared thrust/density, and records an explicit source `role` (`training`/`held_out`/`thrust`/`other`) instead of inferring held-out from file order; legacy studies stay unknown. R2 removes the process-lifetime Git cache so each report/sheet/summary export captures a fresh bounded offline snapshot with `captured_at`. Evidence: `evidence/R1.md`, `evidence/R2.md`.
-
----
-
-## §15 Best feature list ("final boss"): 5 of 18 done, 10 partly done, 3 not started
-
-**Pit Wall**
-- [ ] ⬜ Race-week mission control (next action, days to the event, rules at risk, best car, seal status)
-- [ ] 🟨 Points dashboard: the 1000-point breakdown with our estimate and gaps (project scorecard exists; the 1000-point view ⬜)
-- [x] ✅ dockview layout, saved per device ⏳ visual review
-
-**Design Studio**
-- [ ] 🟨 Rule overlay on the CAD: failed rule → select and frame the part ✅; red/amber colouring and dimension line ⬜
-- [ ] 🟨 Design diff with a deviation heat map (two-design side-by-side compare ✅; heat map ⬜)
-- [ ] 🟨 Parametric sliders: study generator built; live sliders in the UI ⬜
-- [ ] ⬜ Mass and centre-of-gravity estimate
-- [ ] 🟨 Manufacturing check: pass probability ✅; wall thickness and CNC reach ⬜
-
-**Wind Tunnel**
-- [ ] 🟨 Flow viewer: Cp ✅, Q-criterion vortices ✅, wake planes ✅ (field viewer); animated particles 📝 uncommitted draft (`FlowTunnel3D.tsx`), not ticked; LIC streaks, probes and clip ⬜
-- [ ] 🟨 Run compare (same-mesh ΔCp) ✅; drag build-up by part ✅ (cumulative chart); signed component waterfall connected ⏳ browser review; Δwake/Δforces ⬜
-- [ ] 🟨 Quality gate: convergence ✅; GCI and mesh-quality pass/fail shown ✅; y+ and bad-cell maps ⬜
-- [ ] ⬜ Run wizard with live residuals and ETA
-
-**Race**
-- [x] ✅ Game-quality replay: real car, track, 6 cameras, f1-dash HUD, photo finish ⏳ 60 fps check
-- [ ] 🟨 Race-day mode: sealed-prediction reveal ✅ (Pit Wall); live time and reaction entry and calibration update ⬜
-- [x] ✅ Monte Carlo + tornado chart + "what wins"
-
-**Evidence and reports**
-- [x] ✅ React Flow lineage graph
-- [ ] 🟨 PDF: report ✅, judge pack ZIP ✅; India compliance chapter, run gallery and QR ⬜
-- [x] ✅ Presenter (live slides, notes, timer)
-
-## §16 Innovation ideas
-
-| # | Idea | Status |
-|---|---|---|
-| 1 | Closed-loop autonomous design | 🟨 ORACLE → CAD → FORGE built; automatic CFD hand-off and accepted-only feedback ⬜ |
-| 2 | Multi-fidelity BO | ✂️ cut (not doing) |
-| 3 | Physics-informed race-time uncertainty | 🟨 Monte Carlo + SALib ✅; CFD grid error not yet included ⬜ |
-| 4 | Live calibration (digital twin) | 🟨 Bayesian calibration + saved studies ✅; posterior not applied to Race ⬜, error-shrinking chart ⬜ |
-| 5 | Rule-aware optimisation | 🟨 family filter + FORGE check ✅; feasibility inside the acquisition function ⬜ |
-| 6 | Adjoint shape hints on the CAD | 🟨 adjoint tooling exists (`adjoint.py`); CAD hints ⬜, needs an accepted adjoint run |
-| 7 | ML surrogate (stretch) | ⬜ do last, only if time is left |
-| 8 | Verifiable science (hash chain, verify page) | 🟨 hashes, timestamps, coverage ✅; hash-pinned artifact verify page + native QR SVG connected ⏳; public hosting/authority validation pending |
-
-**If an idea is not being done:** mark it ✂️ here with a one-line reason and delete it from MASTER-PLAN. Never leave it half-listed.
-
-## §19 Analysis catalogue (A–G): status per row
-
-**A. Aerodynamics**
-- [ ] ⏳ 1 Drag by part: signed component waterfall + pressure/friction bars + PNG export connected; browser/accepted-run validation pending
-- [ ] 🟨 2 Run vs run ΔCp (same mesh) ✅ — design-to-design ⬜
-- [ ] 🟨 3 GCI: tooling ✅; accepted 3-mesh run ⬜
-- [ ] 🟨 4 Wake survey: planes ✅; momentum-deficit drag ⬜
-- [x] ✅ 5 Vortices (Q-criterion)
-- [ ] ⬜ 6 Surface topology / LIC
-- [ ] ⬜ 7 Cp along lines
-- [ ] ⬜ 8 y+ / boundary-layer map
-- [ ] ⬜ 9 Ride-height sensitivity
-- [ ] ⬜ 10 Yaw sensitivity
-- [ ] 🟨 11 Speed sweep: tooling ✅; runs ⬜
-- [ ] ⬜ 12 Frontal area vs Cd trade
-
-**B. ORACLE**
-- [x] ✅ 13 GP response map
-- [x] ✅ 14 Variable importance (SALib)
-- [ ] 🟨 15 Acquisition history: benchmark trial reasons/table/export connected; real-campaign timeline ⬜
-- [ ] ⏳ 16 Equal-budget GP/EI, native Optuna TPE/CMA-ES, Sobol/LHS/random: preregistered 10–20-seed queue, confidence bands and export built; completed study/browser review pending
-- [ ] ⬜ 17 Pareto front (pymoo)
-- [ ] ⏳ 18 Leave-one-out refitted GP validation and predictive coverage charts built; real-data/browser review pending
-
-**C. Race**
-- [x] ✅ 19 Time budget
-- [x] ✅ 20 Tornado chart
-- [x] ✅ 21 ms per unit
-- [x] ✅ 22 Monte Carlo
-- [ ] 🟨 23 Traces (uPlot) ✅ — annotations ⬜
-- [ ] ⬜ 24 Optimal mass
-- [ ] ⬜ 25 Track-length scaling
-- [ ] 🟨 26 Head-to-head / knock-out probability: Points panel ✅; real field data ⬜
-
-**D. Race-day / measured**
-- [ ] 🟨 27 Calibration: UI ✅; real data ⬜
-- [ ] 🟨 28 Browser-practice median, sample SD, p10/p90, false-start history and export connected; field timing/latency validation pending
-- [ ] ⬜ 29 Lane / batch t-test
-- [ ] 🟨 30 Outlier detection: flags in the timing import API ✅; not shown in the UI ⬜
-- [ ] ⬜ 31 Season trend
-
-**E. Rules**
-- [x] ✅ 32 Compliance margin map + points at risk
-- [ ] 🟨 33 Tolerance stack-up: pass probability ✅; measured spread ⬜
-- [ ] 🟨 34 Mass compliance: rule ✅; density × volume ⬜
-
-**F. Manufacturing**
-- [ ] ⬜ 35 Measured vs CAD deviation
-- [ ] ⬜ 36 Wall thickness / CNC reach
-
-**G. Project**
-- [ ] 🟨 37 Decision timeline: forecast ✅; Gantt from the evidence log ⬜
-- [ ] ⬜ 38 Compute and effort log
-
-## §20 Stadium timing view: 3 of 10 done, 1 partly done, 6 not started
-- [x] ✅ Timing tower (f1-dash components)
-- [x] ✅ Mini-sectors (8)
-- [ ] ⬜ Reaction column with thresholds
-- [ ] 🟨 Speed trap: gauge ✅, trap panel ⬜
-- [x] ✅ Race-pair view + photo finish
-- [ ] ⬜ Event-wide leaderboard
-- [ ] ⬜ History strip
-- [ ] ⬜ Big-screen / TV mode
-- [ ] ⬜ Prediction scoreboard
-- [ ] ⬜ Day export (PDF/CSV)
-
-## §22.2 India rule findings: 6 of 11 actions done, 1 partly done, 4 not started (#4 is a fact, nothing to build)
-- [x] ✅ 1 Innovation story around project impact (`innovation.md`)
-- [ ] 🟨 2 FEA wanted: beam FEM ✅; CalculiX + load test ⬜
-- [x] ✅ 3 UK D8.5 example replaced with India T7.2.1
-- [x] ✅ 4 Mass 50 g (in the rulebook)
-- [ ] ⬜ 5 Performance rules as hard constraints inside ORACLE
-- [x] ✅ 6 Points formulas (Points panel)
-- [ ] ⬜ 7 Gas type confirmed → thrust model (waiting on the organisers)
-- [ ] ⬜ 8 Tether 0.6 mm prior set in the model
-- [ ] ⬜ 9 Originality question sent to the organisers
-- [x] ✂️ 10 Drawing pack: cut
-- [x] ✅ 11 Halo in CFD geometry (check for every run)
-- [x] ✅ 12 1000-point weights
-
-## §22.3 Next-wave tasks (in scope only)
-
-| Done | Partly done | Not started |
-|---|---|---|
-| T19 energy, T02 queue, T08 race | T15 points, T16 timestamps, T17 calibration, T20 FORGE v2, T21 structure, T23 test planner, T29 frontier, T33 project, T34 V&V dossier | T18 thrust model, T25 free-form adjoint, T27 physical-in-loop |
-
-## §26 Reuse passes
-
-**Pass 1: racing-game + f1-dash components**
-- [x] ✅ Imported: speed gauge, results, DriverTag, Gap, LapTime, MiniSectors
-- [ ] ⬜ Their camera rigs and postprocessing chain were not taken (custom code was written instead)
-
-**Pass 2: uPlot + React Flow**
-- [x] ✅ Connected
-- [ ] ⏳ Final visual review
-
-**Pass 3: SALib**
-- [x] ✅ Connected
-- [ ] ⏳ Visual review of the Sensitivity tab
-
-**Pass 4: dockview + test planner**
-- [x] ✅ Connected
-- [ ] ⏳ Visual review
-
-**Saved data features**
-- [x] ✅ Timestamps (T16), calibration studies (T17), project scorecard (T33), evidence coverage (T12), judge pack (T13)
-- [ ] ⏳ Each still needs real data or a live check
-
-## Open source: used to its best?
-
-| Library | Status |
-|---|---|
-| Chili3D, uPlot, React Flow + Dagre, SALib, dockview, Typst, build123d, drei/R3F, postprocessing | ✅ Used properly |
-| pmndrs/racing-game | 🟨 Only the HUD pieces; the camera and effects chain still to adopt |
-| f1-dash | 🟨 Driver components; full leaderboard for stadium mode still to adopt |
-| vtk.js | 🟨 Parsing and layers; the particle flow now uses three.js |
-| mapbox/webgl-wind technique | 📝 Animated flow is an uncommitted draft (`FlowTunnel3D.tsx`) |
-| Optuna, scipy.stats.qmc | ⏳ Native TPE/CMA-ES and scrambled Sobol/LHS benchmark connected; full queued study pending |
-| pymoo | ⬜ Pareto front |
-| ArviZ | ⬜ Calibration diagnostics |
-| OpenTimestamps | ⬜ Second anchor |
-| FoamPilot | ⬜ Run wizard |
-| Hypothesis, pint, openapi-typescript | 🟨 pint used by the unit importers; Hypothesis and openapi-typescript ⬜ |
-| cmdk, sonner, vaul, TanStack Table, Kibo UI, Origin UI | 🟨 cmdk, sonner and native TanStack v9 tables used; vaul, Kibo UI and Origin UI ⬜ (`TODO.md` §11) |
-| CalculiX | ⬜ Only with real material data |
-
-## `TODO.md` §14 chart quality bar
-- [ ] 🟨 One shared chart theme across ECharts and uPlot (ECharts theme in `useECharts`; uPlot styled separately)
-- [ ] ⬜ Source badge on every chart
-- [ ] 🟨 PNG/SVG export everywhere (uPlot and new benchmark/diagnostic/energy/beam/waterfall charts connected; remaining panels pending)
-- [ ] ⬜ Plain-English caption on every chart
-- [ ] 🟨 Compare-two-runs overlay everywhere (ΔCp and ghost compare exist on some charts)
-
-## Analysis: every chart, one tick each (`TODO.md` §14, merged with MASTER-PLAN §11 and §19)
-
-**43 analyses. Status is tracked per row; new software remains ⏳ until browser/data verification.**
-
-**Wind Tunnel (11)**
-- [ ] 🟨 1 Cd / CdA with the GCI uncertainty bar: tooling ✅, accepted 3-mesh runs ⬜
-- [ ] 🟨 2 Convergence (residuals + force history + gate line): residuals ✅, gate line ⬜
-- [ ] ⏳ 3 Signed component waterfall + pressure/friction view + longitudinal build-up connected; browser/accepted-run validation pending
-- [ ] 🟨 4 Cp along the centre line (top/bottom) + Cp on the surface: surface ✅, line plot ⬜
-- [ ] 🟨 5 Run vs run: ΔCp surface (same mesh) ✅ — Δ wake / Δ forces table ⬜
-- [ ] 🟨 6 Wake planes x/L 1, 1.5, 2 ✅ — deficit contours + momentum-deficit drag ⬜
-- [ ] 🟨 7 Q-criterion vortex cores ✅, coloured by speed — vorticity colouring ⬜
-- [ ] ⬜ 8 Surface streaks (LIC) + separation lines
-- [ ] 🟨 9 Speed sweep Cd vs speed: tooling ✅, runs ⬜; yaw / ride height ⬜
-- [ ] ⬜ 10 Frontal area vs Cd trade chart
-- [ ] 🟨 11 Mesh quality pass/fail ✅; y+ maps and skewness histogram ⬜
-
-**Race (9)**
-- [ ] 🟨 1 Speed / accel / thrust / drag traces, linked cursors (uPlot) ✅ — event annotations ⬜
-- [ ] 🟨 2 Ghost delta-time trace: ghost in Replay ✅, delta trace ✅; automatic best-run ghost ⬜
-- [ ] 🟨 3 Time budget: metrics ✅; stacked bar ⬜
-- [ ] 🟨 4 Tornado ✅ + SALib Sobol indices ⬜
-- [x] ✅ 5 Exchange rates (ms per g, per cm² CdA, per 0.001 Crr)
-- [ ] 🟨 6 Monte Carlo histogram p5/p50/p95 ✅ — convergence plot ⬜
-- [ ] 🟨 7 Energy Sankey connected using native ECharts, signed integration error and PNG export; tether unmodelled; browser review ⏳
-- [ ] 🟨 8 Expected points + knock-out probability ✅ — real field data ⬜
-- [ ] ⬜ 9 Optimal mass curve
-
-**ORACLE (7)**
-- [ ] ⏳ 1 Aero map: mean / posterior-SD toggle + next point connected; browser review pending
-- [ ] ⏳ 2 Regret curves: six native methods, 10–20 seeds and Student-t mean CIs connected; queued study/browser review pending
-- [ ] 🟨 3 Held-out predicted vs stored targets with 90% intervals connected; accepted-data/campaign decision view pending
-- [ ] ⏳ 4 Held-out coverage chart with Wilson bounds connected; fold-dependence caveat and synthetic label; real-data/browser review pending
-- [ ] ⏳ 5 SALib importance + fitted GP length-scale chart/table, physical units, fit-bound warnings and PNG export connected; browser review pending
-- [ ] ⬜ 6 Pareto front (pymoo)
-- [ ] ⬜ 7 Acquisition history timeline
-
-**Calibration (6)**
-- [ ] 🟨 1 Prior vs posterior plots: built ✅, real data ⬜
-- [ ] 🟨 2 Error shrinking over runs: saved studies ✅; cross-run scoreboard ⬜
-- [ ] ⬜ 3 Posterior predictive check (ArviZ)
-- [ ] ⏳ 4 Paired-test difference CI, plot and prospective minimum detectable effect connected with native SciPy; exact source/result evidence saved; browser/real-data validation pending
-- [ ] ⬜ 5 Control chart of repeat runs
-- [ ] 🟨 6 Uncertainty budget: input rank correlations ✅; variance shares ⬜
-
-**FORGE (4)**
-- [ ] 🟨 1 Margin bars sorted by points at risk ✅ — tolerance band shading ⬜
-- [ ] 🟨 2 Pass probability per rule: overall pass probability and per-rule plot/table ✅; browser review ⬜
-- [ ] 🟨 3 Legal-frontier map: single-design nearest limits and percent-of-span margins ✅; sampled feasible frontier ⬜
-- [ ] 🟨 4 R/A/G summary: states and compact one-page export ✅; official source-PDF archive ⬜
-
-**Structure (3)**
-- [ ] ⏳ 1 Deflection / bending stress plots connected to solver nodes, estimated strength line and PNG export; browser/material validation pending
-- [ ] 🟨 2 Safety factor comparison table ✅ for up to four configured cases; physical load-test validation ⬜
-- [ ] ⬜ 3 Predicted vs measured load test
-
-**Project (3)**
-- [ ] 🟨 1 Planned vs actual timeline: forecast ✅, Gantt from the evidence log ⬜
-- [ ] ⬜ 2 Risk matrix
-- [ ] ⬜ 3 Effort / CFD-hours chart
-
-**Extra analysis from MASTER-PLAN §11 and §19 not in the 43 above**
-- [ ] ⬜ Adjoint drag map on the car (§11 #6)
-- [ ] ⬜ Thrust curve fit + cartridge variance (§11 #13)
-- [ ] 🟨 Reaction-time statistics (§19 #28): browser-practice history/statistics/export connected; real track reaction validation pending
-- [ ] ⬜ Lane / batch t-test (§19 #29)
-- [ ] 🟨 Outlier detection (§19 #30): flags in the timing import API ✅; not shown in the UI ⬜
-- [ ] ⬜ Season trend (§19 #31)
-- [ ] ⬜ Track-length scaling (§19 #25)
-- [ ] ⬜ Mass from density × volume (§19 #34)
-- [ ] ⬜ Measured vs CAD deviation (§19 #35)
-- [ ] ⬜ Wall thickness / CNC reach (§19 #36)
-- [ ] ⏳ Leave-one-out ORACLE validation (§19 #18): refitted folds + diagnostics connected; browser/real data pending
-- [ ] 🟨 Acceptance audit per run (§11 #15): reason shown ✅, full audit page ⬜
-
-## MASTER-PLAN sections not covered above
-
-**§1 Legal**
-- [ ] ⬜ 1 PDFs archived in `data/reference/rules/` + evidence store
-- [ ] 🟨 2 every T-rule in YAML
-- [ ] 🟨 3 advanced measures (wall, chamber ⬜)
-- [ ] 🟨 4 rule → CAD (overlay ⬜)
-- [ ] ⬜ 5 judging score checklist linked to screens
-
-**§2 Wind Tunnel**
-- [ ] 📝 1 one viewer: the particle flow is an uncommitted draft; the field viewer is still mounted as the other tab
-- [ ] 🟨 2 ParaView-grade layers (LIC, probes, clip ⬜)
-- [x] ✅ 3 clean look
-- [x] ✅ 4 accepted-run default
-- [ ] 🟨 5 engineering panels (GCI chart ✅; y+ and mesh maps ⬜)
-- [ ] ⬜ 6 FoamPilot wizard
-
-**§3 Race**
-- [x] ✅ 1 real car
-- [x] ✅ 2 track + cameras
-- [x] ✅ 3 HUD
-- [ ] 🟨 4 one chart theme
-- [x] ✅ 5 Monte Carlo + tornado
-
-**§4 Chart bar** — 🟨 (see the chart quality bar list above)
-
-**§5 Innovation** — same as §16
-
-**§6 / §12 OSS** — see the open-source table above
-
-**§7 Remove**
-- [ ] 🟨 old flow view, toolbar clutter, duplicate badges, rejected-run default, Race slider stack (old field viewer still mounted as a second Wind Tunnel view)
-- [x] ✅ Calibration and Test planner: Lab/Track/Custom presets and Advanced sections (input walls reduced)
-
-**§8 Build order** — 1–5 mostly done; 6 partly (no multi-fidelity); 7 partly (dockview ✅, xyflow ✅, FoamPilot ⬜); 8 QA ⬜
-
-**§9 UI bar** — 🟨 shell is good. Per-page pass to 8/10 ⬜ (`TODO.md` §11).
-
-**§10 Cuts**
-- [x] ✅ all 6 cuts done
-- [ ] ⬜ Inspect → CAD side-panel merge
-
-**§13 Race rebuild, 8 points**
-- [x] ✅ 1 car, 2 track, 3 cameras, 5 HUD, 7 photo finish
-- [ ] 🟨 4 effects (no motion blur / FOV kick), 6 ghost / compare (split-screen delta ⬜), 8 60 fps (unverified)
-- [ ] ⬜ clip export
-
-**§14 Chart rules** — 🟨 uPlot has export and linked cursors; ECharts theme unification, annotations and source badges everywhere ⬜
-
-**§17 Overbuilt review**
-- [ ] 🟨 Chili3D: keep
-- [x] ✅ two 3D engines accepted
-- [ ] ⬜ M1 under Advanced
-- [ ] ⬜ reaction trainer into race-day mode
-- [x] ✅ ORACLE stays at 4 variables
-- [x] ✅ keep the evidence store
-- [ ] ⏳ Race tabs merged to Replay / Analysis / Points / Calibration; hash links preserved; browser verification pending
-- [x] ✅ renders only in the report
-
-**§21 Output products**
-- [ ] 🟨 portfolio PDF (chapters ⬜)
-- [x] ✅ presenter deck
-- [x] ✅ scrutineering sheet
-- [ ] ⬜ race-day report
-- [ ] 🟨 evidence appendix (artifact QR page connected ⏳; PDF embedding pending)
-
-**§28 ledger items not listed above**
-- [x] ✅ Removed Drawings tab/generator/API/template and judge-pack drawing references (out of scope); saved files untouched
-- [ ] ⬜ Keep synthetic and physical/accepted-CFD training data separate in ORACLE
-- [ ] ⬜ Official judging weights checked against real delivery (declared points are not awarded points)
-- [ ] ⬜ Red-team and post-event regret reports
-- [ ] 🟨 Session best / last / interval / reaction history: timing tower ✅; full event timing system ⬜
-
-## Why real data is only ~5%, what we need, and how to get it
-
-**Why 5%:** almost every number in the app is either *synthetic* (made-up seed data so the screens work) or *simulated on settings nobody has accepted yet*.
-- ORACLE has 8 observations, all synthetic.
-- No CFD run has passed the acceptance gate on the real car with a grid study.
-- No real race time, mass, dimension or thrust curve has been entered.
-
-The only real inputs are the CAD geometry and the rulebook. Without data, judges can't verify any claim.
-
-**What we need (minimum for a defensible story)**
-
-| Data | How much | Who / how | Unlocks |
-|---|---|---|---|
-| Accepted CFD: baseline on 3 meshes | 3 runs (~3 nights on the Mac) | Codex queues them, 1 per night | GCI, Cd ± error, trust badge |
-| Speed sweep 15 / 20 / 25 m/s | 3 runs | overnight | constant-Cd check |
-| ORACLE design runs | 10–15 runs (~2 weeks of nights) | closed loop queues them | real aero map, benchmark, Pareto |
-| Physical mass + dimensions | every part, 2 people × 3 times | team, scale + calipers | FORGE measured, gauge R&R |
-| Thrust curves | 5+ cartridges at 21 °C | team (needs a load cell) | thrust model T18 |
-| Track runs (paired) | 20–30 timed runs, baseline vs candidate | team at the track | calibration, sealed prediction test |
-| Coast-down / spin-down | 10 runs | team | Crr, wheel friction |
-| Reaction times | 50+ practice starts | driver with the Start trainer | reaction stats, points model |
-| Material properties + load test | 1 datasheet + 3 load tests | team | FEA validation, CalculiX |
-
-**Plan**
-1. Start CFD tonight, one run per night, and never run it alongside the dev servers.
-2. The team buys or borrows a 0.01 g scale, calipers and a small load cell.
-3. Book track time: 2 sessions of about 15 runs each.
-4. Enter every number through the app (Calibration / Project) so it gets hashed as evidence.
-
-**Target:** 50% real data in about 6–8 weeks, and 90% before Nationals.
-
-## `TODO.md` task by task (items not ticked elsewhere in this file)
-
-**1. Wind Tunnel animated flow**
-- [x] ✅ Render tab removed
-- [x] ✅ Velocity texture exported
-- [ ] 📝 GPU particles + Cp + camera presets (uncommitted `FlowTunnel3D.tsx`; not ticked)
-- [x] ✅ Accepted-run default
-- [ ] ⬜ Particle trails (streaks)
-- [ ] ⬜ Faint wireframe tunnel walls
-- [ ] 📝 Moving ground stripe (in the uncommitted draft)
-- [ ] ⬜ Bloom on the particles only
-- [ ] ⬜ Slice with particles crossing it
-- [ ] 📝 Auto-drop the particle count below 50 fps (in the uncommitted draft)
-- [ ] ⏳ 60 fps on the real Mac GPU
-
-**1b. CFD speed-ups**
-- [x] ✅ Parallel solve (6 procs, `decomposePar`)
-- [ ] ⬜ Warm start (`mapFields`)
-- [ ] ⏳ Cd convergence stopping already generated: tolerance 0.001 / 200 iterations (quick: 150). API/queue/CLI expose disable, tolerance, window and iteration cap; effective config persisted. Independent acceptance gates retained; installed v2606 execution not verified
-- [ ] ⬜ Mesh reuse / morph
-- [ ] ⬜ 10-core meshing
-- [ ] ⬜ FluidX3D GPU screening (check its licence first)
-- [ ] ⬜ Cloud burst (Inductiva / AWS) if needed
-
-**2. Race**
-- [ ] ⏳ Race tabs reduced to 4 with one active Analysis panel; browser verification pending
-- [ ] ⏳ Start trainer opens as a Base UI dialog from Replay; keyboard handler unmounts on close; browser verification pending
-- [ ] ⬜ Motion blur / FOV kick
-- [ ] ⬜ Clip export
-- [ ] ⬜ Race-day mode
-- [ ] ⬜ Stadium / TV mode
-
-**3. FORGE**
-- [ ] ⬜ Rule count 79 vs 80 checked against the PDF
-- [ ] 🟨 Margin in % on every rule (margin in mm per rule ✅; percent ⬜)
-- [ ] ⬜ R/A/G one-pager
-- [ ] ⬜ Inspection log
-- [ ] ⬜ What-if drag mode
-- [ ] ⬜ Halo/helmet standard-part check
-- [ ] ⬜ Wall thickness, chamber, cylinder-fit wheel
-
-**5. Closed loop**
-- [ ] ⬜ Queue CFD automatically when every performance rule passes
-- [ ] ⬜ STEP-hash guard
-- [ ] ⬜ Accepted-only observation
-- [ ] 🟨 "Run CFD" button: Pit Wall → build next → run dialog ✅ (manual queue); status ⬜
-
-**6. ORACLE**
-- [ ] ⏳ Preregistered Optuna/qmc benchmark implemented: immutable protocol before queue, code/version binding, six methods, 10–20 seeds, CI/export; no full study run yet
-- [ ] 🟨 Marginal-likelihood nugget already fitted and now displayed; repeat-experiment noise estimation remains pending
-- [ ] ⬜ Acquisition history
-- [ ] ⬜ Pareto chart
-- [ ] ⬜ Engineer veto mode
-
-**7. CFD campaign**
-- [ ] 🟨 3-mesh GCI: GCI panel ✅; accepted 3-mesh study ⬜
-- [ ] 🟨 Speed sweep: tooling ✅; runs ⬜
-- [ ] ⬜ 2 turbulence models
-- [ ] ⬜ One-page acceptance rule
-- [ ] ⬜ OpenFOAM version pinned + case hash stored per run
-- [ ] ⬜ Run wizard with residuals and ETA
-
-**8. Calibration and tests**
-- [x] ✅ Presets + Advanced on Calibration and Test planner (Lab/Track/Custom protocols)
-- [ ] 🟨 Error shrinking over runs: saved studies and a comparable held-out error table ✅; error-shrinking trend over runs ⬜
-- [ ] ⬜ ArviZ diagnostics (R-hat unavailable for the current importance sampler)
-- [ ] 🟨 Paired CSV analysis, mean CI, prospective power/MDE and declared pairing basis connected; preregistered field protocol and real paired measurements pending
-- [ ] 🟨 Physical tests: timing and thrust CSV import ✅; mass, caliper, coast-down and load-test entry ⬜
-- [ ] ⏳ Sealed prediction checked against a real run: seal/score workflow ✅; no real run scored yet
-
-**9. Structure**
-- [x] ✅ Beam FEM vs closed-form test (cantilever PL³/3EI test in `tests/test_structure.py`)
-- [ ] ⬜ CalculiX (real material data only)
-- [ ] 🟨 Safety factor
-- [ ] ⬜ Before/after load test
-
-**10. Evidence and judges**
-- [ ] ⬜ OpenTimestamps second anchor (RFC 3161 anchor ✅ only)
-- [ ] ⏳ Artifact verify page + hash-pinned QR SVG/download and Evidence links connected; bounded-memory hash checks; browser/public hosting verification pending
-- [ ] ⬜ Signed git tag
-- [ ] ⬜ Rule PDFs and runs registered in the store (`data/reference/rules/` is empty)
-- [x] ✅ 3-minute judge walkthrough script (`docs/judges/THREE-MINUTE-WALKTHROUGH.md`); timed teammate run and recorded fallback ⬜
-- [x] ✅ Speaker notes (Presenter, `N` key)
-- [ ] ⬜ 60-question Q&A bank
-- [x] ✅ Limitations slide
-- [x] ✅ Innovation one-pager (`docs/judges/INNOVATION-ONE-PAGER.md`)
-- [ ] 🟨 Commit/rulebook/geometry hash in report, sheet and summary PDFs ✅; run-manifest identity and every other export ⬜
-- [ ] ⬜ Offline demo + fallback video
-
-**11. UI to 8/10**
-
-| Page | Status |
-|---|---|
-| Pit Wall | 🟨 |
-| Wind Tunnel | 🟨 |
-| Design Studio | 🟨 |
-| Race | 🟨 |
-| Project | 🟨 |
-| Evidence | 🟨 |
-| Presenter | 🟨 |
-| Settings | ⬜ |
-
-- [ ] 🟨 Adopt cmdk/sonner/vaul/TanStack Table/Kibo/Origin (cmdk, sonner and TanStack v9 used; vaul/Kibo/Origin ⬜)
-- [ ] 🟨 No form with more than 6 visible inputs (Calibration and Planner done; other forms ⬜)
-- [ ] 🟨 Every page re-scored in `RATINGS.md` (file exists; re-scoring pending)
-
-**12. Engineering quality**
-- [ ] 🟨 CI on every push: workflow in `ci/github-actions-ci.yml` is not in `.github/workflows/`, so it does not run; `lefthook.yml` runs ruff, pyrefly, tsc, oxlint and gitleaks on commit
-- [ ] ⬜ 80% coverage on the core modules
-- [ ] ⬜ Hypothesis tests
-- [ ] ⬜ Golden-file baseline tests
-- [ ] ⬜ OpenAPI → TS types
-- [ ] ⬜ Playwright golden path (`@playwright/test` installed, no golden-path test)
-- [ ] 🟨 Analytic physics benchmarks + pint (cantilever closed-form test ✅; pint in unit importers ✅; more benchmarks ⬜)
-- [ ] 🟨 pip-audit / pnpm audit / licence scan (pip-audit in the CI file, not running; licence scan ⬜)
-
-**13. Project and enterprise**
-- [ ] 🟨 Timeline (forecast ✅; Gantt ⬜)
-- [ ] ⬜ Decision log
-- [ ] ⬜ Risk register
-- [ ] ⬜ Meeting minutes
-- [ ] ⬜ Budget with receipts
-- [ ] ⬜ Lessons learned
-- [ ] ⬜ Sponsor report
-- [ ] ⬜ Tool cost vs commercial
-
-**MASTER-PLAN §22.4: organiser questions**
-- [ ] ⬜ Email sent (AI use, air vs CO₂, manual vs auto launch, presentation split)
-
-**`NOW.md`:** it is the detailed test checklist (~550 bullets). Tick those in `NOW.md` itself; this file tracks the build.
-
-## Next 5 to do
-1. Run CFD overnight: baseline on 3 meshes plus the speed sweep. This unlocks GCI, the waterfall, ORACLE on real data and the closed loop.
-2. ORACLE benchmark with Optuna and qmc, plus the Pareto front with pymoo.
-3. Closed loop to CFD with accepted-only feedback.
-4. Race-day mode + stadium/TV mode.
-5. UI polish pass on every page to 8/10.
-
-## Code sprint update: ORACLE and Race (2026-11-03)
-
-- Native Optuna/CMA-ES, SciPy qmc and TanStack Table integrations are connected, with licence copies and attribution. No CFD or full optimiser benchmark launched during this sprint.
-- Benchmark jobs and CFD share a mutual-exclusion gate; benchmark subprocess numerical thread counts are capped at one. Opening ORACLE no longer runs the legacy benchmark.
-- GP diagnostics use actual stored targets and refit each held-out fold; synthetic seed targets remain labelled synthetic.
-- Race now has four main tabs and a dialog-based trainer. Browser/performance checks remain open.
-- Speed-up claims (2–3×, 50–100×) are unmeasured. Warm start, mesh reuse, separate meshing ranks and FluidX3D remain unimplemented; no restricted solver code was bundled.
-- Evidence: `evidence/ORACLE-native-benchmark.md`, `evidence/C07-race-navigation.md`.
-
-## Stop checkpoint — 2026-11-04
-
-Owner requested a pause after the current report fix. No new feature work is running.
-
-**Current detailed feature ledger (§28 A–L): 118 entries.**
-
-| Status | Entries |
-|---|---:|
-| ✅ Built and connected | 58 |
-| 🟨 Partly implemented | 17 |
-| ⬜ Not started | 33 |
-| ⏳ Verification/data gate | 9 |
-| 📝 Pre-existing uncommitted draft | 1 |
-
-**Built-tag share: 58/118 = 49.2%. 60 entries still have work or verification remaining.** This is an unweighted count of ledger entries, not engineering hours, judging readiness or measured validation. It supersedes the old unsupported “about 65% software” estimate. The separate historical T-task score remains 48.1% with eight cuts; the two denominators must not be combined.
-
-**43-chart ledger:** 3 built-tagged, 28 partial, 5 awaiting verification/data, 7 not started. Partial charts often already contain useful connected plots; these labels track the complete target.
-
-**Finished in this sprint and committed**
-- Native Optuna/CMA-ES + SciPy benchmark queue, evidence protocol/result binding, native TanStack result tables.
-- GP mean/uncertainty, held-out prediction/coverage and fitted length-scale/noise diagnostics.
-- Race four-tab navigation, dialog trainer, restored practice history/statistics/false starts/export.
-- CFD stopping controls exposed and recorded; benchmark/CFD exclusion and bounded numerical threads.
-- Removed the out-of-scope drawing generator/UI/API/judge-pack hooks.
-- Native ECharts energy Sankey, signed component drag waterfall and beam deflection/stress plots.
-- SciPy paired timing CI and prospective power/MDE, source/result evidence and result plots/tables.
-- Hash-pinned artifact verification page/QR SVG; streaming file hashes reduce whole-file memory use.
-- Fixed engineering PDF with no completed benchmark and prevented unaccepted/unbound cover selection.
-
-**Largest remaining work**
-1. Accepted-only closed-loop feedback, source/STEP/mesh hash guards and performance-rule gates; separate training pools.
-2. Accepted current-car CFD, 3-mesh GCI, speed sweep/turbulence comparison and measured correlation.
-3. Race-day/stadium/TV workflow: actual timing, leaderboard, reaction entry, scoreboard and day exports.
-4. pymoo Pareto, engineer veto/edit, campaign acquisition history and repeat-experiment noise estimation.
-5. Apply saved calibration to Race; across-run error/PPC/control charts and physical held-out tests.
-6. Advanced FORGE measures, inspection log, one-page compliance summary, manufacturing/CAD deviations and material validation.
-7. Project Gantt/risk/effort workflows, report provenance/QR embedding, judging materials and offline fallback.
-8. Final browser/responsive/performance checks, full suite and independent real-data acceptance.
-
-No accepted CFD campaign or measured race was added. Real-data percentage has no audited numerator and is not upgraded. Existing particle-view draft is preserved and not ticked. Evidence: `evidence/CHECKPOINT-2026-11-04.md`.
-
-Final report guard check: nonnumeric/boolean Cd values and malformed metadata are excluded; five report tests, Ruff and zero-error pyrefly verification passed after the final numeric narrowing fix.
-
-## Next-model handoff — 2026-11-04
-
-Root `prompt.md` now specifies 15 bounded quick-work items, exact source files/symbols, installed OSS to reuse, acceptance criteria, draft-preservation rules and handoff checks. These are subfeatures, not 15 complete master tasks; saved-study comparison and PDF work are explicitly more involved. No implementation boxes or completion percentages changed for creating this handoff.
-
-## Quick review and next handoff — 2026-11-04
-
-Reviewed EASY sprint commits 1b50ac3 / 05f9489 / f88db37. Two source-level correctness gaps reproduced: held-out comparison identity can match different target sets, and code_snapshot remains stale for the API process lifetime. Fixes are pending, not silently accepted. See `evidence/REVIEW-EASY-SPRINT-2026-11-04.md`. Root `prompt-next.md` sequences those fixes, the 60-question Q&A, bounded UI acceptance and remaining software workflows; medium/large work is labelled. No browser/full-suite/physical acceptance was added by this quick review, and no percentage was upgraded.
-
-## Exact partial-entry handoff — 2026-11-04
-
-`prompt-next.md` now reproduces all 20 currently partial §28 IDs verbatim: A06, A07, A11, B13, C10, D07, D10, E10, E11, E13, F08, G06, G09, H02, J06, J07, J09, J10, L03, L07. Each includes source files, remaining implementation, completion criteria and separate physical/authority/browser gates. The two review fixes remain prerequisites. This replaces the generic NEXT sequence; no feature statuses or percentages changed for writing instructions.
-
-## G06 margin bands — 2026-11-04
-
-Closed the remaining G06 software: every two-sided measured rule with a positive declared sigma
-now gets a margin bar as a percentage of its allowed span, with a ±1σ band, rule page, saved-PNG
-export and an explicit probability/points/expected-points ordering toggle. One-sided and manual
-rules stay listed with units rather than being plotted as zero. `RuleRisk` now carries `page` and
-`margin` from FORGE. Evidence: `evidence/G06.md`; tests: `forgeMargin.test.ts`,
-`test_forge_probability.py`; no fresh browser pass was recorded.
-
-## A07 + A11 — 2026-11-04
-
-A07: signed CAD-to-CAD deviation is connected in Inspect → Compare. Sampled B vertices are signed
-by the reference triangle normal, reported in mm, colour-mapped from red (removed) to cyan (added),
-with an alignment gate, unmatched-component list and explicit display-mesh limitation. Tests cover
-identical, translated, scaled, shifted-frame and unmatched fixtures. Evidence: `evidence/A07.md`.
-
-A11: the floating Inspect toolbar and its duplicate design picker were consolidated into one side
-panel. The Studio header is now the only design picker and feeds Inspect; camera presets, explode,
-turntable, section, dimensions, measure, compare/deviation and snapshot all live in the side panel.
-Inspect stays mounted across tab changes, selection survives, and the split stacks below 900 px.
-Evidence: `evidence/A11.md`.
-
-Both remain without a fresh browser screenshot pass because the local dev server was OOM-killed;
-that gate is stated in the evidence rather than inferred from tests.
+# PROGRESS — engineering software and innovation (2026-11-04)
+
+This active tracker uses the owner-approved reduced scope in TODO.md. It supersedes the previous 118-entry mixed software/paperwork ledger and its percentages. The old 49.2%/58-of-118 and historical T-task scores are **not current completion measures** after these cuts. No new overall percentage has been calculated; deleting scope is not completing software.
+
+Legend: ✅ built/connected; 🟨 partial; ⬜ remaining code; ⏳ browser/scientific/performance gate; 📝 local draft. A built feature is not automatically accepted CFD or measured physical validation.
+
+## Owner-approved scope cuts — 2026-11-04
+
+These are removed from active work, including unfinished remainders of already-built extras:
+
+- Judge Q&A banks, judging copywriting, innovation one-pagers, walkthrough scripts and teammate rehearsals.
+- Presenter decks, slides, speaker notes and presentation timers; recorded presentation/fallback videos.
+- Engineering-report, scrutineering-sheet and compact-summary PDF generation, formatting and PDF provenance/hash work.
+- Judge ZIP packs, portfolios, evidence appendices and document-production pipelines.
+- Official-rule PDF archival/publication systems. Reading the applicable regulations and sourcing implemented rules remains engineering work.
+- Public artifact-verification sites, QR exports, publication and public-hosting tasks.
+- OpenTimestamps, RFC3161/external timestamp-authority integrations and cryptographic prediction notarisation. Ordinary saved predictions and later error comparison remain.
+- Signed release/seal tags and offline presentation/demo bundles.
+- Automated written red-team/post-event reports and separate formal V&V dossier generation. In-app validation results remain.
+- Sponsor reports, commercial-tool cost comparisons, meeting minutes, receipts/budgets and administrative lessons logs.
+- Project-management Gantt, administrative project risk matrices, judging-weight/awarded-point tracking. Race-performance points calculations remain.
+- Formal experiment-preregistration paperwork. Exact experiment settings, pairing, sources and statistics remain.
+- Arbitrary coverage-percentage targets, nightly screenshot bureaucracy, mandatory per-task screenshot/rating reports and tests that only mirror labels.
+
+Previously removed scope stays removed: drawing/render packs and DXF/SVG importer; AR; base-bleed; competitor scraping; photo/video scrutineering; photogrammetry; community calibration; multi-fidelity; BoTorch/OpenMDAO/trame; OS matrices, Docker/devcontainer, mutation testing, eight-hour soak, multi-user and archival-publication services.
+
+This is a **planning scope change**. Existing code, saved files and historical evidence are not deleted by this change. Do not revive these tasks because an older document or code module still contains them. Hiding or removing existing extras can be a separate focused cleanup, preserving shared engineering dependencies.
+
+## Design Studio
+
+- [x] ✅ Chili3D CAD, STEP/GLB/CFD import, named parts and save/import pipeline.
+- [x] ✅ Failed-rule part selection/focus, dimensions, sections and A/B inspection controls.
+- [x] ✅ Canonical four-parameter ORACLE study generator through build123d/import/FORGE.
+- [ ] 🟨 CAD rule-state overlays and real value/limit anchors.
+- [ ] 🟨 Inspect/editor consolidation: current DesignSidebar/DesignStudio/DesignWorkspace edits are another contributor's dirty work; do not overwrite or count them committed.
+- [ ] ⬜ Signed mm geometry-deviation heat map and supported frame/alignment checks.
+- [ ] ⬜ Live parametric controls, material-aware mass/CG, minimum wall/CNC reach and measured-CAD manufacturing comparison.
+- [ ] ⏳ Final keyboard/responsive and manufactured-part validation.
+
+## Wind Tunnel and CFD
+
+- [x] ✅ Cp/streamlines/slices, wake planes, Q layers, source legends and compatible same-mesh delta Cp.
+- [x] ✅ Component pressure/friction forces, signed waterfall and longitudinal drag build-up.
+- [x] ✅ Residual/Cd histories, mesh/force/convergence gates, rejection reasons and GCI/speed-study tooling.
+- [x] ✅ Durable queue/log/cancel; configurable recorded Cd stopping controls; benchmark/CFD exclusion and bounded numerical threads.
+- [x] ✅ Compact velocity export and accepted-run default with honest unavailable states.
+- [ ] 📝 Animated GPU flow/ground/camera/adaptive-density integration remains a pre-existing local draft.
+- [ ] 🟨 One-scene integration of the advanced field layers.
+- [ ] ⬜ LIC, probe Cp, y+/bad-cell maps, delta wake/forces, momentum-deficit cross-check and yaw/ride-height matrix.
+- [ ] ⬜ Guided run wizard/ETA and compatible source-validated warm starts/mesh reuse.
+- [ ] ⏳ Accepted current-car baseline, three-mesh GCI, speed sweep, turbulence comparison and physical correlation.
+- [ ] ⏳ Real-Mac fps/memory/loading checks; proposed acceleration factors remain unmeasured.
+
+## Race, analysis and stadium
+
+- [x] ✅ Real-car/20 m replay, broadcast cameras, f1-dash HUD, mini-sectors, ghost, photo finish and adaptive-quality mechanism.
+- [x] ✅ Four main tabs and dialog reaction trainer with restored browser-practice history/statistics/false starts/export.
+- [x] ✅ Linked uPlot traces, MC histogram/quantiles, tornado/exchange-rate metrics and energy Sankey with visible integration residual.
+- [x] ✅ Scenario racing-points/head-to-head calculations; estimates retain their source labels.
+- [ ] 🟨 Complete event annotations, best eligible real-run ghost and compatible overlays.
+- [ ] 🟨 Session tower exists; saved event timing/history, speed trap and event leaderboard remain.
+- [ ] ⬜ Race-day actual timing/reaction, ordinary saved-prediction comparison and explicit calibration application.
+- [ ] ⬜ Stadium/TV/fullscreen mode and engineering timing CSV/JSON export.
+- [ ] ⬜ Supported tether model, race Sobol/variance budget, MC convergence and optimal legal mass curve.
+- [ ] ⏳ Physical rendering/input performance and measured race correlation.
+
+## ORACLE and closed loop
+
+- [x] ✅ GP/EI, study-family feasibility filter, mean/SD map and next point.
+- [x] ✅ Native SALib sensitivity, fitted length-scale/noise diagnostics and held-out prediction/coverage views.
+- [x] ✅ Native Optuna/CMA-ES/SciPy equal-budget benchmark queue, exact settings/version/source binding, trial records/CIs and native tables.
+- [x] ✅ Serialised atomic observation appends and explicit source/provenance labels.
+- [ ] 🟨 Actual campaign acquisition history and engineer proceed/edit/veto flow.
+- [ ] ⬜ Training-pool separation: synthetic demo, unreviewed input, accepted CFD and physical data.
+- [ ] ⬜ STEP/geometry/surface/settings identity guards, full performance-rule queue gate and idempotent accepted-only feedback.
+- [ ] ⬜ Prospective pre-evaluation candidate snapshots and accepted-source scoring.
+- [ ] ⬜ Native eligible-data Pareto front and repeat-experiment noise estimation.
+- [ ] 🟨 Adjoint tooling exists; source-bound sensitivity display and constrained updates remain.
+- [ ] ⏳ Scheduled benchmark execution, accepted campaign/adjoint and measured validation. No authority/publication task is attached to these.
+
+## Calibration, measurements and structure
+
+- [x] ✅ Unit-aware timing/thrust input, per-row outlier flags without exclusions, explicit timing/source settings and Lab/Track/Custom + Advanced forms.
+- [x] ✅ Bounded importance-sampling calibration, posterior intervals, held-out plots, ESS/warnings, saved studies and comparison table.
+- [x] ✅ Held-out comparison review fix R1 recorded in evidence/R1.md: actual input/target/condition identity and explicit source roles; legacy uncertainty retained.
+- [x] ✅ D-optimal timing/coast-down planner and paired CI/prospective power/MDE with exact source/settings/results.
+- [x] ✅ Analytically checked beam model, deflection/stress plots and four-case configured comparison.
+- [ ] ⬜ Required paired sample-size solver, repeat-run control analysis and complete uncertainty decomposition.
+- [ ] 🟨 Across-study scoring/PPC and applying a saved posterior to Race.
+- [ ] ⬜ Extended mass/dimension/coast-down/load-test entry and source-linked gauge R&R.
+- [ ] ⏳ Real material properties, part measurements, paired track/thrust/tether/load tests and independent held-out validation.
+- [ ] ⏳ CalculiX 3D work depends on real materials/load/mesh validation. No written improvement story is required.
+
+## FORGE
+
+- [x] ✅ India-default YAML checks, supported wheel/axle/wing/notch/layout features and source-page references.
+- [x] ✅ CAD/source-bound remeasurement, per-rule manufacturing probabilities and explicit manual/excluded states.
+- [x] ✅ G06 margin bars, declared ±1σ bands, valid percent-of-span and probability/points/expected-loss sorting; engineering spread remains an assumption. See evidence/G06.md.
+- [ ] ⬜ Canonical wall/chamber/cylinder/full-section/standard halo measures.
+- [ ] ⬜ Engineering inspection entry and validated dimensional what-if/feasible frontier.
+- [ ] ⏳ Rule coverage/source reconciliation and physical compliance/load checks. No PDF archive or compliance-document deliverable remains.
+
+## Engineering records, UI and quality
+
+- [x] ✅ Saved source/design/run/experiment/model records, content-addressed files, lineage and missing-source/validation views.
+- [x] ✅ Streaming byte-integrity checks; preserve hashes needed to prevent wrong-design/stale-source use.
+- [x] ✅ Existing ECharts/uPlot/TanStack/Base UI/Dockview integration and meaningful source/units/empty/error patterns.
+- [ ] 🟨 Per-screen source consistency, remaining exports/cursors/overlays, accessible table interactions and compact forms.
+- [ ] ⬜ Source-linked engineering decision/action flow and recorded compute/wall-time view.
+- [ ] 🟨 Fast CI, numerical/source-binding regressions, type/runtime API consistency and security/licence hygiene.
+- [ ] ⏳ Grouped browser/keyboard/download/responsive review and real hardware memory/performance checks. No per-task screenshot/rating paperwork.
+
+## Active next work
+
+1. Complete/land owned Design Studio and one-scene flow integration; preserve concurrent drafts.
+2. Implement training/source separation and accepted-only closed-loop safeguards.
+3. Finish calibration-to-Race, actual event timing and stadium/TV UI.
+4. Engineer decision history, Pareto, paired sample size and remaining useful analysis.
+5. Advanced FORGE/manufacturing/adjoint/structure, scheduled scientific validation and practical quality fixes.
+
+Root prompt-next.md is the active implementation handoff. Old prompts and historical evidence remain history; do not restore their removed tasks. This scope-edit commit changes plans only, does not delete runtime code/data and does not claim a new implementation/verification pass.
