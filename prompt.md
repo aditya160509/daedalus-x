@@ -206,18 +206,18 @@ Inspect current status because another model may have finished these since. Do n
 
 ## Sprint checklist
 
-- [ ] EASY-01 Presenter honesty/benchmark wording
-- [ ] EASY-02 Limitations slide
-- [ ] EASY-03 Per-row outlier flags
-- [ ] EASY-04 Remaining native PNG exports
-- [ ] EASY-05 Four chart source captions
-- [ ] EASY-06 Per-rule probability plot/table
-- [ ] EASY-07 Normalised two-sided headroom
-- [ ] EASY-08 Actual posterior interval plot
-- [ ] EASY-09 Held-out prediction/interval plot
-- [ ] EASY-10 Comparable saved-study error table
-- [ ] EASY-11 Configured-part safety comparison
-- [ ] EASY-12 Compact FORGE summary export
-- [ ] EASY-13 Source identity in report/sheet PDFs
-- [ ] EASY-14 Three-minute judge walkthrough
-- [ ] EASY-15 Innovation one-pager
+- [x] EASY-01 Presenter honesty/benchmark wording
+- [x] EASY-02 Limitations slide
+- [x] EASY-03 Per-row outlier flags
+- [x] EASY-04 Remaining native PNG exports
+- [x] EASY-05 Four chart source captions
+- [x] EASY-06 Per-rule probability plot/table
+- [x] EASY-07 Normalised two-sided headroom
+- [x] EASY-08 Actual posterior interval plot
+- [x] EASY-09 Held-out prediction/interval plot
+- [x] EASY-10 Comparable saved-study error table
+- [x] EASY-11 Configured-part safety comparison
+- [x] EASY-12 Compact FORGE summary export
+- [x] EASY-13 Source identity in report/sheet PDFs
+- [x] EASY-14 Three-minute judge walkthrough
+- [x] EASY-15 Innovation one-pager

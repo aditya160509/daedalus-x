@@ -371,6 +371,10 @@ The next-wave changes were merged into `main` in `6d708b5`. The table tracks ver
 | 6 Calibration / optimisation analysis | 🟨 Partial | ✅ Bayesian calibration API/UI with timing previews and held-out scoring; saved studies persist exact inputs, results and source files with browsing/reopening. Monte Carlo and SALib Sobol/Morris API + Sensitivity UI | Applying the posterior to Race, GP uncertainty maps and measured validation; ⏳ Calibration/Sensitivity visual review |
 | 7 Remaining | 🟨 Partial | Project page, cleanup, ✅ uPlot telemetry, ✅ React Flow evidence lineage and ✅ T34 V&V dossier (JSON/Markdown + Project panel) | Run wizard, ⏳ dockview visual review, red-team/post-event reports and final browser review |
 
+### Bounded 15-task pass (2026-11-04)
+
+Implemented EASY-01…EASY-15 on `main`: presenter honesty/limitations, per-row timing outlier flags, four native PNG exports and source captions, per-rule manufacturing risk plot/table, percent-of-span margins, posterior and held-out prediction plots, comparable saved-study errors, a four-case beam comparison table, a compact FORGE summary PDF, full source identity in the report/sheet/summary PDFs, and the judge walkthrough/one-pager. Evidence: `evidence/EASY-01.md`…`evidence/EASY-15.md`. Focused Python/TypeScript tests, Ruff, TypeScript and focused lint pass; report/sheet/summary fixtures were rendered and visually inspected. Not established: accepted CFD, measured race, physical load tests, final browser/responsive acceptance and a timed teammate walkthrough. The pre-existing animated-flow draft remains uncommitted and untouched.
+
 ### Sprint: short protocol forms (2026-11-03)
 
 - [x] F06: Calibration and Test Planner now use explicit Lab-day/Track-day/Custom assumptions and Base UI Advanced settings. Existing fit/planning APIs and saved calibration evidence stay connected.
@@ -715,7 +719,7 @@ This is the current checkbox ledger requested by the owner. `TODO.md` supplies t
 - [x] ✅ E07 — Preregistered equal-budget native Optuna TPE/CMA-ES + Sobol/LHS/random benchmark queue, 10–20 seeds and regret confidence bands built. ⏳ Full study/browser review; synthetic only.
 - [ ] ⬜ E08 — Accepted-only CFD feedback, STEP-to-mesh hash guard and performance-rule gate in the closed-loop handoff.
 - [ ] ⬜ E09 — Separate synthetic and physical/accepted-CFD training; current manual observation interface is not independent acceptance.
-- [ ] 🟨 E10 — GP mean/SD and refitted held-out target/coverage charts connected; accepted-candidate campaign evidence and final browser review remain.
+- [ ] 🟨 E10 — GP mean/SD, posterior interval, refitted held-out target and residual/coverage charts connected; accepted-candidate campaign evidence and final browser review remain.
 - [ ] 🟨 E11 — Fitted length scales/noise/status and benchmark acquisition reasons connected; real-campaign timeline and engineer veto/edit remain.
 - [ ] ⬜ E12 — pymoo drag/mass/margin Pareto front and racing-points optimisation objective.
 - [ ] 🟨 E13 — Adjoint tooling exists; accepted primal/adjoint, connected map and constrained shape optimisation remain. Multi-fidelity is removed by TODO.
@@ -740,17 +744,17 @@ This is the current checkbox ledger requested by the owner. `TODO.md` supplies t
 - [x] ✅ G02 — Existing wheel/axle/layout, rolling-band, sampled-wing-section, named-notch and rear-wing-plane measures; unsupported geometry remains manual.
 - [x] ✅ G03 — Hash-bound CAD remeasurement and rule-to-part focus.
 - [x] ✅ G04 — Unit-filtered nearest-limit chart/list with rule/page and CAD focus (`FrontierPanel.tsx`); single-design ranking, not full feasible-space map.
-- [x] ✅ G05 — Manufacturing-spread pass-probability API and Rules summary (`forge_probability.py`); independent Normal assumptions and team-entered spread, not measured process capability.
-- [ ] 🟨 G06 — All-rule margin bars with tolerance bands, percent margins and points × failure-probability ordering remain incomplete.
+- [x] ✅ G05 — Manufacturing-spread pass-probability API, Rules summary and per-rule probability plot/table (`forge_probability.py`, `LegalPanel.tsx`); independent Normal assumptions and team-entered spread, not measured process capability.
+- [ ] 🟨 G06 — All-rule margin bars with tolerance bands, percent-of-span margins ✅ and points × failure-probability ordering remain incomplete.
 - [ ] ⬜ G07 — Canonical wall thickness, chamber hole detection, full section chord and standard halo/helmet comparison.
 - [ ] ⬜ G08 — Who/tool/when inspection log and interactive dimensional what-if.
-- [ ] ⬜ G09 — One-page red/amber/green summary and fully linked source-PDF evidence archive.
+- [ ] 🟨 G09 — Compact one-page fail/risk/manual/CAD-pass summary connected (`summary.typ`, `/v1/forge/summary.pdf`); fully linked source-PDF evidence archive remains.
 - [ ] ⏳ G10 — Word-for-word official PDF coverage reconciliation and physical measurement/load-test acceptance. YAML count alone is not a coverage proof.
 
 ### H. Structure
 
 - [x] ✅ H01 — Beam FEM API and Strength panel with part/load presets, deflection/stress/safety-factor metrics and handbook-source warning.
-- [ ] 🟨 H02 — Solver nodal deflection/stress plots and strength reference connected; multi-part safety-factor comparison table remains; browser/material validation pending.
+- [ ] 🟨 H02 — Solver nodal deflection/stress plots and a configured-part comparison table (up to four captured cases) connected; browser/material validation and physical load testing pending.
 - [ ] ⬜ H03 — Predicted-vs-measured load-test chart and evidence-backed before/after story.
 - [ ] ⏳ H04 — Real material measurements before CalculiX 3D halo/wing-mount analysis and mesh convergence.
 
@@ -774,8 +778,8 @@ This is the current checkbox ledger requested by the owner. `TODO.md` supplies t
 - [ ] 🟨 J06 — Full action linkage and real export/download acceptance; a gap detector does not itself record the missing action.
 - [ ] 🟨 J07 — Hash-pinned artifact verification page, Evidence links and native QR SVG/export connected; OpenTimestamps anchor, public deployment and browser/scan verification remain.
 - [ ] ⬜ J08 — Register official PDFs, baseline and every CFD run in evidence; signed release/seal tag workflow.
-- [ ] ⬜ J09 — Three-minute walkthrough, 60+ judge Q&A, honest limitations slide and baseline/change/predicted/measured one-pager.
-- [ ] ⬜ J10 — Complete PDF commit/rulebook/run identity, offline demo and recorded fallback.
+- [ ] 🟨 J09 — Three-minute timed walkthrough script, honest limitations slide and baseline/change/prediction/measurement one-pager written; 60+ judge Q&A bank, timed teammate run and recorded fallback remain.
+- [ ] 🟨 J10 — Report, sheet and summary PDFs now carry full rulebook/geometry hashes, code commit/dirty state and generation time; run-manifest identity, offline demo and recorded fallback remain.
 - [ ] ⬜ J11 — Red-team and post-event regret reports; existing V&V dossier does not implement these.
 - [ ] ⏳ J12 — Real trusted timestamp chain, independent measured race scores and accepted CFD evidence.
 
@@ -813,17 +817,17 @@ These rows track the WHOLE requested chart, so partial rows can contain built co
 | O06 | Pareto front | ⬜ | No connected pymoo/objective front. |
 | O07 | Acquisition history | 🟨 | Benchmark trial reasons/table/full export built; real-campaign timeline pending. |
 | S01 | Prior/posterior plots | 🟨 | Prior controls/posterior summaries exist; density plots absent. |
-| S02 | Error shrinking scoreboard | 🟨 | Saved studies/held-out rows exist; cross-run scoreboard absent. |
+| S02 | Error shrinking scoreboard | 🟨 | Saved studies and a comparable held-out MAE/RMSE table exist; a per-run shrinking-error trend over new measurements is absent. |
 | S03 | Posterior predictive checks | 🟨 | Held-out numeric intervals exist; PPC chart/appropriate diagnostics absent. |
 | S04 | Paired CI / minimum detectable effect | ⏳ | Native SciPy paired t CI, plot, prospective power/MDE and source/result evidence connected; browser/real paired validation pending. |
 | S05 | Repeat-run control chart | ⬜ | No connected chart. |
 | S06 | Full uncertainty variance budget | 🟨 | Input rank correlations exist; CFD/reaction/timing variance decomposition absent. |
-| F01 | Margin bars + tolerance bands | 🟨 | Unit-filtered headroom bars exist; manufacturing band/points ordering incomplete. |
-| F02 | Per-rule pass probability | 🟨 | Probability API/overall summary exists; full per-rule plotted comparison incomplete. |
-| F03 | Legal-frontier boundaries | 🟨 | Single-design nearest limits/rule pages exist; sampled feasible frontier absent. |
-| F04 | Red/amber/green summary | 🟨 | Rule states/counts exist; one-page summary product absent. |
+| F01 | Margin bars + tolerance bands | 🟨 | Unit-filtered headroom bars and percent-of-span margins exist; manufacturing band/points ordering incomplete. |
+| F02 | Per-rule pass probability | 🟨 | Probability API/overall summary and plotted worst-first table connected; browser review incomplete. |
+| F03 | Legal-frontier boundaries | 🟨 | Single-design nearest limits/rule pages and percent-of-span margins exist; sampled feasible frontier absent. |
+| F04 | Red/amber/green summary | 🟨 | Rule states/counts and compact one-page summary exist; official source-PDF archive absent. |
 | T01 | Deflection/stress plots | ✅ | Solver nodal deflection and bending-stress plots, strength reference, linked cursors and PNG export connected; ⏳ browser/physical material review. |
-| T02 | Per-part safety-factor table | 🟨 | Selected-part metric exists; table absent. |
+| T02 | Per-part safety-factor table | 🟨 | Configured-part comparison table for up to four captured cases exists; physical load-test validation and actual-car geometry remain absent. |
 | T03 | Predicted vs measured load | ⬜ | No connected chart/data workflow. |
 | P01 | Planned vs actual evidence timeline | 🟨 | Editable plan/forecasts exist; evidence Gantt absent. |
 | P02 | Risk matrix | ⬜ | No connected matrix. |

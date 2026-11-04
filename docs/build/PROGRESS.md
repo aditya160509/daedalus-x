@@ -33,6 +33,8 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 - **Software ledger:** 58/118 entries built-tagged (49.2%); see the dated checkpoint below for the remaining breakdown.
 - **Real data:** the earlier ~5% was a rough estimate, not an audited ratio. No accepted CFD campaign, no measured race, no physical tests. **This is the biggest gap.**
 
+**2026-11-04 bounded sprint:** EASY-01…EASY-15 implemented and checked in software; evidence files are `evidence/EASY-01.md`…`EASY-15.md`. This adds the Presenter limitations slide, per-row outlier flags, native PNG exports and chart source captions, a per-rule risk plot/table, percent-of-span margins, posterior and held-out plots, comparable saved-study errors, a beam comparison table, a compact FORGE summary, PDF source identity and the judge walkthrough/one-pager. The 58/118 ledger count was not re-audited. Accepted CFD, measured race, physical load tests, browser acceptance and the 60-question Q&A remain open.
+
 ---
 
 ## §15 Best feature list ("final boss"): 5 of 18 done, 10 partly done, 3 not started
@@ -260,13 +262,13 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 
 **FORGE (4)**
 - [ ] 🟨 1 Margin bars sorted by points at risk ✅ — tolerance band shading ⬜
-- [ ] 🟨 2 Pass probability per rule: overall pass probability ✅; per-rule plot ⬜
-- [ ] 🟨 3 Legal-frontier map: single-design nearest limits ✅; sampled feasible frontier ⬜
-- [ ] 🟨 4 R/A/G summary: states ✅, one-pager ⬜
+- [ ] 🟨 2 Pass probability per rule: overall pass probability and per-rule plot/table ✅; browser review ⬜
+- [ ] 🟨 3 Legal-frontier map: single-design nearest limits and percent-of-span margins ✅; sampled feasible frontier ⬜
+- [ ] 🟨 4 R/A/G summary: states and compact one-page export ✅; official source-PDF archive ⬜
 
 **Structure (3)**
 - [ ] ⏳ 1 Deflection / bending stress plots connected to solver nodes, estimated strength line and PNG export; browser/material validation pending
-- [ ] 🟨 2 Safety factor table
+- [ ] 🟨 2 Safety factor comparison table ✅ for up to four configured cases; physical load-test validation ⬜
 - [ ] ⬜ 3 Predicted vs measured load test
 
 **Project (3)**
@@ -456,7 +458,7 @@ The only real inputs are the CAD geometry and the rulebook. Without data, judges
 
 **8. Calibration and tests**
 - [x] ✅ Presets + Advanced on Calibration and Test planner (Lab/Track/Custom protocols)
-- [ ] 🟨 Error shrinking over runs: saved studies ✅; cross-run scoreboard ⬜
+- [ ] 🟨 Error shrinking over runs: saved studies and a comparable held-out error table ✅; error-shrinking trend over runs ⬜
 - [ ] ⬜ ArviZ diagnostics (R-hat unavailable for the current importance sampler)
 - [ ] 🟨 Paired CSV analysis, mean CI, prospective power/MDE and declared pairing basis connected; preregistered field protocol and real paired measurements pending
 - [ ] 🟨 Physical tests: timing and thrust CSV import ✅; mass, caliper, coast-down and load-test entry ⬜
@@ -473,12 +475,12 @@ The only real inputs are the CAD geometry and the rulebook. Without data, judges
 - [ ] ⏳ Artifact verify page + hash-pinned QR SVG/download and Evidence links connected; bounded-memory hash checks; browser/public hosting verification pending
 - [ ] ⬜ Signed git tag
 - [ ] ⬜ Rule PDFs and runs registered in the store (`data/reference/rules/` is empty)
-- [ ] ⬜ 3-minute judge walkthrough
+- [x] ✅ 3-minute judge walkthrough script (`docs/judges/THREE-MINUTE-WALKTHROUGH.md`); timed teammate run and recorded fallback ⬜
 - [x] ✅ Speaker notes (Presenter, `N` key)
 - [ ] ⬜ 60-question Q&A bank
-- [ ] ⬜ Limitations slide
-- [ ] ⬜ Innovation one-pager
-- [ ] ⬜ Commit/rulebook hash in every PDF
+- [x] ✅ Limitations slide
+- [x] ✅ Innovation one-pager (`docs/judges/INNOVATION-ONE-PAGER.md`)
+- [ ] 🟨 Commit/rulebook/geometry hash in report, sheet and summary PDFs ✅; run-manifest identity and every other export ⬜
 - [ ] ⬜ Offline demo + fallback video
 
 **11. UI to 8/10**
