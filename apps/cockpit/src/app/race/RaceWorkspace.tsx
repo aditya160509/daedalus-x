@@ -57,6 +57,8 @@ const ANALYSIS_VIEWS = [
   { value: "spread", label: "Spread" },
   { value: "breakdown", label: "Breakdown" },
   { value: "energy", label: "Energy" },
+  { value: "mass", label: "Mass" },
+  { value: "timing", label: "Timing" },
 ] as const;
 type RaceTab = (typeof RACE_TABS)[number]["id"];
 type AnalysisView = (typeof ANALYSIS_VIEWS)[number]["value"];
@@ -101,6 +103,9 @@ function useRaceNavigation() {
   return { tab, analysis, trainerOpen, selectTab, selectAnalysis, selectTrainer };
 }
 import { SpreadPanel } from "./SpreadPanel";
+import { MonteCarloConvergence } from "@/components/race/MonteCarloConvergence";
+import { MassCurve } from "@/components/race/MassCurve";
+import { TimingPanel } from "@/components/race/TimingPanel";
 import { EnergyPanel } from "@/components/race/EnergyPanel";
 import { PointsPanel } from "@/components/race/PointsPanel";
 import { BreakdownPanel } from "@/components/race/BreakdownPanel";
@@ -641,7 +646,7 @@ export function RaceWorkspace() {
             </>
           )}
           {tab === "analysis" && analysis === "spread" && (
-            <div className="mx-auto w-full max-w-4xl">
+            <div className="mx-auto flex w-full max-w-4xl flex-col gap-3">
               <SpreadPanel
                 data={mc.data}
                 error={mc.error}
@@ -649,6 +654,17 @@ export function RaceWorkspace() {
                 uncertainty={unc}
                 onUncertainty={setUnc}
               />
+              <MonteCarloConvergence race={request} uncertainty={unc} />
+            </div>
+          )}
+          {tab === "analysis" && analysis === "mass" && (
+            <div className="mx-auto w-full max-w-4xl">
+              <MassCurve race={request} />
+            </div>
+          )}
+          {tab === "analysis" && analysis === "timing" && sim.data && (
+            <div className="mx-auto w-full max-w-4xl">
+              <TimingPanel sim={sim.data} />
             </div>
           )}
           {tab === "analysis" && analysis === "energy" && (

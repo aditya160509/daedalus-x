@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Box,
   ChevronsUpDown,
+  Cpu,
   FileStack,
   Gauge,
   Keyboard,
@@ -50,6 +51,7 @@ const SECTIONS: Section[] = [
       { href: "/simulate", label: "Wind Tunnel", capability: "AETHER", icon: Wind, status: "live" },
       { href: "/design", label: "Design Studio", capability: "AETHER", icon: Box, status: "live" },
       { href: "/race", label: "Race", capability: "TITAN", icon: Gauge, status: "live" },
+      { href: "/compute", label: "Compute", capability: "AETHER", icon: Cpu, status: "live" },
     ],
   },
 ];
