@@ -587,3 +587,7 @@ Final report guard check: nonnumeric/boolean Cd values and malformed metadata ar
 ## Next-model handoff — 2026-11-04
 
 Root `prompt.md` now specifies 15 bounded quick-work items, exact source files/symbols, installed OSS to reuse, acceptance criteria, draft-preservation rules and handoff checks. These are subfeatures, not 15 complete master tasks; saved-study comparison and PDF work are explicitly more involved. No implementation boxes or completion percentages changed for creating this handoff.
+
+## Quick review and next handoff — 2026-11-04
+
+Reviewed EASY sprint commits 1b50ac3 / 05f9489 / f88db37. Two source-level correctness gaps reproduced: held-out comparison identity can match different target sets, and code_snapshot remains stale for the API process lifetime. Fixes are pending, not silently accepted. See `evidence/REVIEW-EASY-SPRINT-2026-11-04.md`. Root `prompt-next.md` sequences those fixes, the 60-question Q&A, bounded UI acceptance and remaining software workflows; medium/large work is labelled. No browser/full-suite/physical acceptance was added by this quick review, and no percentage was upgraded.
