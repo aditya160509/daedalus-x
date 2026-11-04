@@ -501,7 +501,7 @@ const PARTICLE_VERTEX = /* glsl */ `
     vSpeed = length(vel);
     vec4 mv = modelViewMatrix * vec4(pos, 1.0);
     gl_Position = projectionMatrix * mv;
-    gl_PointSize = clamp(uPixelRatio * (0.9 + 0.9 * vSpeed) * (0.35 / max(0.04, -mv.z)), 1.0, 4.0);
+    gl_PointSize = clamp(uPixelRatio * (0.9 + 0.9 * vSpeed) * (0.42 / max(0.04, -mv.z)), 1.6, 3.6);
   }
 `;
 
@@ -514,10 +514,20 @@ const PARTICLE_FRAGMENT = /* glsl */ `
     float d = length(c);
     if (d > 0.5) discard;
     float alpha = smoothstep(0.5, 0.05, d);
-    vec3 slow = vec3(0.16, 0.5, 1.0);
-    vec3 fast = vec3(0.82, 0.94, 1.0);
-    vec3 colour = mix(slow, fast, clamp(vSpeed, 0.0, 1.5) / 1.5);
-    fragColor = vec4(colour, alpha * 0.62);
+    // Turbo-style speed map: blue (slow wake) -> cyan -> green -> yellow -> red (fast).
+    float s = clamp(vSpeed / 1.3, 0.0, 1.0);
+    vec3 c0 = vec3(0.19, 0.07, 0.23);
+    vec3 c1 = vec3(0.16, 0.47, 0.98);
+    vec3 c2 = vec3(0.10, 0.90, 0.70);
+    vec3 c3 = vec3(0.95, 0.85, 0.20);
+    vec3 c4 = vec3(0.92, 0.22, 0.10);
+    vec3 colour = s < 0.25 ? mix(c0, c1, s / 0.25)
+      : s < 0.5 ? mix(c1, c2, (s - 0.25) / 0.25)
+      : s < 0.75 ? mix(c2, c3, (s - 0.5) / 0.25)
+      : mix(c3, c4, (s - 0.75) / 0.25);
+    // Undisturbed free stream stays faint so the air bent by the car stands out.
+    float disturbed = clamp(abs(vSpeed - 1.0) * 3.0, 0.0, 1.0);
+    fragColor = vec4(colour, alpha * (0.35 + 0.65 * disturbed));
   }
 `;
 
