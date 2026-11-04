@@ -96,7 +96,7 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [ ] ⬜ Cp probe lines.
 - [ ] ⬜ y+ and bad-cell maps, skewness histogram.
 - [ ] ⬜ Δwake and Δforces, momentum-deficit drag cross-check.
-- [ ] ⬜ Guided run wizard with residual progress and a defensible ETA.
+- [x] ✅ Run monitor: residual chart per field and ETA in the Jobs drawer (`4853264`).
 - [x] ✅ Frontal-area versus Cd trade chart with iso-drag curves (`ff6bf40`).
 - [ ] ⬜ Yaw and ride-height sweeps.
 - [ ] ⏳ Accepted current-car baseline, three-mesh GCI, physical correlation.
@@ -118,7 +118,7 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [ ] ⬜ Stacked time-budget chart with measured reaction (reaction is fixed at 0 now).
 - [ ] ⬜ Race-level SALib indices and a full variance budget.
 - [ ] ⬜ Best eligible real-run ghost (scenario ghost exists).
-- [ ] ⬜ Leaderboard and history strip in stadium mode.
+- [x] ✅ History strip vs prediction band on Race day (`77d738d`).
 - [x] ✅ Stadium view: fullscreen race-day big numbers (`/race/day`, `750b64f`). Panel rotation still open.
 - [ ] ⬜ Supported tether model through dynamics and energy balance.
 - [x] ✅ Race-day time and reaction entry with prediction comparison and CSV/JSON export (`750b64f`).
@@ -134,7 +134,7 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [ ] 🟨 Adjoint tooling exists. Accepted adjoint sensitivity map and constrained updates do not.
 - [ ] ⬜ Accepted-only CFD feedback. STEP-to-mesh hash guard. Performance-rule gate.
 - [ ] ⬜ Separate training pools: synthetic demo, unreviewed input, accepted CFD, physical data.
-- [ ] ⬜ Pareto front with pymoo on eligible objectives: drag, mass, rule margin.
+- [x] ✅ Pareto front with pymoo NSGA-II: predicted CdA vs uncertainty (`40d8dc2`). Mass and rule-margin objectives wait for a mass model.
 - [ ] ⬜ Repeat-experiment noise estimate, separate from the GP nugget.
 
 ### 3.5 Calibration and physical tests
@@ -180,7 +180,7 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [x] ✅ CI workflow exists in the repo as `ci/github-actions-ci.yml`. Moving it to `.github/workflows` is blocked: the token lacks the `workflow` scope.
 - [x] ✅ Tests for source binding, lineage and numerical helpers. Regression tests for the new endpoints.
 - [ ] 🟨 Per-screen provenance labels are not yet consistent everywhere.
-- [ ] 🟨 Chart exports, linked cursors and keyboard access for every table.
+- [ ] 🟨 Chart exports (PNG on every new chart), linked cursors and keyboard access for every table.
 - [ ] ⬜ Source-linked decision log and engineering rationale record.
 - [ ] 🟨 Practical quality: coverage targets are not set. Property tests are partial. OpenAPI-generated types are not in place.
 - [ ] ⏳ Grouped browser, keyboard, download and responsive review at 1440, 1024 and 375 px.
@@ -284,17 +284,17 @@ Verify a licence before copying code. Keep the notice. No licence means no copyi
 | Scipy stats | SciPy | BSD-3 | ✅ used |
 | Benchmark | Optuna | MIT | ✅ used |
 | Design-space sampling | scipy.stats.qmc | BSD-3 | ✅ used |
-| Pareto front | pymoo | Apache-2.0 | ⬜ to adopt |
+| Pareto front | pymoo | Apache-2.0 | ✅ used: NSGA-II drag vs confidence (`40d8dc2`) |
 | Posterior diagnostics | ArviZ | Apache-2.0 | ⬜ only where MCMC exists (current sampler is importance sampling) |
-| Run wizard and monitor | FoamPilot | MIT | ⬜ to adopt |
-| Particle advection | mapbox/webgl-wind | ISC | 📝 technique, draft in progress |
-| WebGPU particles | dgreenheck/threejs-particle-fluids | MIT | ⬜ optional upgrade |
-| Race timing tower, stadium | adn8naiagent/F1ReplayTiming | MIT | ⬜ to adopt for stadium mode |
-| Telemetry layouts | matteocelani/f1-telemetry | MIT | ⬜ to adopt |
-| Design tokens and mono font | Vercel Geist | OFL (font) | ⬜ to adopt |
-| UI primitives | t3code web UI | MIT | ⬜ to port into `components/ui` |
-| KPI cards | Tremor | Apache-2.0 | ⬜ to copy pattern |
-| Number inputs | Origin UI | MIT | ⬜ to copy pattern |
+| Run wizard and monitor | FoamPilot | MIT | ✅ pattern used: residual monitor + ETA in Jobs (`4853264`) |
+| Particle advection | mapbox/webgl-wind | ISC | ✅ technique used in `FlowTunnel3D` |
+| WebGPU particles | dgreenheck/threejs-particle-fluids | MIT | ⏭ not needed: WebGL particles hold frame rate |
+| Race timing tower, stadium | adn8naiagent/F1ReplayTiming | MIT | ✅ pattern used: timing tower, stadium view, history strip |
+| Telemetry layouts | matteocelani/f1-telemetry | MIT | ✅ pattern used: Race Timing/Analysis panels |
+| Design tokens and mono font | Vercel Geist | OFL (font) | ✅ used: Geist Sans/Mono (`0abe55f`) |
+| UI primitives | t3code web UI | MIT | ✅ ported: 28 primitives + dark palette (`0abe55f`) |
+| KPI cards | Tremor | Apache-2.0 | ✅ pattern: one shared `Metric` tile (`77d738d`) |
+| Number inputs | Origin UI | MIT | ✅ covered by t3code `number-field` |
 | Race track reference | Synopsys/NVIDIA digital twin | commercial | reference only |
 | Reference race sim | TUMFTM race-simulation | check | reference only |
 | CalculiX 3D | CalculiX | GPL | ⏳ only with real material data |
