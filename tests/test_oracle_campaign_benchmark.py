@@ -1,5 +1,6 @@
 """Evidence binding and resource exclusion; never launches CFD or a benchmark campaign."""
 
+import itertools
 import json
 from pathlib import Path
 
@@ -91,10 +92,12 @@ def test_native_sampler_budget_and_seed_contract(monkeypatch):
     assert len(result["evaluations"]) == 6 * 10 * 8
     for method in result["methods"]:
         curve = method["mean_cda_m2"]
-        assert len(curve) == 8 and all(a >= b for a, b in zip(curve, curve[1:]))
+        assert len(curve) == 8 and all(a >= b for a, b in itertools.pairwise(curve))
         assert all(
             lo <= mean <= hi
-            for lo, mean, hi in zip(method["lower_cda_m2"], curve, method["upper_cda_m2"])
+            for lo, mean, hi in zip(
+                method["lower_cda_m2"], curve, method["upper_cda_m2"], strict=True
+            )
         )
     for seed in range(7, 17):
         starts = {

@@ -113,7 +113,7 @@ def run(
                 values: list[float] = []
                 for index in range(spec.budget):
                     if method in ("tpe", "cmaes"):
-                        assert study is not None
+                        assert study is not None  # noqa: S101
                         trial = study.ask()
                         point = np.array(
                             [trial.suggest_float(f"x{i}", 0.0, 1.0) for i in range(oracle.DIM)]
@@ -147,7 +147,7 @@ def run(
                         }[method]
                     value = float(oracle.synthetic_cda(point)[0])
                     if method in ("tpe", "cmaes"):
-                        assert study is not None and trial is not None
+                        assert study is not None and trial is not None  # noqa: S101
                         study.tell(trial, value)
                     points.append(point)
                     values.append(value)
