@@ -245,7 +245,7 @@ Each chart needs: shared theme, units on axes, a source tag, hairline grid, dash
 
 **Bar:** Linear, Vercel dashboard, T3 Code. Quiet, dense, precise. No glow, gradient cards, emoji or decorative icons.
 
-- [ ] ⬜ 0. Fix the Next.js "1 Issue" runtime error. Not checked since the last screenshot.
+- [x] ✅ 0. "1 Issue" runtime error fixed (Timer import, LegalPanel hydration).
 - [x] ✅ 1. Moving air: GPU particles coloured by speed, preview fallback.
 - [x] ✅ 2. Outputs tab (`b261ced`) and Wind Tunnel Analysis tab (`b22461b`). Strength card still open.
 - [ ] ⬜ 3. Inspect redo: smooth shading, rule colours on parts, dimension lines, View, Measure, Section, Compare tabs, model table with units.
@@ -343,5 +343,5 @@ These items cannot be finished in software alone.
 - [x] ✅ Wind Tunnel preview fallback (`ae73c0e`).
 - [x] ✅ Compute endpoint and tests (`9672ffb`).
 - [x] ✅ Race: MC convergence, mass curve, speed trap, timing export, compute page (`7de8fa2`).
-- [ ] ⬜ Race annotations (task 5): skipped, owned by the other contributor.
+- [x] ✅ Race annotations (task 5): committed in `aafbe8f`.
 - [ ] 🟨 Chart gaps (task 10): the safety-factor table exists for captured cases. The remaining chart items are in §4.
