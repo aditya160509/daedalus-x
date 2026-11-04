@@ -6,7 +6,13 @@ describe("Pit Wall default docking layout", () => {
     const added = new Set<string>();
     for (const panel of defaultPanels(width)) {
       if (panel.position && "referencePanel" in panel.position) {
-        expect(added.has(String(panel.position.referencePanel))).toBe(true);
+        expect(
+          added.has(
+            typeof panel.position.referencePanel === "string"
+              ? panel.position.referencePanel
+              : panel.position.referencePanel.id,
+          ),
+        ).toBe(true);
       }
       expect(added.has(panel.id)).toBe(false);
       added.add(panel.id);

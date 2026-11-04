@@ -1,7 +1,7 @@
 // Adapted from slowlydev/f1-dash at d21607a (AGPL-3.0). See THIRD_PARTY.md.
 import { clsx } from "clsx";
 
-export interface LapTimeValue {
+interface LapTimeValue {
   Value?: string;
   OverallFastest?: boolean;
   PersonalFastest?: boolean;

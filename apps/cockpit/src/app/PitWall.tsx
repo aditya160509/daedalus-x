@@ -68,11 +68,7 @@ export function PitWall() {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <WorkspaceTabs
-        tabs={TABS}
-        value={tab}
-        onChange={setTab}
-      />
+      <WorkspaceTabs tabs={TABS} value={tab} onChange={setTab} />
       <div className="min-h-0 flex-1 overflow-y-auto p-3">
         {tab === "overview" && (
           <Suspense fallback={<Skeleton className="h-full min-h-96" />}>

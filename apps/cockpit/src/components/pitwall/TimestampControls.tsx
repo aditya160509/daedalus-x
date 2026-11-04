@@ -2,24 +2,13 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import {
-  getAnchorHistory,
-  getAnchorStatus,
-  submitAnchor,
-  verifyAnchor,
-} from "@/lib/api";
+import { getAnchorHistory, getAnchorStatus, submitAnchor, verifyAnchor } from "@/lib/api";
 
 const short = (value: string) => value.replace(/^sha256:/, "").slice(0, 12);
 
 function Verdict({ verified }: { verified: boolean }) {
   return (
-    <span
-      className={
-        verified
-          ? "font-medium text-emerald-500"
-          : "font-medium text-destructive"
-      }
-    >
+    <span className={verified ? "font-medium text-emerald-500" : "font-medium text-destructive"}>
       {verified ? "verified" : "failed"}
     </span>
   );
@@ -98,9 +87,8 @@ export function TimestampControls({ id }: { id: string }) {
           )}
           {status.data.latest_verification && (
             <p className="text-muted-foreground">
-              Latest recorded check:{" "}
-              <Verdict verified={status.data.latest_verification.verified} /> at{" "}
-              {new Date(status.data.latest_verification.created_at).toLocaleString()}.
+              Latest recorded check: <Verdict verified={status.data.latest_verification.verified} />{" "}
+              at {new Date(status.data.latest_verification.created_at).toLocaleString()}.
             </p>
           )}
         </>
@@ -163,7 +151,9 @@ export function TimestampControls({ id }: { id: string }) {
                   </div>
                 </div>
                 <details>
-                  <summary className="cursor-pointer text-muted-foreground">Command and output</summary>
+                  <summary className="cursor-pointer text-muted-foreground">
+                    Command and output
+                  </summary>
                   <pre className="mt-1 max-h-40 overflow-auto whitespace-pre-wrap break-all font-mono text-[11px] text-muted-foreground">
                     {entry.command}
                     {entry.detail ? `\n\n${entry.detail}` : ""}
@@ -174,8 +164,8 @@ export function TimestampControls({ id }: { id: string }) {
           </ul>
           {tokens.length > 0 && (
             <p className="font-mono text-[11px] text-muted-foreground">
-              latest response {short(tokens[tokens.length - 1].content_sha256)} ·{" "}
-              {tokens.length} stored
+              latest response {short(tokens[tokens.length - 1].content_sha256)} · {tokens.length}{" "}
+              stored
             </p>
           )}
         </section>

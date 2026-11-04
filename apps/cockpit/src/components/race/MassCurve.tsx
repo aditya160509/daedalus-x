@@ -7,7 +7,7 @@ import { simulateRaceExtra } from "@/lib/api-extra";
 import { Panel, ProvenanceBadge } from "@/components/ui/primitives";
 
 /** The legal minimum car mass in grams. Heavier cars are legal but slower. */
-export const RULE_MASS_G = 50.0;
+const RULE_MASS_G = 50.0;
 const STEP_G = 0.5;
 const SPAN_G = 30;
 
@@ -16,8 +16,9 @@ const SPAN_G = 30;
  * Race workspace. Every other input (thrust, CdA, Crr, track) is held at the current request.
  */
 export function MassCurve({ race }: { race: RaceSimulationRequest }) {
-  const masses = Array.from({ length: Math.round(SPAN_G / STEP_G) + 1 }, (_, i) =>
-    +(RULE_MASS_G + i * STEP_G).toFixed(2),
+  const masses = Array.from(
+    { length: Math.round(SPAN_G / STEP_G) + 1 },
+    (_, i) => +(RULE_MASS_G + i * STEP_G).toFixed(2),
   );
   const query = useQuery({
     queryKey: ["mass-curve", race, masses],

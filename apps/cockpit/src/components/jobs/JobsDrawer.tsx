@@ -15,7 +15,53 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { cancelJob, getJobLog, listJobs, type Job } from "@/lib/api";
-import { elapsedSeconds, progressPercent } from "./jobMath";
+import { LineChart } from "echarts/charts";
+import {
+  chartAxis,
+  chartTheme,
+  chartTooltip,
+  echarts,
+  useECharts,
+} from "@/components/charts/useECharts";
+import { elapsedSeconds, etaSeconds, parseResiduals, progressPercent } from "./jobMath";
+
+echarts.use([LineChart]);
+
+/** Initial residual per field on a log axis: the convergence monitor. */
+function Residuals({ log }: { log: string }) {
+  const series = parseResiduals(log);
+  const names = Object.keys(series);
+  const host = useECharts(() => {
+    const t = chartTheme();
+    const colors = [t.brand, t.risk, t.ok, "#a78bfa", "#f472b6", "#60a5fa", t.text2];
+    return {
+      animation: false,
+      grid: { left: 44, right: 12, top: 24, bottom: 24 },
+      legend: { top: 0, itemWidth: 10, itemHeight: 4, textStyle: { color: t.text2, fontSize: 10 } },
+      tooltip: {
+        ...chartTooltip(t),
+        trigger: "axis",
+        valueFormatter: (v: number) => v.toExponential(2),
+      },
+      xAxis: { type: "value", ...chartAxis(t), min: "dataMin" },
+      yAxis: {
+        type: "log",
+        ...chartAxis(t),
+        axisLabel: { formatter: (v: number) => v.toExponential(0), color: t.muted, fontSize: 10 },
+      },
+      series: names.map((n, i) => ({
+        name: n,
+        type: "line",
+        showSymbol: false,
+        lineStyle: { width: 1.2, color: colors[i % colors.length] },
+        itemStyle: { color: colors[i % colors.length] },
+        data: series[n],
+      })),
+    };
+  }, [log]);
+  if (!names.length) return null;
+  return <div ref={host} className="h-44 w-full" />;
+}
 
 function LogTail({ job }: { job: Job }) {
   const [text, setText] = useState("");
@@ -49,18 +95,21 @@ function LogTail({ job }: { job: Job }) {
       clearTimeout(timer);
     };
   }, [job.id, job.state]);
+  const eta = etaSeconds(elapsedSeconds(job.started_at, job.finished_at), progress);
   return (
     <div className="space-y-2">
       {progress != null && (
         <>
           <p className="text-xs tabular-nums text-muted-foreground">
             Solver iterations · {progress.toFixed(1)}%
+            {eta != null && ` · about ${Math.ceil(eta / 60)} min left`}
           </p>
           <Progress value={progress} aria-label="Solver iteration progress" />
         </>
       )}
+      <Residuals log={text} />
       {error && (
-        <p role="alert" className="text-xs text-danger">
+        <p role="alert" className="text-xs text-destructive">
           {error}
         </p>
       )}
@@ -99,7 +148,7 @@ function JobCard({ job }: { job: Job }) {
         </div>
         <span className="rounded-full border px-2 py-0.5 text-xs">{job.state}</span>
       </div>
-      {job.error && <p className="text-xs text-danger">{job.error}</p>}
+      {job.error && <p className="text-xs text-destructive">{job.error}</p>}
       <div className="flex gap-2">
         <Button
           variant="outline"
@@ -125,7 +174,7 @@ function JobCard({ job }: { job: Job }) {
                 </DialogDescription>
               </DialogHeader>
               {cancel.error && (
-                <p role="alert" className="text-danger">
+                <p role="alert" className="text-destructive">
                   {cancel.error.message}
                 </p>
               )}
@@ -167,8 +216,7 @@ export function JobsDrawer() {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger render={<Button variant="outline" size="sm" />}>
         <ListTodo />
-        Jobs{" "}
-        {jobs.data?.filter((j) => j.state === "queued" || j.state === "running").length || ""}
+        Jobs {jobs.data?.filter((j) => j.state === "queued" || j.state === "running").length || ""}
       </PopoverTrigger>
       <PopoverContent className="flex max-h-[min(70dvh,40rem)] flex-col overflow-hidden p-0">
         <div className="border-b px-4 py-3">
@@ -181,7 +229,7 @@ export function JobsDrawer() {
         <div className="min-h-0 space-y-3 overflow-y-auto p-4">
           {jobs.isPending && <div className="h-24 animate-pulse rounded-lg bg-surface-2" />}
           {jobs.error && (
-            <p role="alert" className="text-sm text-danger">
+            <p role="alert" className="text-sm text-destructive">
               {jobs.error.message}
             </p>
           )}

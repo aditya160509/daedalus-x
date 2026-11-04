@@ -2,15 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Command } from "cmdk";
-import {
-  ArrowDown,
-  ArrowUp,
-  Box,
-  FileStack,
-  Keyboard,
-  RefreshCw,
-  Wind,
-} from "lucide-react";
+import { ArrowDown, ArrowUp, Box, FileStack, Keyboard, RefreshCw, Wind } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Key } from "./Key";
 import type { PaletteItem } from "./CommandPalette";

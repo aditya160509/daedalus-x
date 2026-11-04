@@ -54,7 +54,7 @@ export function buildTracks(sim: RaceSimulation): TelemetryTrack[] {
   ];
 }
 
-export type RaceMarkerKind = "launch" | "burnout" | "peak" | "finish" | "stop";
+type RaceMarkerKind = "launch" | "burnout" | "peak" | "finish" | "stop";
 
 export interface RaceMarker {
   t: number;
@@ -106,11 +106,7 @@ export function markers(sim: RaceSimulation, time: number[]): RaceMarker[] {
     push(sim.time_s, "finish", "finish");
   } else {
     const reason = sim.stop_reason.trim();
-    push(
-      time[time.length - 1],
-      reason ? `stop · ${reason}` : "stop",
-      "stop",
-    );
+    push(time[time.length - 1], reason ? `stop · ${reason}` : "stop", "stop");
   }
 
   const merged = new Map<number, RaceMarker>();

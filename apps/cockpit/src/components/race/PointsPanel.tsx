@@ -233,7 +233,8 @@ export function PointsPanel({
               />
             </div>
             <p className="text-2xs leading-4 text-muted-foreground">
-              Field times are generated from the assumptions above. Measured provenance requires an actual timing-data import.
+              Field times are generated from the assumptions above. Measured provenance requires an
+              actual timing-data import.
             </p>
           </section>
 

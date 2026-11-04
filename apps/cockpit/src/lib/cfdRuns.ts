@@ -16,9 +16,7 @@ export function defaultRunId(runs: readonly RunSummary[]): string | null {
   const solved = runs.filter((r) => r.state === "succeeded" && r.has_viz);
   const byCd = (a: RunSummary, b: RunSummary) => (a.cd ?? Infinity) - (b.cd ?? Infinity);
   const accepted = solved.filter((r) => r.acceptance === "accepted" && r.cd != null).toSorted(byCd);
-  const measured = solved
-    .filter((r) => r.acceptance !== "rejected" && r.cd != null)
-    .toSorted(byCd);
+  const measured = solved.filter((r) => r.acceptance !== "rejected" && r.cd != null).toSorted(byCd);
   const unrejected = solved.filter((r) => r.acceptance !== "rejected");
   const latestRejected = solved.at(-1);
   return (

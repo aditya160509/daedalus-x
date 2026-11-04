@@ -75,7 +75,15 @@ export function MonteCarloConvergence({
       },
       series: [
         // Stacked pair: an invisible p5 base plus the p95 - p5 width gives a shaded band.
-        { name: "p5 base", type: "line", stack: "band", data: p5, silent: true, lineStyle: { opacity: 0 }, symbol: "none" },
+        {
+          name: "p5 base",
+          type: "line",
+          stack: "band",
+          data: p5,
+          silent: true,
+          lineStyle: { opacity: 0 },
+          symbol: "none",
+        },
         {
           name: "p5–p95",
           type: "line",

@@ -18,3 +18,28 @@ export function elapsedSeconds(start: string | null, finish: string | null, now 
   if (!start) return null;
   return Math.max(0, ((finish ? Date.parse(finish) : now) - Date.parse(start)) / 1000);
 }
+
+/** OpenFOAM log → initial residual per field per iteration (FoamPilot-style monitor). */
+export function parseResiduals(log: string) {
+  const series: Record<string, [number, number][]> = {};
+  let iter = -1;
+  for (const line of log.split("\n")) {
+    const t = /^Time = ([\d.eE+-]+)/.exec(line);
+    if (t) {
+      iter = Number(t[1]);
+      continue;
+    }
+    const r = /Solving for (\w+), Initial residual = ([\d.eE+-]+)/.exec(line);
+    if (r && iter >= 0) {
+      const v = Number(r[2]);
+      if (v > 0) (series[r[1]] ??= []).push([iter, v]);
+    }
+  }
+  return series;
+}
+
+/** Linear ETA from iteration rate; null until there is enough progress to defend it. */
+export function etaSeconds(elapsed: number | null, percent: number | null) {
+  if (elapsed == null || percent == null || percent < 2 || percent >= 100) return null;
+  return (elapsed * (100 - percent)) / percent;
+}

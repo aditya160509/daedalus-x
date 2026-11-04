@@ -96,7 +96,12 @@ export function WorkspaceTabs<T extends string>({
 export function StatusBar({
   items,
 }: {
-  items: { label: string; value: React.ReactNode; tone?: "risk" | "ok" | "muted"; title?: string }[];
+  items: {
+    label: string;
+    value: React.ReactNode;
+    tone?: "risk" | "ok" | "muted";
+    title?: string;
+  }[];
 }) {
   return (
     <div

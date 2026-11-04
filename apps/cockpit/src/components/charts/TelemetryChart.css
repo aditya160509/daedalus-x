@@ -3,8 +3,14 @@
   margin: 0 !important;
   padding-left: 64px;
   text-align: left !important;
-  font: 500 10px/14px var(--font-jetbrains), monospace !important;
+  font:
+    500 10px/14px var(--font-jetbrains),
+    monospace !important;
   color: var(--muted-foreground);
 }
-.daedalus-telemetry .u-cursor-x { border-right-color: #8a8a9360; }
-.daedalus-telemetry .u-select { background: #3dd6f016; }
+.daedalus-telemetry .u-cursor-x {
+  border-right-color: #8a8a9360;
+}
+.daedalus-telemetry .u-select {
+  background: #3dd6f016;
+}

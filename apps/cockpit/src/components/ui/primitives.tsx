@@ -249,9 +249,7 @@ export function EmptyState({
 }) {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-3 p-10 text-center">
-      <div className="text-text-3 [&_svg]:size-5">
-        {icon}
-      </div>
+      <div className="text-text-3 [&_svg]:size-5">{icon}</div>
       <div className="space-y-1.5">
         <h3 className="text-[13px] font-medium tracking-[-0.01em]">{title}</h3>
         <div className="max-w-sm text-xs leading-relaxed text-muted-foreground">{children}</div>

@@ -10,7 +10,7 @@ import type { LoadedModel } from "@/lib/gltf";
  * added, and negative when it lies inside A, i.e. material removed. Distances are millimetres.
  */
 
-export type Vec3 = [number, number, number];
+type Vec3 = [number, number, number];
 
 export interface TriangleMesh {
   label: string;
@@ -53,7 +53,7 @@ export interface DeviationRender {
 const DEFAULT_SAMPLES = 20_000;
 const DEFAULT_TOLERANCE_MM = 0.05;
 
-export function boundsOf(mesh: TriangleMesh): {
+function boundsOf(mesh: TriangleMesh): {
   min: Vec3;
   max: Vec3;
   centre: Vec3;
@@ -243,7 +243,7 @@ function gridCandidates(grid: Grid, point: Vec3, triangles: number): number[] {
 }
 
 /** Signed distance in millimetres from one candidate vertex to the reference surface. */
-export function signedDistanceMm(
+function signedDistanceMm(
   grid: Grid | null,
   reference: TriangleMesh,
   point: Vec3,

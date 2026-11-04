@@ -51,7 +51,7 @@ export function speedTrap(sim: RaceSimulation): SpeedTrap {
   };
 }
 
-export interface TimingRow {
+interface TimingRow {
   t_s: number;
   velocity_m_s: number | null;
   velocity_km_h: number | null;
@@ -60,7 +60,7 @@ export interface TimingRow {
 }
 
 /** One row per returned sample. Columns that the model did not return stay null. */
-export function timingRows(sim: RaceSimulation): TimingRow[] {
+function timingRows(sim: RaceSimulation): TimingRow[] {
   const time = sim.time_axis.values;
   const velocity = channel(sim, "velocity");
   const position = channel(sim, "position");

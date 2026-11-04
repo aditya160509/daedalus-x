@@ -1,7 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "ignoreDependencies": [
-    "@react-three/postprocessing"
   ],
   "ignore": [
     "src/components/ui/**",

@@ -1,7 +1,7 @@
 // Adapted from slowlydev/f1-dash at d21607a (AGPL-3.0). See THIRD_PARTY.md.
 import { clsx } from "clsx";
 
-export interface TimingSector {
+interface TimingSector {
   Segments: { Status: number }[];
   Value?: string;
   PreviousValue?: string;
@@ -20,7 +20,7 @@ type Props = {
   bestSectors: TimingStatsDriver["BestSectors"] | undefined;
 };
 
-export default function DriverMiniSectors({ sectors = [], bestSectors }: Props) {
+export default function DriverMiniSectors({ sectors, bestSectors }: Props) {
   const showMiniSectors = true;
   const showBestSectors = bestSectors !== undefined;
 

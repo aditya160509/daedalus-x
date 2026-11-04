@@ -70,15 +70,29 @@ function DragSplit({ pressure, viscous }: { pressure: number; viscous: number })
         valueFormatter: (v: number) => `${v.toFixed(4)} N`,
       },
       toolbox: { right: 8, feature: { saveAsImage: { type: "png", name: "drag-split" } } },
-      legend: { bottom: 0, icon: "roundRect", itemWidth: 10, itemHeight: 6, textStyle: { color: t.text2, fontSize: 11 } },
+      legend: {
+        bottom: 0,
+        icon: "roundRect",
+        itemWidth: 10,
+        itemHeight: 6,
+        textStyle: { color: t.text2, fontSize: 11 },
+      },
       series: [
         {
           type: "pie",
           radius: ["58%", "80%"],
           center: ["50%", "46%"],
           itemStyle: { borderColor: "transparent" },
-          label: { show: true, position: "center", color: t.text, fontFamily: t.mono, fontSize: 18, formatter: () => `${((Math.max(pressure, 0) / Math.max(pressure + viscous, 1e-12)) * 100).toFixed(0)}%
-pressure` },
+          label: {
+            show: true,
+            position: "center",
+            color: t.text,
+            fontFamily: t.mono,
+            fontSize: 18,
+            formatter:
+              () => `${((Math.max(pressure, 0) / Math.max(pressure + viscous, 1e-12)) * 100).toFixed(0)}%
+pressure`,
+          },
           data: [
             { name: "Pressure", value: Math.max(pressure, 0), itemStyle: { color: t.brand } },
             {
@@ -244,16 +258,40 @@ function AreaTrade({ cd, area }: { cd: number; area: number }) {
     return {
       animation: false,
       grid: { left: 48, right: 24, top: 30, bottom: 36 },
-      legend: { top: 0, right: 40, itemWidth: 12, itemHeight: 6, textStyle: { color: t.text2, fontSize: 11 } },
+      legend: {
+        top: 0,
+        right: 40,
+        itemWidth: 12,
+        itemHeight: 6,
+        textStyle: { color: t.text2, fontSize: 11 },
+      },
       toolbox: { right: 8, feature: { saveAsImage: { type: "png", name: "area-trade" } } },
       tooltip: { ...chartTooltip(t), trigger: "item" },
-      xAxis: { type: "value", name: "A cm²", min: "dataMin", nameTextStyle: { color: t.muted, fontSize: 10 }, ...chartAxis(t) },
-      yAxis: { type: "value", name: "Cd", scale: true, nameTextStyle: { color: t.muted, fontSize: 10 }, ...chartAxis(t) },
+      xAxis: {
+        type: "value",
+        name: "A cm²",
+        min: "dataMin",
+        nameTextStyle: { color: t.muted, fontSize: 10 },
+        ...chartAxis(t),
+      },
+      yAxis: {
+        type: "value",
+        name: "Cd",
+        scale: true,
+        nameTextStyle: { color: t.muted, fontSize: 10 },
+        ...chartAxis(t),
+      },
       series: [
         iso(0.9, "−10% drag", t.ok),
         iso(1, "This run", t.text2),
         iso(1.1, "+10% drag", t.risk),
-        { name: "Run", type: "scatter", symbolSize: 9, itemStyle: { color: t.brand }, data: [[area * 1e4, cd]] },
+        {
+          name: "Run",
+          type: "scatter",
+          symbolSize: 9,
+          itemStyle: { color: t.brand },
+          data: [[area * 1e4, cd]],
+        },
       ],
     };
   }, [cd, area]);

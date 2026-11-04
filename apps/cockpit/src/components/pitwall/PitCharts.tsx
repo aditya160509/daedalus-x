@@ -16,7 +16,6 @@ import {
 
 echarts.use([HeatmapChart, ScatterChart, GaugeChart, VisualMapComponent]);
 
-
 /** Aero map: GP-predicted CdA over the first two variables, tested runs and the next-best star. */
 export function AeroMap({ s }: { s: OracleState }) {
   const [metric, setMetric] = useState<"mean" | "sd">("mean");
@@ -127,7 +126,6 @@ export function AeroMap({ s }: { s: OracleState }) {
   );
 }
 
-
 /** pymoo NSGA-II front: predicted CdA against GP uncertainty; hover shows the design. */
 export function ParetoFront() {
   const q = useQuery({ queryKey: ["oracle-pareto"], queryFn: getOraclePareto, staleTime: 60_000 });
@@ -149,8 +147,22 @@ export function ParetoFront() {
           ].join("<br/>");
         },
       },
-      xAxis: { type: "value", name: "Predicted CdA (cm²)", nameLocation: "middle", nameGap: 26, scale: true, nameTextStyle: { color: t.muted, fontSize: 10 }, ...chartAxis(t) },
-      yAxis: { type: "value", name: "± 1σ (cm²)", scale: true, nameTextStyle: { color: t.muted, fontSize: 10 }, ...chartAxis(t) },
+      xAxis: {
+        type: "value",
+        name: "Predicted CdA (cm²)",
+        nameLocation: "middle",
+        nameGap: 26,
+        scale: true,
+        nameTextStyle: { color: t.muted, fontSize: 10 },
+        ...chartAxis(t),
+      },
+      yAxis: {
+        type: "value",
+        name: "± 1σ (cm²)",
+        scale: true,
+        nameTextStyle: { color: t.muted, fontSize: 10 },
+        ...chartAxis(t),
+      },
       series: [
         {
           type: "line",

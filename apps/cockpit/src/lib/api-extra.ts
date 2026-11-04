@@ -11,7 +11,7 @@ import {
   type UncertaintyInput,
 } from "./api";
 
-export class ExtraApiError extends Error {
+class ExtraApiError extends Error {
   constructor(
     message: string,
     readonly status: number,
@@ -61,7 +61,7 @@ const ComputeRun = z.object({
   source: z.string(),
   logs: z.array(z.string()),
 });
-export type ComputeRun = z.infer<typeof ComputeRun>;
+type ComputeRun = z.infer<typeof ComputeRun>;
 
 /** Per-run cells, solver wall time and status, read from the run logs by the API. */
 export const listCfdCompute = () => call("/v1/cfd/compute", z.array(ComputeRun));

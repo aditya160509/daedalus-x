@@ -517,11 +517,15 @@ export const getOracleState = () => request("/v1/oracle/state", OracleState);
 const OraclePareto = z.object({
   objectives: z.array(z.string()),
   points: z.array(
-    z.object({ params: z.record(z.string(), z.number()), cda_m2: z.number(), cda_sd_m2: z.number() }),
+    z.object({
+      params: z.record(z.string(), z.number()),
+      cda_m2: z.number(),
+      cda_sd_m2: z.number(),
+    }),
   ),
   provenance: z.literal("predicted"),
 });
-export type OraclePareto = z.infer<typeof OraclePareto>;
+type OraclePareto = z.infer<typeof OraclePareto>;
 export const getOraclePareto = () => request("/v1/oracle/pareto", OraclePareto);
 
 // Sealed predictions (T09)
@@ -690,7 +694,7 @@ export const getForgeRisk = (design: string, sigma_mm: number) =>
   });
 
 // ATLAS evidence (T12)
-export const CoverageGap = z.object({
+const CoverageGap = z.object({
   gap_id: z.string(),
   kind: z.enum([
     "solver_run",
@@ -708,7 +712,7 @@ export const CoverageGap = z.object({
   detail: z.string(),
   related_ids: z.array(z.string()),
 });
-export type CoverageGap = z.infer<typeof CoverageGap>;
+type CoverageGap = z.infer<typeof CoverageGap>;
 export const EvidenceRow = z.object({
   id: z.string(),
   kind: z.string(),
@@ -722,7 +726,7 @@ const EvidenceCoverage = z.object({
   items: z.array(CoverageGap),
   counts: z.record(z.string(), z.number()),
 });
-export type EvidenceCoverage = z.infer<typeof EvidenceCoverage>;
+type EvidenceCoverage = z.infer<typeof EvidenceCoverage>;
 export const getEvidenceCoverage = () => request("/v1/evidence/coverage", EvidenceCoverage);
 const EvidenceLineage = z.object({
   nodes: z.array(EvidenceRow),
@@ -733,7 +737,7 @@ const EvidenceLineage = z.object({
   outside_window: z.number(),
   missing_references: z.array(z.string()),
 });
-export type EvidenceLineage = z.infer<typeof EvidenceLineage>;
+type EvidenceLineage = z.infer<typeof EvidenceLineage>;
 export const getEvidenceLineage = () => request("/v1/evidence/lineage", EvidenceLineage);
 
 export const listEvidence = (q?: string) =>
@@ -812,7 +816,7 @@ const TestPlan = z.object({
   steps: z.array(PlannerStep),
   assumptions: z.array(z.string()),
 });
-export type TestPlan = z.infer<typeof TestPlan>;
+type TestPlan = z.infer<typeof TestPlan>;
 export interface TestPlanRequest {
   thrust: { t_s: number[]; force_n: number[] };
   cda_m2: number;
@@ -856,7 +860,7 @@ export const getEnergyAudit = (race: RaceSimulationRequest) =>
     }),
   });
 
-export const RacingOutcome = z.object({
+const RacingOutcome = z.object({
   reaction_points_mean: z.number(),
   reaction_points_p05: z.number(),
   reaction_points_p95: z.number(),
@@ -869,7 +873,7 @@ export const RacingOutcome = z.object({
   performance_compliant: z.boolean(),
   assumptions: z.array(z.string()),
 });
-export type RacingOutcome = z.infer<typeof RacingOutcome>;
+type RacingOutcome = z.infer<typeof RacingOutcome>;
 export interface RacingPointsRequest {
   car_time_s: number[];
   reaction_mean_s: number;
@@ -972,7 +976,7 @@ const CalibrationStudySummary = z.object({
   source_labels: z.array(z.string()),
   medians: z.record(z.string(), z.number()).nullable(),
 });
-export type CalibrationStudySummary = z.infer<typeof CalibrationStudySummary>;
+type CalibrationStudySummary = z.infer<typeof CalibrationStudySummary>;
 const CalibrationStudyDetail = z.object({
   study: CalibrationStudySummary,
   inputs: z.object({
@@ -1278,6 +1282,6 @@ const ArtifactVerification = z.object({
   size_bytes: z.number().nullable(),
   status: z.enum(["match", "mismatch", "missing"]),
 });
-export type ArtifactVerification = z.infer<typeof ArtifactVerification>;
+type ArtifactVerification = z.infer<typeof ArtifactVerification>;
 export const verifyArtifact = (id: string) =>
   request(`/v1/evidence/artifacts/${encodeURIComponent(id)}/verify`, ArtifactVerification);
