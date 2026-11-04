@@ -3,7 +3,6 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   Box,
-  CalendarClock,
   ChevronsUpDown,
   FileStack,
   Gauge,
@@ -11,7 +10,6 @@ import {
   LayoutDashboard,
   PanelLeftClose,
   PanelLeftOpen,
-  Presentation,
   Search,
   Settings,
   type LucideIcon,
@@ -26,7 +24,6 @@ import { CommandPalette, OPEN_EVENT } from "./CommandPalette";
 import { RunPicker } from "./RunPicker";
 import { OPEN_SHORTCUTS, ShortcutsDialog } from "./ShortcutsDialog";
 import { EvidenceDrawer, OPEN_EVIDENCE } from "@/components/evidence/EvidenceDrawer";
-import { OPEN_PRESENTER, Presenter } from "@/components/present/Presenter";
 import { Key } from "./Key";
 import { getHealth } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -53,13 +50,6 @@ const SECTIONS: Section[] = [
       { href: "/simulate", label: "Wind Tunnel", capability: "AETHER", icon: Wind, status: "live" },
       { href: "/design", label: "Design Studio", capability: "AETHER", icon: Box, status: "live" },
       { href: "/race", label: "Race", capability: "TITAN", icon: Gauge, status: "live" },
-      {
-        href: "/project",
-        label: "Project",
-        capability: "ATLAS",
-        icon: CalendarClock,
-        status: "live",
-      },
     ],
   },
 ];
@@ -132,7 +122,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const toggleCollapsed = () => writeCollapsed(!collapsed);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
-  // Keys 1-6 jump to a workspace (04-UI-QUALITY-BAR).
+  // Keys 1-4 jump to a workspace (04-UI-QUALITY-BAR).
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey || isTyping(event.target)) return;
@@ -415,17 +405,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <Key>E</Key>
                 </span>
               </button>
-              <button
-                type="button"
-                onClick={() => window.dispatchEvent(new Event(OPEN_PRESENTER))}
-                aria-label="Present"
-                aria-keyshortcuts="p"
-                className="flex h-8 items-center gap-2 rounded-md border px-2.5 text-xs font-medium text-foreground transition-colors duration-150 hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
-              >
-                <Presentation className="size-3.5" aria-hidden />
-                <span className="hidden sm:inline">Present</span>
-                <kbd className="hidden text-[10px] opacity-70 lg:inline">P</kbd>
-              </button>
             </div>
           </header>
           <main
@@ -439,7 +418,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
       <CommandPalette items={ALL} />
       <EvidenceDrawer />
-      <Presenter />
       <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
       <Toaster
         theme="dark"

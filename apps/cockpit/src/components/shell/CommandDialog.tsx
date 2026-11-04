@@ -8,7 +8,6 @@ import {
   Box,
   FileStack,
   Keyboard,
-  Presentation,
   RefreshCw,
   Wind,
 } from "lucide-react";
@@ -17,7 +16,6 @@ import { Key } from "./Key";
 import type { PaletteItem } from "./CommandPalette";
 import { OPEN_SHORTCUTS } from "./ShortcutsDialog";
 import { OPEN_EVIDENCE } from "@/components/evidence/EvidenceDrawer";
-import { OPEN_PRESENTER } from "@/components/present/Presenter";
 import { listCfdRuns, listDesigns } from "@/lib/api";
 
 const ITEM =
@@ -121,18 +119,6 @@ export function CommandDialog({
             <FileStack size={16} className="text-muted-foreground" />
             Open evidence
             <span className="ml-auto font-mono text-[10px] text-muted-foreground">E</span>
-          </Command.Item>
-          <Command.Item
-            value="present presenter competition"
-            onSelect={() => {
-              setOpen(false);
-              window.dispatchEvent(new Event(OPEN_PRESENTER));
-            }}
-            className={ITEM}
-          >
-            <Presentation size={16} className="text-muted-foreground" />
-            Presenter mode
-            <span className="ml-auto font-mono text-[10px] text-muted-foreground">P</span>
           </Command.Item>
           <Command.Item
             value="shortcuts keyboard help"

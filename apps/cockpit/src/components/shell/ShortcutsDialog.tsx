@@ -11,20 +11,9 @@ const GROUPS: { title: string; items: { keys: string[]; label: string }[] }[] = 
     title: "Global",
     items: [
       { keys: ["⌘", "K"], label: "Search workspaces, designs and runs" },
-      { keys: ["1", "–", "5"], label: "Switch workspace" },
+      { keys: ["1", "–", "4"], label: "Switch workspace" },
       { keys: ["E"], label: "Evidence drawer" },
-      { keys: ["P"], label: "Presenter mode" },
       { keys: ["?"], label: "This shortcut sheet" },
-    ],
-  },
-  {
-    title: "Presenter",
-    items: [
-      { keys: ["→"], label: "Next slide" },
-      { keys: ["←"], label: "Previous slide" },
-      { keys: ["Space"], label: "Next slide" },
-      { keys: ["N"], label: "Speaker notes" },
-      { keys: ["Esc"], label: "Close presenter" },
     ],
   },
   {
