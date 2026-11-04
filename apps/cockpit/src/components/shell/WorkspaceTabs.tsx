@@ -96,7 +96,7 @@ export function WorkspaceTabs<T extends string>({
 export function StatusBar({
   items,
 }: {
-  items: { label: string; value: React.ReactNode; tone?: "risk" | "ok" }[];
+  items: { label: string; value: React.ReactNode; tone?: "risk" | "ok" | "muted"; title?: string }[];
 }) {
   return (
     <div
@@ -105,13 +105,14 @@ export function StatusBar({
       className="flex h-8 shrink-0 items-center gap-5 overflow-x-auto border-t px-4 text-[11px] whitespace-nowrap text-muted-foreground [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       {items.map((it) => (
-        <span key={it.label} className="flex shrink-0 items-baseline gap-1.5">
+        <span key={it.label} className="flex shrink-0 items-baseline gap-1.5" title={it.title}>
           {it.label}
           <span
             className={cn(
               "tabular font-mono text-foreground",
               it.tone === "risk" && "text-risk",
               it.tone === "ok" && "text-ok",
+              it.tone === "muted" && "text-muted-foreground/60",
             )}
           >
             {it.value}

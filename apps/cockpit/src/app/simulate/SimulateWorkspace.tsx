@@ -164,11 +164,29 @@ function RunView({
       : undefined;
   }, [coefficients]);
 
+  // Only an accepted run is evidence. Anything else is a preview: its numbers are greyed and
+  // carry the reason, so the tunnel can still show the air without presenting numbers as proof.
+  const accepted = result?.acceptance === "accepted";
+  const previewReason = accepted
+    ? undefined
+    : (result?.reasons[0] ??
+      (result ? `acceptance ${result.acceptance.replace("_", " ")}` : "not solved yet"));
+  const numTone = accepted ? undefined : ("muted" as const);
   const status = [
-    { label: "Cd", value: fmt(cd) },
-    { label: "CdA", value: cd == null ? "—" : `${(cd * A * 1e4).toFixed(2)} cm²` },
-    { label: "Drag", value: cd == null ? "—" : `${(cd * q * A).toFixed(3)} N` },
-    { label: "Cl", value: fmt(cl) },
+    { label: "Cd", value: fmt(cd), tone: numTone, title: previewReason },
+    {
+      label: "CdA",
+      value: cd == null ? "—" : `${(cd * A * 1e4).toFixed(2)} cm²`,
+      tone: numTone,
+      title: previewReason,
+    },
+    {
+      label: "Drag",
+      value: cd == null ? "—" : `${(cd * q * A).toFixed(3)} N`,
+      tone: numTone,
+      title: previewReason,
+    },
+    { label: "Cl", value: fmt(cl), tone: numTone, title: previewReason },
     { label: "Cells", value: result?.cells != null ? result.cells.toLocaleString() : "—" },
     {
       label: "Iter",
@@ -189,28 +207,63 @@ function RunView({
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <WorkspaceTabs tabs={TUNNEL_TABS} value={tab} onChange={setTab} />
-      {run.result?.acceptance === "rejected" && (
+      {!accepted && (
         <div
           role="status"
-          className="border-b border-danger/30 bg-danger/5 px-4 py-1.5 text-2xs text-danger"
+          className="flex items-center gap-2 border-b border-risk/30 px-4 py-1.5 text-2xs text-risk"
         >
-          Rejected run
-          {run.result.reasons.length ? ` · ${run.result.reasons[0]}` : ""} · never used as a default
-          or as evidence.
+          <span>Not accepted — preview only, not evidence</span>
+          {previewReason && (
+            <span className="truncate text-muted-foreground">· {previewReason}</span>
+          )}
         </div>
       )}
       <div className="flex min-h-0 flex-1 gap-3 p-3">
         {tab === "flow" &&
           (hasViz ? (
-            <div className="min-h-0 min-w-0 flex-1">
-              <FlowViewer3D
-                key={run.run_id}
-                runId={run.run_id}
-                acceptance={run.result?.acceptance ?? "not evaluated"}
-                speed={manifest.reference.U_m_s}
-                length={manifest.car.length_m}
-                runs={runs}
-              />
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2">
+              <div className="flex shrink-0 items-center gap-1 self-start rounded-md border border-border/60 p-0.5 text-2xs">
+                {(
+                  [
+                    ["particles", "Moving air"],
+                    ["layers", "Field layers"],
+                  ] as const
+                ).map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setFlowView(id)}
+                    aria-pressed={flowView === id}
+                    className={cn(
+                      "rounded px-2 py-1 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+                      flowView === id
+                        ? "bg-foreground text-background"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground",
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <div className="min-h-0 min-w-0 flex-1">
+                {flowView === "particles" ? (
+                  <FlowTunnel3D
+                    key={`${run.run_id}-particles`}
+                    runId={run.run_id}
+                    acceptance={run.result?.acceptance ?? "not evaluated"}
+                    speed={manifest.reference.U_m_s}
+                  />
+                ) : (
+                  <FlowViewer3D
+                    key={run.run_id}
+                    runId={run.run_id}
+                    acceptance={run.result?.acceptance ?? "not evaluated"}
+                    speed={manifest.reference.U_m_s}
+                    length={manifest.car.length_m}
+                    runs={runs}
+                  />
+                )}
+              </div>
             </div>
           ) : (
             <EmptyState icon={<Wind className="size-5" />} title="No flow field for this run">
