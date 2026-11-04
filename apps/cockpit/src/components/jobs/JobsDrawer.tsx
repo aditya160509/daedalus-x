@@ -87,7 +87,7 @@ function JobCard({ job }: { job: Job }) {
   });
   const elapsed = elapsedSeconds(job.started_at, job.finished_at);
   return (
-    <article className="space-y-3 rounded-xl border p-3">
+    <article className="space-y-3 rounded-lg border p-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate font-mono text-xs">
@@ -181,7 +181,7 @@ export function JobsDrawer() {
           </p>
         </div>
         <div className="min-h-0 space-y-3 overflow-y-auto p-4">
-          {jobs.isPending && <div className="h-24 animate-pulse rounded-xl bg-surface-2" />}
+          {jobs.isPending && <div className="h-24 animate-pulse rounded-lg bg-surface-2" />}
           {jobs.error && (
             <p role="alert" className="text-sm text-danger">
               {jobs.error.message}

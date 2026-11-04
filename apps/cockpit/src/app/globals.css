@@ -11,7 +11,7 @@
  * a single cyan accent reserved for focus, selection and live data.
  */
 :root {
-  --radius: 0.75rem;
+  --radius: 0.5rem;
 
   --background: #0b0b0c;
   --foreground: #ececee;
@@ -57,9 +57,7 @@
   --chart-5: #3ccf91;
 
   /* Elevation: a 1px top highlight plus a tight contact shadow and a soft ambient one. */
-  --shadow-panel:
-    inset 0 1px 0 0 rgb(255 255 255 / 0.035), 0 1px 2px 0 rgb(0 0 0 / 0.35),
-    0 8px 24px -12px rgb(0 0 0 / 0.5);
+  --shadow-panel: inset 0 1px 0 0 rgb(255 255 255 / 0.03);
   --shadow-float:
     inset 0 1px 0 0 rgb(255 255 255 / 0.06), 0 0 0 1px rgb(0 0 0 / 0.4),
     0 4px 8px -2px rgb(0 0 0 / 0.45), 0 18px 40px -12px rgb(0 0 0 / 0.65);

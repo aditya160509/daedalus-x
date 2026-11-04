@@ -42,7 +42,7 @@ export function PopoverContent({
         <PopoverPrimitive.Popup
           data-slot="popover-content"
           className={cn(
-            "w-[min(28rem,calc(100vw-2rem))] rounded-xl border bg-popover text-popover-foreground shadow-float outline-none",
+            "w-[min(28rem,calc(100vw-2rem))] rounded-lg border bg-popover text-popover-foreground shadow-float outline-none",
             className,
           )}
           {...props}

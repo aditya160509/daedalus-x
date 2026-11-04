@@ -57,7 +57,7 @@ const SECTIONS: Section[] = [
 const ALL = SECTIONS.flatMap((s) => s.items);
 
 const STATUS_DOT: Record<Workspace["status"], string> = {
-  live: "bg-ok",
+  live: "hidden",
   partial: "bg-brand",
   pending: "bg-line-strong",
 };
@@ -459,7 +459,7 @@ function ApiStatus({ compact = false }: { compact?: boolean }) {
           aria-hidden
           className={cn(
             "size-1.5 rounded-full",
-            state === "Online" && "bg-ok shadow-[0_0_6px] shadow-ok/70",
+            state === "Online" && "bg-ok",
             state === "Offline" && "bg-destructive",
             state === "Checking" && "animate-pulse bg-muted-foreground",
           )}
@@ -478,7 +478,7 @@ function ApiStatus({ compact = false }: { compact?: boolean }) {
         <span
           className={cn(
             "size-1.5 rounded-full",
-            state === "Online" && "bg-ok shadow-[0_0_6px] shadow-ok/70",
+            state === "Online" && "bg-ok",
             state === "Offline" && "bg-destructive",
             state === "Checking" && "animate-pulse bg-muted-foreground",
           )}

@@ -339,7 +339,7 @@ export function DesignWorkspace({ designId }: { designId?: string }) {
             {error && (
               <div
                 role="alert"
-                className="glass absolute top-16 left-1/2 z-20 flex max-w-lg -translate-x-1/2 items-center gap-2 rounded-xl px-3 py-2 text-xs text-danger"
+                className="glass absolute top-16 left-1/2 z-20 flex max-w-lg -translate-x-1/2 items-center gap-2 rounded-lg px-3 py-2 text-xs text-danger"
               >
                 <AlertTriangle size={13} /> {error}
                 <button

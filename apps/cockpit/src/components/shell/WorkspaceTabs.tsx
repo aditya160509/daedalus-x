@@ -78,7 +78,7 @@ export function WorkspaceTabs<T extends string>({
                 aria-hidden
                 className={cn(
                   "absolute inset-x-2 bottom-0 h-0.5 rounded-full transition-colors duration-150",
-                  on ? "bg-brand shadow-[0_0_10px] shadow-brand/40" : "bg-transparent",
+                  on ? "bg-brand" : "bg-transparent",
                 )}
               />
             </button>

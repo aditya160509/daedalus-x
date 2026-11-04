@@ -8,8 +8,8 @@ export default function Loading() {
     >
       <div className="h-11 shrink-0 animate-pulse rounded-lg bg-surface-2" />
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-2">
-        <div className="animate-pulse rounded-xl bg-surface-2" />
-        <div className="animate-pulse rounded-xl bg-surface-2" />
+        <div className="animate-pulse rounded-lg bg-surface-2" />
+        <div className="animate-pulse rounded-lg bg-surface-2" />
       </div>
     </div>
   );

@@ -26,11 +26,11 @@ export function Panel({
   return (
     <section
       className={cn(
-        "group/panel flex min-h-0 flex-col overflow-hidden rounded-xl border border-border/80 bg-card shadow-panel",
+        "group/panel flex min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-card",
         className,
       )}
     >
-      <header className="flex min-h-11 shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-border/70 bg-white/[0.012] px-4 py-2">
+      <header className="flex min-h-11 shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-border px-4 py-2">
         <div className="min-w-0">
           <h2 className="truncate text-[13px] font-medium tracking-[-0.01em] text-foreground">
             {title}
@@ -101,7 +101,7 @@ export function Metric({
   icon?: React.ReactNode;
 }) {
   return (
-    <div className="@container flex min-w-0 flex-col gap-3 rounded-xl border border-border/80 bg-card p-4 shadow-panel transition-colors duration-150 hover:border-line-strong/70">
+    <div className="@container flex min-w-0 flex-col gap-2.5 rounded-lg border border-border bg-card p-4 transition-colors duration-150 hover:border-line-strong">
       <div className="flex items-center justify-between gap-2">
         <span className="flex min-w-0 items-center gap-2 text-[11px] text-muted-foreground">
           {icon && <span className="text-muted-foreground [&_svg]:size-3.5">{icon}</span>}
@@ -112,7 +112,7 @@ export function Metric({
       <div className="flex items-baseline gap-1.5">
         <span
           className={cn(
-            "tabular font-mono text-[26px] leading-none font-medium tracking-[-0.02em] @max-[230px]:text-[22px]",
+            "tabular font-mono text-2xl leading-none font-medium tracking-[-0.03em] @max-[230px]:text-xl",
             tone === "risk" && "text-risk",
             tone === "danger" && "text-destructive",
           )}
@@ -248,8 +248,8 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-4 p-10 text-center">
-      <div className="flex size-10 items-center justify-center rounded-full border border-border/80 bg-secondary/70 text-text-2 shadow-panel [&_svg]:size-[18px]">
+    <div className="flex h-full flex-col items-center justify-center gap-3 p-10 text-center">
+      <div className="text-text-3 [&_svg]:size-5">
         {icon}
       </div>
       <div className="space-y-1.5">

@@ -8,7 +8,7 @@ function Group({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="space-y-2">
       <h2 className="label-caps px-1">{title}</h2>
-      <div className="divide-y rounded-xl border border-border/80 bg-card shadow-panel">
+      <div className="divide-y rounded-lg border border-border/80 bg-card shadow-panel">
         {children}
       </div>
     </section>

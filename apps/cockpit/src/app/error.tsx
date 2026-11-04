@@ -30,7 +30,7 @@ export default function ErrorPage({
     <div className="flex h-full items-center justify-center p-6">
       <div
         role="alert"
-        className="flex w-full max-w-lg flex-col gap-4 rounded-xl border bg-card p-6 shadow-panel"
+        className="flex w-full max-w-lg flex-col gap-4 rounded-lg border bg-card p-6 shadow-panel"
       >
         <div className="flex items-center gap-2 text-destructive">
           <AlertTriangle className="size-4" aria-hidden />

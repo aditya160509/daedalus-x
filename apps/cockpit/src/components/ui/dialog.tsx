@@ -49,7 +49,7 @@ export function DialogContent({
       <Primitive.Backdrop className="fixed inset-0 z-50 bg-background/80" />
       <Primitive.Popup
         className={cn(
-          "fixed left-1/2 top-1/2 z-50 max-h-[90dvh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border bg-card p-6 shadow-lg outline-none",
+          "fixed left-1/2 top-1/2 z-50 max-h-[90dvh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border bg-card p-6 shadow-lg outline-none",
           className,
         )}
         {...props}

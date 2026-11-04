@@ -14,7 +14,7 @@ export function MeasureHud({
 }) {
   const result = state?.b ? measure(state.a.point, state.b.point) : null;
   return (
-    <div className="pointer-events-auto absolute right-3 bottom-3 z-10 w-64 rounded-xl border bg-card/90 p-3 backdrop-blur">
+    <div className="pointer-events-auto absolute right-3 bottom-3 z-10 w-64 rounded-lg border bg-card/90 p-3 backdrop-blur">
       <div className="flex items-center justify-between gap-2">
         <span className="text-[11px] font-medium text-foreground">Measure</span>
         <Button variant="ghost" onClick={onClear} className="h-6 px-2 text-[11px]">

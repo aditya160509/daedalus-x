@@ -76,7 +76,7 @@ export function DesignControls({
   return (
     <section
       aria-label="Viewport tools"
-      className="shrink-0 rounded-xl border border-border/80 bg-card shadow-panel"
+      className="shrink-0 rounded-lg border border-border/80 bg-card shadow-panel"
     >
       <header className="flex min-h-11 items-center gap-3 border-b border-border/70 px-4 py-2">
         <h2 className="text-[13px] font-medium tracking-[-0.01em] text-foreground">Viewport</h2>
