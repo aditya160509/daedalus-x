@@ -1,8 +1,34 @@
 # PROGRESS — engineering software and innovation (2026-11-04)
 
-This active tracker uses the owner-approved reduced scope in TODO.md. It supersedes the previous 118-entry mixed software/paperwork ledger and its percentages. The old 49.2%/58-of-118 and historical T-task scores are **not current completion measures** after these cuts. No new overall percentage has been calculated; deleting scope is not completing software.
+This active tracker uses the owner-approved reduced scope in TODO.md. It supersedes the previous 118-entry mixed software/paperwork ledger and its percentages. The old 49.2%/58-of-118 and historical T-task scores are **not current completion measures** after these cuts. Software-only and validation-gate scores are counted below; deleting scope is not completing software.
 
 Legend: ✅ built/connected; 🟨 partial; ⬜ remaining code; ⏳ browser/scientific/performance gate; 📝 local draft. A built feature is not automatically accepted CFD or measured physical validation.
+
+## Current scope scores — 2026-11-04
+
+**Software built: 27/54 = 50.0%.** Strict count of ✅ rows in the current software checklist; partial work and local drafts receive no completion credit.
+
+| Software status | Entries |
+|---|---:|
+| ✅ Built and connected | 27 |
+| 🟨 Partly implemented | 10 |
+| ⬜ Remaining code | 16 |
+| 📝 Uncommitted draft | 1 |
+| **Software total** | **54** |
+
+**Separate validation/dependency gates: 9 pending.** Including these gates, **27/63 = 42.9%** of the entire checklist is built-tagged; **36 entries** still have implementation or verification remaining. Built software does not imply physical/browser/scientific acceptance.
+
+| Area | Built | Partial | Remaining code | Draft | Validation gates | Software built |
+|---|---:|---:|---:|---:|---:|---:|
+| Design Studio | 3 | 2 | 2 | 0 | 1 | 3/7 (42.9%) |
+| Wind Tunnel and CFD | 5 | 1 | 2 | 1 | 2 | 5/9 (55.6%) |
+| Race, analysis and stadium | 4 | 2 | 3 | 0 | 1 | 4/9 (44.4%) |
+| ORACLE and closed loop | 4 | 2 | 4 | 0 | 1 | 4/10 (40.0%) |
+| Calibration, measurements and structure | 5 | 1 | 2 | 0 | 2 | 5/8 (62.5%) |
+| FORGE | 3 | 0 | 2 | 0 | 1 | 3/5 (60.0%) |
+| Engineering records, UI and quality | 3 | 2 | 1 | 0 | 1 | 3/6 (50.0%) |
+
+Method: count each checkbox once in the seven engineering areas below; exclude the cut list and narrative work order. Exclude ⏳ rows from the software denominator and report their data/dependency requirements separately. Rows have different sizes: these are **checklist scores, not effort estimates or competition readiness**. No half-point weighting, removed paperwork or historical 118-entry denominator is used. This recount uses recorded statuses, not a new code/browser/physical audit. Recalculate from the rows when scope/status changes.
 
 ## Owner-approved scope cuts — 2026-11-04
 
