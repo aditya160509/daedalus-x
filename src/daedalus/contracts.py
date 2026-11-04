@@ -245,20 +245,6 @@ class TimestampVerification(Record):
     gen_time: str | None = None
 
 
-class ProjectForecast(Record):
-    """A saved schedule/budget forecast tied to the exact plan that produced it (T33)."""
-
-    forecast_id: str = Field(default_factory=lambda: new_id("fc"))
-    plan_artifact_id: str
-    result_artifact_id: str
-    plan_hash: Sha256
-    p50_days: float
-    p80_days: float
-    finish_probability: float | None = None
-    budget_probability: float | None = None
-    critical_path: tuple[str, ...] = ()
-
-
 class CalibrationStudy(Record):
     """A saved calibration: exact inputs, results and source files, all as artifacts (T17)."""
 

@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import json
 import os
 import shutil
 import subprocess
@@ -14,8 +13,7 @@ import numpy as np
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
-from daedalus import contracts as c
-from daedalus import energy, outcome, project, structure, testplan
+from daedalus import energy, outcome, structure, testplan
 from daedalus.dynamics import CarParams, ThrustCurve
 
 router = APIRouter(prefix="/v1/analysis", tags=["analysis"])
@@ -360,194 +358,6 @@ def verify_anchor(prediction_id: str) -> dict[str, object]:
     finally:
         store.close()
     return _verification_json(record)
-
-
-class EstimateIn(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    optimistic: float = Field(ge=0, le=1e6)
-    likely: float = Field(ge=0, le=1e6)
-    pessimistic: float = Field(ge=0, le=1e6)
-
-
-class TaskIn(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    id: str = Field(min_length=1, max_length=40)
-    name: str = Field(min_length=1, max_length=120)
-    days: EstimateIn
-    depends_on: list[str] = Field(default_factory=list, max_length=50)
-    cost: EstimateIn | None = None
-    owner: str = Field(default="", max_length=60)
-    source: str = Field(default="", max_length=240)
-
-
-class AssumptionIn(BaseModel):
-    """A stated planning assumption and where it came from; empty source means unsupported."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    id: str = Field(min_length=1, max_length=40)
-    text: str = Field(min_length=1, max_length=240)
-    value: float | None = Field(default=None, ge=-1e12, le=1e12)
-    unit: str = Field(default="", max_length=24)
-    source: str = Field(default="", max_length=240)
-    provenance: Literal["official", "measured", "estimated", "assumed"] = "assumed"
-
-
-class ScoreItemIn(BaseModel):
-    """One project-management scorecard claim and the evidence that supports it."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    id: str = Field(min_length=1, max_length=40)
-    criterion: str = Field(min_length=1, max_length=160)
-    points: float | None = Field(default=None, ge=0, le=1000)
-    claim: str = Field(default="", max_length=400)
-    evidence: str = Field(default="", max_length=400)
-    status: Literal["missing", "partial", "complete"] = "missing"
-
-
-class PlanIn(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    tasks: list[TaskIn] = Field(default_factory=list, max_length=200)
-    deadline_days: float | None = Field(default=None, gt=0, le=1e4)
-    budget: float | None = Field(default=None, gt=0)
-    currency: str = Field(default="INR", max_length=8)
-    start_date: str | None = Field(default=None, max_length=10)
-    assumptions: list[AssumptionIn] = Field(default_factory=list, max_length=50)
-    scorecard: list[ScoreItemIn] = Field(default_factory=list, max_length=50)
-
-
-def _plan_path() -> Path:
-    from daedalus.api.engineering import data_root
-
-    return data_root() / "project" / "plan.json"
-
-
-@router.get("/project/plan")
-def get_plan() -> dict[str, object]:
-    path = _plan_path()
-    if not path.is_file():
-        return PlanIn().model_dump()
-    return PlanIn.model_validate_json(path.read_text()).model_dump()
-
-
-@router.put("/project/plan")
-def save_plan(plan: PlanIn) -> dict[str, object]:
-    path = _plan_path()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(".tmp")
-    tmp.write_text(plan.model_dump_json(indent=2))
-    tmp.replace(path)
-    return plan.model_dump()
-
-
-@router.post("/project/forecast")
-def forecast_plan(plan: PlanIn) -> dict[str, object]:
-    def est(e: EstimateIn) -> project.Estimate:
-        return project.Estimate(e.optimistic, e.likely, e.pessimistic)
-
-    try:
-        tasks = [
-            project.Task(
-                t.id,
-                t.name,
-                est(t.days),
-                tuple(t.depends_on),
-                est(t.cost) if t.cost else None,
-                t.owner,
-            )
-            for t in plan.tasks
-        ]
-        result = project.forecast(tasks, deadline_days=plan.deadline_days, budget=plan.budget)
-        _, _, timing = project.critical_path(tasks)
-    except project.PlanInputError as exc:
-        raise HTTPException(422, str(exc)) from exc
-    mapping: dict[str, object] = {
-        **result.to_mapping(),
-        "slack_days": {k: v.slack for k, v in timing.items()},
-        "earliest_start_days": {k: v.earliest_start for k, v in timing.items()},
-    }
-    forecast = _save_forecast(plan, result, mapping)
-    return {**mapping, "forecast_id": forecast.forecast_id}
-
-
-def _save_forecast(
-    plan: PlanIn, result: project.ScheduleForecast, mapping: dict[str, object]
-) -> c.ProjectForecast:
-    """Append the exact plan and result as artifacts plus a forecast record."""
-    from daedalus.api.engineering import data_root
-    from daedalus.store import EvidenceStore, sha256_of
-
-    plan_bytes = plan.model_dump_json().encode()
-    store = EvidenceStore(data_root())
-    try:
-        projects = list(store.records(c.Project))
-        if projects:
-            project_id = projects[0].project_id
-        else:
-            project_id = store.add(
-                c.Project(team="Veloira", competition_class="Unspecified")
-            ).project_id
-        plan_art = store.put_artifact(
-            plan_bytes,
-            kind="project_plan",
-            source_entity_id=project_id,
-            provenance=c.Provenance.ESTIMATED,
-        )
-        result_art = store.put_artifact(
-            json.dumps(mapping, sort_keys=True, default=float).encode(),
-            kind="project_forecast",
-            source_entity_id=project_id,
-            provenance=c.Provenance.PREDICTED,
-            units=("days",),
-        )
-        return store.add(
-            c.ProjectForecast(
-                plan_artifact_id=plan_art.artifact_id,
-                result_artifact_id=result_art.artifact_id,
-                plan_hash=sha256_of(plan_bytes),
-                p50_days=float(result.p50_days),
-                p80_days=float(result.p80_days),
-                finish_probability=result.finish_probability,
-                budget_probability=result.budget_probability,
-                critical_path=result.critical_path,
-            )
-        )
-    finally:
-        store.close()
-
-
-@router.get("/project/forecasts")
-def list_forecasts() -> list[dict[str, object]]:
-    """Saved forecasts, newest first; the plan and result stay as content-addressed artifacts."""
-    from daedalus.api.engineering import data_root
-    from daedalus.store import EvidenceStore
-
-    store = EvidenceStore(data_root())
-    try:
-        saved = sorted(
-            store.records(c.ProjectForecast),
-            key=lambda f: (f.created_at, f.forecast_id),
-            reverse=True,
-        )
-        return [
-            {
-                "forecast_id": f.forecast_id,
-                "created_at": f.created_at.isoformat(),
-                "plan_hash": f.plan_hash,
-                "p50_days": f.p50_days,
-                "p80_days": f.p80_days,
-                "finish_probability": f.finish_probability,
-                "budget_probability": f.budget_probability,
-                "critical_path": list(f.critical_path),
-            }
-            for f in saved
-        ]
-    finally:
-        store.close()
 
 
 class BreakdownRequest(EnergyRequest):
