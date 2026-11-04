@@ -86,10 +86,13 @@ This is a **planning scope change**. Existing code, saved files and historical e
 - [x] ✅ Linked uPlot traces, MC histogram/quantiles, tornado/exchange-rate metrics and energy Sankey with visible integration residual.
 - [x] ✅ Scenario racing-points/head-to-head calculations; estimates retain their source labels.
 - [ ] 🟨 Complete event annotations, best eligible real-run ghost and compatible overlays.
-- [ ] 🟨 Session tower exists; saved event timing/history, speed trap and event leaderboard remain.
+- [x] ✅ Speed trap: peak and finish speed read from the trace (`raceTiming.ts`).
+- [ ] 🟨 Session tower exists; saved event timing/history and event leaderboard remain.
 - [ ] ⬜ Race-day actual timing/reaction, ordinary saved-prediction comparison and explicit calibration application.
-- [ ] ⬜ Stadium/TV/fullscreen mode and engineering timing CSV/JSON export.
-- [ ] ⬜ Supported tether model, race Sobol/variance budget, MC convergence and optimal legal mass curve.
+- [x] ✅ Engineering timing CSV/JSON export of the trace and speed trap (`TimingPanel.tsx`).
+- [ ] 🟨 Stadium/TV/fullscreen mode remains.
+- [x] ✅ Monte Carlo convergence (p5/p50/p95 against sample count) and optimal legal mass curve from 50.0 g.
+- [ ] 🟨 Supported tether model and race Sobol/variance budget remain.
 - [ ] ⏳ Physical rendering/input performance and measured race correlation.
 
 ## ORACLE and closed loop
@@ -134,7 +137,8 @@ This is a **planning scope change**. Existing code, saved files and historical e
 - [x] ✅ Streaming byte-integrity checks; preserve hashes needed to prevent wrong-design/stale-source use.
 - [x] ✅ Existing ECharts/uPlot/TanStack/Base UI/Dockview integration and meaningful source/units/empty/error patterns.
 - [ ] 🟨 Per-screen source consistency, remaining exports/cursors/overlays, accessible table interactions and compact forms.
-- [ ] ⬜ Source-linked engineering decision/action flow and recorded compute/wall-time view.
+- [x] ✅ Recorded compute/wall-time view: cells, iterations, solver wall and CPU time per CFD run from logs (`compute.py`, Compute page).
+- [ ] ⬜ Source-linked engineering decision/action flow remains.
 - [ ] 🟨 Fast CI, numerical/source-binding regressions, type/runtime API consistency and security/licence hygiene.
 - [ ] ⏳ Grouped browser/keyboard/download/responsive review and real hardware memory/performance checks. No per-task screenshot/rating paperwork.
 
