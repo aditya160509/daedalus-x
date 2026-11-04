@@ -5,7 +5,7 @@ import { AlertTriangle, Box, FileUp, Maximize2, Minimize2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { Group, Panel as ResizablePanel, Separator } from "react-resizable-panels";
 import { toast } from "sonner";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import {
   Button,
   EmptyState,
@@ -41,11 +41,18 @@ const DesignCompare = dynamic(
   { ssr: false, loading: ViewerFallback },
 );
 
-export function DesignWorkspace() {
+/** Below the tablet breakpoint the side panel stacks under the viewport instead of squeezing it. */
+function subscribeNarrow(listener: () => void) {
+  const media = window.matchMedia("(max-width: 900px)");
+  media.addEventListener("change", listener);
+  return () => media.removeEventListener("change", listener);
+}
+const readNarrow = () => window.matchMedia("(max-width: 900px)").matches;
+
+export function DesignWorkspace({ designId }: { designId?: string }) {
   const designs = useQuery({ queryKey: ["designs"], queryFn: listDesigns, staleTime: 60_000 });
-  const [manualId, setManualId] = useState<string | null>(null);
   const [local, setLocal] = useState<LoadedModel | null>(null);
-  const activeId = local ? null : (manualId ?? designs.data?.[0]?.design_id ?? null);
+  const activeId = local ? null : (designId ?? designs.data?.[0]?.design_id ?? null);
   const remote = useDesignModel(activeId);
   const model = local ?? remote.model;
   const geometry = local ? null : remote.geometry;
@@ -64,6 +71,7 @@ export function DesignWorkspace() {
   const [measureOn, setMeasureOn] = useState(false);
   const [measureState, setMeasureState] = useState<MeasureState | null>(null);
   const [compareOn, setCompareOn] = useState(false);
+  const [deviationOn, setDeviationOn] = useState(false);
   const [compareId, setCompareId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loadingLocal, setLoadingLocal] = useState(false);
@@ -72,6 +80,7 @@ export function DesignWorkspace() {
   const snapshot = useRef<(() => string | null) | null>(null);
   const bus = useMemo(() => cameraBus(), []);
   const reducedMotion = useReducedMotion();
+  const narrow = useSyncExternalStore(subscribeNarrow, readNarrow, () => false);
 
   const compareOptions = useMemo(
     () => (designs.data ?? []).filter((design) => design.design_id !== activeId),
@@ -128,16 +137,6 @@ export function DesignWorkspace() {
     }
   }, []);
 
-  const chooseDesign = (id: string) => {
-    setLocal(null);
-    setManualId(id);
-    setSelected(null);
-    setMeasureState(null);
-    setMeasureOn(false);
-    setError(null);
-    setNonce((value) => value + 1);
-  };
-
   const choosePreset = (next: CameraPreset) => {
     setPreset(next);
     setNonce((value) => value + 1);
@@ -186,6 +185,7 @@ export function DesignWorkspace() {
   const toggleCompare = () => {
     if (compareOn) {
       setCompareOn(false);
+      setDeviationOn(false);
       return;
     }
     if (compareOptions.length === 0) return;
@@ -194,8 +194,13 @@ export function DesignWorkspace() {
   };
 
   return (
-    <Group orientation="horizontal" className="h-full p-3">
-      <ResizablePanel id="viewport" minSize="45" className="min-h-0">
+    <Group orientation={narrow ? "vertical" : "horizontal"} className="h-full p-3">
+      <ResizablePanel
+        id="viewport"
+        minSize={narrow ? "40" : "45"}
+        defaultSize={narrow ? "55" : undefined}
+        className="min-h-0"
+      >
         <Panel
           title={local ? local.fileName : (activeId ?? "Viewport")}
           description={summary?.source_file ?? (local ? "local GLB" : undefined)}
@@ -263,6 +268,7 @@ export function DesignWorkspace() {
                   explode={explode}
                   turntable={turntable}
                   dimensions={dimensions}
+                  deviationOn={deviationOn}
                   measureOn={measureOn}
                   measure={measureState}
                   onMeasurePoint={addMeasurePoint}
@@ -320,36 +326,6 @@ export function DesignWorkspace() {
               </EmptyState>
             )}
 
-            {model && frame && (
-              <DesignControls
-                designs={designs.data ?? []}
-                activeId={activeId}
-                localName={local?.fileName ?? null}
-                onDesign={chooseDesign}
-                mode={mode}
-                onMode={setMode}
-                preset={preset}
-                onPreset={choosePreset}
-                explode={explode}
-                onExplode={setExplode}
-                turntable={turntable}
-                onTurntable={() => setTurntable((value) => !value)}
-                dimensions={dimensions}
-                onDimensions={() => setDimensions((value) => !value)}
-                section={section}
-                onSection={setSection}
-                measureOn={measureOn}
-                onMeasure={toggleMeasure}
-                onSnapshot={takeSnapshot}
-                compareOn={compareActive}
-                onCompare={toggleCompare}
-                compareId={effectiveCompareId}
-                onCompareId={setCompareId}
-                compareOptions={compareOptions}
-                busy={busy}
-              />
-            )}
-
             {measureOn && <MeasureHud state={measureState} onClear={() => setMeasureState(null)} />}
 
             {compareActive && !comparison.model && (
@@ -380,14 +356,24 @@ export function DesignWorkspace() {
       </ResizablePanel>
       {!maximised && (
         <>
-          <Separator className="group mx-1 flex w-1.5 items-center justify-center rounded-full outline-none data-[separator=hover]:bg-white/[0.04] data-[separator=active]:bg-brand/20">
-            <span className="h-10 w-0.5 rounded-full bg-line-strong transition-colors group-data-[separator=active]:bg-brand group-data-[separator=hover]:bg-text-2" />
+          <Separator
+            className={cn(
+              "group flex items-center justify-center rounded-full outline-none data-[separator=hover]:bg-white/[0.04] data-[separator=active]:bg-brand/20",
+              narrow ? "my-1 h-1.5 w-full" : "mx-1 w-1.5",
+            )}
+          >
+            <span
+              className={cn(
+                "rounded-full bg-line-strong transition-colors group-data-[separator=active]:bg-brand group-data-[separator=hover]:bg-text-2",
+                narrow ? "h-0.5 w-10" : "h-10 w-0.5",
+              )}
+            />
           </Separator>
           <ResizablePanel
             id="sidebar"
-            defaultSize="360px"
-            minSize="280px"
-            maxSize="560px"
+            defaultSize={narrow ? "45" : "360px"}
+            minSize={narrow ? "30" : "280px"}
+            maxSize={narrow ? "60" : "560px"}
             className="min-h-0"
           >
             <DesignSidebar
@@ -398,6 +384,35 @@ export function DesignWorkspace() {
               onSelect={setSelected}
               hidden={hidden}
               onHiddenChange={setHidden}
+              viewControls={
+                model && frame ? (
+                  <DesignControls
+                    mode={mode}
+                    onMode={setMode}
+                    preset={preset}
+                    onPreset={choosePreset}
+                    explode={explode}
+                    onExplode={setExplode}
+                    turntable={turntable}
+                    onTurntable={() => setTurntable((value) => !value)}
+                    dimensions={dimensions}
+                    onDimensions={() => setDimensions((value) => !value)}
+                    section={section}
+                    onSection={setSection}
+                    measureOn={measureOn}
+                    onMeasure={toggleMeasure}
+                    onSnapshot={takeSnapshot}
+                    compareOn={compareActive}
+                    onCompare={toggleCompare}
+                    deviationOn={deviationOn}
+                    onDeviation={() => setDeviationOn((value) => !value)}
+                    compareId={effectiveCompareId}
+                    onCompareId={setCompareId}
+                    compareOptions={compareOptions}
+                    busy={busy}
+                  />
+                ) : undefined
+              }
             />
           </ResizablePanel>
         </>

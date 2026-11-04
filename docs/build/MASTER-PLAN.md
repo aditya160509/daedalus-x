@@ -650,11 +650,11 @@ This is the current checkbox ledger requested by the owner. `TODO.md` supplies t
 - [x] ✅ A04 — Inspection viewer has named parts, dimensions, section/measurement and comparison controls (`DesignWorkspace.tsx`, `components/viewer/design`).
 - [x] ✅ A05 — ORACLE study builds four physical parameters through build123d and the canonical importer, with FORGE and evidence (`design_loop.py`).
 - [ ] 🟨 A06 — CAD rule overlay: selection/focus exists; coloured rule states plus measured-value/limit dimension lines inside CAD remain.
-- [ ] 🟨 A07 — Two-design comparison exists; signed deviation heat map in mm remains.
+- [x] ✅ A07 — Two-design comparison includes a signed CAD deviation layer in mm: closest-point distance to the reference surface along its triangle normals, colour scale/legend, alignment rejection and explicit unmatched components (`viewer/design/deviation.ts`, `DesignCompare.tsx`). Display-mesh deviation, not manufacturing measurement.
 - [ ] ⬜ A08 — Four live editable parametric controls with validated regeneration inside Design Studio.
 - [ ] ⬜ A09 — Material-aware mass and centre-of-gravity estimate connected to the design.
 - [ ] ⬜ A10 — Minimum-wall map, CNC reach and manufacturing checks using canonical geometry.
-- [ ] 🟨 A11 — Consolidate overlapping inspection/editor controls without losing measurement tools.
+- [x] ✅ A11 — Inspect/editor controls consolidated into the Design Studio side panel; the duplicate design picker and floating toolbar are gone, all camera/measure/section/compare/snapshot actions remain, selection survives tab changes and the panel stacks below 900 px (`DesignWorkspace.tsx`, `DesignControls.tsx`, `DesignSidebar.tsx`).
 - [ ] ⏳ A12 — Final keyboard/responsive CAD acceptance and actual manufactured-part checks.
 
 ### B. Wind Tunnel — target: moving-air view plus trustworthy engineering analysis

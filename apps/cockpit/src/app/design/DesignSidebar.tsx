@@ -17,6 +17,7 @@ export function DesignSidebar({
   onSelect,
   hidden,
   onHiddenChange,
+  viewControls,
 }: {
   model: LoadedModel | null;
   geometry: DesignGeometry | null;
@@ -25,6 +26,7 @@ export function DesignSidebar({
   onSelect: (uuid: string | null) => void;
   hidden: ReadonlySet<string>;
   onHiddenChange: (next: ReadonlySet<string>) => void;
+  viewControls?: React.ReactNode;
 }) {
   const [query, setQuery] = useState("");
   const visibleParts = useMemo(() => {
@@ -56,7 +58,8 @@ export function DesignSidebar({
       : [];
 
   return (
-    <aside className="flex h-full min-h-0 flex-col gap-3">
+    <aside className="flex h-full min-h-0 flex-col gap-3 overflow-y-auto">
+      {viewControls}
       <Panel
         title="Model"
         actions={

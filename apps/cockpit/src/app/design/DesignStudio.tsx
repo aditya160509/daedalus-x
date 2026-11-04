@@ -70,6 +70,7 @@ function Studio({
   const designs = useQuery({ queryKey: ["designs"], queryFn: listDesigns, staleTime: 60_000 });
   const [design, setDesign] = useState<string | undefined>(initialDesign);
   const [cadOpened, setCadOpened] = useState(false);
+  const [inspectOpened, setInspectOpened] = useState(false);
   const [focusRequest, setFocusRequest] = useState<FocusRequest | null>(() =>
     initialParts ? { parts: initialParts, nonce: 0 } : null,
   );
@@ -80,6 +81,7 @@ function Studio({
   };
   const selectTab = (next: typeof tab) => {
     if (tab === "cad" || next === "cad") setCadOpened(true);
+    if (next === "inspect") setInspectOpened(true);
     setTab(next);
   };
   const [saving, setSaving] = useState(false);
@@ -164,7 +166,11 @@ function Studio({
             />
           </div>
         )}
-        {tab === "inspect" && <DesignWorkspace />}
+        {(tab === "inspect" || inspectOpened) && (
+          <div className="size-full" hidden={tab !== "inspect"}>
+            <DesignWorkspace designId={current === BLANK ? undefined : current} />
+          </div>
+        )}
         {tab === "strength" && (
           <div className="mx-auto w-full max-w-3xl overflow-y-auto p-3">
             <StrengthPanel />

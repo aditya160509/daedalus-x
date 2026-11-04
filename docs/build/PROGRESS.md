@@ -606,3 +606,19 @@ export and an explicit probability/points/expected-points ordering toggle. One-s
 rules stay listed with units rather than being plotted as zero. `RuleRisk` now carries `page` and
 `margin` from FORGE. Evidence: `evidence/G06.md`; tests: `forgeMargin.test.ts`,
 `test_forge_probability.py`; no fresh browser pass was recorded.
+
+## A07 + A11 — 2026-11-04
+
+A07: signed CAD-to-CAD deviation is connected in Inspect → Compare. Sampled B vertices are signed
+by the reference triangle normal, reported in mm, colour-mapped from red (removed) to cyan (added),
+with an alignment gate, unmatched-component list and explicit display-mesh limitation. Tests cover
+identical, translated, scaled, shifted-frame and unmatched fixtures. Evidence: `evidence/A07.md`.
+
+A11: the floating Inspect toolbar and its duplicate design picker were consolidated into one side
+panel. The Studio header is now the only design picker and feeds Inspect; camera presets, explode,
+turntable, section, dimensions, measure, compare/deviation and snapshot all live in the side panel.
+Inspect stays mounted across tab changes, selection survives, and the split stacks below 900 px.
+Evidence: `evidence/A11.md`.
+
+Both remain without a fresh browser screenshot pass because the local dev server was OOM-killed;
+that gate is stated in the evidence rather than inferred from tests.

@@ -5,6 +5,7 @@ import { Canvas } from "@react-three/fiber";
 import { useState } from "react";
 import * as THREE from "three";
 import { CarModel } from "./CarModel";
+import { DeviationPoints } from "./DeviationPoints";
 import { DesignCamera } from "./DesignCamera";
 import { Dimensions, MeasureGraphic } from "./Dimensions";
 import { SectionPlane } from "./SectionPlane";
@@ -91,6 +92,7 @@ function SceneContents(props: DesignSceneProps) {
       {props.section != null && (
         <SectionPlane model={props.model} position={props.section} mode={props.mode} />
       )}
+      {props.deviation && <DeviationPoints data={props.deviation} radius={props.frame.radius} />}
       <MeasureGraphic measureState={props.measure} />
       <DesignCamera
         preset={props.preset}

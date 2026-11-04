@@ -60,6 +60,8 @@ export interface DesignSceneProps {
   measureOn: boolean;
   measure: MeasureState | null;
   onMeasurePoint: (point: MeasurePoint) => void;
+  /** Colour-mapped CAD deviation points for the revision surface, when compare-deviation is on. */
+  deviation?: import("./deviation").DeviationRender | null;
   /** Registers the 2× PNG capture function; compare canvases leave this undefined. */
   onSnapshot?: (capture: (() => string | null) | null) => void;
   bus: CameraBus;
