@@ -591,3 +591,7 @@ Root `prompt.md` now specifies 15 bounded quick-work items, exact source files/s
 ## Quick review and next handoff — 2026-11-04
 
 Reviewed EASY sprint commits 1b50ac3 / 05f9489 / f88db37. Two source-level correctness gaps reproduced: held-out comparison identity can match different target sets, and code_snapshot remains stale for the API process lifetime. Fixes are pending, not silently accepted. See `evidence/REVIEW-EASY-SPRINT-2026-11-04.md`. Root `prompt-next.md` sequences those fixes, the 60-question Q&A, bounded UI acceptance and remaining software workflows; medium/large work is labelled. No browser/full-suite/physical acceptance was added by this quick review, and no percentage was upgraded.
+
+## Exact partial-entry handoff — 2026-11-04
+
+`prompt-next.md` now reproduces all 20 currently partial §28 IDs verbatim: A06, A07, A11, B13, C10, D07, D10, E10, E11, E13, F08, G06, G09, H02, J06, J07, J09, J10, L03, L07. Each includes source files, remaining implementation, completion criteria and separate physical/authority/browser gates. The two review fixes remain prerequisites. This replaces the generic NEXT sequence; no feature statuses or percentages changed for writing instructions.
