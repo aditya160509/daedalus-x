@@ -586,12 +586,6 @@ const ForgeChecks = z.object({
   checks: z.array(RuleCheck),
   points_at_risk: PointsAtRisk.optional(),
 });
-/** Printable scrutineering sheet for a design (opens the PDF in a new tab). */
-export const forgeSheetUrl = (design: string) =>
-  `/api/v1/forge/sheet.pdf?design=${encodeURIComponent(design)}`;
-/** Compact one-page FORGE overview that links back to the full sheet. */
-export const forgeSummaryUrl = (design: string) =>
-  `/api/v1/forge/summary.pdf?design=${encodeURIComponent(design)}`;
 export const getForgeChecks = (design: string) =>
   request(`/v1/forge/checks?design=${encodeURIComponent(design)}`, ForgeChecks);
 
@@ -752,7 +746,7 @@ export const getRaceBreakdown = (race: RaceSimulationRequest, reactionS: number)
     }),
   });
 
-// Analysis (T19 energy audit, T21 beam FEM, T33 project twin)
+// Analysis (T19 energy audit, T21 beam FEM)
 const PlannerSd = z.object({ cda: z.number(), crr: z.number(), thrust: z.number() });
 const PlannerStep = z.discriminatedUnion("kind", [
   z.object({
@@ -1039,125 +1033,6 @@ export interface BeamRequest {
 }
 export const solveBeam = (req: BeamRequest) =>
   request("/v1/analysis/beam", BeamResult, { method: "POST", body: JSON.stringify(req) });
-
-const EstimateDays = z.object({
-  optimistic: z.number(),
-  likely: z.number(),
-  pessimistic: z.number(),
-});
-export const PlanTask = z.object({
-  id: z.string(),
-  name: z.string(),
-  days: EstimateDays,
-  depends_on: z.array(z.string()),
-  cost: EstimateDays.nullable(),
-  owner: z.string(),
-  source: z.string().default(""),
-});
-export type PlanTask = z.infer<typeof PlanTask>;
-export const PlanAssumption = z.object({
-  id: z.string(),
-  text: z.string(),
-  value: z.number().nullable().default(null),
-  unit: z.string().default(""),
-  source: z.string().default(""),
-  provenance: z.enum(["official", "measured", "estimated", "assumed"]).default("assumed"),
-});
-export type PlanAssumption = z.infer<typeof PlanAssumption>;
-export const ScoreItem = z.object({
-  id: z.string(),
-  criterion: z.string(),
-  points: z.number().nullable().default(null),
-  claim: z.string().default(""),
-  evidence: z.string().default(""),
-  status: z.enum(["missing", "partial", "complete"]).default("missing"),
-});
-export type ScoreItem = z.infer<typeof ScoreItem>;
-export const ProjectPlan = z.object({
-  tasks: z.array(PlanTask),
-  deadline_days: z.number().nullable(),
-  budget: z.number().nullable(),
-  currency: z.string().default("INR"),
-  start_date: z.string().nullable().default(null),
-  assumptions: z.array(PlanAssumption).default([]),
-  scorecard: z.array(ScoreItem).default([]),
-});
-export type ProjectPlan = z.infer<typeof ProjectPlan>;
-export const getProjectPlan = () => request("/v1/analysis/project/plan", ProjectPlan);
-export const saveProjectPlan = (plan: ProjectPlan) =>
-  request("/v1/analysis/project/plan", ProjectPlan, { method: "PUT", body: JSON.stringify(plan) });
-const ProjectForecast = z.object({
-  likely_days: z.number(),
-  critical_path: z.array(z.string()),
-  p50_days: z.number(),
-  p80_days: z.number(),
-  p95_days: z.number(),
-  finish_probability: z.number().nullable(),
-  criticality: z.record(z.string(), z.number()),
-  cost_p50: z.number().nullable(),
-  cost_p80: z.number().nullable(),
-  budget_probability: z.number().nullable(),
-  slack_days: z.record(z.string(), z.number()),
-  forecast_id: z.string(),
-});
-export const forecastProject = (plan: ProjectPlan) =>
-  request("/v1/analysis/project/forecast", ProjectForecast, {
-    method: "POST",
-    body: JSON.stringify(plan),
-  });
-const SavedForecast = z.object({
-  forecast_id: z.string(),
-  created_at: z.string(),
-  plan_hash: z.string(),
-  p50_days: z.number(),
-  p80_days: z.number(),
-  finish_probability: z.number().nullable(),
-  budget_probability: z.number().nullable(),
-  critical_path: z.array(z.string()),
-});
-export type SavedForecast = z.infer<typeof SavedForecast>;
-export const listProjectForecasts = () =>
-  request("/v1/analysis/project/forecasts", z.array(SavedForecast));
-
-// V&V dossier (T34): statuses are computed from stored evidence, never from the UI.
-const DossierCheck = z.object({
-  requirement_id: z.string(),
-  title: z.string(),
-  claim: z.string(),
-  status: z.enum(["verified", "partial", "failed", "no_evidence"]),
-  detail: z.string(),
-  evidence_ids: z.array(z.string()),
-});
-const DossierGap = z.object({
-  gap_id: z.string(),
-  kind: z.string(),
-  entity_id: z.string(),
-  entity_kind: z.string(),
-  action: z.string(),
-  detail: z.string(),
-  related_ids: z.array(z.string()),
-});
-export const Dossier = z.object({
-  generated: z.string(),
-  summary: z.object({
-    requirements: z.number(),
-    verified: z.number(),
-    partial: z.number(),
-    failed: z.number(),
-    no_evidence: z.number(),
-    failures: z.number(),
-    outstanding: z.number(),
-    records: z.number(),
-  }),
-  checks: z.array(DossierCheck),
-  failures: z.array(z.object({ kind: z.string(), id: z.string(), detail: z.string() })),
-  limitations: z.array(z.string()),
-  outstanding: z.array(DossierGap),
-  statement: z.string(),
-});
-export type Dossier = z.infer<typeof Dossier>;
-export const getDossier = () => request("/v1/report/dossier", Dossier);
-export const dossierMarkdownUrl = "/api/v1/report/dossier?format=md";
 
 const OracleGpDiagnostics = z.object({
   fit_success: z.boolean(),

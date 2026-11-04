@@ -15,7 +15,6 @@ from daedalus.api import (
     oracle,
     paired,
     race,
-    report,
 )
 
 
@@ -29,7 +28,6 @@ def create_app() -> FastAPI:
     app.include_router(oracle.router)
     app.include_router(forge.router)
     app.include_router(evidence.router)
-    app.include_router(report.router)
     app.include_router(analysis.router)
     app.include_router(paired.router)
 

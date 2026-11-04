@@ -1,4 +1,4 @@
-"""FORGE with the India NF 2025-26 rulebook (ORDER 1): rules, measures, points at risk, sheet.
+"""FORGE with the India NF 2025-26 rulebook (ORDER 1): rules, measures, points at risk.
 
 Geometry here is synthetic and only exercises the measures; it is not data about the real car.
 """
@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from daedalus import forge, forge_sheet
+from daedalus import forge
 
 BOOK_PATH = Path(__file__).resolve().parents[1] / "rulebooks" / "stem-racing-india-nf-2025-26.yaml"
 
@@ -238,50 +238,6 @@ def test_at_risk_rules_are_scored_separately() -> None:
     assert "T7.2.1" in risk.at_risk_rules  # 0.4 mm margin
     assert risk.at_risk_points == 2.5
     assert risk.failing_points == 10.0  # rear wing starts 1 mm ahead of plane B
-
-
-def test_sheet_rows_cover_every_rule_and_compile_to_pdf() -> None:
-    book = forge.load_rulebook(BOOK_PATH)
-    checks = forge.run_checks(book, car(wheelbase=118.0))
-    data = forge_sheet.sheet_data(
-        book, checks, design="synthetic", generated="2026-11-02 00:00 UTC"
-    )
-    assert len(data["rows"]) == len(book["rules"])  # type: ignore[arg-type]
-    assert data["failing_points"] == 10.0
-    assert forge_sheet.limit_text(65.0, 85.0, "mm") == "65 to 85 mm"
-    assert forge_sheet.limit_text(50.0, None, "g") == ">= 50 g"
-    assert forge_sheet.limit_text(None, None, "check") == "check"
-    pdf = forge_sheet.compile_sheet(data)
-    assert pdf.startswith(b"%PDF")
-    assert len(pdf) > 5_000
-
-
-def test_sheet_rejects_mismatched_checks() -> None:
-    book = forge.load_rulebook(BOOK_PATH)
-    checks = forge.run_checks(book, car())
-    with pytest.raises(ValueError):
-        forge_sheet.sheet_data(book, checks[:-1], design="x")
-
-
-def test_summary_counts_match_checks_and_compile() -> None:
-    book = forge.load_rulebook(BOOK_PATH)
-    checks = forge.run_checks(book, car(front_gap=38.4))
-    data = forge_sheet.summary_data(
-        book, checks, design="synthetic", generated="2026-11-04 00:00 UTC", max_findings=2
-    )
-    counts = data["counts"]
-    assert isinstance(counts, dict)
-    assert counts["total"] == len(checks)
-    assert counts["fail"] + counts["risk"] + counts["manual"] + counts["cad_pass"] == len(checks)
-    findings = data["findings"]
-    assert isinstance(findings, list)
-    assert len(findings) == 2
-    assert all(item["state"] in {"FAIL (CAD)", "AT RISK"} for item in findings)
-    assert data["omitted_findings"] == counts["fail"] + counts["risk"] - 2
-    assert data["manual_review"] == counts["manual"]
-    pdf = forge_sheet.compile_summary(data)
-    assert pdf.startswith(b"%PDF")
-    assert len(pdf) > 4_000
 
 
 def test_frontier_ranks_the_tightest_rule_first() -> None:

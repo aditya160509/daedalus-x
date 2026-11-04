@@ -71,26 +71,6 @@ export function PitWall() {
         tabs={TABS}
         value={tab}
         onChange={setTab}
-        right={
-          <div className="flex items-center gap-1">
-            <a
-              href="/api/v1/report/pdf"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
-            >
-              Report PDF ↗
-            </a>
-            <a
-              href="/api/v1/report/judge-pack"
-              download="daedalus-x-judge-pack.zip"
-              title="One ZIP with the existing report, rule checks, run manifests, evidence verification and a list of anything missing"
-              className="inline-flex items-center rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
-            >
-              Judge pack ZIP ↓
-            </a>
-          </div>
-        }
       />
       <div className="min-h-0 flex-1 overflow-y-auto p-3">
         {tab === "overview" && (

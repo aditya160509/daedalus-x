@@ -8,8 +8,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
-  forgeSheetUrl,
-  forgeSummaryUrl,
   getForgeChecks,
   getForgeRisk,
   listDesigns,
@@ -449,26 +447,6 @@ export function LegalPanel({
               >
                 {measurement.isPending ? "Measuring CAD…" : "Measure CAD features"}
               </Button>
-            )}
-            {design && (
-              <a
-                href={forgeSheetUrl(design)}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded px-1.5 py-0.5 text-foreground underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-              >
-                Scrutineering sheet (PDF)
-              </a>
-            )}
-            {design && (
-              <a
-                href={forgeSummaryUrl(design)}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded px-1.5 py-0.5 text-muted-foreground underline-offset-2 hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-              >
-                One-page summary (PDF)
-              </a>
             )}
           </div>
           <details className="group border-b border-border/50 px-4 py-2">
