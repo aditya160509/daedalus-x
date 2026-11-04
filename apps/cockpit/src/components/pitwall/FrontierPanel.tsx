@@ -6,6 +6,7 @@ import { chartTheme, useECharts } from "@/components/charts/useECharts";
 import { Button } from "@/components/ui/button";
 import { Panel, ProvenanceBadge, Skeleton } from "@/components/ui/primitives";
 import { getForgeChecks, getForgeFrontier, type ForgeFrontier, type RuleCheck } from "@/lib/api";
+import { headroomLabel, normalisedHeadroom } from "@/lib/forgeMargin";
 
 type Row = ForgeFrontier["rows"][number] & { check: RuleCheck };
 
@@ -148,6 +149,11 @@ export function FrontierPanel({
                     <span className="font-mono tabular-nums">
                       {row.headroom > 0 ? "+" : ""}
                       {row.headroom.toFixed(2)} {row.unit || "1"}
+                      <span className="block text-[10px] font-normal text-muted-foreground">
+                        {normalisedHeadroom(row.check) == null
+                          ? "not applicable"
+                          : headroomLabel(row.check)}
+                      </span>
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground">

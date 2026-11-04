@@ -10,6 +10,7 @@ import {
 } from "@/components/forms/TestProtocolPicker";
 import { AdvancedFields } from "@/components/ui/advanced-fields";
 import { Button } from "@/components/ui/button";
+import { DataTable, type DataColumn } from "@/components/ui/data-table";
 import { Input } from "@/components/ui/input";
 import { NumberField, Panel, ProvenanceBadge, Skeleton } from "@/components/ui/primitives";
 import {
@@ -20,7 +21,15 @@ import {
   type CalibrationStudyDetail,
   type TimingImport,
 } from "@/lib/api";
+import { comparisonRows, type StudyComparisonRow } from "@/lib/calibrationCompare";
 import { estimateThrust, parseThrustCsv, type ThrustTrace } from "@/lib/thrust";
+import { outlierRowIndices } from "@/lib/timingRows";
+import { HeldOutPlot, PosteriorIntervals } from "./CalibrationPlots";
+
+type TimingPreview = TimingImport & {
+  /** Saved studies do not store the importer's flags; say so instead of inventing them. */
+  outliersKnown: boolean;
+};
 
 const LABELS: Record<string, { label: string; unit: string; scale: number }> = {
   cda_m2: { label: "CdA", unit: "cm²", scale: 10000 },
@@ -29,6 +38,80 @@ const LABELS: Record<string, { label: string; unit: string; scale: number }> = {
   extra_noise_s: { label: "Extra noise SD", unit: "ms", scale: 1000 },
   offset_s: { label: "Model offset", unit: "ms", scale: 1000 },
 };
+
+const MAX_COMPARE = 5;
+
+const COMPARISON_COLUMNS: DataColumn<StudyComparisonRow>[] = [
+  {
+    accessorKey: "study_id",
+    header: "Study",
+    cell: (cell) => (
+      <span>
+        <span className="font-mono text-muted-foreground">{String(cell.getValue())}</span>
+        <span className="block text-2xs text-muted-foreground">
+          {new Date(cell.row.original.created_at).toLocaleString()}
+        </span>
+      </span>
+    ),
+  },
+  {
+    accessorKey: "n_runs",
+    header: "Runs / held out",
+    meta: { numeric: true },
+    cell: (cell) => `${String(cell.getValue())} / ${cell.row.original.n_held_out}`,
+  },
+  {
+    accessorKey: "effective_sample_size",
+    header: "ESS",
+    meta: { numeric: true },
+    cell: (cell) => {
+      const value = cell.getValue();
+      return typeof value === "number" ? value.toFixed(1) : "—";
+    },
+  },
+  {
+    accessorKey: "mae_ms",
+    header: "Held-out MAE (ms)",
+    meta: { numeric: true },
+    cell: (cell) => {
+      const value = cell.getValue();
+      return typeof value === "number" ? value.toFixed(1) : "not evaluated";
+    },
+  },
+  {
+    accessorKey: "rmse_ms",
+    header: "Held-out RMSE (ms)",
+    meta: { numeric: true },
+    cell: (cell) => {
+      const value = cell.getValue();
+      return typeof value === "number" ? value.toFixed(1) : "not evaluated";
+    },
+  },
+  {
+    accessorKey: "comparability",
+    header: "Held-out set / comparability",
+    cell: (cell) => (
+      <span>
+        <span className="block">{String(cell.getValue())}</span>
+        <span className="block text-2xs text-muted-foreground">
+          {cell.row.original.source_labels.length
+            ? cell.row.original.source_labels.join(", ")
+            : "no source label stored"}
+        </span>
+      </span>
+    ),
+  },
+];
+
+/** Fetch at most five saved studies in pairs; opening the comparison never reruns a fit. */
+async function fetchStudyDetails(ids: string[]): Promise<CalibrationStudyDetail[]> {
+  const details: CalibrationStudyDetail[] = [];
+  for (let index = 0; index < ids.length; index += 2) {
+    // oxlint-disable-next-line no-await-in-loop -- batches of two bound concurrent study reads
+    details.push(...(await Promise.all(ids.slice(index, index + 2).map(getCalibrationStudy))));
+  }
+  return details;
+}
 
 async function fileToBase64(file: File): Promise<string> {
   const bytes = new Uint8Array(await file.arrayBuffer());
@@ -42,11 +125,13 @@ async function fileToBase64(file: File): Promise<string> {
 function pointsToImport(
   filename: string,
   points: CalibrationStudyDetail["inputs"]["points"],
-): TimingImport {
+): TimingPreview {
   return {
     filename,
     units: {},
     warnings: [],
+    outlier_indices: [],
+    outliersKnown: false,
     rows: points.map((point, index) => ({
       run_no: index + 1,
       lane: "",
@@ -61,8 +146,8 @@ function pointsToImport(
 export function CalibrationPanel() {
   const [protocol, setProtocol] = useState<TestProtocolId>("custom");
   const queryClient = useQueryClient();
-  const [training, setTraining] = useState<TimingImport | null>(null);
-  const [held, setHeld] = useState<TimingImport | null>(null);
+  const [training, setTraining] = useState<TimingPreview | null>(null);
+  const [held, setHeld] = useState<TimingPreview | null>(null);
   const [curve, setCurve] = useState<ThrustTrace | null>(null);
   const [curveName, setCurveName] = useState("");
   const [curveError, setCurveError] = useState("");
@@ -88,6 +173,12 @@ export function CalibrationPanel() {
   const studies = useQuery({
     queryKey: ["calibration-studies"],
     queryFn: listCalibrationStudies,
+  });
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const comparison = useQuery({
+    queryKey: ["calibration-comparison", compareIds],
+    queryFn: () => fetchStudyDetails(compareIds),
+    enabled: compareIds.length > 0,
   });
   const fit = useMutation({
     mutationFn: calibrateBayesian,
@@ -135,8 +226,9 @@ export function CalibrationPanel() {
     mutationFn: ({ file }: { file: File; target: "training" | "held" }) =>
       previewTimingImport(file),
     onSuccess: (data, variables) => {
-      if (variables.target === "training") setTraining(data);
-      else setHeld(data);
+      const preview: TimingPreview = { ...data, outliersKnown: true };
+      if (variables.target === "training") setTraining(preview);
+      else setHeld(preview);
       fit.reset();
       setOpenedStudy(null);
     },
@@ -239,6 +331,23 @@ export function CalibrationPanel() {
       mass_kg: r.mass_kg ?? values.mass / 1000,
     }));
   const result = fit.data;
+  const intervalItems = result
+    ? Object.entries(result.summaries).flatMap(([key, summary]) => {
+        const label = LABELS[key];
+        return label
+          ? [
+              {
+                key,
+                label: label.label,
+                unit: label.unit,
+                p05: summary.p05 * label.scale,
+                median: summary.median * label.scale,
+                p95: summary.p95 * label.scale,
+              },
+            ]
+          : [];
+      })
+    : [];
   return (
     <Panel
       title="Bayesian calibration"
@@ -469,6 +578,24 @@ export function CalibrationPanel() {
                 {studies.data.map((study) => (
                   <li key={study.study_id} className="space-y-1 p-2">
                     <div className="flex flex-wrap items-baseline justify-between gap-2">
+                      <label className="flex items-center gap-1.5 text-2xs text-muted-foreground">
+                        <input
+                          type="checkbox"
+                          checked={compareIds.includes(study.study_id)}
+                          disabled={
+                            !compareIds.includes(study.study_id) && compareIds.length >= MAX_COMPARE
+                          }
+                          onChange={(event) =>
+                            setCompareIds((ids) =>
+                              event.target.checked
+                                ? [...ids, study.study_id].slice(0, MAX_COMPARE)
+                                : ids.filter((id) => id !== study.study_id),
+                            )
+                          }
+                          aria-label={`Compare calibration ${study.study_id}`}
+                        />
+                        Compare
+                      </label>
                       <span className="tabular-nums text-muted-foreground">
                         {new Date(study.created_at).toLocaleString()}
                       </span>
@@ -509,44 +636,103 @@ export function CalibrationPanel() {
               </p>
             )}
           </section>
+          {compareIds.length > 0 && (
+            <section aria-label="Saved calibration comparison" className="space-y-2">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <h3 className="font-medium">Compare saved calibrations</h3>
+                <Button size="sm" variant="ghost" onClick={() => setCompareIds([])}>
+                  Clear selection
+                </Button>
+              </div>
+              <p className="text-2xs text-muted-foreground">
+                {compareIds.length} of {MAX_COMPARE} selected. Details load two at a time; no fit is
+                rerun. Errors come only from each study’s stored held-out rows.
+              </p>
+              {comparison.isPending ? (
+                <Skeleton className="h-28" />
+              ) : comparison.isError ? (
+                <p role="alert" className="text-xs text-destructive">
+                  Could not load the selected studies: {comparison.error.message}{" "}
+                  <Button size="sm" variant="link" onClick={() => void comparison.refetch()}>
+                    Retry
+                  </Button>
+                </p>
+              ) : (
+                <>
+                  <DataTable
+                    data={comparisonRows(comparison.data)}
+                    columns={COMPARISON_COLUMNS}
+                    label="Saved calibration comparison"
+                    empty="No selected study could be loaded."
+                  />
+                  <p className="text-2xs leading-relaxed text-muted-foreground">
+                    Studies scored on a different held-out signature are marked non-comparable and
+                    are not joined into an error trend. “Not evaluated” means no held-out rows were
+                    scored, not zero error. These are held-out results on the supplied data, not
+                    independent physical validation.
+                  </p>
+                </>
+              )}
+            </section>
+          )}
           <p className="text-sm text-muted-foreground">
             Posterior estimates depend on the supplied runs, thrust curve and priors. Timing alone
             may not identify drag and rolling separately. No physical validation is implied.
           </p>
           {[training, held]
-            .filter((x): x is TimingImport => !!x)
-            .map((data) => (
-              <div
-                key={`${data === training ? "training" : "held"}-${data.filename}`}
-                className="rounded-lg border p-3 text-xs"
-              >
-                <h3 className="font-medium">
-                  {data === training ? "Calibration" : "Held-out"} preview · {data.rows.length} runs
-                </h3>
-                <p className="mt-1 text-muted-foreground">
-                  Declared/assumed file units:{" "}
-                  {Object.entries(data.units)
-                    .map(([k, v]) => `${k}: ${v}`)
-                    .join(", ")}
-                  . Per-row mass overrides fallback; track and timing SD are shared.
-                </p>
-                {data.warnings.map((w) => (
-                  <p key={w} className="mt-1">
-                    {w}
+            .filter((x): x is TimingPreview => !!x)
+            .map((data) => {
+              const flagged = outlierRowIndices(data.rows.length, data.outlier_indices);
+              return (
+                <div
+                  key={`${data === training ? "training" : "held"}-${data.filename}`}
+                  className="rounded-lg border p-3 text-xs"
+                >
+                  <h3 className="font-medium">
+                    {data === training ? "Calibration" : "Held-out"} preview · {data.rows.length}{" "}
+                    runs
+                  </h3>
+                  <p className="mt-1 text-muted-foreground">
+                    Declared/assumed file units:{" "}
+                    {Object.entries(data.units)
+                      .map(([k, v]) => `${k}: ${v}`)
+                      .join(", ")}
+                    . Per-row mass overrides fallback; track and timing SD are shared.
                   </p>
-                ))}
-                <ul className="mt-2 space-y-1">
-                  {data.rows.map((r) => (
-                    <li key={r.run_no}>
-                      Run {r.run_no}
-                      {r.lane ? ` · lane ${r.lane}` : ""}: {r.time_s.toFixed(4)} s ·{" "}
-                      {r.mass_kg == null ? "fallback mass" : `${(r.mass_kg * 1000).toFixed(1)} g`}
-                      {r.reaction_s == null ? "" : ` · reaction ${r.reaction_s} s (not subtracted)`}
-                    </li>
+                  {data.warnings.map((w) => (
+                    <p key={w} className="mt-1">
+                      {w}
+                    </p>
                   ))}
-                </ul>
-              </div>
-            ))}
+                  {!data.outliersKnown && (
+                    <p className="mt-1 text-muted-foreground">
+                      Outlier flags are unavailable for this reconstructed saved-study preview. The
+                      original file is not re-scored here, so no row is marked or removed.
+                    </p>
+                  )}
+                  <ul className="mt-2 space-y-1">
+                    {data.rows.map((r, index) => (
+                      <li key={`${index}-${r.run_no}`}>
+                        Run {r.run_no}
+                        {r.lane ? ` · lane ${r.lane}` : ""}: {r.time_s.toFixed(4)} s ·{" "}
+                        {r.mass_kg == null ? "fallback mass" : `${(r.mass_kg * 1000).toFixed(1)} g`}
+                        {r.reaction_s == null
+                          ? ""
+                          : ` · reaction ${r.reaction_s} s (not subtracted)`}
+                        {flagged.includes(index) && (
+                          <span
+                            className="ml-2 rounded border border-risk/40 bg-risk/10 px-1.5 py-0.5 text-[10px] font-medium text-risk"
+                            title="Flagged by the importer's median ± 5·MAD check; the row is kept and used unchanged."
+                          >
+                            time outlier · kept
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
           {training && training.rows.length > 30 && (
             <p role="alert">At most 30 calibration runs per calculation.</p>
           )}
@@ -596,6 +782,7 @@ export function CalibrationPanel() {
                   );
                 })}
               </div>
+              <PosteriorIntervals items={intervalItems} />
               {result.warnings.map((w) => (
                 <p key={w} className="text-xs">
                   {w}
@@ -610,20 +797,25 @@ export function CalibrationPanel() {
               <h3 className="font-medium">Held-out predictions</h3>
               {result.held_out.length ? (
                 <div className="space-y-2">
+                  <HeldOutPlot
+                    rows={result.held_out}
+                    labels={result.held_out.map(
+                      (_, index) => `run ${held?.rows[index]?.run_no ?? `row ${index + 1}`}`,
+                    )}
+                  />
                   {result.held_out.map((r, i) => (
-                    <p
-                      key={held?.rows[i]?.run_no ?? r.measured_s}
-                      className="rounded-lg border p-3 text-xs"
-                    >
-                      Run {held?.rows[i]?.run_no}: measured {r.measured_s.toFixed(4)} s · predicted
-                      median {r.median_s.toFixed(4)} s · 90% interval {r.p05_s.toFixed(4)}–
-                      {r.p95_s.toFixed(4)} s · error {r.error_s.toFixed(4)} s
+                    <p key={`${i}-${r.measured_s}`} className="rounded-lg border p-3 text-xs">
+                      Run {held?.rows[i]?.run_no ?? `row ${i + 1}`}: measured{" "}
+                      {r.measured_s.toFixed(4)} s · predicted median {r.median_s.toFixed(4)} s · 90%
+                      interval {r.p05_s.toFixed(4)}–{r.p95_s.toFixed(4)} s · error{" "}
+                      {r.error_s.toFixed(4)} s
                     </p>
                   ))}
                 </div>
               ) : (
                 <p className="text-xs text-muted-foreground">
-                  No held-out runs provided; out-of-sample validation has not been performed.
+                  Not performed: no held-out runs were provided, so out-of-sample validation has not
+                  been performed.
                 </p>
               )}
             </>

@@ -7,7 +7,7 @@ import { LegalPanel } from "@/components/pitwall/LegalPanel";
 import { AeroMap, BenchmarkChart, cm2 } from "@/components/pitwall/PitCharts";
 import { SealedReveal } from "@/components/pitwall/SealedReveal";
 import { HeroImage, useHeroRun } from "@/components/render/HeroRender";
-import { getOracleState } from "@/lib/api";
+import { getDossier, getOracleState, listCfdRuns } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 export const OPEN_PRESENTER = "daedalus:open-presenter";
@@ -49,6 +49,27 @@ export function Presenter() {
   });
   const s = q.data;
   const heroRun = useHeroRun();
+  const runs = useQuery({
+    queryKey: ["cfd-runs"],
+    queryFn: listCfdRuns,
+    staleTime: 60_000,
+    enabled: open,
+  });
+  const dossier = useQuery({
+    queryKey: ["vv-dossier"],
+    queryFn: getDossier,
+    staleTime: 30_000,
+    enabled: open,
+  });
+  const heroSummary = runs.data?.find((run) => run.run_id === heroRun);
+  const checkStatus = (id: string) => {
+    const check = dossier.data?.checks.find((item) => item.requirement_id === id);
+    return check ? check.status.replaceAll("_", " ") : "checking source status…";
+  };
+  const benchmarkTitle = s?.benchmark ? "GP/EI vs Latin hypercube" : "Benchmark unavailable";
+  const flowNote = heroRun
+    ? `Simulated steady-flow field from CFD run ${heroRun} (acceptance: ${heroSummary?.acceptance ?? "not recorded"}). It is not a measured flow or an independently accepted current-car result.`
+    : "No solved CFD run with flow data is available. No flow result is claimed.";
 
   const demo = (href: string) => {
     setOpen(false);
@@ -72,30 +93,58 @@ export function Presenter() {
     },
     {
       title: "The car",
-      note: "Our best measured drag, the race time it gives, and what ORACLE expects from the next run.",
+      note:
+        s?.provenance === "synthetic"
+          ? "The lowest stored ORACLE observation is currently a synthetic seed target, not a measured drag value. The race time is a lumped-parameter prediction using an assumed 8 g thrust curve."
+          : "The lowest stored ORACLE observation and the race time it implies. Stored provenance is mixed; check each observation before calling it measured.",
       body: s && (
         <div className="w-full max-w-5xl">
           <div className="grid grid-cols-2 gap-12">
-            <Big label="Drag area" value={cm2(s.best.cda_m2)} unit="cm²" />
-            <Big label="Predicted race" value={s.best.race_time_s.toFixed(3)} unit="s" />
-            <Big label="CFD runs" value={String(s.observations.length)} />
+            <Big label="Lowest stored CdA" value={cm2(s.best.cda_m2)} unit="cm²" />
+            <Big label="Model race time" value={s.best.race_time_s.toFixed(3)} unit="s" />
+            <Big label="ORACLE observations" value={String(s.observations.length)} />
             <Big
-              label="Next run gain"
+              label="Next-point model gain"
               value={((s.best.race_time_s - s.next.race_time_s) * 1000).toFixed(1)}
               unit="ms"
             />
           </div>
+          <p className="mt-8 text-sm text-muted-foreground">
+            Observation source: {s.provenance === "synthetic" ? "synthetic seed targets" : "mixed"}.
+            The next-point gain is a GP prediction, not a measured result. No accepted current-car
+            CFD drag value is implied.
+          </p>
         </div>
       ),
     },
     {
       title: "The flow",
-      note: "Real CFD on our car: surface pressure (red pushes, blue sucks) and streamlines by speed.",
-      body: heroRun && <HeroImage runId={heroRun} className="aspect-video w-full max-w-6xl" />,
+      note: flowNote,
+      body: heroRun ? (
+        <figure className="w-full max-w-6xl">
+          <HeroImage runId={heroRun} className="aspect-video w-full" />
+          <figcaption className="mt-2 text-sm text-muted-foreground">
+            Simulated CFD flow field · run {heroRun} · acceptance{" "}
+            {heroSummary?.acceptance ?? "not recorded"}. Surface Cp and streamtubes are solver
+            output, not measured pressure or a validated current-car result.
+          </figcaption>
+        </figure>
+      ) : (
+        <div className="max-w-2xl rounded-2xl border bg-card p-8 text-center">
+          <p className="text-lg font-medium">No flow source available</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {runs.isPending
+              ? "Loading the CFD run list…"
+              : runs.isError
+                ? `Could not load CFD runs: ${runs.error.message}`
+                : "No solved run with flow data is stored. The deck does not show a substitute image."}
+          </p>
+        </div>
+      ),
     },
     {
       title: "Aero map",
-      note: "Dots are tested designs; the star is where ORACLE says to test next.",
+      note: `GP posterior mean over the first two design variables, fitted to ${s?.observations.length ?? "the stored"} observations (${s?.provenance ?? "source loading"}). Dots are stored observations projected onto this slice; the star is the model's next proposal. The map is not measured CFD and carries no accepted-source claim.`,
       body: s && (
         <div className="h-[60vh] w-full max-w-5xl">
           <AeroMap s={s} />
@@ -103,8 +152,10 @@ export function Presenter() {
       ),
     },
     {
-      title: "ORACLE vs random",
-      note: "Same run budget: ORACLE finds lower drag sooner than Latin-hypercube sampling.",
+      title: benchmarkTitle,
+      note: s?.benchmark
+        ? "Completed registered equal-budget study on synthetic objectives: best-of-run CdA for GP with expected improvement versus Latin hypercube. This shows optimiser behaviour on synthetic data, not CFD or physical validation."
+        : "No completed registered benchmark is stored, so no optimiser winner is claimed. Register an equal-budget synthetic study in Pit Wall → ORACLE → Benchmark to populate this slide.",
       body: s && (
         <div className="h-[55vh] w-full max-w-5xl">
           <BenchmarkChart s={s} />
@@ -113,10 +164,66 @@ export function Presenter() {
     },
     {
       title: "Legal",
-      note: "Checked against the sourced rulebook with page numbers. Mass and tether are measured, never assumed.",
+      note: "CAD-only rule checks against the sourced rulebook with page numbers. Unmeasurable rules stay in manual review, and points at risk are rulebook penalties, not a prediction of the race result.",
       body: (
         <div className="h-[60vh] w-full max-w-3xl [&>section]:h-full">
           <LegalPanel />
+        </div>
+      ),
+    },
+    {
+      title: "What is still unverified",
+      note: "Built software is not evidence. This slide separates what the app can show from what has not been measured. The static QA and checkpoint facts are dated 2026-11-04; live dossier statuses refresh when the deck opens.",
+      body: (
+        <div className="grid w-full max-w-6xl gap-3 sm:grid-cols-2">
+          {[
+            {
+              label: "ORACLE observations",
+              value:
+                s?.provenance === "synthetic"
+                  ? "Synthetic seed targets"
+                  : s
+                    ? "Mixed; inspect each observation"
+                    : "Source status unavailable",
+              detail: "No accepted current-car drag campaign supplies these targets yet.",
+            },
+            {
+              label: "Accepted CFD / grid study",
+              value: checkStatus("V&V-03"),
+              detail: "No accepted current-car 3-mesh GCI study is established by this deck.",
+            },
+            {
+              label: "Measured race validation",
+              value: checkStatus("V&V-05"),
+              detail: "No independent measured race run scores the model out of sample here.",
+            },
+            {
+              label: "Materials and beam model",
+              value: "Handbook estimates",
+              detail:
+                "Euler–Bernoulli cantilever simplification; print anisotropy, joints and shear failure are not modelled.",
+            },
+            {
+              label: "Physical GPU and final QA",
+              value: "Pending (checkpoint 2026-11-04)",
+              detail:
+                "60 fps on the physical GPU and the final 1440/1024/375 px acceptance pass are not established.",
+            },
+            {
+              label: "Evidence rule",
+              value: "A hash proves integrity, not physics",
+              detail:
+                "Missing measurements stay missing; no slide upgrades a synthetic or CAD-only result to measured.",
+            },
+          ].map((item) => (
+            <div key={item.label} className="rounded-xl border bg-card p-4">
+              <div className="text-xs text-muted-foreground">{item.label}</div>
+              <div className="mt-1 text-lg font-medium capitalize">{item.value}</div>
+              <div className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                {item.detail}
+              </div>
+            </div>
+          ))}
         </div>
       ),
     },

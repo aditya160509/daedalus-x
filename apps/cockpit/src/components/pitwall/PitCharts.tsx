@@ -33,7 +33,12 @@ export function AeroMap({ s }: { s: OracleState }) {
     return {
       animation: false,
       textStyle: { fontFamily: t.mono, color: t.muted },
-      grid: { left: 44, right: 70, top: 10, bottom: 36 },
+      grid: { left: 44, right: 70, top: 28, bottom: 36 },
+      toolbox: {
+        right: 0,
+        top: 0,
+        feature: { saveAsImage: { type: "png", name: "oracle-aero-map", pixelRatio: 2 } },
+      },
       tooltip: {
         ...chartTooltip(t),
         formatter: (p: { value: number[]; seriesIndex: number }) =>
@@ -113,8 +118,10 @@ export function AeroMap({ s }: { s: OracleState }) {
         aria-label={`${metric === "sd" ? "GP posterior standard deviation" : "Predicted drag area"} over the first two variables`}
       />
       <p className="text-xs leading-relaxed text-muted-foreground">
-        Other variables are fixed at the best observation. Markers project observations onto this
-        slice; the star is next. Posterior SD is model uncertainty, not measured CFD error.
+        Fitted GP map from {s.observations.length} stored observations ({s.provenance}). Other
+        variables are fixed at the best observation. Markers project observations onto this slice;
+        the star is the model's next proposal. Posterior SD is model uncertainty, not measured CFD
+        error, and the map does not establish an accepted drag value.
       </p>
     </div>
   );

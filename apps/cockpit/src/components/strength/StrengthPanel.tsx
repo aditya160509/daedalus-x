@@ -11,7 +11,9 @@ import {
   SegmentedControl,
   Skeleton,
 } from "@/components/ui/primitives";
-import { getBeamMaterials, solveBeam, type BeamRequest } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { DataTable, type DataColumn } from "@/components/ui/data-table";
+import { getBeamMaterials, solveBeam, type BeamRequest, type BeamResult } from "@/lib/api";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { BeamPlots } from "./BeamPlots";
 import { Ruler } from "lucide-react";
@@ -78,6 +80,49 @@ function verdict(sf: number): { tone: "default" | "risk" | "danger"; text: strin
   return { tone: "default", text: "holds with margin" };
 }
 
+interface CapturedCase {
+  id: string;
+  part: string;
+  materialName: string;
+  materialSource: BeamResult["material_source"];
+  loadN: number;
+  request: BeamRequest;
+  result: BeamResult;
+}
+
+const loadOf = (request: BeamRequest) =>
+  Object.values(request.point_loads_n).reduce((sum, value) => sum + value, 0);
+
+function capturedCsv(cases: CapturedCase[]): string {
+  const header = [
+    "case",
+    "part",
+    "material",
+    "material_source",
+    "length_mm",
+    "load_n",
+    "safety_factor",
+    "peak_stress_mpa",
+    "max_deflection_mm",
+    "section",
+  ];
+  const rows = cases.map((item) => [
+    item.id,
+    item.part,
+    item.materialName,
+    item.materialSource,
+    item.request.length_m * 1000,
+    loadOf(item.request).toFixed(3),
+    item.result.safety_factor == null ? "" : item.result.safety_factor.toFixed(3),
+    item.result.max_stress_mpa.toFixed(3),
+    item.result.max_deflection_mm.toFixed(4),
+    JSON.stringify(item.request.section),
+  ]);
+  return [header, ...rows]
+    .map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(","))
+    .join("\n");
+}
+
 /** T21 beam FEM: will this part survive the scrutineering load test? */
 export function StrengthPanel() {
   const materials = useQuery({ queryKey: ["beam-materials"], queryFn: getBeamMaterials });
@@ -88,6 +133,7 @@ export function StrengthPanel() {
   const [aMm, setAMm] = useState(preset.aMm);
   const [bMm, setBMm] = useState(preset.bMm);
   const [loadG, setLoadG] = useState(preset.loadG);
+  const [captured, setCaptured] = useState<CapturedCase[]>([]);
 
   const choose = (id: PartId) => {
     const p = PARTS.find((x) => x.value === id) ?? PARTS[0];
@@ -116,6 +162,116 @@ export function StrengthPanel() {
     enabled: !!materials.data,
   });
   const v = result.data ? verdict(result.data.safety_factor ?? Infinity) : null;
+  const inputsDirty = JSON.stringify(req) !== JSON.stringify(debounced);
+  const canCapture =
+    !!result.data &&
+    !result.isFetching &&
+    !inputsDirty &&
+    !materials.isPending &&
+    captured.length < 4;
+
+  const columns: DataColumn<CapturedCase>[] = [
+    {
+      accessorKey: "part",
+      header: "Part",
+      cell: (cell) => (
+        <span>
+          <span className="block">{String(cell.getValue())}</span>
+          <span className="block font-mono text-2xs text-muted-foreground">
+            {cell.row.original.request.length_m * 1000} mm ·{" "}
+            {cell.row.original.request.section.kind}
+          </span>
+        </span>
+      ),
+    },
+    {
+      accessorKey: "materialName",
+      header: "Material",
+      cell: (cell) => (
+        <span>
+          <span className="block">{String(cell.getValue())}</span>
+          <span className="block text-2xs text-muted-foreground">
+            {cell.row.original.materialSource} strength
+          </span>
+        </span>
+      ),
+    },
+    {
+      accessorKey: "loadN",
+      header: "Load",
+      meta: { numeric: true },
+      cell: (cell) =>
+        `${(Number(cell.getValue()) / G).toFixed(0)} g · ${Number(cell.getValue()).toFixed(2)} N`,
+    },
+    {
+      id: "safety",
+      accessorFn: (row) => row.result.safety_factor,
+      header: "Safety factor",
+      meta: { numeric: true },
+      cell: (cell) =>
+        cell.row.original.result.safety_factor == null
+          ? "not applicable (no stress)"
+          : cell.row.original.result.safety_factor.toFixed(2),
+    },
+    {
+      id: "stress",
+      accessorFn: (row) => row.result.max_stress_mpa,
+      header: "Peak stress (MPa)",
+      meta: { numeric: true },
+      cell: (cell) => cell.row.original.result.max_stress_mpa.toFixed(1),
+    },
+    {
+      id: "deflection",
+      accessorFn: (row) => row.result.max_deflection_mm,
+      header: "Deflection (mm)",
+      meta: { numeric: true },
+      cell: (cell) => cell.row.original.result.max_deflection_mm.toFixed(3),
+    },
+    {
+      id: "remove",
+      header: "",
+      cell: (cell) => (
+        <Button
+          size="sm"
+          variant="ghost"
+          aria-label={`Remove captured ${cell.row.original.part} case`}
+          onClick={() =>
+            setCaptured((rows) => rows.filter((row) => row.id !== cell.row.original.id))
+          }
+        >
+          Remove
+        </Button>
+      ),
+    },
+  ];
+
+  const capture = () => {
+    if (!canCapture || !result.data) return;
+    const material = materials.data?.materials[debounced.material];
+    setCaptured((rows) => [
+      ...rows,
+      {
+        id: crypto.randomUUID(),
+        part: preset.label,
+        materialName: material?.name ?? debounced.material,
+        materialSource: result.data.material_source,
+        loadN: loadOf(debounced),
+        request: structuredClone(debounced),
+        result: structuredClone(result.data),
+      },
+    ]);
+  };
+
+  const exportCsv = () => {
+    const url = URL.createObjectURL(
+      new Blob([capturedCsv(captured)], { type: "text/csv;charset=utf-8" }),
+    );
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "beam-safety-cases.csv";
+    anchor.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
 
   return (
     <Panel
@@ -217,6 +373,46 @@ export function StrengthPanel() {
             Material values for {result.data.material} are handbook estimates. 3D-printed parts are
             weaker than moulded ones; measure your own material before quoting this number.
           </p>
+          <section
+            aria-label="Configured-part safety comparison"
+            className="space-y-2 border-t pt-3"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-sm font-medium">Configured-part comparison</h3>
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="outline" disabled={!canCapture} onClick={capture}>
+                  Capture current case ({captured.length}/4)
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={captured.length === 0}
+                  onClick={exportCsv}
+                >
+                  Export CSV
+                </Button>
+              </div>
+            </div>
+            <p className="text-2xs text-muted-foreground">
+              {inputsDirty || result.isFetching
+                ? "Waiting for the debounced solver result before this case can be captured."
+                : captured.length >= 4
+                  ? "Remove a case to capture another; four cases is the comparison limit."
+                  : "Captures the exact request and resolved result. Editing the inputs afterwards does not rewrite a row."}
+            </p>
+            <DataTable
+              data={captured}
+              columns={columns}
+              label="Captured configured-part safety factors"
+              empty="No configured case captured yet."
+            />
+            <p className="text-2xs text-muted-foreground">
+              Cases are calculated from their recorded section, material and load. This table is
+              local to this browser session and is not saved as evidence. Presets and handbook
+              materials remain estimates, not physical load-test validation. A null safety factor
+              means zero stress (no load), not an infinite strength claim.
+            </p>
+          </section>
         </>
       )}
     </Panel>

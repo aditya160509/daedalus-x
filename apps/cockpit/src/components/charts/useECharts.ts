@@ -8,6 +8,7 @@ import {
   LegendComponent,
   MarkAreaComponent,
   MarkLineComponent,
+  ToolboxComponent,
   TooltipComponent,
 } from "echarts/components";
 import * as echarts from "echarts/core";
@@ -24,6 +25,7 @@ echarts.use([
   LegendComponent,
   MarkAreaComponent,
   MarkLineComponent,
+  ToolboxComponent,
   CanvasRenderer,
 ]);
 

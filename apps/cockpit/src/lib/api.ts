@@ -588,6 +588,9 @@ const ForgeChecks = z.object({
 /** Printable scrutineering sheet for a design (opens the PDF in a new tab). */
 export const forgeSheetUrl = (design: string) =>
   `/api/v1/forge/sheet.pdf?design=${encodeURIComponent(design)}`;
+/** Compact one-page FORGE overview that links back to the full sheet. */
+export const forgeSummaryUrl = (design: string) =>
+  `/api/v1/forge/summary.pdf?design=${encodeURIComponent(design)}`;
 export const getForgeChecks = (design: string) =>
   request(`/v1/forge/checks?design=${encodeURIComponent(design)}`, ForgeChecks);
 
@@ -852,6 +855,8 @@ const TimingImport = z.object({
   filename: z.string(),
   units: z.record(z.string(), z.string()),
   warnings: z.array(z.string()),
+  /** Zero-based positions of rows flagged by the backend median ± 5·MAD detector. */
+  outlier_indices: z.array(z.number().int().nonnegative()).default([]),
   rows: z.array(
     z.object({
       run_no: z.number(),
@@ -962,7 +967,21 @@ const CalibrationStudyDetail = z.object({
     rho_kg_m3: z.number(),
     seed: z.number(),
   }),
-  results: z.looseObject({ held_out: z.array(z.looseObject({})) }),
+  results: z.looseObject({
+    summaries: z.record(z.string(), BayesSummary).optional(),
+    effective_sample_size: z.number().optional(),
+    seed: z.number().optional(),
+    warnings: z.array(z.string()).optional(),
+    held_out: z.array(
+      z.object({
+        measured_s: z.number(),
+        median_s: z.number(),
+        p05_s: z.number(),
+        p95_s: z.number(),
+        error_s: z.number(),
+      }),
+    ),
+  }),
   sources: z.array(
     z.object({
       artifact_id: z.string(),

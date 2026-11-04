@@ -28,9 +28,11 @@ function pointerX(params: unknown): number | null {
 export function DragBuildupChart({
   data,
   onMarker,
+  caption = "Integrated pressure and wall-shear drag over the simulated surface, grouped by part. It is solver output from this case, not a measured force balance; no uncertainty interval or accepted-source claim is shown.",
 }: {
   data: Available;
   onMarker: (x: number | null) => void;
+  caption?: string;
 }) {
   const host = useECharts(
     () => {
@@ -40,10 +42,15 @@ export function DragBuildupChart({
       return {
         animation: false,
         textStyle: { fontFamily: t.mono },
-        grid: { left: 54, right: 20, top: 22, bottom: 34 },
+        grid: { left: 54, right: 20, top: 32, bottom: 34 },
+        toolbox: {
+          right: 0,
+          top: 0,
+          feature: { saveAsImage: { type: "png", name: "drag-buildup", pixelRatio: 2 } },
+        },
         legend: {
           top: 0,
-          right: 4,
+          left: 0,
           icon: "roundRect",
           itemWidth: 10,
           itemHeight: 6,
@@ -97,11 +104,16 @@ export function DragBuildupChart({
     },
   );
   return (
-    <div
-      ref={host}
-      className="h-full w-full"
-      role="img"
-      aria-label="Cumulative drag build-up along the car, stacked by component group"
-    />
+    <figure className="flex h-full min-h-0 min-w-0 flex-col">
+      <div
+        ref={host}
+        className="min-h-0 w-full flex-1"
+        role="img"
+        aria-label="Cumulative drag build-up along the car, stacked by component group"
+      />
+      <figcaption className="px-2 pt-1 text-2xs leading-relaxed text-muted-foreground">
+        {caption}
+      </figcaption>
+    </figure>
   );
 }

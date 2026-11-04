@@ -7,10 +7,12 @@ export function SpreadChart({
   edges,
   counts,
   percentiles,
+  caption = "Predicted Monte Carlo trials from the entered input uncertainty. These are simulated race times, not measured runs; no sampling-convergence claim is made.",
 }: {
   edges: number[];
   counts: number[];
   percentiles: Record<string, number>;
+  caption?: string;
 }) {
   const host = useECharts(() => {
     const t = chartTheme();
@@ -19,7 +21,12 @@ export function SpreadChart({
     return {
       animation: false,
       textStyle: { fontFamily: t.mono },
-      grid: { left: 40, right: 16, top: 24, bottom: 30 },
+      grid: { left: 40, right: 16, top: 30, bottom: 30 },
+      toolbox: {
+        right: 0,
+        top: 0,
+        feature: { saveAsImage: { type: "png", name: "race-time-monte-carlo", pixelRatio: 2 } },
+      },
       tooltip: {
         ...chartTooltip(t),
         trigger: "axis",
@@ -67,6 +74,16 @@ export function SpreadChart({
     };
   }, [edges, counts, percentiles]);
   return (
-    <div ref={host} className="h-full w-full" role="img" aria-label="Race time distribution" />
+    <figure className="flex h-full min-h-0 min-w-0 flex-col">
+      <div
+        ref={host}
+        className="min-h-0 w-full flex-1"
+        role="img"
+        aria-label="Race time distribution"
+      />
+      <figcaption className="px-1 pt-1 text-2xs leading-relaxed text-muted-foreground">
+        {caption}
+      </figcaption>
+    </figure>
   );
 }

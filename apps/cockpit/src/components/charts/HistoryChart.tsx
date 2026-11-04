@@ -17,6 +17,8 @@ export function HistoryChart({
   band,
   yRange,
   ariaLabel,
+  exportName = "iteration-history",
+  caption = "Simulated solver iteration history from this run. It shows numerical convergence only: it is not an experimental measurement and carries no GCI or uncertainty interval.",
 }: {
   iteration: number[];
   series: HistorySeries[];
@@ -27,17 +29,24 @@ export function HistoryChart({
   /** Fixed y extent, e.g. to hide the start-up transient; the full history stays zoomable. */
   yRange?: [number, number];
   ariaLabel: string;
+  exportName?: string;
+  caption?: string;
 }) {
   const host = useECharts(() => {
     const t = chartTheme();
     return {
       animation: false,
       textStyle: { fontFamily: t.mono },
-      grid: { left: 56, right: 16, top: 28, bottom: 32 },
+      grid: { left: 56, right: 16, top: 34, bottom: 32 },
       dataZoom: [{ type: "inside", filterMode: "none" }],
+      toolbox: {
+        right: 0,
+        top: 0,
+        feature: { saveAsImage: { type: "png", name: exportName, pixelRatio: 2 } },
+      },
       legend: {
         top: 0,
-        right: 8,
+        left: 0,
         icon: "roundRect",
         itemWidth: 10,
         itemHeight: 3,
@@ -95,6 +104,13 @@ export function HistoryChart({
             : undefined,
       })),
     };
-  }, [iteration, series, yLabel, log, band, yRange]);
-  return <div ref={host} className="h-full w-full" role="img" aria-label={ariaLabel} />;
+  }, [iteration, series, yLabel, log, band, yRange, exportName]);
+  return (
+    <figure className="flex h-full min-h-0 min-w-0 flex-col">
+      <div ref={host} className="min-h-0 w-full flex-1" role="img" aria-label={ariaLabel} />
+      <figcaption className="px-1 pt-1 text-2xs leading-relaxed text-muted-foreground">
+        {caption}
+      </figcaption>
+    </figure>
+  );
 }
