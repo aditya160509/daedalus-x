@@ -35,6 +35,8 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 
 **2026-11-04 bounded sprint:** EASY-01…EASY-15 implemented and checked in software; evidence files are `evidence/EASY-01.md`…`EASY-15.md`. This adds the Presenter limitations slide, per-row outlier flags, native PNG exports and chart source captions, a per-rule risk plot/table, percent-of-span margins, posterior and held-out plots, comparable saved-study errors, a beam comparison table, a compact FORGE summary, PDF source identity and the judge walkthrough/one-pager. The 58/118 ledger count was not re-audited. Accepted CFD, measured race, physical load tests, browser acceptance and the 60-question Q&A remain open.
 
+**2026-11-04 review fixes R1/R2:** `evidence/REVIEW-EASY-SPRINT-2026-11-04.md` found two P2 issues in that sprint. R1 replaces saved-study identity with the actual stored held-out inputs/targets, row order, per-row conditions and shared thrust/density, and records an explicit source `role` (`training`/`held_out`/`thrust`/`other`) instead of inferring held-out from file order; legacy studies stay unknown. R2 removes the process-lifetime Git cache so each report/sheet/summary export captures a fresh bounded offline snapshot with `captured_at`. Evidence: `evidence/R1.md`, `evidence/R2.md`.
+
 ---
 
 ## §15 Best feature list ("final boss"): 5 of 18 done, 10 partly done, 3 not started

@@ -116,7 +116,11 @@ def test_calibration_is_saved_with_inputs_results_and_sources(monkeypatch):
         "/v1/calibrations/bayesian",
         json=_body(
             source_files=[
-                {"label": "runs.csv", "content_b64": base64.b64encode(raw).decode()},
+                {
+                    "label": "runs.csv",
+                    "role": "held_out",
+                    "content_b64": base64.b64encode(raw).decode(),
+                },
             ]
         ),
     )
@@ -135,6 +139,7 @@ def test_calibration_is_saved_with_inputs_results_and_sources(monkeypatch):
     assert "source_files" not in detail["inputs"]
     assert detail["results"]["summaries"]["crr"]["median"] == 0.021
     assert detail["sources"][0]["label"] == "runs.csv"
+    assert detail["sources"][0]["role"] == "held_out"
     assert detail["sources"][0]["size_bytes"] == len(raw)
     assert detail["sources"][0]["content_sha256"].startswith("sha256:")
 

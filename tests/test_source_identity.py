@@ -1,20 +1,11 @@
-"""EASY-13: printable exports carry exact input hashes and an honest code identity."""
+"""EASY-13/R2: printable exports carry exact input hashes and a fresh code identity."""
 
 from __future__ import annotations
 
 import hashlib
 from pathlib import Path
 
-import pytest
-
 from daedalus import source_identity as si
-
-
-@pytest.fixture(autouse=True)
-def _fresh_code_cache() -> None:
-    si.code_snapshot.cache_clear()
-    yield
-    si.code_snapshot.cache_clear()
 
 
 def test_file_sha256_is_full_and_streamed(tmp_path: Path) -> None:
@@ -75,7 +66,10 @@ def test_missing_inputs_are_reported_not_invented(tmp_path: Path) -> None:
 def test_code_snapshot_without_git_reports_unavailable(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setattr(si, "REPO_ROOT", tmp_path)
     snapshot = si.code_snapshot()
-    assert snapshot == {"commit": None, "dirty": None, "state": "unavailable"}
+    assert snapshot["commit"] is None
+    assert snapshot["dirty"] is None
+    assert snapshot["state"] == "unavailable"
+    assert isinstance(snapshot["captured_at"], str)
     assert si.short_commit(snapshot) == "unknown (no .git in this source installation)"
 
 
@@ -99,3 +93,28 @@ def test_code_snapshot_reads_bounded_local_git(monkeypatch) -> None:
     assert snapshot["state"] == "recorded"
     assert snapshot["dirty"] is False
     assert calls == [("rev-parse", "HEAD"), ("status", "--porcelain", "--untracked-files=no")]
+
+
+def test_each_export_captures_a_fresh_snapshot(tmp_path: Path, monkeypatch) -> None:
+    state = {"commit": "a" * 40, "status": ""}
+
+    def fake_git(*args: str) -> str | None:
+        return state["commit"] if args[0] == "rev-parse" else state["status"]
+
+    monkeypatch.setattr(si, "_git", fake_git)
+    monkeypatch.setattr(si, "REPO_ROOT", Path(__file__).resolve().parents[1])
+    common = {
+        "rulebook_path": tmp_path / "rules.yaml",
+        "geometry_path": tmp_path / "geometry.json",
+    }
+    first = si.source_identity(**common)
+    state.update(commit="b" * 40, status=" M changed.py")
+    second = si.source_identity(**common)
+
+    first_code = first["code"]
+    second_code = second["code"]
+    assert isinstance(first_code, dict) and isinstance(second_code, dict)
+    assert first_code["commit"] == "a" * 40
+    assert second_code["commit"] == "b" * 40
+    assert second_code["dirty"] is True
+    assert "captured_at" in first_code and "captured_at" in second_code

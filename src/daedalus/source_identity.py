@@ -2,7 +2,8 @@
 
 No network call and no shell are used. A source checkout without `.git` reports `unavailable`
 rather than inventing a commit, and the YAML rulebook revision stays separate from an official
-PDF identity, which is not archived by these exports.
+PDF identity, which is not archived by these exports. Each call captures a fresh snapshot so a
+long-lived API process cannot report an earlier commit as the state of a later export.
 """
 
 from __future__ import annotations
@@ -11,7 +12,6 @@ import hashlib
 import shutil
 import subprocess
 from datetime import UTC, datetime
-from functools import lru_cache
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -49,16 +49,31 @@ def _git(*args: str) -> str | None:
     return result.stdout.strip()
 
 
-@lru_cache(maxsize=1)
 def code_snapshot() -> dict[str, object]:
-    """Commit and tracked-file dirtiness, cached for the process; bounded and offline."""
+    """Commit, tracked-file dirtiness and capture time for one export; bounded and offline."""
+    captured_at = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
     if not (REPO_ROOT / ".git").exists():
-        return {"commit": None, "dirty": None, "state": "unavailable"}
+        return {
+            "commit": None,
+            "dirty": None,
+            "state": "unavailable",
+            "captured_at": captured_at,
+        }
     commit = _git("rev-parse", "HEAD")
     status = _git("status", "--porcelain", "--untracked-files=no")
     if commit is None or status is None:
-        return {"commit": None, "dirty": None, "state": "unavailable"}
-    return {"commit": commit, "dirty": bool(status), "state": "recorded"}
+        return {
+            "commit": None,
+            "dirty": None,
+            "state": "unavailable",
+            "captured_at": captured_at,
+        }
+    return {
+        "commit": commit,
+        "dirty": bool(status),
+        "state": "recorded",
+        "captured_at": captured_at,
+    }
 
 
 def source_identity(

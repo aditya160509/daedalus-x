@@ -5,7 +5,11 @@ import type { CalibrationStudyDetail } from "@/lib/api";
 function detail(
   id: string,
   held: Array<{ measured_s: number; median_s: number; error_s: number }>,
-  options: { hash?: string; track?: number } = {},
+  options: {
+    hash?: string;
+    role?: "training" | "held_out" | "thrust" | "other" | null;
+    tracks?: number[];
+  } = {},
 ): CalibrationStudyDetail {
   return {
     study: {
@@ -20,9 +24,9 @@ function detail(
     },
     inputs: {
       points: [],
-      held_out: held.map((row) => ({
+      held_out: held.map((row, index) => ({
         time_s: row.measured_s,
-        track_m: options.track ?? 20,
+        track_m: options.tracks?.[index] ?? 20,
         sigma_s: 0.005,
         mass_kg: 0.05,
       })),
@@ -52,12 +56,14 @@ function detail(
           {
             artifact_id: "a",
             label: "training.csv",
+            role: "training",
             content_sha256: "train",
             size_bytes: 1,
           },
           {
             artifact_id: "b",
             label: "held.csv",
+            role: options.role === undefined ? "held_out" : (options.role ?? undefined),
             content_sha256: options.hash,
             size_bytes: 1,
           },
@@ -86,19 +92,78 @@ describe("saved-study comparison", () => {
     expect(rows[0].comparability).toContain("Not evaluated");
   });
 
-  it("marks different held-out signatures as non-comparable", () => {
+  it("does not treat two studies with different measured targets as the same set", () => {
     const rows = comparisonRows([
-      detail("a", [{ measured_s: 1.5, median_s: 1.51, error_s: 0.01 }], { hash: "h1" }),
-      detail("b", [{ measured_s: 1.5, median_s: 1.51, error_s: 0.01 }], { hash: "h2" }),
+      detail("a", [{ measured_s: 1.5, median_s: 1.51, error_s: 0.01 }]),
+      detail("b", [{ measured_s: 1.9, median_s: 1.51, error_s: -0.39 }]),
     ]);
+    expect(rows[0].held_signature).not.toBe(rows[1].held_signature);
     expect(rows.every((row) => row.comparability.includes("Not comparable"))).toBe(true);
   });
 
-  it("names a shared scored set even when the source hash is unavailable", () => {
+  it("keeps per-row condition association when the condition sets are otherwise equal", () => {
+    const rows = comparisonRows([
+      detail(
+        "a",
+        [
+          { measured_s: 1.5, median_s: 1.51, error_s: 0.01 },
+          { measured_s: 1.6, median_s: 1.61, error_s: 0.01 },
+        ],
+        { tracks: [20, 30] },
+      ),
+      detail(
+        "b",
+        [
+          { measured_s: 1.5, median_s: 1.51, error_s: 0.01 },
+          { measured_s: 1.6, median_s: 1.61, error_s: 0.01 },
+        ],
+        { tracks: [30, 20] },
+      ),
+    ]);
+    expect(rows[0].held_signature).not.toBe(rows[1].held_signature);
+    expect(rows.every((row) => row.comparability.includes("different scored"))).toBe(true);
+  });
+
+  it("marks legacy studies without a source role as unknown, not inferred from order", () => {
     const rows = comparisonRows([
       detail("a", [{ measured_s: 1.5, median_s: 1.51, error_s: 0.01 }]),
       detail("b", [{ measured_s: 1.5, median_s: 1.51, error_s: 0.01 }]),
     ]);
-    expect(rows[0].comparability).toContain("source-file hash unavailable");
+    expect(rows[0].identity_known).toBe(false);
+    expect(rows[0].comparability).toContain("source role/hash unavailable");
+  });
+
+  it("verifies an explicitly held-out source hash when present", () => {
+    const rows = comparisonRows([
+      detail("a", [{ measured_s: 1.5, median_s: 1.51, error_s: 0.01 }], { hash: "h1" }),
+      detail("b", [{ measured_s: 1.5, median_s: 1.51, error_s: 0.01 }], { hash: "h1" }),
+    ]);
+    expect(rows.every((row) => row.identity_known)).toBe(true);
+    expect(rows[0].comparability).toBe("Comparable held-out set (source hash verified)");
+  });
+
+  it("does not use a source in another role as held-out identity", () => {
+    const rows = comparisonRows([
+      detail("a", [{ measured_s: 1.5, median_s: 1.51, error_s: 0.01 }], {
+        hash: "h1",
+        role: "training",
+      }),
+      detail("b", [{ measured_s: 1.5, median_s: 1.51, error_s: 0.01 }], {
+        hash: "h1",
+        role: "training",
+      }),
+    ]);
+    expect(rows.every((row) => row.identity_known)).toBe(false);
+    expect(rows[0].comparability).toContain("source role/hash unavailable");
+  });
+
+  it("rejects misaligned stored held-out rows instead of comparing them", () => {
+    const broken = detail("a", [
+      { measured_s: 1.5, median_s: 1.51, error_s: 0.01 },
+      { measured_s: 1.6, median_s: 1.61, error_s: 0.01 },
+    ]);
+    broken.inputs.held_out = broken.inputs.held_out.slice(0, 1);
+    const rows = comparisonRows([broken]);
+    expect(rows[0].comparability).toContain("misaligned");
   });
 });

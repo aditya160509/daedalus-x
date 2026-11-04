@@ -269,6 +269,8 @@ class CalibrationStudy(Record):
     results_artifact_id: str
     source_artifact_ids: tuple[str, ...] = ()
     source_labels: tuple[str, ...] = ()
+    # Parallel to source_labels. Empty or blank entries mean the role was not recorded.
+    source_roles: tuple[str, ...] = ()
     n_runs: int = Field(ge=1)
     n_held_out: int = Field(ge=0)
 

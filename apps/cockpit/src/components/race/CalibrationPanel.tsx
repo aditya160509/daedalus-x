@@ -522,10 +522,16 @@ export function CalibrationPanel() {
             onClick={async () => {
               if (!training) return;
               const thrust = curve ?? estimateThrust(DEFAULT_ESTIMATE);
-              const chosen = [files.training, files.held].filter((f): f is File => !!f);
+              const chosen = [
+                { file: files.training, role: "training" as const },
+                { file: files.held, role: "held_out" as const },
+              ].filter(
+                (item): item is { file: File; role: "training" | "held_out" } => !!item.file,
+              );
               const source_files = await Promise.all(
-                chosen.map(async (file) => ({
+                chosen.map(async ({ file, role }) => ({
                   label: file.name,
+                  role,
                   content_b64: await fileToBase64(file),
                 })),
               );

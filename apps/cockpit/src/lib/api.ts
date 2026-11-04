@@ -986,6 +986,7 @@ const CalibrationStudyDetail = z.object({
     z.object({
       artifact_id: z.string(),
       label: z.string(),
+      role: z.enum(["training", "held_out", "thrust", "other"]).nullable().optional(),
       content_sha256: z.string(),
       size_bytes: z.number().int().nonnegative(),
     }),

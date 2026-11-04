@@ -62,7 +62,7 @@
   #table(columns: (auto, 1fr), stroke: 0.4pt + luma(200), inset: 4pt,
     [Rulebook YAML], [#rb.file · revision #rb.revision · SHA-256 #text(7pt)[#if rb.sha256 == none [unavailable] else [#rb.sha256]]],
     [Geometry JSON], [#geo.file · SHA-256 #text(7pt)[#if geo.sha256 == none [unavailable] else [#geo.sha256]]],
-    [Code snapshot], [#code.label],
+    [Code snapshot], [#code.label · captured #code.at("captured_at", default: "unavailable")],
     [Generated], [#d.generated · data hash #d.hash],
   )
   #text(7.5pt, fill: gray)[

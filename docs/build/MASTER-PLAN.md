@@ -779,7 +779,7 @@ This is the current checkbox ledger requested by the owner. `TODO.md` supplies t
 - [ ] 🟨 J07 — Hash-pinned artifact verification page, Evidence links and native QR SVG/export connected; OpenTimestamps anchor, public deployment and browser/scan verification remain.
 - [ ] ⬜ J08 — Register official PDFs, baseline and every CFD run in evidence; signed release/seal tag workflow.
 - [ ] 🟨 J09 — Three-minute timed walkthrough script, honest limitations slide and baseline/change/prediction/measurement one-pager written; 60+ judge Q&A bank, timed teammate run and recorded fallback remain.
-- [ ] 🟨 J10 — Report, sheet and summary PDFs now carry full rulebook/geometry hashes, code commit/dirty state and generation time; run-manifest identity, offline demo and recorded fallback remain.
+- [ ] 🟨 J10 — Report, sheet and summary PDFs now carry full rulebook/geometry hashes, code commit/dirty state (captured fresh per export, with capture time) and generation time; run-manifest identity, offline demo and recorded fallback remain.
 - [ ] ⬜ J11 — Red-team and post-event regret reports; existing V&V dossier does not implement these.
 - [ ] ⏳ J12 — Real trusted timestamp chain, independent measured race scores and accepted CFD evidence.
 

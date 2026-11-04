@@ -331,10 +331,13 @@ class SourceFile(BaseModel):
 
     label: str = Field(min_length=1, max_length=120)
     content_b64: str = Field(min_length=1, max_length=MAX_SOURCE_BYTES * 4 // 3 + 8)
+    # Explicit role when the caller knows it. Legacy saved studies have no role and must not
+    # have one inferred from file order or a shared condition set.
+    role: Literal["training", "held_out", "thrust", "other"] | None = None
 
 
-def _decode_sources(files: list[SourceFile]) -> list[tuple[str, bytes]]:
-    decoded: list[tuple[str, bytes]] = []
+def _decode_sources(files: list[SourceFile]) -> list[tuple[str, bytes, str | None]]:
+    decoded: list[tuple[str, bytes, str | None]] = []
     for source in files:
         label = Path(source.label).name
         if not label.lower().endswith(ALLOWED_EXTENSIONS):
@@ -352,7 +355,7 @@ def _decode_sources(files: list[SourceFile]) -> list[tuple[str, bytes]]:
             raise HTTPException(
                 413, f"source file {label!r} exceeds the {MAX_SOURCE_BYTES // (1 << 20)} MB limit"
             )
-        decoded.append((label, data))
+        decoded.append((label, data, source.role))
     return decoded
 
 
@@ -425,7 +428,7 @@ def _save_study(
                 source_entity_id=model.model_id,
                 provenance=c.Provenance.MEASURED,
             )
-            for _label, data in sources
+            for _label, data, _role in sources
         ]
         study = store.add(
             c.CalibrationStudy(
@@ -434,7 +437,8 @@ def _save_study(
                 inputs_artifact_id=inputs_art.artifact_id,
                 results_artifact_id=results_art.artifact_id,
                 source_artifact_ids=tuple(a.artifact_id for a in source_arts),
-                source_labels=tuple(label for label, _data in sources),
+                source_labels=tuple(label for label, _data, _role in sources),
+                source_roles=tuple(role or "" for _label, _data, role in sources),
                 n_runs=len(req.points),
                 n_held_out=len(req.held_out),
             )
@@ -585,6 +589,11 @@ def get_calibration_study(study_id: str) -> dict[str, object]:
                     "label": study.source_labels[index]
                     if index < len(study.source_labels)
                     else artifact_id,
+                    "role": (
+                        study.source_roles[index]
+                        if index < len(study.source_roles) and study.source_roles[index]
+                        else None
+                    ),
                     "content_sha256": artifact.content_sha256,
                     "size_bytes": _artifact_size(store, artifact_id),
                 }
