@@ -581,3 +581,7 @@ Owner requested a pause after the current report fix. No new feature work is run
 No accepted CFD campaign or measured race was added. Real-data percentage has no audited numerator and is not upgraded. Existing particle-view draft is preserved and not ticked. Evidence: `evidence/CHECKPOINT-2026-11-04.md`.
 
 Final report guard check: nonnumeric/boolean Cd values and malformed metadata are excluded; five report tests, Ruff and zero-error pyrefly verification passed after the final numeric narrowing fix.
+
+## Next-model handoff — 2026-11-04
+
+Root `prompt.md` now specifies 15 bounded quick-work items, exact source files/symbols, installed OSS to reuse, acceptance criteria, draft-preservation rules and handoff checks. These are subfeatures, not 15 complete master tasks; saved-study comparison and PDF work are explicitly more involved. No implementation boxes or completion percentages changed for creating this handoff.
