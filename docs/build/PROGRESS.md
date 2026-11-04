@@ -48,6 +48,8 @@ These are removed from active work, including unfinished remainders of already-b
 - Formal experiment-preregistration paperwork. Exact experiment settings, pairing, sources and statistics remain.
 - Arbitrary coverage-percentage targets, nightly screenshot bureaucracy, mandatory per-task screenshot/rating reports and tests that only mirror labels.
 
+**Removed from code, 2026-11-04.** Deleted: the presenter (slides, speaker notes, timer, `P` shortcut, Present button); the report, scrutineering-sheet and compact-summary PDFs (`api/report.py`, `forge_sheet.py`, `report/*.typ`, `/v1/forge/sheet.pdf`, `/v1/forge/summary.pdf`, the Report PDF and sheet links); the judge pack ZIP (`judge_pack.py`); the V&V dossier (`dossier.py`, `/v1/report/dossier`, the Project panel); the Project workspace and its plan/forecast API (`project.py`, `/v1/analysis/project/*`, `ProjectForecast`, the Project nav entry); `source_identity.py` (only used by those PDFs); the `typst` dependency; `docs/judges/`; and the evidence notes for these features. The drawing generator was already gone. Sealed predictions, RFC 3161 timestamps, evidence, FORGE, ORACLE and race code are untouched. Scores above were not recounted; if a removed row had been counted as built, the next status recount should drop it.
+
 Previously removed scope stays removed: drawing/render packs and DXF/SVG importer; AR; base-bleed; competitor scraping; photo/video scrutineering; photogrammetry; community calibration; multi-fidelity; BoTorch/OpenMDAO/trame; OS matrices, Docker/devcontainer, mutation testing, eight-hour soak, multi-user and archival-publication services.
 
 This is a **planning scope change**. Existing code, saved files and historical evidence are not deleted by this change. Do not revive these tasks because an older document or code module still contains them. Hiding or removing existing extras can be a separate focused cleanup, preserving shared engineering dependencies.
@@ -160,7 +162,7 @@ still not captured and is stated as the remaining A06 gate. Evidence: `evidence/
 
 Wrote the 66-question sourced judge Q&A bank in `docs/judges/JUDGE-QA.md`. It is preparation, not
 acceptance: the teammate-timed three-minute run and a real recorded fallback remain open, so J09
-stays partial. Evidence: `evidence/J09.md`.
+stays partial. Evidence: `evidence/J09.md`. Both the bank and that evidence note were removed from code and docs on 2026-11-04.
 
 ## F08 — 2026-11-04
 
