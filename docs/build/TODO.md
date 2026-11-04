@@ -133,3 +133,16 @@ This is a **planning scope change**. Existing code, saved files and historical e
 5. Advanced geometry/manufacturing/adjoint/structure, scheduled real validation and grouped quality/performance checks.
 
 Existing completed software is tracked in PROGRESS. Only unresolved engineering work above is active. No new overall percentage is inferred from removing tasks.
+
+## UI redo (owner priority, 2026-11-04)
+Follow `docs/build/UI-REDO.md` §0–§8 **before** new features:
+1. Fix the "1 Issue" error.
+2. Always-visible moving air.
+3. Port the t3code (MIT) UI primitives + Geist tokens into `components/ui`.
+4. Outputs tab.
+5. Inspect redo.
+6. Strength redo.
+7. Apply to every page.
+8. Performance.
+
+Use F1ReplayTiming (MIT) for the Race timing/stadium view.

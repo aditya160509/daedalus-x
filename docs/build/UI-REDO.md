@@ -162,3 +162,26 @@ After each step:
 1. Screenshot it at 1440 px.
 2. Compare it with Linear/Vercel side by side.
 3. Fix anything that looks louder or more cluttered than they do.
+
+## 8. Research results (TinyFish + GitHub licence checks, 2026-11-04): copy these
+
+| Source | Licence | What to take, exactly |
+|---|---|---|
+| **pingdotgg/t3code** (45k ★) | **MIT: copy directly** | Its web UI primitives (button, dialog, command palette, tooltip, form controls, sidebar, tabs) and its rules in `docs/internals/web-ui.md`: one design system, compose components instead of copying classes. Port them into `components/ui` as **the** base and replace our ad-hoc versions. Keep the MIT notice. |
+| **Vercel Geist** (design system + `geist-font`, OFL) | font OFL, tokens public | Geist Sans/Mono fonts, near-black surfaces, grey scale `gray-100…1000`, restrained accent, dense cards. Use it as our token reference, and swap Inter/JetBrains Mono for Geist if it looks better. |
+| **Dashboard pattern 2026** (Linear/Stripe/Vercel) | — | 256 px sidebar, **4–6 KPI cards max** on top, 12-column grid, dark as default, one primary action. Use this for the Outputs tab and Pit Wall. |
+| **adn8naiagent/F1ReplayTiming** (940 ★) | **MIT** | Timing tower, track-position map, telemetry panels, session replay controls. Use it for the stadium/TV mode and the Race timing (better than f1-dash for replay). |
+| **matteocelani/f1-telemetry** | MIT | Telemetry chart layout and driver comparison panels. |
+| **TracingInsights.com** | site, no repo | Reference only: F1 analytics chart styles (lap delta, speed trace, sector comparison). |
+| **mapbox/webgl-wind** | ISC | GPU particle advection (ping-pong textures): the moving-air core. |
+| **dgreenheck/threejs-particle-fluids** | **MIT** | WebGPU compute particles and trail rendering. Use it to upgrade the air particles to WebGPU when the browser supports it, and fall back to WebGL. |
+| **Simcenter STAR-CCM+ 2506 / Siemens CFD-visualisation blog** | commercial | The look to match: ray-traced car, Q-criterion vortices coloured by velocity, surface LIC, wake planes. Our target style for the Wind Tunnel. |
+| **Synopsys + NVIDIA Omniverse STEM Racing digital-twin racetrack** | commercial | The benchmark for the race track: real track dimensions, start box, tether, finish gate, studio lighting. Match its realism in the Race replay, and tell judges we built the same idea openly. |
+| **Free F1-in-Schools track CAD** (shared publicly by a team; find the source and licence) | check | If the licence allows, use their track model instead of our hand-built geometry. |
+
+**Order to apply:**
+1. Port the t3code primitives + Geist tokens.
+2. Apply them to every page.
+3. Outputs tab.
+4. Wind Tunnel look (STAR-CCM+ style).
+5. Race track (Omniverse benchmark) + F1ReplayTiming timing.
