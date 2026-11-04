@@ -579,3 +579,5 @@ Owner requested a pause after the current report fix. No new feature work is run
 8. Final browser/responsive/performance checks, full suite and independent real-data acceptance.
 
 No accepted CFD campaign or measured race was added. Real-data percentage has no audited numerator and is not upgraded. Existing particle-view draft is preserved and not ticked. Evidence: `evidence/CHECKPOINT-2026-11-04.md`.
+
+Final report guard check: nonnumeric/boolean Cd values and malformed metadata are excluded; five report tests, Ruff and zero-error pyrefly verification passed after the final numeric narrowing fix.

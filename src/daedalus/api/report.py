@@ -39,7 +39,8 @@ def _best_run(design: str) -> Path | None:
             r.get("succeeded") is True
             and r.get("acceptance") == "accepted"
             and manifest.get("design_id") == design
-            and type(cd) in (int, float)
+            and isinstance(cd, int | float)
+            and not isinstance(cd, bool)
             and math.isfinite(cd)
             and cd > 0
         )
