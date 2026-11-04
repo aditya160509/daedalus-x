@@ -146,6 +146,8 @@ def test_api_returns_measured_rule_risks(client: TestClient) -> None:
     assert body["samples"] == 4_000
     assert body["rules"]
     assert all(rule["unit"] == "mm" for rule in body["rules"])
+    assert all(rule["page"] >= 1 for rule in body["rules"])
+    assert all("margin" in rule for rule in body["rules"])
     assert 0.0 <= body["overall_pass_probability"] <= 1.0
     assert body["expected_points_lost"] >= 0.0
     assert body["p95_points_lost"] >= body["expected_points_lost"]

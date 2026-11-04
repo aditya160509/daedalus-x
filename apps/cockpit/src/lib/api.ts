@@ -620,10 +620,12 @@ export const measureForge = (design: string) =>
 const RuleRisk = z.object({
   rule_id: z.string(),
   name: z.string(),
+  page: z.number().int().positive(),
   unit: z.string(),
   value: z.number(),
   min: z.number().nullable(),
   max: z.number().nullable(),
+  margin: z.number().nullable(),
   sigma: z.number(),
   pass_probability: z.number(),
   expected_points_lost: z.number().nullable(),

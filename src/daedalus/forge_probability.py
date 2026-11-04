@@ -23,10 +23,12 @@ MAX_SAMPLES = 100_000
 class RuleRisk:
     rule_id: str
     name: str
+    page: int
     unit: str
     value: float
     min: float | None
     max: float | None
+    margin: float | None
     sigma: float
     pass_probability: float
     expected_points_lost: float | None
@@ -112,10 +114,12 @@ def manufacturing_risk(
             RuleRisk(
                 rule_id=check.rule_id,
                 name=check.name,
+                page=check.page,
                 unit=check.unit,
                 value=check.value,
                 min=check.min,
                 max=check.max,
+                margin=check.margin,
                 sigma=sigma,
                 pass_probability=float(np.mean(inside)),
                 expected_points_lost=expected,

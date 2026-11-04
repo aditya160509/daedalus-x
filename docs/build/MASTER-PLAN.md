@@ -745,7 +745,7 @@ This is the current checkbox ledger requested by the owner. `TODO.md` supplies t
 - [x] ✅ G03 — Hash-bound CAD remeasurement and rule-to-part focus.
 - [x] ✅ G04 — Unit-filtered nearest-limit chart/list with rule/page and CAD focus (`FrontierPanel.tsx`); single-design ranking, not full feasible-space map.
 - [x] ✅ G05 — Manufacturing-spread pass-probability API, Rules summary and per-rule probability plot/table (`forge_probability.py`, `LegalPanel.tsx`); independent Normal assumptions and team-entered spread, not measured process capability.
-- [ ] 🟨 G06 — All-rule margin bars with tolerance bands, percent-of-span margins ✅ and points × failure-probability ordering remain incomplete.
+- [x] ✅ G06 — All-rule margin bars with ±1σ bands and percent-of-span margins, rule page and points × failure-probability ordering are connected (`forgeMargin.ts`, `LegalPanel.tsx`, `forge_probability.py`); spread is a team-entered Normal assumption, not measured process capability.
 - [ ] ⬜ G07 — Canonical wall thickness, chamber hole detection, full section chord and standard halo/helmet comparison.
 - [ ] ⬜ G08 — Who/tool/when inspection log and interactive dimensional what-if.
 - [ ] 🟨 G09 — Compact one-page fail/risk/manual/CAD-pass summary connected (`summary.typ`, `/v1/forge/summary.pdf`); fully linked source-PDF evidence archive remains.

@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useDeferredValue, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
+import type { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams } from "echarts";
 import { cadFocusHref } from "@/lib/cadFocus";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -18,9 +19,18 @@ import {
 } from "@/lib/api";
 import { chartTheme, useECharts } from "@/components/charts/useECharts";
 import { DataTable, type DataColumn } from "@/components/ui/data-table";
-import { NumberField, Panel, Skeleton } from "@/components/ui/primitives";
+import { NumberField, Panel, SegmentedControl, Skeleton } from "@/components/ui/primitives";
 import { fmt, fmtPct } from "@/lib/format";
-import { headroomLabel, normalisedHeadroom } from "@/lib/forgeMargin";
+import {
+  headroomLabel,
+  marginBand,
+  normalisedHeadroom,
+  orderRiskRows,
+  RISK_ORDER_LABELS,
+  RISK_ORDER_OPTIONS,
+  type MarginBand,
+  type RiskOrder,
+} from "@/lib/forgeMargin";
 import { cn } from "@/lib/utils";
 
 const STATE: Record<RuleCheck["state"], { label: string; dot: string }> = {
@@ -50,6 +60,7 @@ const RISK_COLUMNS: DataColumn<RiskRow>[] = [
       <span>
         <span className="font-mono text-muted-foreground">{String(cell.getValue())}</span>{" "}
         {cell.row.original.name}
+        <span className="block text-2xs text-muted-foreground">page {cell.row.original.page}</span>
       </span>
     ),
   },
@@ -76,8 +87,122 @@ const RISK_COLUMNS: DataColumn<RiskRow>[] = [
   },
 ];
 
-function RuleRiskChart({ risk }: { risk: ForgeRisk }) {
-  const rows = risk.rules.toSorted((a, b) => a.pass_probability - b.pass_probability);
+function RuleMarginChart({ checks, risk }: { checks: RuleCheck[]; risk: ForgeRisk }) {
+  const bands = useMemo(() => {
+    const sigmaById = new Map(risk.rules.map((row) => [row.rule_id, row.sigma]));
+    return checks
+      .map((check) =>
+        marginBand(
+          check,
+          sigmaById.get(check.rule_id) ?? (check.unit === "mm" ? risk.sigma_mm : null),
+        ),
+      )
+      .filter((band): band is MarginBand => band != null)
+      .toSorted((a, b) => a.pct - b.pct);
+  }, [checks, risk]);
+  const unavailable = checks.length - bands.length;
+  const host = useECharts(() => {
+    const theme = chartTheme();
+    return {
+      animation: false,
+      grid: { left: 58, right: 18, top: 30, bottom: 42, containLabel: false },
+      toolbox: {
+        right: 0,
+        top: 0,
+        feature: {
+          saveAsImage: { type: "png", name: "forge-rule-margin-bands", pixelRatio: 2 },
+        },
+      },
+      tooltip: {
+        trigger: "axis",
+        axisPointer: { type: "shadow" },
+        backgroundColor: theme.popover,
+        borderColor: theme.lineStrong,
+        textStyle: { color: theme.text, fontSize: 11, fontFamily: theme.mono },
+        formatter: (params: Array<{ dataIndex: number }>) => {
+          const band = bands[params[0]?.dataIndex ?? 0];
+          if (!band) return "";
+          return [
+            `${band.rule_id} · ${band.name} (p.${band.page})`,
+            `Margin ${band.margin > 0 ? "+" : ""}${band.margin} ${band.unit} = ${band.pct.toFixed(1)}% of allowed span`,
+            `Band ±1σ spans ${band.band_low_pct.toFixed(1)}% to ${band.band_high_pct.toFixed(1)}%`,
+          ].join("<br/>");
+        },
+      },
+      xAxis: {
+        type: "value",
+        name: "% of allowed span",
+        nameTextStyle: { color: theme.muted, fontSize: 10 },
+        axisLabel: { color: theme.muted, fontSize: 10, formatter: "{value}%" },
+        axisLine: { show: true, onZero: true, lineStyle: { color: theme.lineStrong } },
+        axisTick: { show: false },
+        splitLine: { lineStyle: { color: theme.line, opacity: 0.45 } },
+      },
+      yAxis: {
+        type: "category",
+        inverse: true,
+        data: bands.map((band) => band.rule_id),
+        axisLabel: { color: theme.muted, fontSize: 9 },
+        axisTick: { show: false },
+        axisLine: { show: false },
+      },
+      series: [
+        {
+          type: "custom",
+          silent: true,
+          data: bands.map((band, index) => [index, band.band_low_pct, band.band_high_pct]),
+          renderItem: (_params: CustomSeriesRenderItemParams, api: CustomSeriesRenderItemAPI) => {
+            const index = Number(api.value(0));
+            const low = Number(api.value(1));
+            const high = Number(api.value(2));
+            const start = api.coord([low, index]);
+            const end = api.coord([high, index]);
+            return {
+              type: "rect",
+              shape: {
+                x: start[0],
+                y: start[1] - 6,
+                width: Math.max(1, end[0] - start[0]),
+                height: 12,
+              },
+              style: { fill: theme.lineStrong, opacity: 0.22 },
+            };
+          },
+        },
+        {
+          type: "bar",
+          barMaxWidth: 10,
+          data: bands.map((band) => ({
+            value: band.pct,
+            itemStyle: {
+              color: band.pct < 0 ? theme.risk : band.pct < 20 ? theme.brand : theme.ok,
+            },
+          })),
+        },
+      ],
+    };
+  }, [bands]);
+  return (
+    <div className="space-y-1">
+      <div
+        ref={host}
+        className="w-full"
+        style={{ height: Math.max(240, Math.min(520, bands.length * 16 + 120)) }}
+        role="img"
+        aria-label="Per-rule margin as a percentage of the allowed span, with the declared ±1σ band"
+      />
+      <p className="text-2xs leading-4 text-muted-foreground">
+        Bars show the signed nearest-limit margin as a percentage of the allowed two-sided span; the
+        band is ±1σ of the declared process spread, not a rulebook tolerance.{" "}
+        {unavailable > 0
+          ? `${unavailable} rule(s) have no two-sided span, CAD value or applicable σ; one-sided margins stay in the rule list with their own units.`
+          : "Every checked rule has a two-sided span and an applicable σ."}
+      </p>
+    </div>
+  );
+}
+
+function RuleRiskChart({ risk, rows }: { risk: ForgeRisk; rows: RiskRow[] }) {
   const host = useECharts(() => {
     const theme = chartTheme();
     return {
@@ -142,21 +267,30 @@ function RuleRiskChart({ risk }: { risk: ForgeRisk }) {
         },
       ],
     };
-  }, [risk]);
+  }, [risk, rows]);
   return (
     <div
       ref={host}
       className="w-full"
       role="img"
-      aria-label="Per-rule manufacturing pass probability, weakest rule first"
+      aria-label="Per-rule manufacturing pass probability in the selected order"
       style={{ height: Math.max(240, Math.min(520, rows.length * 18 + 110)) }}
     />
   );
 }
 
-function RuleRiskDetail({ risk }: { risk: ForgeRisk }) {
-  const rows = risk.rules.toSorted((a, b) => a.pass_probability - b.pass_probability);
-  const weakest = rows[0];
+function RuleRiskDetail({ risk, checks }: { risk: ForgeRisk; checks: RuleCheck[] }) {
+  const [order, setOrder] = useState<RiskOrder>("expected");
+  const rows = useMemo(() => orderRiskRows(risk.rules, order), [risk.rules, order]);
+  const weakest = useMemo(
+    () =>
+      risk.rules.reduce<RiskRow | null>(
+        (lowest, row) =>
+          lowest == null || row.pass_probability < lowest.pass_probability ? row : lowest,
+        null,
+      ),
+    [risk.rules],
+  );
   return (
     <div className="mt-3 space-y-2">
       <div className="flex flex-wrap items-baseline justify-between gap-2 text-2xs">
@@ -164,11 +298,21 @@ function RuleRiskDetail({ risk }: { risk: ForgeRisk }) {
         {weakest && (
           <span className="tabular font-mono">
             {weakest.rule_id} · {fmtPct(weakest.pass_probability, 1)}% at σ{" "}
-            {weakest.sigma.toFixed(3)} {weakest.unit}
+            {weakest.sigma.toFixed(3)} {weakest.unit} · p.{weakest.page}
           </span>
         )}
       </div>
-      <RuleRiskChart risk={risk} />
+      <RuleMarginChart checks={checks} risk={risk} />
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="text-2xs font-medium text-text-2">Rule order</span>
+        <SegmentedControl
+          label="Order manufacturing risk rows"
+          value={order}
+          onChange={setOrder}
+          options={RISK_ORDER_OPTIONS}
+        />
+      </div>
+      <RuleRiskChart risk={risk} rows={rows} />
       <DataTable
         data={rows}
         columns={RISK_COLUMNS}
@@ -176,11 +320,13 @@ function RuleRiskDetail({ risk }: { risk: ForgeRisk }) {
         empty="No rule had a CAD value and an applicable sigma."
       />
       <p className="text-2xs leading-4 text-muted-foreground">
-        Sorted weakest first. {risk.excluded_rules} manual or non-length rule(s) excluded from this
-        model; they are not shown as 100% passing or zero penalty.
+        Ordered by {RISK_ORDER_LABELS[order].toLowerCase()}. {risk.excluded_rules} manual or
+        non-length rule(s) excluded from this model; they are not shown as 100% passing or zero
+        penalty.
         {risk.unquantified_rules.length > 0 &&
           ` Expected loss is unavailable for ${risk.unquantified_rules.length} rule(s) whose penalty text does not state points: ${risk.unquantified_rules.join(", ")}.`}{" "}
-        σ is a declared process assumption, not measured manufacturing capability.
+        Expected points are ordered as independent per-rule losses, not correlated risk or measured
+        process capability; σ is a declared process assumption.
       </p>
       <details className="text-2xs text-muted-foreground">
         <summary className="cursor-pointer hover:text-foreground">Model assumptions</summary>
@@ -390,7 +536,7 @@ export function LegalPanel({
                 capability. {risk.data.excluded_rules} manual or non-length rules excluded.
               </p>
             )}
-            {risk.data && <RuleRiskDetail risk={risk.data} />}
+            {risk.data && <RuleRiskDetail risk={risk.data} checks={checks} />}
           </details>
           <table className="w-full text-xs">
             <tbody>

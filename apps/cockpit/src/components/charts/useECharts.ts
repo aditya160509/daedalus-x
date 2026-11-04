@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart, LineChart } from "echarts/charts";
+import { BarChart, CustomChart, LineChart } from "echarts/charts";
 import {
   AxisPointerComponent,
   DataZoomComponent,
@@ -18,6 +18,7 @@ import { useEffect, useRef } from "react";
 echarts.use([
   LineChart,
   BarChart,
+  CustomChart,
   GridComponent,
   TooltipComponent,
   AxisPointerComponent,

@@ -597,3 +597,12 @@ Reviewed EASY sprint commits 1b50ac3 / 05f9489 / f88db37. Two source-level corre
 ## Exact partial-entry handoff — 2026-11-04
 
 `prompt-next.md` now reproduces all 20 currently partial §28 IDs verbatim: A06, A07, A11, B13, C10, D07, D10, E10, E11, E13, F08, G06, G09, H02, J06, J07, J09, J10, L03, L07. Each includes source files, remaining implementation, completion criteria and separate physical/authority/browser gates. The two review fixes remain prerequisites. This replaces the generic NEXT sequence; no feature statuses or percentages changed for writing instructions.
+
+## G06 margin bands — 2026-11-04
+
+Closed the remaining G06 software: every two-sided measured rule with a positive declared sigma
+now gets a margin bar as a percentage of its allowed span, with a ±1σ band, rule page, saved-PNG
+export and an explicit probability/points/expected-points ordering toggle. One-sided and manual
+rules stay listed with units rather than being plotted as zero. `RuleRisk` now carries `page` and
+`margin` from FORGE. Evidence: `evidence/G06.md`; tests: `forgeMargin.test.ts`,
+`test_forge_probability.py`; no fresh browser pass was recorded.
