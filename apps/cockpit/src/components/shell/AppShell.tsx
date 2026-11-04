@@ -15,6 +15,7 @@ import {
   Settings,
   type LucideIcon,
   Wind,
+  Timer,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -51,6 +52,7 @@ const SECTIONS: Section[] = [
       { href: "/simulate", label: "Wind Tunnel", capability: "AETHER", icon: Wind, status: "live" },
       { href: "/design", label: "Design Studio", capability: "AETHER", icon: Box, status: "live" },
       { href: "/race", label: "Race", capability: "TITAN", icon: Gauge, status: "live" },
+      { href: "/race/day", label: "Race day", capability: "TV", icon: Timer, status: "live" },
       { href: "/compute", label: "Compute", capability: "AETHER", icon: Cpu, status: "live" },
     ],
   },
