@@ -155,3 +155,9 @@ applies the overlay after iframe load. `Check.axis` is derived from a deliberate
 map; clearance/diameter/mass and manual rules have no axis and stay explicit. Bridge tests cover
 message validation; the vendored app was rebuilt and the bundle copied. Browser click-through is
 still not captured and is stated as the remaining A06 gate. Evidence: `evidence/A06.md`.
+
+## J09 Q&A bank — 2026-11-04
+
+Wrote the 66-question sourced judge Q&A bank in `docs/judges/JUDGE-QA.md`. It is preparation, not
+acceptance: the teammate-timed three-minute run and a real recorded fallback remain open, so J09
+stays partial. Evidence: `evidence/J09.md`.
