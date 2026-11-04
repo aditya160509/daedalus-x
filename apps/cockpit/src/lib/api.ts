@@ -178,6 +178,26 @@ const CfdRunSummary = z.object({
 });
 type CfdRunSummary = z.infer<typeof CfdRunSummary>;
 export const listCfdRuns = () => request("/v1/cfd/runs", z.array(CfdRunSummary));
+const CfdWake = z.object({
+  stations: z.array(
+    z.object({
+      x_over_L: z.number(),
+      drag_n: z.number(),
+      max_velocity_deficit: z.number(),
+      wake_area_cm2: z.number(),
+      valid_fraction: z.number(),
+    }),
+  ),
+  loss_map: z.object({
+    x_over_L: z.number(),
+    y_mm: z.array(z.number()),
+    z_mm: z.array(z.number()),
+    cpt_loss: z.array(z.array(z.number().nullable())),
+  }),
+  provenance: z.literal("simulated"),
+});
+export const getCfdWake = (id: string) =>
+  request(`/v1/cfd/runs/${encodeURIComponent(id)}/wake.json`, CfdWake);
 
 const RENDER_VIEWS = ["iso", "side", "top", "front"] as const;
 export type RenderView = (typeof RENDER_VIEWS)[number];

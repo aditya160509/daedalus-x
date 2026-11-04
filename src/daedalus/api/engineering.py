@@ -245,6 +245,22 @@ def run_drag_buildup(run_id: str) -> FileResponse:
     return FileResponse(path, media_type="application/json")
 
 
+@router.get("/cfd/runs/{run_id}/wake.json")
+def run_wake(run_id: str) -> FileResponse:
+    """Momentum-deficit drag and total-pressure loss behind the car (cross-check of forces)."""
+    from daedalus.viz.wake import export_wake
+
+    run = _safe_dir("runs", run_id)
+    try:
+        with _FIELD_EXPORT_LOCK:
+            path = export_wake(run)
+    except FileNotFoundError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except (ValueError, KeyError, TypeError) as exc:
+        raise HTTPException(422, str(exc)) from exc
+    return FileResponse(path, media_type="application/json")
+
+
 @router.get("/cfd/runs/{run_id}/vtk/velocity.json")
 def run_velocity_meta(run_id: str) -> FileResponse:
     """Grid metadata for the GPU particle advection texture."""

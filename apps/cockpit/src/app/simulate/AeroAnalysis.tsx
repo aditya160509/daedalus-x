@@ -1,7 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { PieChart, ScatterChart } from "echarts/charts";
+import { HeatmapChart, PieChart, ScatterChart } from "echarts/charts";
+import { MarkLineComponent, VisualMapComponent } from "echarts/components";
 import { Metric, Panel } from "@/components/ui/primitives";
 import {
   chartAxis,
@@ -10,9 +11,9 @@ import {
   echarts,
   useECharts,
 } from "@/components/charts/useECharts";
-import { type CfdRunDetail, listCfdRuns } from "@/lib/api";
+import { type CfdRunDetail, getCfdWake, listCfdRuns } from "@/lib/api";
 
-echarts.use([PieChart, ScatterChart]);
+echarts.use([PieChart, ScatterChart, HeatmapChart, VisualMapComponent, MarkLineComponent]);
 
 const RHO = 1.204;
 
@@ -264,6 +265,172 @@ function AreaTrade({ cd, area }: { cd: number; area: number }) {
   return <div ref={host} className="h-64 w-full" />;
 }
 
+/** Drag per part split into pressure and skin friction, biggest first, with share of total. */
+function DragByPart({
+  forces,
+}: {
+  forces: Record<string, { pressure_drag_x: number; viscous_drag_x: number }>;
+}) {
+  const rows = Object.entries(forces)
+    .map(([n, f]) => ({ n, p: f.pressure_drag_x, v: f.viscous_drag_x }))
+    .toSorted((a, b) => a.p + a.v - (b.p + b.v));
+  const total = rows.reduce((s, r) => s + r.p + r.v, 0) || 1;
+  const host = useECharts(() => {
+    const t = chartTheme();
+    const bar = (name: string, key: "p" | "v", color: string) => ({
+      name,
+      type: "bar",
+      stack: "d",
+      barWidth: 12,
+      itemStyle: { color },
+      data: rows.map((r) => r[key]),
+    });
+    return {
+      animation: false,
+      grid: { left: 96, right: 64, top: 28, bottom: 28 },
+      legend: {
+        top: 0,
+        right: 40,
+        itemWidth: 10,
+        itemHeight: 6,
+        textStyle: { color: t.text2, fontSize: 11 },
+      },
+      toolbox: { right: 8, feature: { saveAsImage: { type: "png", name: "drag-by-part" } } },
+      tooltip: {
+        ...chartTooltip(t),
+        trigger: "axis",
+        axisPointer: { type: "shadow" },
+        valueFormatter: (v: number) => `${v.toFixed(4)} N`,
+      },
+      xAxis: {
+        type: "value",
+        name: "N",
+        nameTextStyle: { color: t.muted, fontSize: 10 },
+        ...chartAxis(t),
+      },
+      yAxis: {
+        type: "category",
+        data: rows.map((r) => r.n),
+        ...chartAxis(t),
+        splitLine: { show: false },
+        axisLabel: { color: t.text2, fontSize: 11 },
+      },
+      series: [
+        bar("Pressure", "p", t.brand),
+        {
+          ...bar("Skin friction", "v", t.lineStrong),
+          label: {
+            show: true,
+            position: "right",
+            color: t.muted,
+            fontFamily: t.mono,
+            fontSize: 10,
+            formatter: (x: { dataIndex: number }) =>
+              `${(((rows[x.dataIndex].p + rows[x.dataIndex].v) / total) * 100).toFixed(0)}%`,
+          },
+        },
+      ],
+    };
+  }, [forces]);
+  return (
+    <div ref={host} style={{ height: Math.max(160, rows.length * 30 + 60) }} className="w-full" />
+  );
+}
+
+/** Momentum-deficit drag at three wake stations against the surface-force drag. */
+function WakeDrag({
+  stations,
+  surface,
+}: {
+  stations: { x_over_L: number; drag_n: number }[];
+  surface: number;
+}) {
+  const host = useECharts(() => {
+    const t = chartTheme();
+    return {
+      animation: false,
+      grid: { left: 52, right: 24, top: 16, bottom: 32 },
+      toolbox: { right: 8, feature: { saveAsImage: { type: "png", name: "wake-drag" } } },
+      tooltip: {
+        ...chartTooltip(t),
+        trigger: "axis",
+        valueFormatter: (v: number) => `${v.toFixed(4)} N`,
+      },
+      xAxis: { type: "category", data: stations.map((s) => `${s.x_over_L} L`), ...chartAxis(t) },
+      yAxis: {
+        type: "value",
+        name: "N",
+        min: 0,
+        nameTextStyle: { color: t.muted, fontSize: 10 },
+        ...chartAxis(t),
+      },
+      series: [
+        {
+          type: "bar",
+          barWidth: 18,
+          itemStyle: { color: t.brand, borderRadius: 2 },
+          data: stations.map((s) => s.drag_n),
+          markLine: {
+            symbol: "none",
+            silent: true,
+            lineStyle: { color: t.text2, type: "dashed" },
+            label: { color: t.muted, formatter: "surface forces" },
+            data: [{ yAxis: surface }],
+          },
+        },
+      ],
+    };
+  }, [stations, surface]);
+  return <div ref={host} className="h-56 w-full" />;
+}
+
+/** Total-pressure loss behind the car, looking upstream: where the drag is lost. */
+function WakeLossMap({ y, z, loss }: { y: number[]; z: number[]; loss: (number | null)[][] }) {
+  const host = useECharts(() => {
+    const t = chartTheme();
+    const data: [number, number, number][] = [];
+    loss.forEach((row, j) => row.forEach((v, i) => v != null && data.push([i, j, v])));
+    return {
+      animation: false,
+      grid: { left: 48, right: 72, top: 12, bottom: 36 },
+      toolbox: { right: 8, feature: { saveAsImage: { type: "png", name: "wake-loss" } } },
+      tooltip: {
+        ...chartTooltip(t),
+        formatter: (p: { value: [number, number, number] }) =>
+          `y ${y[p.value[0]].toFixed(0)} mm · z ${z[p.value[1]].toFixed(0)} mm<br/>Cp₀ loss ${p.value[2].toFixed(2)}`,
+      },
+      xAxis: {
+        type: "category",
+        data: y.map((v) => v.toFixed(0)),
+        name: "y mm",
+        nameLocation: "middle",
+        nameGap: 22,
+        ...chartAxis(t),
+        axisLabel: { interval: 7, color: t.muted, fontSize: 10 },
+      },
+      yAxis: {
+        type: "category",
+        data: z.map((v) => v.toFixed(0)),
+        name: "z mm",
+        ...chartAxis(t),
+        axisLabel: { interval: 5, color: t.muted, fontSize: 10 },
+      },
+      visualMap: {
+        min: 0,
+        max: 1,
+        calculable: true,
+        right: 0,
+        top: "middle",
+        itemHeight: 120,
+        textStyle: { color: t.muted, fontSize: 10 },
+        inRange: { color: ["#000000", "#1e3a8a", "#5b8cff", "#fbbf24", "#ef4444"] },
+      },
+      series: [{ type: "heatmap", data, progressive: 0 }],
+    };
+  }, [y, z, loss]);
+  return <div ref={host} className="h-72 w-full" />;
+}
+
 /** Every aerodynamic output for the selected run on one page. */
 export function AeroAnalysis({ run }: { run: CfdRunDetail }) {
   const r = run.result;
@@ -278,6 +445,14 @@ export function AeroAnalysis({ run }: { run: CfdRunDetail }) {
   const accepted = r?.acceptance === "accepted";
   const steps = (r?.steps ?? []).filter((s) => s.seconds > 0.5);
   const totalTime = steps.reduce((s, x) => s + x.seconds, 0);
+  const wake = useQuery({
+    queryKey: ["cfd-wake", run.run_id],
+    queryFn: () => getCfdWake(run.run_id),
+    enabled: run.state === "succeeded" || r?.cd != null,
+    staleTime: Infinity,
+    retry: false,
+  });
+  const wakeMid = wake.data?.stations[1];
 
   return (
     <div className="flex flex-col gap-4 overflow-y-auto p-4">
@@ -350,6 +525,52 @@ export function AeroAnalysis({ run }: { run: CfdRunDetail }) {
             Pressure drag comes from shape; skin friction from surface area and finish.
           </Caption>
         </Panel>
+        <Panel
+          title="Drag by part"
+          description="Pressure and skin-friction drag per part; % of total."
+        >
+          {groups.length ? (
+            <DragByPart forces={Object.fromEntries(groups)} />
+          ) : (
+            <p className="p-4 text-sm text-muted-foreground">No per-part forces in this run.</p>
+          )}
+          <Caption>
+            Fix the top bar first: a big blue share means shape, a big grey share means surface
+            area.
+          </Caption>
+        </Panel>
+        <Panel
+          title="Wake drag cross-check"
+          description="Momentum and pressure lost in the wake, at three distances behind the car."
+        >
+          {wake.data && drag != null ? (
+            <WakeDrag stations={wake.data.stations} surface={drag} />
+          ) : (
+            <p className="p-4 text-sm text-muted-foreground">
+              {wake.error ? wake.error.message : "Sampling the wake…"}
+            </p>
+          )}
+          <Caption>
+            {wakeMid && drag != null
+              ? `Wake recovers ${((wakeMid.drag_n / drag) * 100).toFixed(0)}% of surface drag at 0.5 L. Within ±15% means the forces are trustworthy.`
+              : "Independent check of the force integration."}
+          </Caption>
+        </Panel>
+        {wake.data && (
+          <Panel
+            title="Wake loss map"
+            description={`Total-pressure loss ${wake.data.loss_map.x_over_L} L behind the car, looking forward.`}
+          >
+            <WakeLossMap
+              y={wake.data.loss_map.y_mm}
+              z={wake.data.loss_map.z_mm}
+              loss={wake.data.loss_map.cpt_loss}
+            />
+            <Caption>
+              Bright cores are vortices and separated flow: each one is drag you can design out.
+            </Caption>
+          </Panel>
+        )}
         <Panel title="Forces by part" description="Drag and lift per part group (N).">
           {groups.length ? (
             <GroupForces forces={Object.fromEntries(groups)} />
