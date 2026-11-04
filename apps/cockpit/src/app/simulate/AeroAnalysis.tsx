@@ -228,6 +228,38 @@ function StepTimes({ steps }: { steps: { name: string; seconds: number }[] }) {
   );
 }
 
+/** Frontal area vs Cd trade: iso-drag curves through this run (same CdA = same drag). */
+function AreaTrade({ cd, area }: { cd: number; area: number }) {
+  const host = useECharts(() => {
+    const t = chartTheme();
+    const cda = cd * area;
+    const xs = Array.from({ length: 41 }, (_, i) => area * (0.7 + i * 0.015) * 1e4);
+    const iso = (k: number, name: string, color: string) => ({
+      name,
+      type: "line",
+      showSymbol: false,
+      lineStyle: { color, width: 1, type: k === 1 ? "solid" : "dashed" },
+      data: xs.map((x) => [x, (cda * k) / (x / 1e4)]),
+    });
+    return {
+      animation: false,
+      grid: { left: 48, right: 24, top: 30, bottom: 36 },
+      legend: { top: 0, right: 40, itemWidth: 12, itemHeight: 6, textStyle: { color: t.text2, fontSize: 11 } },
+      toolbox: { right: 8, feature: { saveAsImage: { type: "png", name: "area-trade" } } },
+      tooltip: { ...chartTooltip(t), trigger: "item" },
+      xAxis: { type: "value", name: "A cm²", min: "dataMin", nameTextStyle: { color: t.muted, fontSize: 10 }, ...chartAxis(t) },
+      yAxis: { type: "value", name: "Cd", scale: true, nameTextStyle: { color: t.muted, fontSize: 10 }, ...chartAxis(t) },
+      series: [
+        iso(0.9, "−10% drag", t.ok),
+        iso(1, "This run", t.text2),
+        iso(1.1, "+10% drag", t.risk),
+        { name: "Run", type: "scatter", symbolSize: 9, itemStyle: { color: t.brand }, data: [[area * 1e4, cd]] },
+      ],
+    };
+  }, [cd, area]);
+  return <div ref={host} className="h-64 w-full" />;
+}
+
 /** Every aerodynamic output for the selected run on one page. */
 export function AeroAnalysis({ run }: { run: CfdRunDetail }) {
   const r = run.result;
@@ -329,6 +361,12 @@ export function AeroAnalysis({ run }: { run: CfdRunDetail }) {
           <RunsCd current={run.run_id} />
           <Caption>Only accepted runs count as evidence.</Caption>
         </Panel>
+        {r?.cd != null && (
+          <Panel title="Area vs Cd trade" description="Points on one curve give the same drag.">
+            <AreaTrade cd={r.cd} area={A} />
+            <Caption>Shrink frontal area or Cd; moving below the solid line cuts drag.</Caption>
+          </Panel>
+        )}
         <Panel title="Compute time" description="Wall-clock time per pipeline step.">
           {steps.length ? (
             <StepTimes steps={steps} />
