@@ -4,7 +4,8 @@ import { GaugeChart, HeatmapChart, ScatterChart } from "echarts/charts";
 import { VisualMapComponent } from "echarts/components";
 import { useState } from "react";
 import { SegmentedControl } from "@/components/ui/primitives";
-import type { OracleState } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { getOraclePareto, type OracleState } from "@/lib/api";
 import {
   chartAxis,
   chartTheme,
@@ -126,3 +127,43 @@ export function AeroMap({ s }: { s: OracleState }) {
   );
 }
 
+
+/** pymoo NSGA-II front: predicted CdA against GP uncertainty; hover shows the design. */
+export function ParetoFront() {
+  const q = useQuery({ queryKey: ["oracle-pareto"], queryFn: getOraclePareto, staleTime: 60_000 });
+  const pts = q.data?.points ?? [];
+  const host = useECharts(() => {
+    const t = chartTheme();
+    return {
+      animation: false,
+      grid: { left: 64, right: 24, top: 16, bottom: 40 },
+      toolbox: { right: 8, feature: { saveAsImage: { type: "png", name: "pareto" } } },
+      tooltip: {
+        ...chartTooltip(t),
+        trigger: "item",
+        formatter: (p: { dataIndex: number }) => {
+          const d = pts[p.dataIndex];
+          return [
+            `CdA ${(d.cda_m2 * 1e4).toFixed(3)} cm² ± ${(d.cda_sd_m2 * 1e4).toFixed(3)}`,
+            ...Object.entries(d.params).map(([k, v]) => `${k}: ${v.toFixed(2)}`),
+          ].join("<br/>");
+        },
+      },
+      xAxis: { type: "value", name: "Predicted CdA (cm²)", nameLocation: "middle", nameGap: 26, scale: true, nameTextStyle: { color: t.muted, fontSize: 10 }, ...chartAxis(t) },
+      yAxis: { type: "value", name: "± 1σ (cm²)", scale: true, nameTextStyle: { color: t.muted, fontSize: 10 }, ...chartAxis(t) },
+      series: [
+        {
+          type: "line",
+          step: "end",
+          symbol: "circle",
+          symbolSize: 7,
+          lineStyle: { color: t.lineStrong, width: 1 },
+          itemStyle: { color: t.brand },
+          data: pts.map((d) => [d.cda_m2 * 1e4, d.cda_sd_m2 * 1e4]),
+        },
+      ],
+    };
+  }, [pts]);
+  if (q.error) return <p className="p-4 text-sm text-destructive">{q.error.message}</p>;
+  return <div ref={host} className="h-full min-h-80 w-full" />;
+}

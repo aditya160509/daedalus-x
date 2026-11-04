@@ -524,7 +524,6 @@ export function LegalPanel({
                   className="border-b border-border/50 last:border-0"
                   title={`${c.rule_id} (p. ${c.page})${c.note ? ` · ${c.note}` : ""}`}
                 >
-                  {" "}
                   <td className="py-1.5 pl-4">
                     <span
                       className={cn("mr-2 inline-block size-1.5 rounded-full", STATE[c.state].dot)}

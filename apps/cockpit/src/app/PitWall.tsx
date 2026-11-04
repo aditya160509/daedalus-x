@@ -6,7 +6,7 @@ import { SensitivityPanel } from "@/components/pitwall/SensitivityPanel";
 import { BuildNextControls } from "@/components/pitwall/BuildNextControls";
 import { TestPlannerPanel } from "@/components/pitwall/TestPlannerPanel";
 import { LegalPanel } from "@/components/pitwall/LegalPanel";
-import { AeroMap } from "@/components/pitwall/PitCharts";
+import { AeroMap, ParetoFront } from "@/components/pitwall/PitCharts";
 import { SealedReveal } from "@/components/pitwall/SealedReveal";
 import { HeroImage, useHeroRun } from "@/components/render/HeroRender";
 import { StatusBar, useTab, WorkspaceTabs } from "@/components/shell/WorkspaceTabs";
@@ -29,6 +29,7 @@ const OracleDiagnostics = lazy(() =>
 );
 const ORACLE_VIEWS = [
   { value: "map", label: "Response map" },
+  { value: "pareto", label: "Pareto front" },
   { value: "benchmark", label: "Benchmark" },
   { value: "validation", label: "Validation" },
 ] as const;
@@ -43,7 +44,7 @@ const TABS = [
 const prettify = (n: string) => n.replace(/_/g, " ");
 
 export function PitWall() {
-  const [oracleView, setOracleView] = useState<"map" | "benchmark" | "validation">("map");
+  const [oracleView, setOracleView] = useState<(typeof ORACLE_VIEWS)[number]["value"]>("map");
   const [tab, setTab] = useTab(TABS);
   const q = useQuery({ queryKey: ["oracle"], queryFn: getOracleState, staleTime: 60_000 });
   const heroRun = useHeroRun();
@@ -166,6 +167,16 @@ export function PitWall() {
                   bodyClassName="p-3"
                 >
                   {s ? <AeroMap s={s} /> : <Skeleton className="size-full" />}
+                </Panel>
+              )}
+              {oracleView === "pareto" && (
+                <Panel
+                  title="Drag vs confidence (NSGA-II, pymoo)"
+                  description="Each point is a feasible design no other design beats on both predicted CdA and its uncertainty."
+                  actions={<ProvenanceBadge value="predicted" />}
+                  bodyClassName="p-3"
+                >
+                  <ParetoFront />
                 </Panel>
               )}
               {oracleView === "benchmark" && (

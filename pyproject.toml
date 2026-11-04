@@ -21,6 +21,7 @@ dependencies = [
     "salib>=1.6.0",
     "optuna>=5.0.0",
     "cmaes>=0.13.1",
+    "pymoo>=0.6.2",
 ]
 
 [project.scripts]

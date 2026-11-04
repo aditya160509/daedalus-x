@@ -110,6 +110,26 @@ class ObservationIn(BaseModel):
     provenance: Provenance = Provenance.SIMULATED
 
 
+@router.get("/pareto")
+def pareto_front() -> dict[str, object]:
+    obs = oracle.Campaign(data_root()).load()
+    gp = oracle.GP(np.array([o.params for o in obs]), np.array([o.cda_m2 for o in obs]))
+    front = oracle.pareto(gp)
+    names = [v.name for v in oracle.VARIABLES]
+    return {
+        "objectives": ["cda_m2", "cda_sd_m2"],
+        "points": [
+            {
+                "params": dict(zip(names, oracle.to_physical(u).tolist(), strict=True)),
+                "cda_m2": float(m),
+                "cda_sd_m2": float(s),
+            }
+            for u, m, s in zip(front["unit"], front["cda_m2"], front["cda_sd_m2"], strict=True)
+        ],
+        "provenance": "predicted",
+    }
+
+
 @router.post("/observations")
 def add_observation(body: ObservationIn) -> dict[str, int]:
     obs = oracle.Campaign(data_root()).add(

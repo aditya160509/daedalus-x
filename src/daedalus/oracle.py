@@ -238,3 +238,33 @@ class Campaign:
                 if name is not None:
                     Path(name).unlink(missing_ok=True)
         return all_obs
+
+
+def pareto(gp: GP, pop: int = 60, gens: int = 40, seed: int = 0) -> dict[str, FloatArray]:
+    """NSGA-II (pymoo) front of predicted CdA versus its GP uncertainty over feasible designs.
+
+    Trades expected drag against confidence: the low-drag end is where to look next, the
+    low-uncertainty end is the safest build. Infeasible study-family points are penalised.
+    """
+    from pymoo.algorithms.moo.nsga2 import NSGA2
+    from pymoo.core.problem import Problem
+    from pymoo.optimize import minimize as moo_minimize
+
+    class _Trade(Problem):
+        def __init__(self) -> None:
+            super().__init__(n_var=DIM, n_obj=2, n_ieq_constr=1, xl=0.0, xu=1.0)
+
+        def _evaluate(
+            self, x: FloatArray, out: dict[str, object], *args: object, **kw: object
+        ) -> None:
+            mean, sd = gp.predict(x)
+            out["F"] = np.column_stack([mean, sd])
+            out["G"] = np.where(study_feasible(x), -1.0, 1.0)
+
+    res = moo_minimize(_Trade(), NSGA2(pop_size=pop), ("n_gen", gens), seed=seed, verbose=False)
+    order = np.argsort(res.F[:, 0])
+    return {
+        "unit": np.asarray(res.X)[order],
+        "cda_m2": res.F[order, 0],
+        "cda_sd_m2": res.F[order, 1],
+    }

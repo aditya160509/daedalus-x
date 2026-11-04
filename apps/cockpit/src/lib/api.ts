@@ -514,6 +514,15 @@ export const OracleState = z.object({
 });
 export type OracleState = z.infer<typeof OracleState>;
 export const getOracleState = () => request("/v1/oracle/state", OracleState);
+const OraclePareto = z.object({
+  objectives: z.array(z.string()),
+  points: z.array(
+    z.object({ params: z.record(z.string(), z.number()), cda_m2: z.number(), cda_sd_m2: z.number() }),
+  ),
+  provenance: z.literal("predicted"),
+});
+export type OraclePareto = z.infer<typeof OraclePareto>;
+export const getOraclePareto = () => request("/v1/oracle/pareto", OraclePareto);
 
 // Sealed predictions (T09)
 const Qty = z.object({ value: z.number(), unit: z.string() });
