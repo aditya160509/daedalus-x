@@ -31,3 +31,23 @@
     [], [], [],
   )).flatten(),
 )
+
+#let ident = d.at("identity", default: none)
+#if ident != none [
+  #let rb = ident.rulebook
+  #let geo = ident.geometry
+  #let code = ident.code
+  #v(6pt)
+  #text(8pt, weight: "bold")[Source identity]
+  #table(columns: (auto, 1fr), stroke: 0.4pt + luma(200), inset: 4pt,
+    [Rulebook YAML], [#rb.file · revision #rb.revision · SHA-256 #text(6.5pt)[#if rb.sha256 == none [unavailable] else [#rb.sha256]]],
+    [Geometry JSON], [#geo.file · SHA-256 #text(6.5pt)[#if geo.sha256 == none [unavailable] else [#geo.sha256]]],
+    [Code snapshot], [#code.label],
+    [Generated], [#d.generated],
+  )
+  #text(7pt, fill: gray)[
+    The YAML revision and hash identify the local rule source, not an official PDF.
+    #if ident.official_rule_pdf_archived [The official rule PDF is archived.] else [No official rule PDF is archived by this export.]
+  ]
+]
+

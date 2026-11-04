@@ -11,6 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from daedalus import forge, forge_probability, forge_sheet
 from daedalus.api.engineering import data_root
+from daedalus.source_identity import source_identity
 
 router = APIRouter(prefix="/v1/forge", tags=["forge"])
 RULEBOOK_DIR = Path(__file__).resolve().parents[3] / "rulebooks"
@@ -52,6 +53,14 @@ def checks(design: str, rulebook: str = DEFAULT_RULEBOOK) -> dict[str, object]:
     }
 
 
+def _identity(design_dir: Path, book: dict[str, object], rulebook_path: Path) -> dict[str, object]:
+    return source_identity(
+        rulebook_path=rulebook_path,
+        geometry_path=design_dir / "geometry.json",
+        rulebook_revision=str(book.get("revision", "")),
+    )
+
+
 @router.get("/sheet.pdf")
 def sheet(design: str = "orbit_baseline", rulebook: str = DEFAULT_RULEBOOK) -> Response:
     """Printable scrutineering sheet: every rule, its limits, the CAD result and blank boxes."""
@@ -59,11 +68,42 @@ def sheet(design: str = "orbit_baseline", rulebook: str = DEFAULT_RULEBOOK) -> R
     design_dir = _design_dir(design)
     book = forge.load_rulebook(path)
     results = forge.check_design(design_dir, path)
-    pdf = forge_sheet.compile_sheet(forge_sheet.sheet_data(book, results, design=design))
+    identity = _identity(design_dir, book, path)
+    data = forge_sheet.sheet_data(
+        book,
+        results,
+        design=design,
+        generated=str(identity["generated"]),
+        identity=identity,
+    )
+    pdf = forge_sheet.compile_sheet(data)
     return Response(
         content=pdf,
         media_type="application/pdf",
         headers={"Content-Disposition": 'inline; filename="daedalus-x-scrutineering-sheet.pdf"'},
+    )
+
+
+@router.get("/summary.pdf")
+def summary(design: str = "orbit_baseline", rulebook: str = DEFAULT_RULEBOOK) -> Response:
+    """Compact one-page FORGE overview linked beside the full scrutineering sheet."""
+    path = _rulebook_path(rulebook)
+    design_dir = _design_dir(design)
+    book = forge.load_rulebook(path)
+    results = forge.check_design(design_dir, path)
+    identity = _identity(design_dir, book, path)
+    data = forge_sheet.summary_data(
+        book,
+        results,
+        design=design,
+        generated=str(identity["generated"]),
+        identity=identity,
+    )
+    pdf = forge_sheet.compile_summary(data)
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": 'inline; filename="daedalus-x-forge-summary.pdf"'},
     )
 
 

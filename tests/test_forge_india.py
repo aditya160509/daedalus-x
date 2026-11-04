@@ -263,6 +263,27 @@ def test_sheet_rejects_mismatched_checks() -> None:
         forge_sheet.sheet_data(book, checks[:-1], design="x")
 
 
+def test_summary_counts_match_checks_and_compile() -> None:
+    book = forge.load_rulebook(BOOK_PATH)
+    checks = forge.run_checks(book, car(front_gap=38.4))
+    data = forge_sheet.summary_data(
+        book, checks, design="synthetic", generated="2026-11-04 00:00 UTC", max_findings=2
+    )
+    counts = data["counts"]
+    assert isinstance(counts, dict)
+    assert counts["total"] == len(checks)
+    assert counts["fail"] + counts["risk"] + counts["manual"] + counts["cad_pass"] == len(checks)
+    findings = data["findings"]
+    assert isinstance(findings, list)
+    assert len(findings) == 2
+    assert all(item["state"] in {"FAIL (CAD)", "AT RISK"} for item in findings)
+    assert data["omitted_findings"] == counts["fail"] + counts["risk"] - 2
+    assert data["manual_review"] == counts["manual"]
+    pdf = forge_sheet.compile_summary(data)
+    assert pdf.startswith(b"%PDF")
+    assert len(pdf) > 4_000
+
+
 def test_frontier_ranks_the_tightest_rule_first() -> None:
     checks = forge.run_checks(forge.load_rulebook(BOOK_PATH), car(front_gap=38.4))
     rows = forge.frontier(checks)

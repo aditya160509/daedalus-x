@@ -7,7 +7,6 @@ import json
 import math
 import shutil
 import tempfile
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal
 
@@ -18,6 +17,7 @@ from fastapi.responses import Response
 from daedalus.api import engineering as eng_api
 from daedalus.api import forge as forge_api
 from daedalus.api import oracle as oracle_api
+from daedalus.source_identity import source_identity
 
 router = APIRouter(prefix="/v1/report", tags=["report"])
 TEMPLATE = Path(__file__).resolve().parents[1] / "report" / "report.typ"
@@ -66,10 +66,18 @@ def _hero(run: Path | None) -> Path | None:
 
 @router.get("/pdf")
 def report_pdf(design: str = "orbit_baseline") -> Response:
-    data: dict[str, object] = {"oracle": oracle_api.state(), "forge": forge_api.checks(design)}
+    forge_data = forge_api.checks(design)
+    data: dict[str, object] = {"oracle": oracle_api.state(), "forge": forge_data}
     body = json.dumps(data, sort_keys=True, default=str)
     data["hash"] = "sha256:" + hashlib.sha256(body.encode()).hexdigest()[:12]
-    data["generated"] = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
+    rulebook_path = forge_api.RULEBOOKS[forge_api.DEFAULT_RULEBOOK]
+    identity = source_identity(
+        rulebook_path=rulebook_path,
+        geometry_path=eng_api.data_root() / "designs" / design / "geometry.json",
+        rulebook_revision=str(forge_data.get("revision", "")),
+    )
+    data["identity"] = identity
+    data["generated"] = identity["generated"]
     run = _best_run(design)
     hero = _hero(run)
     data["hero_run"] = run.name if hero and run else None
