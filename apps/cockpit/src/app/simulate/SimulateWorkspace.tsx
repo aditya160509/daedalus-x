@@ -15,6 +15,7 @@ import { defaultRunId } from "@/lib/cfdRuns";
 import { SERIES, SERIES_CYCLE } from "@/lib/colormap";
 import { useSelectedRun } from "@/lib/runSelection";
 import { cn } from "@/lib/utils";
+import { AeroAnalysis } from "./AeroAnalysis";
 import { GridStudyPanel } from "./GridStudyPanel";
 import { StatusBar, useTab, WorkspaceTabs } from "@/components/shell/WorkspaceTabs";
 
@@ -23,6 +24,7 @@ const ignoreMarker = () => undefined;
 
 const TUNNEL_TABS = [
   { id: "flow", label: "Flow" },
+  { id: "analysis", label: "Analysis" },
   { id: "forces", label: "Forces" },
   { id: "convergence", label: "Convergence" },
   { id: "mesh", label: "Mesh" },
@@ -270,6 +272,7 @@ function RunView({
               Pick a solved run with flow data.
             </EmptyState>
           ))}
+        {tab === "analysis" && <AeroAnalysis run={run} />}
         {tab === "forces" && (
           <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-0 xl:flex-row xl:overflow-hidden">
             <div className="flex min-h-[520px] min-w-0 flex-1 flex-col gap-3 xl:min-h-0">
