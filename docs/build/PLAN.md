@@ -71,7 +71,7 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [x] ✅ CAD rule overlay colours matched parts by pass, at-risk and fail.
 - [x] ✅ Two-design comparison shows a signed CAD deviation in mm.
 - [x] ✅ Inspect and editor controls consolidated into one side panel.
-- [x] ✅ Outputs tab: six KPI tiles, rules-to-fix table, volume by part (`aac3493`, another contributor).
+- [x] ✅ Outputs tab: six KPI tiles, rules-to-fix table, volume by part (`b261ced`, another contributor).
 - [ ] ⬜ Live parametric controls with validated regeneration.
 - [ ] ⬜ Material-aware mass and centre-of-gravity estimate from geometry.
 - [ ] ⬜ Minimum wall thickness, CNC reach and measured-versus-CAD checks.
@@ -252,7 +252,7 @@ Each chart needs: shared theme, units on axes, a source tag, hairline grid, dash
 
 - [ ] ⬜ 0. Fix the Next.js "1 Issue" runtime error. Not checked since the last screenshot.
 - [ ] 🟨 1. Moving air. The preview fallback is built. The particle view is still an uncommitted draft.
-- [ ] 🟨 2. Outputs tab. Built (`aac3493`). Needs the Wind Tunnel and Strength cards.
+- [ ] 🟨 2. Outputs tab. Built (`b261ced`). Needs the Wind Tunnel and Strength cards.
 - [ ] ⬜ 3. Inspect redo: smooth shading, rule colours on parts, dimension lines, View, Measure, Section, Compare tabs, model table with units.
 - [ ] ⬜ 4. Strength redo: part sketch with the load arrow, one compact input row, one deflection chart and one stress chart with the limit band, one summary row, all-part table.
 - [ ] 🟨 5. Visual system. Tokens exist. Chart theme exists. Port t3code primitives to `components/ui` and align buttons and cards.
