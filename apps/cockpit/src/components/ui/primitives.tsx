@@ -96,7 +96,7 @@ export function Metric({
   value: string;
   unit?: string;
   provenance?: Provenance;
-  tone?: "default" | "risk" | "danger";
+  tone?: "default" | "ok" | "risk" | "danger";
   hint?: string;
   icon?: React.ReactNode;
 }) {
@@ -113,15 +113,16 @@ export function Metric({
         <span
           className={cn(
             "tabular font-mono text-2xl leading-none font-medium tracking-[-0.03em] @max-[230px]:text-xl",
+            tone === "ok" && "text-ok",
             tone === "risk" && "text-risk",
             tone === "danger" && "text-destructive",
           )}
         >
           {value}
         </span>
-        {unit && <span className="text-sm text-muted-foreground">{unit}</span>}
+        {unit && <span className="font-mono text-xs text-muted-foreground">{unit}</span>}
       </div>
-      {hint && <span className="truncate text-[11px] text-muted-foreground">{hint}</span>}
+      <span className="truncate font-mono text-[11px] text-text-3">{hint ?? "\u00a0"}</span>
     </div>
   );
 }

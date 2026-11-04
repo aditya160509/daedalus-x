@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { PieChart, ScatterChart } from "echarts/charts";
-import { Panel } from "@/components/ui/primitives";
+import { Metric, Panel } from "@/components/ui/primitives";
 import {
   chartAxis,
   chartTheme,
@@ -11,7 +11,6 @@ import {
   useECharts,
 } from "@/components/charts/useECharts";
 import { type CfdRunDetail, listCfdRuns } from "@/lib/api";
-import { cn } from "@/lib/utils";
 
 echarts.use([PieChart, ScatterChart]);
 
@@ -19,39 +18,6 @@ const RHO = 1.204;
 
 function fmt(v: number | null | undefined, d = 3) {
   return v == null || !Number.isFinite(v) ? "—" : v.toFixed(d);
-}
-
-function Kpi({
-  label,
-  value,
-  unit,
-  sub,
-  tone,
-}: {
-  label: string;
-  value: string;
-  unit?: string;
-  sub?: string;
-  tone?: "ok" | "risk";
-}) {
-  return (
-    <div className="flex min-w-0 flex-col gap-2 rounded-lg border border-border bg-card px-4 py-3">
-      <span className="truncate text-[11px] text-muted-foreground">{label}</span>
-      <div className="flex items-baseline gap-1.5">
-        <span
-          className={cn(
-            "tabular font-mono text-2xl leading-none font-medium tracking-[-0.03em]",
-            tone === "ok" && "text-ok",
-            tone === "risk" && "text-risk",
-          )}
-        >
-          {value}
-        </span>
-        {unit && <span className="font-mono text-xs text-muted-foreground">{unit}</span>}
-      </div>
-      <span className="truncate font-mono text-[11px] text-text-3">{sub ?? " "}</span>
-    </div>
-  );
 }
 
 function Caption({ children }: { children: React.ReactNode }) {
@@ -316,10 +282,10 @@ export function AeroAnalysis({ run }: { run: CfdRunDetail }) {
   return (
     <div className="flex flex-col gap-4 overflow-y-auto p-4">
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
-        <Kpi
+        <Metric
           label="Cd"
           value={fmt(r?.cd)}
-          sub={
+          hint={
             r?.cd_ci95
               ? `95% ${fmt(r.cd_ci95[0])}–${fmt(r.cd_ci95[1])}`
               : r?.cd_window_spread != null
@@ -327,42 +293,42 @@ export function AeroAnalysis({ run }: { run: CfdRunDetail }) {
                 : undefined
           }
         />
-        <Kpi
+        <Metric
           label="CdA"
           value={r?.cd != null ? fmt(r.cd * A * 1e4, 2) : "—"}
           unit="cm²"
-          sub={`A ${fmt(A * 1e4, 1)} cm²`}
+          hint={`A ${fmt(A * 1e4, 1)} cm²`}
         />
-        <Kpi
+        <Metric
           label="Drag"
           value={drag != null ? fmt(drag, 4) : "—"}
           unit="N"
-          sub={`at ${fmt(U, 1)} m/s`}
+          hint={`at ${fmt(U, 1)} m/s`}
         />
-        <Kpi label="Cl" value={fmt(r?.cl)} sub="+ = lift" />
-        <Kpi
+        <Metric label="Cl" value={fmt(r?.cl)} hint="+ = lift" />
+        <Metric
           label="Pressure share"
           value={pressure + viscous > 0 ? fmt((pressure / (pressure + viscous)) * 100, 0) : "—"}
           unit="%"
-          sub="of total drag"
+          hint="of total drag"
         />
-        <Kpi
+        <Metric
           label="Cells"
           value={r?.cells != null ? (r.cells / 1e3).toFixed(0) : "—"}
           unit="k"
-          sub={r?.mesh_ok === false ? "mesh check failed" : "mesh ok"}
+          hint={r?.mesh_ok === false ? "mesh check failed" : "mesh ok"}
           tone={r?.mesh_ok === false ? "risk" : undefined}
         />
-        <Kpi
+        <Metric
           label="Iterations"
           value={r?.iterations != null ? String(r.iterations) : "—"}
-          sub={r?.converged_by_residuals ? "residuals converged" : "not converged"}
+          hint={r?.converged_by_residuals ? "residuals converged" : "not converged"}
         />
-        <Kpi
+        <Metric
           label="Status"
           value={accepted ? "Accepted" : (r?.acceptance ?? run.state)}
           tone={accepted ? "ok" : "risk"}
-          sub={`${(totalTime / 60).toFixed(1)} min total`}
+          hint={`${(totalTime / 60).toFixed(1)} min total`}
         />
       </div>
 

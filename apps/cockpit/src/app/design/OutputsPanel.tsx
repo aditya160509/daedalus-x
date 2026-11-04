@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight } from "lucide-react";
-import { Panel, ProvenanceBadge, Skeleton } from "@/components/ui/primitives";
+import { Metric, Panel, Skeleton } from "@/components/ui/primitives";
 import {
   getDesignGeometry,
   getForgeChecks,
@@ -23,30 +23,6 @@ type Tile = {
   tone?: "risk" | "danger";
   source?: Provenance;
 };
-
-function KpiTile({ t }: { t: Tile }) {
-  return (
-    <div className="@container flex min-w-0 flex-col gap-2 rounded-lg border border-border bg-card px-4 py-3">
-      <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
-        <span className="truncate">{t.label}</span>
-        {t.source && <ProvenanceBadge value={t.source} />}
-      </div>
-      <div className="flex items-baseline gap-1.5">
-        <span
-          className={cn(
-            "tabular font-mono text-2xl leading-none font-medium tracking-[-0.03em]",
-            t.tone === "risk" && "text-risk",
-            t.tone === "danger" && "text-destructive",
-          )}
-        >
-          {t.value}
-        </span>
-        {t.unit && <span className="font-mono text-xs text-muted-foreground">{t.unit}</span>}
-      </div>
-      <span className="truncate font-mono text-[11px] text-text-3">{t.sub ?? " "}</span>
-    </div>
-  );
-}
 
 const STATE_ORDER: Record<RuleCheck["state"], number> = {
   fail_cad: 0,
@@ -184,7 +160,17 @@ export function OutputsPanel({
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         {loading
           ? tiles.map((t) => <Skeleton key={t.label} className="h-[92px] rounded-lg" />)
-          : tiles.map((t) => <KpiTile key={t.label} t={t} />)}
+          : tiles.map((t) => (
+              <Metric
+                key={t.label}
+                label={t.label}
+                value={t.value}
+                unit={t.unit}
+                hint={t.sub}
+                tone={t.tone}
+                provenance={t.source}
+              />
+            ))}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">

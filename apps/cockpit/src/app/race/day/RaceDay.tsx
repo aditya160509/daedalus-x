@@ -3,6 +3,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { Download, Maximize2, Minimize2, Plus, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { BarChart } from "echarts/charts";
+import { MarkAreaComponent, MarkLineComponent } from "echarts/components";
+import {
+  chartAxis,
+  chartTheme,
+  chartTooltip,
+  echarts,
+  useECharts,
+} from "@/components/charts/useECharts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { listPredictions, simulateRace } from "@/lib/api";
@@ -20,6 +29,71 @@ function load(): Run[] {
   } catch {
     return [];
   }
+}
+
+echarts.use([BarChart, MarkLineComponent, MarkAreaComponent]);
+
+/** Every run as a bar against the prediction band: the stadium history strip. */
+function HistoryStrip({
+  runs,
+  predicted,
+  low,
+  high,
+}: {
+  runs: Run[];
+  predicted: number | null;
+  low: number | null;
+  high: number | null;
+}) {
+  const host = useECharts(() => {
+    const t = chartTheme();
+    const best = Math.min(...runs.map((r) => r.car_s));
+    return {
+      animation: false,
+      grid: { left: 44, right: 16, top: 12, bottom: 24 },
+      tooltip: {
+        ...chartTooltip(t),
+        trigger: "axis",
+        valueFormatter: (v: number) => `${v.toFixed(3)} s`,
+      },
+      xAxis: { type: "category", data: runs.map((r, i) => `${i + 1}${r.lane}`), ...chartAxis(t) },
+      yAxis: {
+        type: "value",
+        min: (v: { min: number }) => Math.floor((v.min - 0.05) * 20) / 20,
+        ...chartAxis(t),
+        axisLabel: { color: t.muted, fontSize: 10, formatter: (v: number) => v.toFixed(2) },
+      },
+      series: [
+        {
+          type: "bar",
+          barMaxWidth: 18,
+          data: runs.map((r) => ({
+            value: r.car_s,
+            itemStyle: { borderRadius: 2, color: r.car_s === best ? "#b18cff" : t.lineStrong },
+          })),
+          markLine:
+            predicted != null
+              ? {
+                  symbol: "none",
+                  silent: true,
+                  lineStyle: { color: t.brand, type: "dashed" },
+                  label: { color: t.muted, formatter: "pred" },
+                  data: [{ yAxis: predicted }],
+                }
+              : undefined,
+          markArea:
+            low != null && high != null
+              ? {
+                  silent: true,
+                  itemStyle: { color: t.brand, opacity: 0.08 },
+                  data: [[{ yAxis: low }, { yAxis: high }]],
+                }
+              : undefined,
+        },
+      ],
+    };
+  }, [runs, predicted, low, high]);
+  return <div ref={host} className="h-40 w-full" />;
 }
 
 function fmt(v: number | null | undefined, d = 3) {
@@ -238,6 +312,12 @@ export function RaceDay() {
           }
         />
       </div>
+
+      {runs.length > 0 && (
+        <section className="rounded-lg border border-border bg-card px-2 pt-2">
+          <HistoryStrip runs={runs} predicted={predicted} low={low} high={high} />
+        </section>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
         <section className="overflow-hidden rounded-lg border border-border bg-card">
