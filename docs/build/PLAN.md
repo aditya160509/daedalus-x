@@ -268,6 +268,25 @@ Each chart needs: shared theme, units on axes, a source tag, hairline grid, dash
 - [ ] ⬜ Live wind tunnel: GPU lattice-Boltzmann preview while editing. FluidX3D (non-commercial licence: run as a separate optional program, never vendored) or MarcosAsh/Lattice_Fluid_Dynamics (MIT).
 - [ ] ⬜ Neural field surrogate: fine-tune NVIDIA Transolver (DrivAerML, PhysicsNeMo, Apache-2.0) on our runs for instant pressure/wake fields; label "predicted".
 
+Taken from the TODO.md review (2026-11-04). Headline claim: "we optimise expected competition points under rule and manufacturing uncertainty, not lap time."
+- [ ] ⬜ **Points-aware ORACLE (headline).** Objective = E[racing points] − E[spec penalty], gated by P(legal under manufacturing spread) ≥ 1 − α. Show three picks: fastest, most reliable, recommended. Builds on the P90 robust pick, FORGE pass probability and the race Monte Carlo.
+- [ ] ⬜ **Counterfactual decision record.** Save one comparison of what lowest-Cd would choose against what the points-aware engine chooses, with signed deltas (CdA, mass, margins, time, points) and the reason. This is the smallest useful decision log.
+- [ ] ⬜ **A/B design comparison** under identical assumptions: geometry, rule margins, CFD acceptance, race time ± uncertainty, plus a "why A wins" line.
+- [ ] ⬜ **Why this recommendation.** ORACLE shows its reasons in one line: length-scale importance, EI, uncertainty and nearest rule risk.
+- [ ] ⬜ **One status badge everywhere:** legal + accepted CFD + calibrated race model, as a filter across Design, ORACLE, Race and FORGE.
+- [ ] ⬜ **Rule-versioned points engine.** Race-mode switch (automatic vs manual reaction). Every scoring rule stored as data with its clause number, with the C9.1/C9.4 and C9.6/C9.7.2 contradictions flagged. Property-test ties and the 3rd/4th-place cliff. Show the ms→points exchange rate next to ms/g.
+- [ ] ⬜ **Class-aware FORGE:** General / Safety / Performance class, rectifiable-at-half-penalty flag, per-car or per-wheel multiplicity, gauge guard band so margin means margin after tool error. Performance failure = ineligible for Fastest Car and Best Engineered Car.
+- [ ] ⬜ **Regulation proof-load presets in Strength:** 100 g wheel, 1 kg halo, 200 g tether guide; plus launch and stopping dynamic loads.
+- [ ] ⬜ **Design-for-manufacture panel:** draft and undercut detection, minimum internal radius vs cutter, 3-axis reach, minimum feature size, model-block containment (trimesh / manifold3d). Extends the open wall-thickness and CNC-reach items.
+- [ ] ⬜ **Turbulence model-form uncertainty:** SST vs transition (kOmegaSSTLM) vs laminar spread as a Cd error bar (wings at Re 3e4–1e5). Needs runs.
+- [ ] ⬜ **Real-objective optimiser benchmark** on the race model or a small CFD sweep, reported as regret; the synthetic study stays as method validation.
+- [ ] ⬜ **Value-of-information test planner:** recommend the measurement that most reduces points uncertainty.
+- [ ] ⬜ **Race physics terms:** tether friction with a prior, cartridge mass spread (±0.5 g) in the Monte Carlo, check that gas mass loss is modelled.
+- [ ] ⬜ **Car A/B nomination and reaction advisor:** paired-timing posterior, ex-Gaussian reaction fit (scipy `exponnorm`), earlier reaction vs false-start (−2.5 pts) trade-off.
+- [ ] ⬜ **Frozen demo mode** for judges: cached results, no solver calls, low GPU load.
+
+Not taken from TODO.md: PDF/submission validator, CadQuery, DAFoam, SU2, preCICE, SMT. Also not taken: MAPIE and PyMC/NumPyro until real held-out data exists, sustainability accounting, and portfolio/talk writing.
+
 ## 6. Open-source map
 
 Verify a licence before copying code. Keep the notice. No licence means no copying.
