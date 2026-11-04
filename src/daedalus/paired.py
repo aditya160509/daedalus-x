@@ -28,6 +28,8 @@ class PairedRequest(BaseModel):
     alpha: float = Field(default=0.05, ge=0.001, le=0.1)
     target_power: float = Field(default=0.8, ge=0.5, le=0.99)
     planned_pairs: int = Field(default=20, ge=3, le=1000)
+    # The smallest candidate-baseline difference that would matter in practice, in milliseconds.
+    meaningful_effect_ms: float | None = Field(default=None, gt=0, le=10_000)
 
 
 def power(effect_sd: float, pairs: int, alpha: float) -> float:
@@ -97,6 +99,19 @@ def analyze(request: PairedRequest) -> dict[str, object]:
         return power(effect, request.planned_pairs, request.alpha) - request.target_power
 
     standardized_mde = brentq(target_gap, 0.0, 100.0)
+    required_pairs = None
+    required_status = "not_requested"
+    power_at_required = None
+    power_below_required = None
+    if request.meaningful_effect_ms is not None:
+        effect_sd = (request.meaningful_effect_ms / 1000) / sd
+        required_pairs, required_status = _required_pairs(
+            effect_sd, request.alpha, request.target_power
+        )
+        if required_pairs is not None:
+            power_at_required = power(effect_sd, required_pairs, request.alpha)
+            if required_pairs > 3:
+                power_below_required = power(effect_sd, required_pairs - 1, request.alpha)
     return {
         "provenance": "user_entered",
         "source_label": request.source_label,
@@ -110,6 +125,11 @@ def analyze(request: PairedRequest) -> dict[str, object]:
         "planned_pairs": request.planned_pairs,
         "target_power": request.target_power,
         "minimum_detectable_ms": float(standardized_mde * sd * 1000),
+        "meaningful_effect_ms": request.meaningful_effect_ms,
+        "required_pairs": required_pairs,
+        "required_pairs_status": required_status,
+        "power_at_required": power_at_required,
+        "power_below_required": power_below_required,
         "rows": [
             {**row, "difference_ms": float(delta * 1000)}
             for row, delta in zip(rows, differences, strict=True)
@@ -123,3 +143,19 @@ def analyze(request: PairedRequest) -> dict[str, object]:
             "Randomise/counterbalance run order and control lane, batch and environmental effects.",
         ],
     }
+
+
+def _required_pairs(effect_sd: float, alpha: float, target_power: float) -> tuple[int | None, str]:
+    """Smallest N in [3, 1000] meeting target power; explicit when the goal is out of bounds."""
+    if effect_sd <= 0:
+        return None, "effect must be positive"
+    if power(effect_sd, 1000, alpha) < target_power:
+        return None, "target power is not reached within 1000 pairs"
+    low, high = 3, 1000
+    while low < high:
+        mid = (low + high) // 2
+        if power(effect_sd, mid, alpha) >= target_power:
+            high = mid
+        else:
+            low = mid + 1
+    return low, "ok"

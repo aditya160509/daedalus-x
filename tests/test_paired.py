@@ -85,3 +85,23 @@ def test_planning_boundary_settings_remain_finite(pairs, alpha, target):
     assert result["minimum_detectable_ms"] > 0
     effect = result["minimum_detectable_ms"] / result["sd_difference_ms"]
     assert power(effect, pairs, alpha) == pytest.approx(target, abs=1e-8)
+
+
+def test_required_pairs_is_minimal_and_n_minus_one_fails():
+    result = analyze(request(meaningful_effect_ms=20.0))
+    assert result["required_pairs_status"] == "ok"
+    required = result["required_pairs"]
+    assert isinstance(required, int) and required >= 3
+    assert result["power_at_required"] >= 0.8
+    assert result["power_below_required"] < 0.8
+    effect_sd = (20.0 / 1000) / (result["sd_difference_ms"] / 1000)
+    assert power(effect_sd, required, 0.05) == pytest.approx(result["power_at_required"])
+    assert power(effect_sd, required - 1, 0.05) == pytest.approx(result["power_below_required"])
+
+
+def test_required_pairs_reports_out_of_bounds_and_absent_effect():
+    assert analyze(request())["required_pairs"] is None
+    assert analyze(request())["required_pairs_status"] == "not_requested"
+    impossible = analyze(request(meaningful_effect_ms=0.001))
+    assert impossible["required_pairs"] is None
+    assert impossible["required_pairs_status"] == "target power is not reached within 1000 pairs"

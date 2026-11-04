@@ -733,7 +733,7 @@ This is the current checkbox ledger requested by the owner. `TODO.md` supplies t
 - [x] ✅ F05 — Single-fit concurrency gate and disabled input editing while fitting/planning.
 - [x] ✅ F06 — Lab-day/Track-day/Custom protocols and Base UI Advanced sections connected; Calibration has six main inputs and Planner four. Hidden invalid settings reveal themselves; priors/uploads are preserved. Brief in-app 1440/375 px, overflow and planner API checks passed (see `evidence/F06-protocol-forms.md`).
 - [ ] ⬜ F07 — Prior-vs-posterior plots, across-run error scoreboard and posterior predictive-check plot.
-- [ ] 🟨 F08 — Paired CSV, mean CI, prospective power/MDE, declared pairing basis and evidence connected; formal preregistration, required-sample-size solver and field validation remain.
+- [ ] 🟨 F08 — Paired CSV, mean CI, prospective power/MDE, declared pairing basis, evidence and a minimum-N solver are connected (`paired.py`, `PairedTimingPanel.tsx`); required N reports N/N−1 power and explicit out-of-bounds states. Formal preregistration is out of scope; actual paired field validation remains.
 - [ ] ⬜ F09 — Repeat-run control chart and gauge R&R workflow.
 - [ ] ⬜ F10 — Explicit application of a saved posterior to Race with a linked model/source record.
 - [ ] ⏳ F11 — Team measurements: part masses, dimensions, coast-down, thrust, tether/launch repeatability and independent held-out runs. ArviZ R-hat must remain unavailable for the current importance sampler; do not invent multiple chains.

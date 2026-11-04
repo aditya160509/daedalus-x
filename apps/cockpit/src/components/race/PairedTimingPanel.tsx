@@ -107,19 +107,22 @@ export function PairedTimingPanel() {
   const [pairs, setPairs] = useState(20);
   const [alpha, setAlpha] = useState(0.05);
   const [power, setPower] = useState(0.8);
+  const [effect, setEffect] = useState(0);
   const comparison = useMutation({ mutationFn: analyzePairedTimings });
   const invalid =
     !csv.trim() ||
     !source.trim() ||
     basis.trim().length < 5 ||
-    ![pairs, alpha, power].every(Number.isFinite) ||
+    ![pairs, alpha, power, effect].every(Number.isFinite) ||
     !Number.isInteger(pairs) ||
     pairs < 3 ||
     pairs > 1000 ||
     alpha < 0.001 ||
     alpha > 0.1 ||
     power < 0.5 ||
-    power > 0.99;
+    power > 0.99 ||
+    effect < 0 ||
+    effect > 10_000;
   return (
     <Panel
       title="Paired timing comparison"
@@ -141,6 +144,7 @@ export function PairedTimingPanel() {
               planned_pairs: pairs,
               alpha,
               target_power: power,
+              meaningful_effect_ms: effect > 0 ? effect : null,
             });
         }}
       >
@@ -191,19 +195,34 @@ export function PairedTimingPanel() {
             Exact header: <code>pair_id,baseline_s,candidate_s</code>. One unique pair per row,
             3–500 complete pairs; no automatic exclusions.
           </p>
-          <NumberField
-            id="paired-planned"
-            label="Planned future pairs"
-            unit="pairs"
-            value={pairs}
-            min={3}
-            max={1000}
-            step={1}
-            onChange={(v) => {
-              setPairs(v);
-              comparison.reset();
-            }}
-          />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <NumberField
+              id="paired-planned"
+              label="Planned future pairs"
+              unit="pairs"
+              value={pairs}
+              min={3}
+              max={1000}
+              step={1}
+              onChange={(v) => {
+                setPairs(v);
+                comparison.reset();
+              }}
+            />
+            <NumberField
+              id="paired-effect"
+              label="Meaningful difference (0 = skip)"
+              unit="ms"
+              value={effect}
+              min={0}
+              max={10_000}
+              step={1}
+              onChange={(v) => {
+                setEffect(v);
+                comparison.reset();
+              }}
+            />
+          </div>
           <AdvancedFields
             description="Prospective two-sided power uses the pilot difference spread as an assumption."
             invalidCount={
@@ -274,7 +293,29 @@ function PairedResult({ data }: { data: PairedTimingResult }) {
           unit="ms"
           hint={`${data.planned_pairs} future pairs, ${(data.target_power * 100).toFixed(0)}% power; pilot SD assumed`}
         />
+        <Metric
+          label="Required pairs"
+          value={data.required_pairs == null ? "—" : String(data.required_pairs)}
+          unit={data.required_pairs == null ? "" : "pairs"}
+          hint={
+            data.required_pairs == null
+              ? data.required_pairs_status === "not_requested"
+                ? "Enter a meaningful difference to solve for N"
+                : data.required_pairs_status
+              : `For ${data.meaningful_effect_ms} ms; N−1 reports ${(
+                  (data.power_below_required ?? 0) * 100
+                ).toFixed(0)}% power`
+          }
+        />
       </div>
+      {data.required_pairs != null && data.power_below_required != null && (
+        <p className="text-xs text-muted-foreground">
+          {data.required_pairs} pairs reach {(100 * (data.power_at_required ?? 0)).toFixed(1)}%
+          power; {data.required_pairs - 1} pairs reach only{" "}
+          {(100 * data.power_below_required).toFixed(1)}%, so the solver returns the smallest N that
+          meets the target.
+        </p>
+      )}
       <DifferencePlot data={data} />
       <DataTable data={data.rows} columns={columns} label="Source timing pairs" />
       <ul className="list-inside list-disc space-y-1 text-xs text-muted-foreground">

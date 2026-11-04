@@ -161,3 +161,11 @@ still not captured and is stated as the remaining A06 gate. Evidence: `evidence/
 Wrote the 66-question sourced judge Q&A bank in `docs/judges/JUDGE-QA.md`. It is preparation, not
 acceptance: the teammate-timed three-minute run and a real recorded fallback remain open, so J09
 stays partial. Evidence: `evidence/J09.md`.
+
+## F08 — 2026-11-04
+
+Added the required-sample-size solver to the paired timing analysis. Given a declared meaningful
+difference in ms, alpha and target power, it returns the smallest N whose noncentral-t power meets
+the target, with power at N and N−1, or an explicit out-of-bounds reason instead of a rounded
+number. UI adds the effect field and required-pairs metric. Tests cover minimality, N−1 failure and
+out-of-bounds cases. Field validation with real paired runs remains. Evidence: `evidence/F08.md`.

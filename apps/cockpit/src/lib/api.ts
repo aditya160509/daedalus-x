@@ -1318,6 +1318,11 @@ const PairedTimingResult = z.object({
   planned_pairs: z.number(),
   target_power: z.number(),
   minimum_detectable_ms: z.number(),
+  meaningful_effect_ms: z.number().nullable(),
+  required_pairs: z.number().int().nullable(),
+  required_pairs_status: z.string(),
+  power_at_required: z.number().nullable(),
+  power_below_required: z.number().nullable(),
   rows: z.array(
     z.object({
       pair_id: z.string(),
@@ -1338,6 +1343,7 @@ export interface PairedTimingRequest {
   alpha: number;
   target_power: number;
   planned_pairs: number;
+  meaningful_effect_ms: number | null;
 }
 export const analyzePairedTimings = (body: PairedTimingRequest) =>
   request("/v1/analysis/paired", PairedTimingResult, {
