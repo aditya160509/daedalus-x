@@ -12,7 +12,7 @@ The owner reviews and verifies. **You build.** Do not ask the owner questions. W
 5. `04-UI-QUALITY-BAR.md`: the visual standard (commercial F1 or CFD-vendor grade)
 6. `05-RESEARCH-PROTOCOL.md`: how to research with TinyFish and record links
 7. `06-GIT-AND-HANDOFF.md`: GitHub, commits, pushing, handoff notes
-8. `PLAN.md`: what is left and how to build it (pick the next unchecked item). `PROGRESS.md` tracks what is done; `UI-REDO.md` is the visual standard.
+8. `BOARD.md`: open items by difficulty (auto-generated). `PLAN.md`: what is left and how to build it (pick the next unchecked item). `PROGRESS.md` tracks what is done; `UI-REDO.md` is the visual standard.
 
 ## 2. Mission in one paragraph
 Daedalus X is a local-first race-engineering cockpit for a STEM Racing (F1 in Schools) CO₂ car. It imports the car's CAD and runs real OpenFOAM CFD on a Mac. It shows the airflow like a commercial wind tunnel (AETHER) and predicts race time with uncertainty (TITAN). It suggests the next best design experiment (ORACLE), checks the rulebook (FORGE), and keeps a tamper-proof record of every claim (ATLAS). Everything is free and open source and runs on one Apple-silicon Mac (10 cores, 16 GB).

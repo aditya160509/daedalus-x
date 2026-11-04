@@ -14,3 +14,6 @@ pre-commit:
       run: pnpm format:check && pnpm typecheck && pnpm lint
     secrets:
       run: gitleaks git --staged --redact --no-banner
+    board:
+      glob: "docs/build/PLAN.md"
+      run: python3 scripts/board.py && git add docs/build/BOARD.md
