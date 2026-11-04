@@ -66,3 +66,9 @@ Retained distribution licence texts: `docs/licenses/uplot-LICENSE.txt`, `docs/li
 ## Artifact verification QR — 2026-11-03
 
 [qrcode.react 4.2.0](https://github.com/zpao/qrcode.react), ISC, supplies the native SVG QR renderer; its bundled [Project Nayuki QR Code Generator](https://www.nayuki.io/page/qr-code-generator-library) is MIT. GitHub aggregate metadata returned NOASSERTION, so the installed distribution ISC notice and pinned v4.2.0 bundled MIT licence were inspected and retained in `docs/licenses/qrcode-react-LICENSE.txt` and `docs/licenses/qrcodegen-LICENSE.txt`. Hash-pinned artifact links and SVG download are integration code; no QR encoder was written here.
+
+## pingdotgg/t3code (MIT)
+UI primitives in `apps/cockpit/src/components/ui` (button, badge, input, menu, select, combobox, number-field, switch, checkbox, table, empty, alert, kbd, scroll-area, popover, toggle) and the dark palette are ported from t3code. Copyright (c) 2026 T3 Tools Inc. MIT License.
+
+## Vercel Geist fonts (OFL-1.1)
+Geist Sans and Geist Mono via next/font.

@@ -165,12 +165,10 @@ export function JobsDrawer() {
   }, [jobs.data, cache]);
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button variant="outline" size="sm">
-          <ListTodo />
-          Jobs{" "}
-          {jobs.data?.filter((j) => j.state === "queued" || j.state === "running").length || ""}
-        </Button>
+      <PopoverTrigger render={<Button variant="outline" size="sm" />}>
+        <ListTodo />
+        Jobs{" "}
+        {jobs.data?.filter((j) => j.state === "queued" || j.state === "running").length || ""}
       </PopoverTrigger>
       <PopoverContent className="flex max-h-[min(70dvh,40rem)] flex-col overflow-hidden p-0">
         <div className="border-b px-4 py-3">
