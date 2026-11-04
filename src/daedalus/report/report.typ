@@ -19,7 +19,7 @@
 #table(columns: (1fr, auto), stroke: 0.4pt + luma(200), inset: 6pt,
   [Best drag area (CdA)], [#calc.round(d.oracle.best.cda_m2 * 10000, digits: 2) cm²],
   [Predicted race time], [#calc.round(d.oracle.best.race_time_s, digits: 3) s],
-  [CFD runs], [#d.oracle.observations.len()],
+  [ORACLE observations], [#d.oracle.observations.len()],
   [Rule checks failing (CAD)], [#d.forge.checks.filter(c => c.state == "fail_cad").len()],
 )
 #src[ORACLE state, provenance #d.oracle.provenance]
@@ -27,9 +27,17 @@
 == ORACLE: next experiment
 #table(columns: (1fr, auto), stroke: 0.4pt + luma(200), inset: 6pt,
   ..d.oracle.variables.map(v => ([#v.name.replace("_", " ")], [#calc.round(d.oracle.next.params.at(v.name), digits: 2) #v.unit])).flatten(),
-  [Predicted CdA], [#calc.round(d.oracle.next.cda_m2 * 10000, digits: 2) ± #calc.round(d.oracle.next.cda_sd_m2 * 10000, digits: 2) cm²],
+  [Predicted CdA (mean +/- 1 SD)], [#calc.round(d.oracle.next.cda_m2 * 10000, digits: 2) ± #calc.round(d.oracle.next.cda_sd_m2 * 10000, digits: 2) cm²],
 )
-Budget-matched benchmark after #d.oracle.benchmark.gp.len() runs: ORACLE #calc.round(d.oracle.benchmark.gp.last() * 10000, digits: 3) cm² vs random #calc.round(d.oracle.benchmark.lhs.last() * 10000, digits: 3) cm².
+#let benchmark = d.oracle.at("benchmark", default: none)
+#if benchmark != none and benchmark.gp.len() > 0 and benchmark.lhs.len() > 0 [
+  Synthetic equal-budget benchmark after #benchmark.gp.len() evaluations per method:
+  ORACLE #calc.round(benchmark.gp.last() * 10000, digits: 3) cm² vs
+  Latin hypercube #calc.round(benchmark.lhs.last() * 10000, digits: 3) cm².
+  This is not accepted CFD or physical validation.
+] else [
+  No completed registered benchmark is available. No optimisation-performance claim is made.
+]
 
 == FORGE: rule compliance (#d.forge.revision)
 #if d.forge.is_reference_only [_Reference rulebook; replace with the event's own regulations._]

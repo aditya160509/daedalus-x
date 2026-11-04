@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import shutil
 import tempfile
 from datetime import UTC, datetime
@@ -22,15 +23,26 @@ router = APIRouter(prefix="/v1/report", tags=["report"])
 TEMPLATE = Path(__file__).resolve().parents[1] / "report" / "report.typ"
 
 
-def _best_run() -> Path | None:
-    """Lowest-Cd succeeded run, the one whose hero render goes on the cover."""
+def _best_run(design: str) -> Path | None:
+    """Lowest-Cd accepted run explicitly bound to this design; older unbound runs omitted."""
     best: tuple[float, Path] | None = None
     for res in (eng_api.data_root() / "runs").glob("*/daedalus_result.json"):
         try:
             r = json.loads(res.read_text())
+            manifest = json.loads((res.parent / "daedalus_manifest.json").read_text())
         except (OSError, ValueError):
             continue
-        ok = r.get("succeeded") and isinstance(r.get("cd"), int | float)
+        if not isinstance(r, dict) or not isinstance(manifest, dict):
+            continue
+        cd = r.get("cd")
+        ok = (
+            r.get("succeeded") is True
+            and r.get("acceptance") == "accepted"
+            and manifest.get("design_id") == design
+            and type(cd) in (int, float)
+            and math.isfinite(cd)
+            and cd > 0
+        )
         if ok and (best is None or r["cd"] < best[0]):
             best = (float(r["cd"]), res.parent)
     return best and best[1]
@@ -57,7 +69,7 @@ def report_pdf(design: str = "orbit_baseline") -> Response:
     body = json.dumps(data, sort_keys=True, default=str)
     data["hash"] = "sha256:" + hashlib.sha256(body.encode()).hexdigest()[:12]
     data["generated"] = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
-    run = _best_run()
+    run = _best_run(design)
     hero = _hero(run)
     data["hero_run"] = run.name if hero and run else None
     with tempfile.TemporaryDirectory() as tmp:

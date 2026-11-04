@@ -681,7 +681,7 @@ This is the current checkbox ledger requested by the owner. `TODO.md` supplies t
 - [x] ✅ C03 — Director, side/broadcast, chase, onboard, top and finish cameras (`scene/BroadcastRig.tsx`).
 - [x] ✅ C04 — Direct racing-game gauge/results and f1-dash timing/mini-sector component adaptations with retained licences.
 - [x] ✅ C05 — Scenario ghost inside Replay, eight model sector times, finish slow motion and PNG capture.
-- [x] ✅ C06 — Replay adaptive-quality mechanism and separate reaction trainer.
+- [x] ✅ C06 — Replay adaptive quality and dialog-based trainer with restored browser history, median/spread/false starts, native chart and JSON export; field latency validation pending.
 - [x] ✅ C07 — Four-tab consolidation built: Replay / Analysis / Points / Calibration, trainer in Base UI dialog; legacy hashes retained. ⏳ Browser/keyboard verification.
 - [ ] ⬜ C08 — Race-day actual time + reaction entry, prediction comparison and explicit instant calibration update.
 - [ ] ⬜ C09 — Dedicated stadium/TV mode with projector layout, fullscreen and panel rotation.
@@ -696,12 +696,12 @@ This is the current checkbox ledger requested by the owner. `TODO.md` supplies t
 - [x] ✅ D02 — Scenario Δtime trace; scenario/preset comparison is not automatically the best measured run.
 - [x] ✅ D03 — Monte Carlo time histogram, p5/p50/p95 and rank-correlation sensitivity tornado.
 - [x] ✅ D04 — Time-budget and ±10% sensitivity metrics, plus ms/g, ms/cm² and Crr exchange-rate metrics (`BreakdownPanel.tsx`).
-- [x] ✅ D05 — Model energy balance as stacked bars and energy metrics (`EnergyPanel.tsx`).
+- [x] ✅ D05 — Model energy metrics and native ECharts Sankey with signed integration residual (`EnergyPanel.tsx`); tether remains unmodelled.
 - [x] ✅ D06 — Racing-points scenario, round/head-to-head probabilities and current simulation baseline adoption. Generated scenarios remain synthetic/estimated.
 - [ ] 🟨 D07 — Complete launch/burnout/peak/finish annotations, automatic best-run ghost and all chart exports/overlays.
 - [ ] ⬜ D08 — Race time-budget stacked chart including editable measured reaction; current breakdown request uses reaction 0.
 - [ ] ⬜ D09 — Race-level SALib indices, Monte Carlo convergence plot and full uncertainty variance budget.
-- [ ] ⬜ D10 — Energy Sankey with supported tether contribution; current energy chart is not a Sankey.
+- [ ] 🟨 D10 — Native Sankey and closure-error accounting connected; supported tether contribution and physical validation remain.
 - [ ] ⬜ D11 — Points distribution and optimal legal mass curve; existing what-if mass sparkline is not that curve.
 
 ### E. ORACLE / optimisation — target: explainable, constrained design decisions
@@ -715,8 +715,8 @@ This is the current checkbox ledger requested by the owner. `TODO.md` supplies t
 - [x] ✅ E07 — Preregistered equal-budget native Optuna TPE/CMA-ES + Sobol/LHS/random benchmark queue, 10–20 seeds and regret confidence bands built. ⏳ Full study/browser review; synthetic only.
 - [ ] ⬜ E08 — Accepted-only CFD feedback, STEP-to-mesh hash guard and performance-rule gate in the closed-loop handoff.
 - [ ] ⬜ E09 — Separate synthetic and physical/accepted-CFD training; current manual observation interface is not independent acceptance.
-- [ ] ⬜ E10 — GP map uncertainty, predicted-vs-actual and predictive-interval coverage charts.
-- [ ] ⬜ E11 — Length-scale interpretation, acquisition history and recorded engineer veto/edit.
+- [ ] 🟨 E10 — GP mean/SD and refitted held-out target/coverage charts connected; accepted-candidate campaign evidence and final browser review remain.
+- [ ] 🟨 E11 — Fitted length scales/noise/status and benchmark acquisition reasons connected; real-campaign timeline and engineer veto/edit remain.
 - [ ] ⬜ E12 — pymoo drag/mass/margin Pareto front and racing-points optimisation objective.
 - [ ] 🟨 E13 — Adjoint tooling exists; accepted primal/adjoint, connected map and constrained shape optimisation remain. Multi-fidelity is removed by TODO.
 
@@ -729,7 +729,7 @@ This is the current checkbox ledger requested by the owner. `TODO.md` supplies t
 - [x] ✅ F05 — Single-fit concurrency gate and disabled input editing while fitting/planning.
 - [x] ✅ F06 — Lab-day/Track-day/Custom protocols and Base UI Advanced sections connected; Calibration has six main inputs and Planner four. Hidden invalid settings reveal themselves; priors/uploads are preserved. Brief in-app 1440/375 px, overflow and planner API checks passed (see `evidence/F06-protocol-forms.md`).
 - [ ] ⬜ F07 — Prior-vs-posterior plots, across-run error scoreboard and posterior predictive-check plot.
-- [ ] ⬜ F08 — Paired baseline/candidate protocol, CI, power/sample-size calculation and minimum detectable effect.
+- [ ] 🟨 F08 — Paired CSV, mean CI, prospective power/MDE, declared pairing basis and evidence connected; formal preregistration, required-sample-size solver and field validation remain.
 - [ ] ⬜ F09 — Repeat-run control chart and gauge R&R workflow.
 - [ ] ⬜ F10 — Explicit application of a saved posterior to Race with a linked model/source record.
 - [ ] ⏳ F11 — Team measurements: part masses, dimensions, coast-down, thrust, tether/launch repeatability and independent held-out runs. ArviZ R-hat must remain unavailable for the current importance sampler; do not invent multiple chains.
@@ -891,3 +891,7 @@ Sensitivity now displays normalised/physical RBF correlation lengths, optimisati
 ### Reaction-practice statistics — 2026-11-03 (§23 update)
 
 Trainer restores local history on open and records timestamped reactions/false starts, bounded to 500 attempts, with median/p10/p90/sample SD and native ECharts latest-50 trace/PNG plus full JSON export. Legacy numeric results keep null timestamps and do not invent historical false-start counts. Storage failures preserve a session copy; hidden-tab trials cancel; key-repeat/editable-field shortcuts ignored; immediate phase ref prevents duplicate event records. Browser latency/track validation remains open. Evidence: `evidence/RACE-reaction-statistics.md`.
+
+### Stop checkpoint — 2026-11-04 (§23 update)
+
+Owner requested a stop after the current bug fix. Engineering PDF now handles absent/empty benchmarks, identifies ORACLE observations accurately, names LHS correctly, labels GP one-SD uncertainty, and only chooses accepted cover runs explicitly bound to the selected design. Five report tests and one synthetic PDF render check passed. The FORGE one-page summary was not started. Full remaining-work counts and priority buckets are recorded in PROGRESS.md and `evidence/CHECKPOINT-2026-11-04.md`. All code from this sprint is committed; the pre-existing animated-flow draft remains separate. No CFD or servers started.

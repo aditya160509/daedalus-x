@@ -1,4 +1,4 @@
-# PROGRESS: one tick-box view of the whole plan (2026-11-03)
+# PROGRESS: one tick-box view of the whole plan (2026-11-04)
 
 Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, with its status. Checked line by line against the code on 2026-11-03.
 
@@ -30,8 +30,8 @@ Every target in `MASTER-PLAN.md` (§15, 16, 19, 20, 22, 26) and `TODO.md` §14, 
 
 ## Overall
 - **In-scope tasks:** **48.1% historical coarse checklist score** (27-task scope; not effort or readiness).
-- **Software built:** about 65%.
-- **Real data:** about 5%. No accepted CFD campaign, no measured race, no physical tests. **This is the biggest gap.**
+- **Software ledger:** 58/118 entries built-tagged (49.2%); see the dated checkpoint below for the remaining breakdown.
+- **Real data:** the earlier ~5% was a rough estimate, not an audited ratio. No accepted CFD campaign, no measured race, no physical tests. **This is the biggest gap.**
 
 ---
 
@@ -538,3 +538,44 @@ The only real inputs are the CAD geometry and the rulebook. Without data, judges
 - Race now has four main tabs and a dialog-based trainer. Browser/performance checks remain open.
 - Speed-up claims (2–3×, 50–100×) are unmeasured. Warm start, mesh reuse, separate meshing ranks and FluidX3D remain unimplemented; no restricted solver code was bundled.
 - Evidence: `evidence/ORACLE-native-benchmark.md`, `evidence/C07-race-navigation.md`.
+
+## Stop checkpoint — 2026-11-04
+
+Owner requested a pause after the current report fix. No new feature work is running.
+
+**Current detailed feature ledger (§28 A–L): 118 entries.**
+
+| Status | Entries |
+|---|---:|
+| ✅ Built and connected | 58 |
+| 🟨 Partly implemented | 17 |
+| ⬜ Not started | 33 |
+| ⏳ Verification/data gate | 9 |
+| 📝 Pre-existing uncommitted draft | 1 |
+
+**Built-tag share: 58/118 = 49.2%. 60 entries still have work or verification remaining.** This is an unweighted count of ledger entries, not engineering hours, judging readiness or measured validation. It supersedes the old unsupported “about 65% software” estimate. The separate historical T-task score remains 48.1% with eight cuts; the two denominators must not be combined.
+
+**43-chart ledger:** 3 built-tagged, 28 partial, 5 awaiting verification/data, 7 not started. Partial charts often already contain useful connected plots; these labels track the complete target.
+
+**Finished in this sprint and committed**
+- Native Optuna/CMA-ES + SciPy benchmark queue, evidence protocol/result binding, native TanStack result tables.
+- GP mean/uncertainty, held-out prediction/coverage and fitted length-scale/noise diagnostics.
+- Race four-tab navigation, dialog trainer, restored practice history/statistics/false starts/export.
+- CFD stopping controls exposed and recorded; benchmark/CFD exclusion and bounded numerical threads.
+- Removed the out-of-scope drawing generator/UI/API/judge-pack hooks.
+- Native ECharts energy Sankey, signed component drag waterfall and beam deflection/stress plots.
+- SciPy paired timing CI and prospective power/MDE, source/result evidence and result plots/tables.
+- Hash-pinned artifact verification page/QR SVG; streaming file hashes reduce whole-file memory use.
+- Fixed engineering PDF with no completed benchmark and prevented unaccepted/unbound cover selection.
+
+**Largest remaining work**
+1. Accepted-only closed-loop feedback, source/STEP/mesh hash guards and performance-rule gates; separate training pools.
+2. Accepted current-car CFD, 3-mesh GCI, speed sweep/turbulence comparison and measured correlation.
+3. Race-day/stadium/TV workflow: actual timing, leaderboard, reaction entry, scoreboard and day exports.
+4. pymoo Pareto, engineer veto/edit, campaign acquisition history and repeat-experiment noise estimation.
+5. Apply saved calibration to Race; across-run error/PPC/control charts and physical held-out tests.
+6. Advanced FORGE measures, inspection log, one-page compliance summary, manufacturing/CAD deviations and material validation.
+7. Project Gantt/risk/effort workflows, report provenance/QR embedding, judging materials and offline fallback.
+8. Final browser/responsive/performance checks, full suite and independent real-data acceptance.
+
+No accepted CFD campaign or measured race was added. Real-data percentage has no audited numerator and is not upgraded. Existing particle-view draft is preserved and not ticked. Evidence: `evidence/CHECKPOINT-2026-11-04.md`.
