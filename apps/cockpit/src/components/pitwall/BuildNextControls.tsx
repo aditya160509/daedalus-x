@@ -18,7 +18,10 @@ export function BuildNextControls({ unit, reason }: { unit: number[]; reason: st
     "";
   const build = useMutation({
     mutationFn: buildOracleStudy,
-    onSuccess: () => void cache.invalidateQueries({ queryKey: ["designs"] }),
+    onSuccess: () => {
+      void cache.invalidateQueries({ queryKey: ["designs"] });
+      void cache.invalidateQueries({ queryKey: ["oracle-candidate-forecasts"] });
+    },
   });
   // FORGE's comparable dimensional headrooms are in millimetres.
   const nearest = build.data?.checks

@@ -3,12 +3,12 @@
 Generated from `PLAN.md` by `scripts/board.py` on every commit. Do not edit by hand:
 tick the item in PLAN.md instead.
 
-**Whole plan: 91/147 done (62%).**
+**Whole plan: 94/147 done (64%).**
 
 | Group | Done | Open |
 |---|---|---|
 | Easy (10-30 min each) | 14 | 1 |
-| Medium (1-2 h each) | 0 | 29 |
+| Medium (1-2 h each) | 3 | 26 |
 | Hard (3-8 h each) | 0 | 10 |
 | Needs CFD runs or real measurements | 0 | 16 |
 
@@ -39,11 +39,9 @@ tick the item in PLAN.md instead.
 - [ ] Best eligible real-run ghost (scenario ghost exists). _(3.3 Race, replay and timing)_
 - [ ] Supported tether model through dynamics and energy balance. _(3.3 Race, replay and timing)_
 - [ ] Explicit calibration update from race-day runs. _(3.3 Race, replay and timing)_
-- [ ] Campaign acquisition history and engineer proceed, edit or veto records. _(3.4 ORACLE and closed loop)_
 - [ ] Repeat-experiment noise estimate, separate from the GP nugget. _(3.4 ORACLE and closed loop)_
 - [ ] Across-study scoring and posterior predictive checks. _(3.5 Calibration and physical tests)_
 - [ ] Applying a saved posterior to Race. Explicit link and record still missing. _(3.5 Calibration and physical tests)_
-- [ ] Feasible frontier across the design space. Single-design ranking exists. _(3.6 FORGE (India rules, in app))_
 - [ ] Wall thickness, chamber holes, full section chord, halo comparison. _(3.6 FORGE (India rules, in app))_
 - [ ] Inspection log: who, tool, when, raw readings, physical part identity. _(3.6 FORGE (India rules, in app))_
 - [ ] Interactive dimensional what-if. _(3.6 FORGE (India rules, in app))_
@@ -60,7 +58,9 @@ tick the item in PLAN.md instead.
 - [ ] **Value-of-information test planner:** recommend the measurement that most reduces points uncertainty. _(5b. Innovation backlog (researched 2026-11-04))_
 - [ ] **Car A/B nomination and reaction advisor:** paired-timing posterior, ex-Gaussian reaction fit (scipy `exponnorm`), earlier reaction vs false-start (−2.5 pts) trade-off. _(5b. Innovation backlog (researched 2026-11-04))_
 - [ ] **Frozen demo mode** for judges: cached results, no solver calls, low GPU load. _(5b. Innovation backlog (researched 2026-11-04))_
-- [ ] Chart gaps (task 10): the safety-factor table exists for captured cases. The remaining chart items are in §4. _(9. Done in this plan's last pass (2026-11-04))_
+- [x] Campaign acquisition history and engineer proceed, edit or veto records. _(3.4 ORACLE and closed loop)_
+- [x] Feasible frontier across imported CAD samples. _(3.6 FORGE (India rules, in app))_
+- [x] Chart gaps (task 10): Section 4 software is implemented. Native full-car yaw setup and physical/CFD acceptance remain separate gates. _(9. Done in this plan's last pass (2026-11-04))_
 
 ## Hard (3-8 h each)
 

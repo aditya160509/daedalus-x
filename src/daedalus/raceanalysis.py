@@ -139,3 +139,24 @@ def exchange_rates(car: Car) -> dict[str, float]:
         "ms_per_0p001_crr": float((t[4] - t[5]) / (2 if r >= dr else 1) * 1000),
         "ms_per_percent_thrust": float((t[6] - t[7]) / 2 * 1000),
     }
+
+
+def sobol_time(car: Car) -> dict[str, object]:
+    """Variance sensitivity for independent ±10% M2 input ranges."""
+    from daedalus.sensitivity import analyze
+
+    def evaluate(inputs: np.ndarray) -> np.ndarray:
+        m, a, r, thrust = (0.9 + 0.2 * inputs).T
+        return race_times(
+            car.thrust,
+            thrust,
+            car.mass_kg * m,
+            car.cda_m2 * a,
+            car.crr * r,
+            car.rho_kg_m3,
+            car.track_m,
+            ModelLevel.M2,
+            dt_s=5e-4,
+        )
+
+    return {**analyze(evaluate, INPUTS[:4]), "target": "TITAN M2 finish time"}

@@ -197,6 +197,7 @@ const CfdWake = z.object({
     y_mm: z.array(z.number()),
     z_mm: z.array(z.number()),
     cpt_loss: z.array(z.array(z.number().nullable())),
+    velocity_deficit: z.array(z.array(z.number().nullable())),
   }),
   provenance: z.literal("simulated"),
 });
@@ -495,6 +496,7 @@ const StudyCase = z.object({
   speed_m_s: z.number(),
   cells: z.number().nullable(),
   cd: z.number().nullable(),
+  reference_area_m2: z.number().positive().nullable().optional(),
   ci95: z.tuple([z.number(), z.number()]).nullable(),
   quality_eligible: z.boolean(),
   acceptance: z.string().nullable(),
@@ -561,6 +563,44 @@ export const OracleState = z.object({
   provenance: z.enum(["synthetic", "mixed"]),
 });
 export type OracleState = z.infer<typeof OracleState>;
+const AcquisitionRow = z.object({
+  id: z.string(),
+  created_at: z.string(),
+  action: z.enum(["proceed", "edit", "veto"]),
+  reason: z.string(),
+  provenance: z.enum(["predicted", "synthetic"]),
+  unit: z.array(z.number()),
+  edited_unit: z.array(z.number()).nullable(),
+  campaign_observations: z.number(),
+  ei_m2: z.number(),
+});
+export const listOracleAcquisitions = () =>
+  request("/v1/oracle/acquisition", z.array(AcquisitionRow));
+export const recordOracleAcquisition = (input: {
+  action: "proceed" | "edit" | "veto";
+  unit: number[];
+  edited_unit?: number[];
+  reason: string;
+}) =>
+  request("/v1/oracle/acquisition", z.object({ id: z.string() }), {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+export const listCandidateForecasts = () =>
+  request("/v1/oracle/candidate-forecasts", z.array(z.string()));
+export const getCandidateScore = (design: string, run: string) =>
+  request(
+    `/v1/oracle/candidate-score?design=${encodeURIComponent(design)}&run=${encodeURIComponent(run)}`,
+    z.object({
+      design: z.string(),
+      run: z.string(),
+      predicted_cda_m2: z.number(),
+      sd_m2: z.number(),
+      actual_cda_m2: z.number(),
+      speed_m_s: z.number(),
+      provenance: z.enum(["predicted", "synthetic"]),
+    }),
+  );
 export const getOracleState = () => request("/v1/oracle/state", OracleState);
 const OraclePareto = z.object({
   objectives: z.array(z.string()),
@@ -686,6 +726,25 @@ const ForgeChecks = z.object({
 export const getForgeChecks = (design: string) =>
   request(`/v1/forge/checks?design=${encodeURIComponent(design)}`, ForgeChecks);
 
+export const getForgeFrontierSamples = (design: string) =>
+  request(
+    `/v1/forge/frontier-samples?design=${encodeURIComponent(design)}`,
+    z.object({
+      rows: z.array(
+        z.object({
+          design: z.string(),
+          area_cm2: z.number(),
+          margin_mm: z.number(),
+          failed: z.number(),
+          manual: z.number(),
+          frontier: z.boolean(),
+        }),
+      ),
+      rules: z.number(),
+      excluded: z.number(),
+      outside_sample_limit: z.number(),
+    }),
+  );
 const ForgeFrontier = z.object({
   rows: z.array(
     z.object({
@@ -829,6 +888,33 @@ const RaceBreakdown = z.object({
   }),
 });
 export type RaceBreakdown = z.infer<typeof RaceBreakdown>;
+export const getRaceSobol = (race: RaceSimulationRequest) =>
+  request(
+    "/v1/analysis/race-sobol",
+    z.object({
+      samples: z.number(),
+      rows: z.array(
+        z.object({
+          name: z.string(),
+          first_order: z.number(),
+          total_order: z.number(),
+          first_order_ci95: z.number(),
+          total_order_ci95: z.number(),
+        }),
+      ),
+    }),
+    {
+      method: "POST",
+      body: JSON.stringify({
+        mass_kg: race.mass_kg,
+        track_length_m: race.track_length_m,
+        thrust: { t_s: race.thrust.t_s, force_n: race.thrust.force_n },
+        cda_m2: race.cda_m2,
+        crr: race.crr,
+        rho_kg_m3: race.rho_kg_m3,
+      }),
+    },
+  );
 export const getRaceBreakdown = (race: RaceSimulationRequest, reactionS: number) =>
   request("/v1/analysis/race-breakdown", RaceBreakdown, {
     method: "POST",
@@ -1000,6 +1086,7 @@ const BayesianCalibration = z.object({
       p05_s: z.number(),
       p95_s: z.number(),
       error_s: z.number(),
+      predictive_rank: z.number().min(0).max(1).optional(),
     }),
   ),
   study_id: z.string(),

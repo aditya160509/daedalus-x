@@ -192,12 +192,19 @@ def report(root: Path, prefix: str) -> dict[str, object]:
         row.update(
             {
                 "cells": None,
+                "reference_area_m2": None,
                 "cd": None,
                 "ci95": None,
                 "quality_eligible": False,
                 "acceptance": "not_run",
             }
         )
+        manifest_path = result_path.with_name("daedalus_manifest.json")
+        if manifest_path.exists():
+            manifest = json.loads(manifest_path.read_text())
+            area = manifest.get("reference", {}).get("Aref_full_m2")
+            if isinstance(area, (int, float)) and np.isfinite(area) and area > 0:
+                row["reference_area_m2"] = area
         if result_path.exists():
             result = json.loads(result_path.read_text())
             row.update(

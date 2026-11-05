@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+import math
 from dataclasses import asdict
 from pathlib import Path
 
@@ -57,6 +59,64 @@ def frontier(design: str, rulebook: str = DEFAULT_RULEBOOK) -> dict[str, object]
     path = _rulebook_path(rulebook)
     results = forge.check_design(_design_dir(design), path)
     return {"rows": [asdict(r) for r in forge.frontier(results)]}
+
+
+@router.get("/frontier-samples")
+def frontier_samples(design: str, rulebook: str = DEFAULT_RULEBOOK) -> dict[str, object]:
+    """Observed CAD sample frontier under the same computable dimensional checks."""
+    rule_path = _rulebook_path(rulebook)
+    reference = _design_dir(design)
+    basis = {
+        r.rule_id
+        for r in forge.check_design(reference, rule_path)
+        if r.unit == "mm" and r.margin is not None and r.state != "manual_review"
+    }
+    rows = []
+    skipped = 0
+    others = sorted(
+        p for p in reference.parent.iterdir() if p != reference and (p / "geometry.json").is_file()
+    )
+    for path in [reference, *others[:39]]:
+        try:
+            geometry = json.loads((path / "geometry.json").read_text())
+            area = float(geometry["frontal_area_m2"])
+            if not math.isfinite(area) or area <= 0:
+                raise ValueError("positive frontal area required")
+            checks = forge.check_design(path, rule_path)
+        except (OSError, ValueError, KeyError, TypeError):
+            skipped += 1
+            continue
+        margins = {
+            r.rule_id: r.margin
+            for r in checks
+            if r.unit == "mm" and r.margin is not None and r.state != "manual_review"
+        }
+        if not basis or not basis.issubset(margins):
+            skipped += 1
+            continue
+        rows.append(
+            {
+                "design": path.name,
+                "area_cm2": area * 10000,
+                "margin_mm": min(margins[r] for r in basis),
+                "failed": sum(r.state == "fail_cad" for r in checks),
+                "manual": sum(r.state == "manual_review" for r in checks),
+            }
+        )
+    eligible = [row for row in rows if row["failed"] == 0]
+    for row in rows:
+        row["frontier"] = row["failed"] == 0 and not any(
+            other["area_cm2"] <= row["area_cm2"]
+            and other["margin_mm"] >= row["margin_mm"]
+            and (other["area_cm2"] < row["area_cm2"] or other["margin_mm"] > row["margin_mm"])
+            for other in eligible
+        )
+    return {
+        "rows": rows,
+        "rules": len(basis),
+        "excluded": skipped,
+        "outside_sample_limit": max(0, len(others) - 39),
+    }
 
 
 @router.post("/measure")

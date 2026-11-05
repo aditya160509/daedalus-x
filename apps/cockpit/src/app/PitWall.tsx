@@ -27,11 +27,15 @@ const OptimizerBenchmark = lazy(() =>
 const OracleDiagnostics = lazy(() =>
   import("@/components/pitwall/OracleDiagnostics").then((m) => ({ default: m.OracleDiagnostics })),
 );
+const CampaignAnalysis = lazy(() =>
+  import("@/components/pitwall/CampaignAnalysis").then((m) => ({ default: m.CampaignAnalysis })),
+);
 const ORACLE_VIEWS = [
   { value: "map", label: "Response map" },
   { value: "pareto", label: "Pareto front" },
   { value: "benchmark", label: "Benchmark" },
   { value: "validation", label: "Validation" },
+  { value: "campaign", label: "Campaign" },
 ] as const;
 
 const TABS = [
@@ -190,6 +194,14 @@ export function PitWall() {
               {oracleView === "benchmark" && (
                 <Suspense fallback={<Skeleton className="h-80" />}>
                   <OptimizerBenchmark />
+                </Suspense>
+              )}
+              {oracleView === "campaign" && (
+                <Suspense fallback={<Skeleton className="h-80" />}>
+                  <CampaignAnalysis
+                    key={s?.next.unit.join(",") ?? "loading"}
+                    unit={s?.next.unit ?? []}
+                  />
                 </Suspense>
               )}
               {oracleView === "validation" && (

@@ -108,6 +108,9 @@ import { MassCurve } from "@/components/race/MassCurve";
 import { TimingPanel } from "@/components/race/TimingPanel";
 import { EnergyPanel } from "@/components/race/EnergyPanel";
 import { PointsPanel } from "@/components/race/PointsPanel";
+import { VarianceBudget } from "@/components/race/VarianceBudget";
+import { MeasuredGhost } from "@/components/race/MeasuredGhost";
+import { RaceSobol } from "@/components/race/RaceSobol";
 import { BreakdownPanel } from "@/components/race/BreakdownPanel";
 import { CalibrationWorkbench } from "@/components/race/CalibrationWorkbench";
 import {
@@ -689,7 +692,7 @@ export function RaceWorkspace() {
             </div>
           )}
           {tab === "analysis" && analysis === "breakdown" && (
-            <div className="mx-auto w-full max-w-4xl">
+            <div className="mx-auto w-full max-w-4xl space-y-3">
               <BreakdownPanel
                 data={breakdown.data}
                 error={breakdown.error}
@@ -701,6 +704,13 @@ export function RaceWorkspace() {
                 reactionInput={measuredReactionMs}
                 onReactionInput={setMeasuredReactionMs}
               />
+              {valid && <RaceSobol race={request} />}
+              {breakdown.data && (
+                <VarianceBudget msPerCm2={breakdown.data.exchange_rates.ms_per_cm2_cda} />
+              )}
+              {sim.data?.finished && primaryTrace && (
+                <MeasuredGhost primary={primaryTrace} finish={request.track_length_m} />
+              )}
             </div>
           )}
         </div>

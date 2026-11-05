@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { DataTable, type DataColumn } from "@/components/ui/data-table";
 import { getBeamMaterials, solveBeam, type BeamRequest, type BeamResult } from "@/lib/api";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
+import { LoadComparison } from "./LoadComparison";
 import { BeamPlots } from "./BeamPlots";
 import { Ruler } from "lucide-react";
 
@@ -471,6 +472,13 @@ export function StrengthPanel() {
             <Metric label="Root moment" value={result.data.max_moment_nmm.toFixed(1)} unit="N·mm" />
           </div>
           <BeamPlots data={result.data} />
+          {!inputsDirty && loadN > 0 && (
+            <LoadComparison
+              key={`${part}-${JSON.stringify(req)}`}
+              loadN={loadN}
+              predicted={result.data.max_deflection_mm}
+            />
+          )}
           <p className="text-2xs text-muted-foreground">
             Material values for {result.data.material} are handbook estimates. 3D-printed parts are
             weaker than moulded ones; measure your own material before quoting this number.

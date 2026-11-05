@@ -385,3 +385,22 @@ def race_breakdown(req: BreakdownRequest) -> dict[str, object]:
         }
     except raceanalysis.RaceAnalysisError as exc:
         raise HTTPException(422, str(exc)) from exc
+
+
+@router.post("/race-sobol")
+def race_sobol(req: EnergyRequest) -> dict[str, object]:
+    from daedalus import raceanalysis
+
+    try:
+        return raceanalysis.sobol_time(
+            raceanalysis.Car(
+                req.thrust.curve(),
+                req.mass_kg,
+                req.cda_m2,
+                req.crr,
+                req.rho_kg_m3,
+                req.track_length_m,
+            )
+        )
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc

@@ -1,5 +1,6 @@
 "use client";
 
+import { ForgeSampleFrontier } from "./ForgeSampleFrontier";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { chartTheme, useECharts } from "@/components/charts/useECharts";
@@ -94,11 +95,11 @@ export function FrontierPanel({
       bodyClassName="overflow-y-auto"
     >
       <div className="space-y-4 p-4">
+        {design && <ForgeSampleFrontier design={design} />}
         <p className="text-sm leading-relaxed text-muted-foreground">
           Headroom to each rule’s nearest boundary for this CAD design. Negative values are outside
-          the limit. This is a single-design margin ranking, not a map of the feasible design space;
-          unmeasurable rules are excluded. CAD-derived and approximate values require physical
-          verification.
+          the limit. The ranking below is for the selected design and excludes unmeasurable rules.
+          CAD-derived and approximate values require physical verification.
         </p>
         {!design ? (
           <p className="text-sm">Select an imported design to inspect its limits.</p>

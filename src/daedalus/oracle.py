@@ -200,6 +200,22 @@ class Observation:
         Provenance(self.provenance)
 
 
+def forecast(observations: list[Observation], unit: tuple[float, ...]) -> dict[str, float | str]:
+    x = np.asarray([o.params for o in observations])
+    y = np.asarray([o.cda_m2 for o in observations])
+    point = np.asarray([unit])
+    gp = GP(x, y)
+    mean, sd = gp.predict(point)
+    return {
+        "predicted_cda_m2": float(mean[0]),
+        "sd_m2": float(sd[0]),
+        "ei_m2": float(expected_improvement(gp, point, float(y.min()))[0]),
+        "provenance": "synthetic"
+        if any(o.provenance == "synthetic" for o in observations)
+        else "predicted",
+    }
+
+
 class Campaign:
     """Observations on disk; a SYNTHETIC Latin-hypercube seed until CFD results arrive."""
 

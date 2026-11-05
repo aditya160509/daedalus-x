@@ -132,7 +132,7 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [x] ✅ SALib sensitivity on the fitted GP. Length scales, noise, optimiser status.
 - [x] ✅ Equal-budget benchmark: Optuna TPE, CMA-ES, Sobol, LHS, random. Ten to twenty seeds with regret bands. Synthetic labels.
 - [x] ✅ Observation validation with serialised, atomic appends.
-- [ ] 🟨 Campaign acquisition history and engineer proceed, edit or veto records. `mid`
+- [x] ✅ Campaign acquisition history and engineer proceed, edit or veto records. `mid`
 - [ ] 🟨 Adjoint tooling exists. Accepted adjoint sensitivity map and constrained updates do not. `data`
 - [ ] ⬜ Accepted-only CFD feedback. STEP-to-mesh hash guard. Performance-rule gate. `hard`
 - [ ] ⬜ Separate training pools: synthetic demo, unreviewed input, accepted CFD, physical data. `hard`
@@ -162,7 +162,7 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [x] ✅ Manufacturing-spread pass probability per rule.
 - [x] ✅ Margin bars with ±1σ bands and percent-of-span margins, ordered by points at risk.
 - [ ] 🟨 Rule coverage reconciled with the regulation text. The YAML has 79 entries; the recount is pending. `data`
-- [ ] 🟨 Feasible frontier across the design space. Single-design ranking exists. `mid`
+- [x] ✅ Feasible frontier across imported CAD samples. `mid`
 - [ ] ⬜ Wall thickness, chamber holes, full section chord, halo comparison. `mid`
 - [ ] ⬜ Inspection log: who, tool, when, raw readings, physical part identity. `mid`
 - [ ] ⬜ Interactive dimensional what-if. `mid`
@@ -197,50 +197,58 @@ Each chart needs: shared theme, units on axes, a source tag, hairline grid, dash
 
 | ID | Chart | Status | Remaining |
 |---|---|---|---|
-| W01 | Cd and CdA with grid uncertainty | 🟨 | Consistent CdA uncertainty from accepted source. |
-| W02 | Residual and force convergence with gate | 🟨 | Gate line and linked comparison. |
+| W01 | Cd and CdA with grid uncertainty | ✅ | Cd and CdA share manifest reference area. Fine-grid GCI appears for accepted matching refinements. An accepted campaign is still needed. |
+| W02 | Residual and force convergence with gate | ✅ | Drag and residual cursors are linked. Final steady-window spread is compared with the 1% solver gate. |
 | W03 | Component drag waterfall, pressure and friction | ✅ | Accepted-CFD browser review. |
-| W04 | Centreline Cp and surface Cp | 🟨 | Centreline plot. |
-| W05 | ΔCp, Δwake, Δforces | 🟨 | Δwake and Δforces. |
-| W06 | Wake planes and momentum drag | 🟨 | Deficit contours and drag cross-check. |
-| W07 | Q cores coloured by vorticity | 🟨 | Colour is speed now. |
-| W08 | LIC and separation lines | ⬜ | Build. |
-| W09 | Speed, yaw and ride-height study | 🟨 | Yaw and ride-height sweeps. |
-| W10 | Frontal area versus Cd | ⬜ | Build. |
+| W04 | Centreline Cp and surface Cp | ✅ | Centreline Cp preset at a chosen height and the existing surface Cp layer. |
+| W05 | ΔCp, Δwake, Δforces | ✅ | Surface ΔCp, aligned-grid Δwake and matched per-part force deltas. |
+| W06 | Wake planes and momentum drag | ✅ | Wake deficit and loss maps plus momentum-deficit drag cross-check. |
+| W07 | Q cores coloured by vorticity | ✅ | Q isosurfaces coloured by dimensionless vorticity magnitude. |
+| W08 | LIC and separation lines | ✅ | vtk.js wall-shear LIC and heuristic low-shear reversal lines. Browser GPU verification pending. |
+| W09 | Speed, yaw and ride-height study | ✅ | Speed study plus yaw and ride-height plots for imported full-car CFD or measured sweeps. Native full-car yaw setup and real sweep data remain separate gates. |
+| W10 | Frontal area versus Cd | ✅ | Frontal area vs Cd with iso-CdA curves. |
 | W11 | Mesh and y+ maps, skewness histogram | ✅ | Existing OpenFOAM solution and checkMesh field summaries. |
-| R01 | Linked telemetry traces and events | 🟨 | Annotations (in uncommitted `raceTracks.ts`). |
-| R02 | Ghost Δtime against the best run | 🟨 | Automatic best real run. |
-| R03 | Time-budget stacked bar | ⬜ | Stacked chart with measured reaction. |
-| R04 | Tornado and SALib race indices | 🟨 | Race Sobol indices. |
+| R01 | Linked telemetry traces and events | ✅ | Linked telemetry with launch, burnout, peak, finish and stop event annotations. |
+| R02 | Ghost Δtime against the best run | ✅ | Race Breakdown ranks uploaded measured distance traces and plots model-minus-fastest measured delta. |
+| R03 | Time-budget stacked bar | ✅ | Stacked predicted car time and entered measured gate reaction. |
+| R04 | Tornado and SALib race indices | ✅ | Local tornado plus bounded SALib S₁/Sₜ and sampling intervals. |
 | R05 | Exchange rates | ✅ | Browser review. |
 | R06 | Monte Carlo histogram and convergence | ✅ | Convergence plot added (`7de8fa2`). |
 | R07 | Energy Sankey | ✅ | Tether term, browser review. |
-| R08 | Points distribution, round and head-to-head | 🟨 | Full distribution. |
+| R08 | Points distribution, round and head-to-head | ✅ | Full scenario distribution and round-by-round opponent win probabilities. |
 | R09 | Optimal legal mass curve | ✅ | Built (`7de8fa2`). |
 | R10 | Speed trap and timing export | ✅ | Built (`7de8fa2`). |
 | O01 | GP mean and expected-improvement map | ✅ | Browser review. |
 | O02 | Equal-budget regret benchmark with CIs | ✅ | Full numerical study. |
-| O03 | Predicted versus actual candidates | 🟨 | Accepted campaign data. |
+| O03 | Predicted versus actual candidates | ✅ | Build-time GP forecast compared with accepted CFD on identical stored surface hashes. Needs an accepted prospective run for real evidence. |
 | O04 | Predictive interval calibration | ✅ | Real-data check. |
 | O05 | Length scales and Sobol importance | ✅ | Accepted-data review. |
-| O06 | Pareto front | ⬜ | pymoo on eligible objectives. |
-| O07 | Acquisition history | 🟨 | Real-campaign timeline and veto records. |
-| S01 | Prior and posterior plots | 🟨 | Density plots. |
-| S02 | Error shrinking scoreboard | 🟨 | Per-run trend. |
-| S03 | Posterior predictive checks | 🟨 | PPC chart. |
+| O06 | Pareto front | ✅ | pymoo NSGA-II front over surrogate drag and model uncertainty, filtered by study-family feasibility. |
+| O07 | Acquisition history | ✅ | Recorded proceed, edit and veto decisions, rationale and GP expected-improvement trend. |
+| S01 | Prior and posterior plots | ✅ | Analytic priors and posterior draw densities. |
+| S02 | Error shrinking scoreboard | ✅ | Held-out error scoreboard and signed residual trend in upload order. |
+| S03 | Posterior predictive checks | ✅ | Held-out predicted intervals and empirical predictive-rank CDF. |
 | S04 | Paired CI and minimum detectable effect | ✅ | Real paired data. |
-| S05 | Repeat-run control chart | ⬜ | Build. |
-| S06 | Uncertainty variance budget | 🟨 | CFD, reaction and timing terms. |
+| S05 | Repeat-run control chart | ✅ | Individuals chart for ordered, same-mass timing uploads. Physical repeat tests remain a data gate. |
+| S06 | Uncertainty variance budget | ✅ | Independent first-order variance budget for CdA, reaction and timing uncertainty. |
 | F01 | Margin bars with tolerance bands | ✅ | Manufacturing band and points ordering. |
-| F02 | Per-rule pass probability | 🟨 | Browser review. |
-| F03 | Legal frontier | 🟨 | Sampled feasible frontier. |
-| F04 | Red, amber, green summary | 🟨 | Rule counts exist. Source archive is cut. |
+| F02 | Per-rule pass probability | ✅ | Manufacturing-risk simulation is implemented. Browser review remains an acceptance check. |
+| F03 | Legal frontier | ✅ | Sampled CAD frontier across imported designs on shared dimensional checks. Manual and physical inspection still apply. |
+| F04 | Red, amber, green summary | ✅ | FORGE pass, risk, failure and manual-review summaries. |
 | T01 | Deflection and stress plots | ✅ | Physical material review. |
-| T02 | Safety-factor table, all four parts | 🟨 | One table covering all four parts. |
-| T03 | Predicted versus measured load | ⬜ | Measured data needed. |
-| P01 | Planned versus actual timeline | ⬜ | Gantt is cut. Keep only evidence timing if needed. |
+| T02 | Safety-factor table, all four parts | ✅ | All four preset safety factors in a single table. |
+| T03 | Predicted versus measured load | ✅ | Same-load predicted vs entered measured deflection chart. Physical measurements remain a data gate. |
+| P01 | Planned versus actual timeline | ✂ | Cut from scope. |
 | P02 | Risk matrix | ✂ | Cut. |
 | P03 | Effort and CFD hours | ✅ | Compute table built. Effort chart is cut. |
+
+Chart references consulted through TinyFish
+
+- Fine-grid GCI and Richardson extrapolation. [NASA spatial convergence guidance](https://www.grc.nasa.gov/www/wind/valid/tutorial/spatconv.html)
+- Shared visual mapping for signed differences. [Apache ECharts visual mapping](https://apache.github.io/echarts-handbook/en/concepts/visual-map/)
+- First-order and total-order sensitivity. [SALib documentation](https://salib.readthedocs.io/en/latest/user_guide/basics.html)
+- Individuals control limits based on successive moving ranges. [NIST handbook](https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc322.htm)
+- Surface LIC using the vtk.js mapper. [Kitware Surface LIC](https://www.kitware.com/visualize-surface-vector-fields-with-vtk-js/)
 
 ---
 
@@ -370,4 +378,4 @@ These items cannot be finished in software alone.
 - [x] ✅ Compute endpoint and tests (`9672ffb`).
 - [x] ✅ Race: MC convergence, mass curve, speed trap, timing export, compute page (`7de8fa2`).
 - [x] ✅ Race annotations (task 5): committed in `aafbe8f`.
-- [ ] 🟨 Chart gaps (task 10): the safety-factor table exists for captured cases. The remaining chart items are in §4. `mid`
+- [x] ✅ Chart gaps (task 10): Section 4 software is implemented. Native full-car yaw setup and physical/CFD acceptance remain separate gates. `mid`

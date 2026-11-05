@@ -1,27 +1,57 @@
 "use client";
 
+import { ConditionSweep } from "./ConditionSweep";
 import { Table } from "@/components/ui/table";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Panel, ProvenanceBadge } from "@/components/ui/primitives";
+import { Panel, ProvenanceBadge, SegmentedControl } from "@/components/ui/primitives";
 import { type GridStudy, listStudies } from "@/lib/api";
-import { chartTheme, useECharts } from "@/components/charts/useECharts";
+import { chartAxis, chartTheme, chartTooltip, useECharts } from "@/components/charts/useECharts";
 import { cn } from "@/lib/utils";
 
-function StudyChart({ study, speed = false }: { study: GridStudy; speed?: boolean }) {
+function StudyChart({
+  study,
+  speed = false,
+  area = false,
+}: {
+  study: GridStudy;
+  speed?: boolean;
+  area?: boolean;
+}) {
   const rows = study.cases.filter((r) =>
     speed ? r.label === "grid_medium" || r.label.startsWith("speed_") : r.label.startsWith("grid_"),
   );
   const host = useECharts(() => {
     const t = chartTheme();
-    const points = rows.filter((r) => r.cd != null && (speed || r.cells != null));
+    const points = rows.filter(
+      (r) => r.cd != null && (speed || r.cells != null) && (!area || r.reference_area_m2 != null),
+    );
     const x = (r: GridStudy["cases"][number]) => (speed ? r.speed_m_s : r.cells);
+    const scale = (r: GridStudy["cases"][number]) =>
+      area ? (r.reference_area_m2 ?? 0) * 10000 : 1;
+    const fine = points.find((r) => r.label === "grid_fine");
+    const commonArea = fine?.reference_area_m2;
+    const accepted =
+      commonArea != null &&
+      points.filter(
+        (r) =>
+          r.label.startsWith("grid_") &&
+          r.acceptance === "accepted" &&
+          r.reference_area_m2 === commonArea,
+      ).length === 3;
+    const gci = study.gci?.status === "monotonic" ? study.gci.gci_fine_pct : null;
+    const fineValue = fine?.cd != null ? fine.cd * scale(fine) : null;
+    const uncertainty =
+      !speed && accepted && gci != null && fineValue != null
+        ? (Math.abs(fineValue) * gci) / 100
+        : null;
     return {
       animation: false,
       textStyle: { fontFamily: t.mono },
       grid: { left: 50, right: 20, top: 24, bottom: 40 },
-      tooltip: { trigger: "axis" },
+      tooltip: { ...chartTooltip(t), trigger: "axis" },
       xAxis: {
+        ...chartAxis(t),
         type: speed ? "value" : "log",
         name: speed ? "speed (m/s)" : "cells (log)",
         nameLocation: "middle",
@@ -29,26 +59,42 @@ function StudyChart({ study, speed = false }: { study: GridStudy; speed?: boolea
         axisLabel: { color: t.muted },
       },
       yAxis: {
+        ...chartAxis(t),
         type: "value",
         scale: true,
-        name: "Cd",
+        name: area ? "CdA (cm²)" : "Cd (1)",
         axisLabel: { color: t.muted },
-        splitLine: { lineStyle: { color: t.line } },
       },
       series: [
         {
           type: "line",
-          data: points.map((r) => [x(r), r.cd]),
+          data: points.map((r) => [x(r), r.cd! * scale(r)]),
           itemStyle: { color: t.brand },
           markLine:
-            !speed && study.gci?.extrapolated_cd != null
+            !speed && accepted && fine && study.gci?.extrapolated_cd != null
               ? {
                   symbol: "none",
                   lineStyle: { type: "dashed", color: t.muted },
-                  data: [{ yAxis: study.gci.extrapolated_cd, name: "extrapolated Cd" }],
+                  data: [{ yAxis: study.gci.extrapolated_cd * scale(fine), name: "Extrapolated" }],
                 }
               : undefined,
         },
+        ...(fine && fineValue != null && uncertainty != null
+          ? [
+              {
+                name: "Fine-grid GCI",
+                type: "line",
+                symbol: "rect",
+                symbolSize: [14, 2],
+                itemStyle: { color: t.risk },
+                lineStyle: { color: t.risk, type: "dashed" },
+                data: [
+                  [x(fine), fineValue - uncertainty],
+                  [x(fine), fineValue + uncertainty],
+                ],
+              },
+            ]
+          : []),
         ...points
           .filter((r) => r.ci95 != null)
           .map((r) => ({
@@ -58,14 +104,14 @@ function StudyChart({ study, speed = false }: { study: GridStudy; speed?: boolea
             symbolSize: [8, 2],
             lineStyle: { color: t.brand },
             data: [
-              [x(r), r.ci95?.[0]],
-              [x(r), r.ci95?.[1]],
+              [x(r), r.ci95![0] * scale(r)],
+              [x(r), r.ci95![1] * scale(r)],
             ],
           })),
       ],
     };
-  }, [study, speed]);
-  const hasData = rows.some((r) => r.cd != null);
+  }, [study, speed, area]);
+  const hasData = rows.some((r) => r.cd != null && (!area || r.reference_area_m2 != null));
   return (
     <div className="relative h-56 w-full">
       <div
@@ -73,14 +119,16 @@ function StudyChart({ study, speed = false }: { study: GridStudy; speed?: boolea
         role="img"
         aria-label={
           speed
-            ? "Cd versus speed with numerical mean confidence intervals"
-            : "Cd versus mesh cells with numerical mean confidence intervals"
+            ? `${area ? "CdA" : "Cd"} versus speed with numerical mean confidence intervals`
+            : `${area ? "CdA" : "Cd"} versus mesh cells with numerical mean confidence intervals`
         }
         className="h-full w-full"
       />
       {!hasData && (
         <p className="absolute inset-0 flex items-center justify-center bg-card text-sm text-muted-foreground">
-          Waiting for solver results. No values are inferred.
+          {area
+            ? "Waiting for solver results with a recorded reference area."
+            : "Waiting for solver results. No values are inferred."}
         </p>
       )}
     </div>
@@ -89,6 +137,7 @@ function StudyChart({ study, speed = false }: { study: GridStudy; speed?: boolea
 
 export function GridStudyPanel() {
   const [selected, setSelected] = useState("");
+  const [coefficient, setCoefficient] = useState<"cd" | "cda">("cd");
   const studies = useQuery({ queryKey: ["studies"], queryFn: listStudies, refetchInterval: 15000 });
   const study = studies.data?.find((s) => s.study_id === selected) ?? studies.data?.[0];
   const gci = study?.gci?.gci_fine_pct;
@@ -149,9 +198,23 @@ export function GridStudyPanel() {
               "All three grid cases must pass numerical quality gates before extrapolation."}{" "}
             {study.note}
           </p>
+          <SegmentedControl
+            label="Drag measure"
+            options={[
+              { value: "cd", label: "Cd (1)" },
+              { value: "cda", label: "CdA (cm²)" },
+            ]}
+            value={coefficient}
+            onChange={setCoefficient}
+          />
+          <p className="text-xs text-muted-foreground">
+            Solid bars show solver-window 95% confidence intervals. The dashed fine-grid bar is
+            discretisation GCI and appears only for three accepted refinements with a common
+            reference area.
+          </p>
           <div className="grid gap-4 md:grid-cols-2">
-            <StudyChart study={study} />
-            <StudyChart study={study} speed />
+            <StudyChart study={study} area={coefficient === "cda"} />
+            <StudyChart study={study} speed area={coefficient === "cda"} />
           </div>
           <div className="overflow-x-auto">
             <Table aria-label="Grid-study cases" className="w-full text-xs">
@@ -200,6 +263,7 @@ export function GridStudyPanel() {
           )}
         </div>
       )}
+      <ConditionSweep />
     </Panel>
   );
 }

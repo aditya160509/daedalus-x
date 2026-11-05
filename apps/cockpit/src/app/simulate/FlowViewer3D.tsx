@@ -4,6 +4,8 @@
 // Layers are VTK XML files the API exports per run: /v1/cfd/runs/{id}/vtk/{layer}.
 import "@kitware/vtk.js/Rendering/Profiles/Geometry";
 import "@kitware/vtk.js/Rendering/Profiles/Volume";
+import "@kitware/vtk.js/Rendering/Profiles/LIC";
+import vtkSurfaceLICMapper from "@kitware/vtk.js/Rendering/Core/SurfaceLICMapper";
 import vtkXMLImageDataReader from "@kitware/vtk.js/IO/XML/XMLImageDataReader";
 import vtkXMLPolyDataReader from "@kitware/vtk.js/IO/XML/XMLPolyDataReader";
 import vtkGenericRenderWindow from "@kitware/vtk.js/Rendering/Misc/GenericRenderWindow";
@@ -139,12 +141,23 @@ export function FlowViewer3D({
       array: string,
       preset: string,
       range: readonly [number, number],
+      mode?: "lic" | "separation",
     ) => (() => void) | null;
   } | null>(null);
   const [layers, setLayers] = useState<Layers>(INITIAL);
   const [status, setStatus] = useState<string>("loading");
   const [wake, setWake] = useState("off");
   const [vortex, setVortex] = useState(false);
+  const [wall, setWall] = useState<"off" | "lic" | "separation">("off");
+  const [wallReport, setWallReport] = useState<{
+    runId: string;
+    mode: string;
+    message: string;
+    ready: boolean;
+  } | null>(null);
+  const currentWall = wallReport?.runId === runId && wallReport.mode === wall ? wallReport : null;
+  const wallReady = currentWall?.ready ?? false;
+  const wallStatus = wall === "off" ? "" : (currentWall?.message ?? "Loading wall shear…");
   const [wakeStatus, setWakeStatus] = useState("");
   const [vortexStatus, setVortexStatus] = useState("");
   const [otherRun, setOtherRun] = useState("");
@@ -256,6 +269,7 @@ export function FlowViewer3D({
         array: string,
         preset: string,
         range: readonly [number, number],
+        mode?: "lic" | "separation",
       ) => {
         const reader = vtkXMLPolyDataReader.newInstance();
         try {
@@ -270,11 +284,24 @@ export function FlowViewer3D({
           reader.delete();
           return null;
         }
-        const actor = colored(data, array, false);
+        const actor = mode === "lic" ? vtkActor.newInstance() : colored(data, array, false);
+        if (mode === "lic") {
+          const mapper = vtkSurfaceLICMapper.newInstance();
+          mapper.setInputData(data);
+          mapper.setInputArrayToProcess(0, "traction", "PointData", "Vectors");
+          mapper.setScalarVisibility(false);
+          const lic = mapper.getLicInterface();
+          lic.setEnableLIC(true);
+          lic.setNumberOfSteps(18);
+          lic.setLICIntensity(0.65);
+          actor.setMapper(mapper);
+          renderer.addActor(actor);
+        }
         const mapper = actor.getMapper()!;
         const lookup = lut(preset, range);
         mapper.setLookupTable(lookup);
-        actor.getProperty().setOpacity(0.8);
+        actor.getProperty().setOpacity(mode ? 1 : 0.8);
+        if (mode === "separation") actor.getProperty().setLineWidth(3);
         win.render();
         const dispose = () => {
           if (!insightDisposers.delete(dispose)) return;
@@ -323,7 +350,9 @@ export function FlowViewer3D({
   useEffect(() => {
     const sc = scene.current;
     if (!sc || status !== "ready") return;
-    sc.surface.setVisibility(layers.surface.visible && !comparison);
+    sc.surface.setVisibility(
+      layers.surface.visible && !comparison && !(wall === "lic" && wallReady),
+    );
     const surfaceLut = lut(layers.surface.preset, FIELDS.Cp[1]);
     sc.surface.getMapper()!.setLookupTable(surfaceLut);
     sc.lookups.surface?.delete();
@@ -349,7 +378,7 @@ export function FlowViewer3D({
     sc.lookups.slice = sliceLut;
     sc.slice.setVisibility(visible);
     sc.render();
-  }, [layers, status, comparison]);
+  }, [layers, status, comparison, wall, wallReady]);
 
   useEffect(() => {
     const sc = scene.current;
@@ -436,6 +465,52 @@ export function FlowViewer3D({
 
   useEffect(() => {
     const sc = scene.current;
+    if (!sc || status !== "ready" || wall === "off") return;
+    const controller = new AbortController();
+    let remove: (() => void) | null = null;
+    void Promise.resolve()
+      .then(async () => {
+        if (controller.signal.aborted) return;
+        const gl =
+          wall === "lic" ? host.current?.querySelector("canvas")?.getContext("webgl2") : null;
+        if (
+          wall === "lic" &&
+          (!gl?.getExtension("EXT_color_buffer_float") ||
+            !gl.getExtension("OES_texture_float_linear"))
+        ) {
+          throw new Error("Surface LIC needs WebGL 2 with floating-point render textures.");
+        }
+        const buffer = await fetchLayer(
+          runId,
+          wall === "lic" ? "wall.vtp" : "separation.vtp",
+          controller.signal,
+        );
+        if (controller.signal.aborted) return;
+        remove = sc.addInsight(buffer, "candidate", "Inferno (matplotlib)", [0, 1], wall);
+        setWallReport({
+          runId,
+          mode: wall,
+          ready: Boolean(remove),
+          message: remove ? "" : "No candidate lines in this field.",
+        });
+      })
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted)
+          setWallReport({
+            runId,
+            mode: wall,
+            ready: false,
+            message: error instanceof Error ? error.message : String(error),
+          });
+      });
+    return () => {
+      controller.abort();
+      remove?.();
+    };
+  }, [runId, status, wall]);
+
+  useEffect(() => {
+    const sc = scene.current;
     if (!sc || status !== "ready" || !vortex) {
       setVortexStatus("");
       return;
@@ -447,7 +522,7 @@ export function FlowViewer3D({
     fetchLayer(runId, "vortex.vtp", controller.signal)
       .then((buffer) => {
         if (cancelled) return;
-        remove = sc.addInsight(buffer, "U_Uinf", "jet", FIELDS.U_Uinf[1]);
+        remove = sc.addInsight(buffer, "omega_L_Uinf", "jet", [0, 100]);
         setVortexStatus(remove ? "" : "No Q isosurface at the selected levels.");
       })
       .catch((error: unknown) => {
@@ -666,6 +741,32 @@ export function FlowViewer3D({
           )}
         </section>
         <section className="space-y-2 rounded-lg border p-2.5">
+          <label htmlFor="wall-layer" className="font-medium">
+            Wall shear diagnostics
+          </label>
+          <select
+            id="wall-layer"
+            value={wall}
+            className="w-full rounded border bg-transparent px-1 py-0.5"
+            onChange={(event) => {
+              const value = event.target.value;
+              if (value === "off" || value === "lic" || value === "separation") {
+                setWallReport(null);
+                setWall(value);
+              }
+            }}
+          >
+            <option value="off">Off</option>
+            <option value="lic">Surface LIC</option>
+            <option value="separation">Separation candidates</option>
+          </select>
+          <p className="text-muted-foreground">
+            LIC follows simulated wall traction. Candidate lines mark low shear near streamwise
+            reversal and can also indicate attachment.
+          </p>
+          {wallStatus && <p role="status">{wallStatus}</p>}
+        </section>
+        <section className="space-y-2 rounded-lg border p-2.5">
           <label className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -675,10 +776,10 @@ export function FlowViewer3D({
             Q-criterion surfaces
           </label>
           <div className="h-2 rounded-sm" style={{ background: gradient("jet") }} />
-          <p className="font-mono text-muted-foreground">U/U∞: 0 to 1.25 [1]</p>
+          <p className="font-mono text-muted-foreground">|ω| L/U∞: 0 to 100 [1]</p>
           <p className="text-muted-foreground">
-            Isosurfaces at Q/(U∞/L)² = 50 and 200; coloured by speed ratio. Fixed thresholds can
-            miss weaker structures.
+            Isosurfaces at Q/(U∞/L)² = 50 and 200; coloured by vorticity magnitude. Fixed thresholds
+            can miss weaker structures.
           </p>
           {vortexStatus && <p role="status">{vortexStatus}</p>}
           {vortex && !vortexStatus && (

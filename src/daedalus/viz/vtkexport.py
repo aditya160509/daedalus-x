@@ -23,8 +23,11 @@ import pyvista as pv
 import vtk
 
 from . import CAR_GROUPS, _reader
+from .surface import separation_flags
 
-Layer = Literal["surface", "streamlines", "volume", "wake1", "wake1p5", "wake2", "vortex"]
+Layer = Literal[
+    "surface", "streamlines", "volume", "wake1", "wake1p5", "wake2", "vortex", "wall", "separation"
+]
 WAKE_POSITIONS = {"wake1": 1.0, "wake1p5": 1.5, "wake2": 2.0}
 LAYERS: dict[str, str] = {
     "surface": "vtp",
@@ -32,8 +35,10 @@ LAYERS: dict[str, str] = {
     "volume": "vti",
     **dict.fromkeys(WAKE_POSITIONS, "vtp"),
     "vortex": "vtp",
+    "wall": "vtp",
+    "separation": "vtp",
 }
-EXPORT_VERSION = 4
+EXPORT_VERSION = 6
 GRID_MAX = 64
 SURFACE_TARGET_CELLS = 120_000
 VELOCITY_COMPONENTS = ("u_over_uinf", "v_over_uinf", "w_over_uinf", "valid")
@@ -77,6 +82,39 @@ def _surface(boundary: pv.MultiBlock, groups: list[str], q: float) -> pv.PolyDat
         half = half.decimate_pro(reduction, preserve_topology=True)
     out = _mirror(half).compute_normals(auto_orient_normals=True, cell_normals=False)
     return out
+
+
+def _wall_field(boundary: pv.MultiBlock, groups: list[str], *, separation: bool) -> pv.PolyData:
+    parts = []
+    for group in groups:
+        block = boundary[group]
+        if not isinstance(block, pv.DataSet) or "wallShearStress" not in block.point_data:
+            raise ValueError(f"wall shear is unavailable on patch {group!r}")
+        mesh = block.extract_surface(algorithm="dataset_surface").triangulate()
+        traction = -np.asarray(mesh.point_data["wallShearStress"], dtype=np.float64)
+        mesh.clear_data()
+        if separation:
+            flags = separation_flags(mesh, traction).astype(bool)
+            faces = mesh.faces.reshape(-1, 4)[:, 1:]
+            edges = np.vstack([faces[:, [0, 1]], faces[:, [1, 2]], faces[:, [2, 0]]])
+            edges = np.unique(np.sort(edges[flags[edges].all(axis=1)], axis=1), axis=0)
+            if edges.size:
+                lines = np.column_stack([np.full(len(edges), 2), edges]).ravel()
+                part = pv.PolyData(mesh.points, lines=lines).clean()
+                part.point_data["candidate"] = np.ones(part.n_points, dtype=np.float32)
+                parts.append(part)
+        else:
+            mesh.point_data["traction"] = traction.astype(np.float32)
+            mesh.point_data.active_vectors_name = "traction"
+            parts.append(mesh)
+    if not parts:
+        return pv.PolyData()
+    half = pv.merge(parts).clean()
+    if not separation:
+        half.point_data.active_vectors_name = "traction"
+        if half.n_cells > SURFACE_TARGET_CELLS // 2:
+            half = half.decimate_pro(1 - (SURFACE_TARGET_CELLS // 2) / half.n_cells)
+    return _mirror(half)
 
 
 def _streamlines(internal: pv.UnstructuredGrid, car: dict, u_inf: float) -> pv.PolyData:
@@ -163,17 +201,21 @@ def _wake_plane(
 
 
 def _vortices(internal: pv.UnstructuredGrid, car: dict, u_inf: float) -> pv.PolyData:
-    """Q isosurfaces at Q/(U∞/L)² = 50 and 200, colored by speed ratio."""
+    """Q isosurfaces at Q/(U∞/L)² = 50 and 200, colored by dimensionless vorticity magnitude."""
     length = float(car["length_m"])
-    derived = internal.compute_derivative(scalars="U", gradient=False, qcriterion=True)
+    derived = internal.compute_derivative(
+        scalars="U", gradient=False, qcriterion=True, vorticity=True
+    )
     surface = derived.contour(
         [50 * (u_inf / length) ** 2, 200 * (u_inf / length) ** 2], scalars="qcriterion"
     )
     if not surface.n_points:
         return pv.PolyData()
-    speed = np.linalg.norm(np.asarray(surface.point_data["U"], float), axis=1) / u_inf
+    omega = (
+        np.linalg.norm(np.asarray(surface.point_data["vorticity"], float), axis=1) * length / u_inf
+    )
     surface.clear_data()
-    surface.point_data["U_Uinf"] = speed.astype(np.float32)
+    surface.point_data["omega_L_Uinf"] = omega.astype(np.float32)
     if surface.n_cells > SURFACE_TARGET_CELLS // 2:
         surface = surface.decimate_pro(1 - (SURFACE_TARGET_CELLS // 2) / surface.n_cells)
     return _mirror(surface)
@@ -288,10 +330,12 @@ def export_layer(case: Path, layer: str, cache_dir: Path | None = None) -> Path:
     ):
         raise ValueError("run manifest needs positive finite reference speed and car length")
     groups = [g for g in car["groups"] if g in CAR_GROUPS]
-    mesh = _reader(case, groups if layer == "surface" else [])
+    mesh = _reader(case, groups if layer in ("surface", "wall", "separation") else [])
     internal = mesh["internalMesh"]
     if layer == "surface":
         data: pv.DataSet = _surface(mesh["boundary"], groups, q)
+    elif layer in ("wall", "separation"):
+        data = _wall_field(mesh["boundary"], groups, separation=layer == "separation")
     elif layer == "streamlines":
         data = _streamlines(internal, car, u_inf)
     elif layer == "volume":

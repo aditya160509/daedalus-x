@@ -52,3 +52,14 @@ def test_bad_inputs_are_rejected() -> None:
     weak = Car(ThrustCurve.constant(0.01, 0.05), mass_kg=0.055, cda_m2=4e-4, crr=0.05)
     with pytest.raises(RaceAnalysisError, match="finish"):
         time_budget(weak)
+
+
+def test_sobol_ranks_thrust_and_returns_sampling_intervals() -> None:
+    from daedalus.raceanalysis import sobol_time
+
+    result = sobol_time(CAR)
+    rows = result["rows"]
+    assert isinstance(rows, list) and len(rows) == 4
+    by_name = {row["name"]: row for row in rows}
+    assert by_name["thrust"]["total_order"] > by_name["cda"]["total_order"]
+    assert all(row["total_order_ci95"] >= 0 for row in rows)

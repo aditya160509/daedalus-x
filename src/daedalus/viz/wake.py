@@ -21,7 +21,7 @@ from . import _reader
 RHO = 1.204
 STATIONS = (0.25, 0.5, 1.0)  # distance behind the car, in car lengths
 NY, NZ = 48, 32
-VERSION = 1
+VERSION = 2
 
 
 def _plane(car: dict[str, Any], x: float) -> tuple[np.ndarray, float, int, int]:
@@ -40,6 +40,7 @@ def survey(internal: pv.DataSet, car: dict[str, Any], u_inf: float) -> dict[str,
     q = 0.5 * u_inf**2
     stations = []
     loss_map: list[list[float | None]] | None = None
+    deficit_map: list[list[float | None]] | None = None
     for s in STATIONS:
         pts, da, ny, nz = _plane(car, length + s * length)
         sampled = pv.PolyData(pts).sample(internal)
@@ -55,14 +56,20 @@ def survey(internal: pv.DataSet, car: dict[str, Any], u_inf: float) -> dict[str,
             {
                 "x_over_L": s,
                 "drag_n": drag,
-                "max_velocity_deficit": float(np.nanmax(deficit)),
+                "max_velocity_deficit": float(np.max(deficit[valid])) if valid.any() else 0.0,
                 "wake_area_cm2": float(np.sum(np.nan_to_num(cpt) > 0.05) * da * 1e4),
                 "valid_fraction": float(valid.mean()),
             }
         )
         if loss_map is None:
-            grid = cpt.reshape(nz, ny)
-            loss_map = [[None if np.isnan(v) else round(float(v), 4) for v in row] for row in grid]
+            loss_map = [
+                [round(float(v), 4) if np.isfinite(v) else None for v in row]
+                for row in cpt.reshape(nz, ny)
+            ]
+            deficit_map = [
+                [round(float(v), 4) if np.isfinite(v) else None for v in row]
+                for row in deficit.reshape(nz, ny)
+            ]
     w, h = car["width_m"], car["height_m"]
     return {
         "version": VERSION,
@@ -72,6 +79,7 @@ def survey(internal: pv.DataSet, car: dict[str, Any], u_inf: float) -> dict[str,
             "y_mm": np.linspace(-(w / 2 + 0.04), w / 2 + 0.04, NY).__mul__(1e3).round(2).tolist(),
             "z_mm": np.linspace(0.0005, h + 0.05, NZ).__mul__(1e3).round(2).tolist(),
             "cpt_loss": loss_map,
+            "velocity_deficit": deficit_map,
         },
         "provenance": "simulated",
     }

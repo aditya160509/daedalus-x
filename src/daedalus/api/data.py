@@ -565,6 +565,13 @@ def bayesian_calibration(req: BayesianCalibrationRequest) -> dict[str, object]:
                     "p05_s": float(low),
                     "p95_s": float(high),
                     "error_s": float(median - run.time_s),
+                    "predictive_rank": float(
+                        (
+                            np.count_nonzero(draws < run.time_s)
+                            + 0.5 * np.count_nonzero(draws == run.time_s)
+                        )
+                        / draws.size
+                    ),
                 }
             )
         results: dict[str, object] = {

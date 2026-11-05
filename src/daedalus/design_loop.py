@@ -53,6 +53,7 @@ def _build(
         parametric.write_step(unit, dimensions, source)
         report = geometry.import_car(source, directory, forward_axis="-X", up_axis="+Z")
         checks = forge.check_design(directory, rulebook)
+        observations = oracle.Campaign(root).load()
         manifest = {
             "generator": parametric.VERSION,
             "baseline": baseline.name,
@@ -60,7 +61,12 @@ def _build(
             "unit": unit,
             "parameters": [p.model_dump() for p in parameters],
             "provenance": "estimated",
-            "campaign_observations": [asdict(o) for o in oracle.Campaign(root).load()],
+            "campaign_observations": [asdict(o) for o in observations],
+            "forecast": oracle.forecast(observations, unit),
+            "surface_hashes": {
+                file.name: sha256_of(file.read_bytes())
+                for file in (directory / "cfd").glob("*.stl")
+            },
             "warnings": [
                 "Parametric study family, not a reconstruction of the manufactured car",
                 "Halo, tether features, loads and manufacturing tolerances need engineering review",

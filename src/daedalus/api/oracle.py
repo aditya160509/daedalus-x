@@ -2,18 +2,21 @@
 
 from __future__ import annotations
 
+import json
 from functools import lru_cache
 from typing import Annotated, Literal
 
 import numpy as np
-from fastapi import APIRouter
-from pydantic import BaseModel, ConfigDict, Field
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from daedalus import montecarlo, oracle
-from daedalus.api.engineering import data_root
+from daedalus import contracts as c
+from daedalus import geometry, montecarlo, oracle
+from daedalus.api.engineering import _safe_dir, data_root
 from daedalus.contracts import Provenance
 from daedalus.dynamics import ThrustCurve
 from daedalus.oracle_benchmark import BenchmarkSpec
+from daedalus.store import EvidenceStore
 
 router = APIRouter(prefix="/v1/oracle", tags=["oracle"])
 
@@ -293,3 +296,141 @@ def diagnostics() -> dict[str, object]:
         return _diagnostics(snapshot)
     except (ValueError, np.linalg.LinAlgError) as exc:
         raise HTTPException(409, str(exc)) from exc
+
+
+UnitPoint = Annotated[
+    list[Annotated[float, Field(ge=0, le=1)]],
+    Field(min_length=oracle.DIM, max_length=oracle.DIM),
+]
+
+
+class AcquisitionDecision(BaseModel):
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False, str_strip_whitespace=True)
+    action: Literal["proceed", "edit", "veto"]
+    unit: UnitPoint
+    edited_unit: UnitPoint | None = None
+    reason: str = Field(min_length=3, max_length=400)
+
+    @model_validator(mode="after")
+    def validate_edit(self) -> AcquisitionDecision:
+        if (self.action == "edit") != (self.edited_unit is not None):
+            raise ValueError("Supply revised parameters only for an edit")
+        if self.edited_unit is not None and (
+            self.edited_unit == self.unit
+            or not oracle.study_feasible(np.asarray(self.edited_unit))[0]
+        ):
+            raise ValueError("Edit must change a parameter and stay within the study bounds")
+        return self
+
+
+@router.get("/acquisition")
+def acquisition_history() -> list[dict[str, object]]:
+    store = EvidenceStore(data_root())
+    try:
+        records = [a for a in store.records(c.Artifact) if a.kind == "oracle_acquisition"][-100:]
+        return [
+            {
+                **json.loads(store.read_artifact(a.artifact_id)),
+                "id": a.artifact_id,
+                "created_at": a.created_at.isoformat(),
+            }
+            for a in records
+        ]
+    finally:
+        store.close()
+
+
+@router.post("/acquisition", status_code=201)
+def record_acquisition(decision: AcquisitionDecision) -> dict[str, str]:
+    from daedalus.api.cad import PROJECT_ID
+
+    root = data_root()
+    obs = oracle.Campaign(root).load()
+    record = {
+        **decision.model_dump(),
+        "campaign_observations": len(obs),
+        **oracle.forecast(obs, tuple(decision.unit)),
+    }
+    store = EvidenceStore(root)
+    try:
+        if not store.exists(PROJECT_ID):
+            raise HTTPException(409, "Import a project design before recording a decision")
+        artifact = store.put_artifact(
+            json.dumps(record, allow_nan=False).encode(),
+            kind="oracle_acquisition",
+            source_entity_id=PROJECT_ID,
+            provenance=c.Provenance.ESTIMATED,
+        )
+        return {"id": artifact.artifact_id}
+    finally:
+        store.close()
+
+
+@router.get("/candidate-forecasts")
+def candidate_forecasts() -> list[str]:
+    store = EvidenceStore(data_root())
+    try:
+        records = [a for a in store.records(c.Artifact) if a.kind == "oracle_candidate"][-100:]
+        return [
+            a.source_entity_id
+            for a in reversed(records)
+            if "forecast" in json.loads(store.read_artifact(a.artifact_id))
+        ]
+    finally:
+        store.close()
+
+
+@router.get("/candidate-score")
+def candidate_score(design: str, run: str) -> dict[str, object]:
+    _safe_dir("designs", design)
+    case = _safe_dir("runs", run)
+    store = EvidenceStore(data_root())
+    try:
+        record = next(
+            (
+                a
+                for a in store.records(c.Artifact)
+                if a.kind == "oracle_candidate" and a.source_entity_id == design
+            ),
+            None,
+        )
+        if record is None:
+            raise HTTPException(404, "No candidate forecast")
+        snapshot = json.loads(store.read_artifact(record.artifact_id))
+        forecast = snapshot.get("forecast")
+    finally:
+        store.close()
+    if not forecast:
+        raise HTTPException(404, "Candidate was built before prospective forecasts were captured")
+    try:
+        result = json.loads((case / "daedalus_result.json").read_text())
+        manifest = json.loads((case / "daedalus_manifest.json").read_text())
+        if not result.get("succeeded") or result.get("acceptance") != "accepted":
+            raise ValueError("Select an accepted completed CFD run")
+        source = snapshot.get("surface_hashes")
+        solved = {
+            p.name: geometry.sha256_file(p) for p in (case / "constant/triSurface").glob("*.stl")
+        }
+        if not source or source != solved:
+            raise ValueError("Candidate and run do not share identical CFD surface hashes")
+        area = float(manifest["reference"]["Aref_full_m2"])
+        cd = result.get("cd_mean") if result.get("cd_mean") is not None else result.get("cd")
+        speed = float(manifest["reference"]["U_m_s"])
+        actual = float(cd) * area
+        if (
+            area <= 0
+            or speed <= 0
+            or not np.isfinite(speed)
+            or not np.isfinite(actual)
+            or actual <= 0
+        ):
+            raise ValueError("Run has no positive accepted drag area")
+    except (ValueError, OSError, KeyError, TypeError) as exc:
+        raise HTTPException(422, str(exc)) from exc
+    return {
+        **forecast,
+        "actual_cda_m2": actual,
+        "speed_m_s": speed,
+        "design": design,
+        "run": run,
+    }

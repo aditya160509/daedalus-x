@@ -24,7 +24,13 @@ import {
 import { comparisonRows, type StudyComparisonRow } from "@/lib/calibrationCompare";
 import { estimateThrust, parseThrustCsv, type ThrustTrace } from "@/lib/thrust";
 import { outlierRowIndices } from "@/lib/timingRows";
-import { CalibrationDensity, HeldOutPlot, PosteriorIntervals } from "./CalibrationPlots";
+import {
+  CalibrationDensity,
+  HeldOutPlot,
+  PosteriorIntervals,
+  PredictiveDiagnostics,
+  RepeatRunControl,
+} from "./CalibrationPlots";
 
 type TimingPreview = TimingImport & {
   /** Saved studies do not store the importer's flags; say so instead of inventing them. */
@@ -750,6 +756,14 @@ export function CalibrationPanel() {
                 </div>
               );
             })}
+          {training &&
+            training.rows.length >= 5 &&
+            new Set(training.rows.map((r) => r.mass_kg ?? values.mass / 1000)).size === 1 && (
+              <section className="space-y-2">
+                <h3 className="text-sm font-medium">Repeat-run control chart</h3>
+                <RepeatRunControl times={training.rows.map((r) => r.time_s)} />
+              </section>
+            )}
           {training && training.rows.length > 30 && (
             <p role="alert">At most 30 calibration runs per calculation.</p>
           )}
@@ -849,6 +863,7 @@ export function CalibrationPanel() {
               )}
               {result.held_out.length ? (
                 <div className="space-y-2">
+                  <PredictiveDiagnostics rows={result.held_out} />
                   <HeldOutPlot
                     rows={result.held_out}
                     labels={result.held_out.map((_, index) => `held-out row ${index + 1}`)}

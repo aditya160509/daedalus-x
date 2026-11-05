@@ -325,7 +325,7 @@ function RunView({
           <div className="flex min-h-0 flex-1 flex-col gap-3">
             <Panel
               title="Drag convergence"
-              description="Cd per iteration, axis fitted to the settled half (scroll to zoom). Accepted only if Cd varies under 1% in the shaded window."
+              description="Cd per iteration, axis fitted to the settled half (scroll to zoom). The shaded window identifies the final steady acceptance interval."
               className="min-h-0 flex-1"
               actions={<ProvenanceBadge value="simulated" />}
             >
@@ -343,6 +343,22 @@ function RunView({
                 <Waiting />
               )}
             </Panel>
+            {result?.acceptance_mode !== "averaged" && result?.cd_window_spread != null && (
+              <div className="rounded-md border px-3 py-2 text-xs">
+                <span className="font-medium">Steady Cd gate</span>
+                <span
+                  className={cn(
+                    "ml-2 font-mono",
+                    result.cd_window_spread <= 0.01 ? "text-ok" : "text-risk",
+                  )}
+                >
+                  {(100 * result.cd_window_spread).toFixed(2)}% relative spread
+                </span>
+                <span className="ml-2 border-l border-dashed pl-2 text-muted-foreground">
+                  Limit 1.00% over the final window
+                </span>
+              </div>
+            )}
             <Panel
               title="Residuals"
               actions={<ProvenanceBadge value="simulated" />}

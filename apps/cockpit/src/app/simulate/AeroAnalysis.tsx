@@ -12,7 +12,7 @@ import {
   echarts,
   useECharts,
 } from "@/components/charts/useECharts";
-import { type CfdRunDetail, getCfdWake, listCfdRuns, probeCfdCp } from "@/lib/api";
+import { type CfdRunDetail, getCfdWake, getCfdRun, listCfdRuns, probeCfdCp } from "@/lib/api";
 
 echarts.use([PieChart, ScatterChart, HeatmapChart, VisualMapComponent, MarkLineComponent]);
 
@@ -386,11 +386,24 @@ function WakeDrag({
 }
 
 /** Total-pressure loss behind the car, looking upstream: where the drag is lost. */
-function WakeLossMap({ y, z, loss }: { y: number[]; z: number[]; loss: (number | null)[][] }) {
+function WakeLossMap({
+  y,
+  z,
+  loss,
+  label = "Cp₀ loss",
+  signed = false,
+}: {
+  y: number[];
+  z: number[];
+  loss: (number | null)[][];
+  label?: string;
+  signed?: boolean;
+}) {
   const host = useECharts(() => {
     const t = chartTheme();
     const data: [number, number, number][] = [];
     loss.forEach((row, j) => row.forEach((v, i) => v != null && data.push([i, j, v])));
+    const limit = signed ? Math.max(0.01, ...data.map(([, , v]) => Math.abs(v))) : 1;
     return {
       animation: false,
       grid: { left: 48, right: 72, top: 12, bottom: 36 },
@@ -398,7 +411,7 @@ function WakeLossMap({ y, z, loss }: { y: number[]; z: number[]; loss: (number |
       tooltip: {
         ...chartTooltip(t),
         formatter: (p: { value: [number, number, number] }) =>
-          `y ${y[p.value[0]].toFixed(0)} mm · z ${z[p.value[1]].toFixed(0)} mm<br/>Cp₀ loss ${p.value[2].toFixed(2)}`,
+          `y ${y[p.value[0]].toFixed(0)} mm · z ${z[p.value[1]].toFixed(0)} mm<br/>${label} ${p.value[2].toFixed(3)} [1]`,
       },
       xAxis: {
         type: "category",
@@ -417,23 +430,27 @@ function WakeLossMap({ y, z, loss }: { y: number[]; z: number[]; loss: (number |
         axisLabel: { interval: 5, color: t.muted, fontSize: 10 },
       },
       visualMap: {
-        min: 0,
-        max: 1,
+        min: signed ? -limit : 0,
+        max: limit,
         calculable: true,
         right: 0,
         top: "middle",
         itemHeight: 120,
         textStyle: { color: t.muted, fontSize: 10 },
-        inRange: { color: ["#000000", "#1e3a8a", "#5b8cff", "#fbbf24", "#ef4444"] },
+        inRange: {
+          color: signed
+            ? ["#2166ac", "#e9eef3", "#b2182b"]
+            : ["#10182a", "#2856a5", "#75c3ea", "#f3e48c"],
+        },
       },
       series: [{ type: "heatmap", data, progressive: 0 }],
     };
-  }, [y, z, loss]);
-  return <div ref={host} className="h-72 w-full" />;
+  }, [y, z, loss, label, signed]);
+  return <div ref={host} className="h-72 w-full" role="img" aria-label={label} />;
 }
 
 /** Every aerodynamic output for the selected run on one page. */
-function CpProbe({ runId }: { runId: string }) {
+function CpProbe({ runId, lengthMm }: { runId: string; lengthMm: number }) {
   const [values, setValues] = useState(["0", "0", "40", "200", "0", "40"]);
   const probe = useMutation({
     mutationFn: (coords: number[]) => probeCfdCp(runId, coords.slice(0, 3), coords.slice(3)),
@@ -495,6 +512,18 @@ function CpProbe({ runId }: { runId: string }) {
             </label>
           ))}
         </div>
+        <Button
+          type="button"
+          disabled={probe.isPending}
+          onClick={() => {
+            const height = Number(values[2]);
+            const endpoints = [-20, 0, height, Math.round(lengthMm + 20), 0, height];
+            setValues(endpoints.map(String));
+            probe.mutate(endpoints.map((v) => v / 1000));
+          }}
+        >
+          Sample centreline at start height
+        </Button>
         <Button type="submit" disabled={probe.isPending}>
           {probe.isPending ? "Sampling…" : "Sample line"}
         </Button>
@@ -515,6 +544,119 @@ function CpProbe({ runId }: { runId: string }) {
         role="img"
         aria-label="Pressure coefficient along the probe line"
       />
+    </Panel>
+  );
+}
+
+function WakeComparison({
+  run,
+  baseWake,
+}: {
+  run: CfdRunDetail;
+  baseWake: Awaited<ReturnType<typeof getCfdWake>> | undefined;
+}) {
+  const [otherId, setOtherId] = useState("");
+  const runs = useQuery({ queryKey: ["cfd-runs"], queryFn: listCfdRuns });
+  const other = useQuery({
+    queryKey: ["analysis-comparison", otherId],
+    enabled: Boolean(otherId),
+    retry: false,
+    queryFn: async () => ({
+      run: await getCfdRun(otherId),
+      wake: await getCfdWake(otherId).catch(() => null),
+    }),
+  });
+  const a = baseWake?.loss_map;
+  const b = other.data?.wake?.loss_map;
+  const matches =
+    a &&
+    b &&
+    a.x_over_L === b.x_over_L &&
+    run.manifest.car.length_m === other.data?.run.manifest.car.length_m &&
+    a.y_mm.length === b.y_mm.length &&
+    a.z_mm.length === b.z_mm.length &&
+    a.y_mm.every((v, i) => v === b.y_mm[i]) &&
+    a.z_mm.every((v, i) => v === b.z_mm[i]);
+  const delta =
+    matches && a && b
+      ? a.cpt_loss.map((row, j) =>
+          row.map((value, i) => {
+            const compared = b.cpt_loss[j]?.[i];
+            return value == null || compared == null ? null : compared - value;
+          }),
+        )
+      : null;
+  const own = run.result?.forces_n ?? {};
+  const compared = other.data?.run.result?.forces_n ?? {};
+  const common = Object.keys(own).filter((key) => Object.hasOwn(compared, key));
+  return (
+    <Panel
+      title="Wake and force comparison"
+      actions={<ProvenanceBadge value="simulated" />}
+      description="Signed differences are comparison run minus selected run."
+      bodyClassName="space-y-3 p-3"
+    >
+      <label className="grid max-w-xs gap-1 text-xs">
+        Compare against
+        <select
+          value={otherId}
+          onChange={(e) => setOtherId(e.target.value)}
+          className="h-8 rounded border bg-background px-2"
+        >
+          <option value="">Select solved run…</option>
+          {runs.data
+            ?.filter((r) => r.run_id !== run.run_id && r.state === "succeeded")
+            .map((r) => (
+              <option key={r.run_id} value={r.run_id}>
+                {r.run_id}
+              </option>
+            ))}
+        </select>
+      </label>
+      {runs.error && (
+        <p role="alert" className="text-xs text-destructive">
+          {runs.error.message}
+        </p>
+      )}
+      {otherId && other.isPending && (
+        <p className="text-xs text-muted-foreground">Loading comparison…</p>
+      )}
+      {other.error && (
+        <p role="alert" className="text-xs text-destructive">
+          {other.error.message}
+        </p>
+      )}
+      {other.data && (
+        <>
+          <p className="text-xs text-muted-foreground">
+            Inlet: {run.manifest.reference.U_m_s} → {other.data.run.manifest.reference.U_m_s} m/s.
+            Force changes include any change in inlet or setup.
+          </p>
+          {common.length > 0 ? (
+            <GroupForces
+              forces={Object.fromEntries(
+                common.map((key) => [
+                  key,
+                  {
+                    drag_x: compared[key].drag_x - own[key].drag_x,
+                    lift_z: compared[key].lift_z - own[key].lift_z,
+                    side_y: compared[key].side_y - own[key].side_y,
+                  },
+                ]),
+              )}
+            />
+          ) : (
+            <p className="text-xs text-muted-foreground">No matching force groups.</p>
+          )}
+          {delta && a ? (
+            <WakeLossMap y={a.y_mm} z={a.z_mm} loss={delta} label="ΔCp₀ loss" signed />
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Wake comparison needs two available fields on the same station and sampling grid.
+            </p>
+          )}
+        </>
+      )}
     </Panel>
   );
 }
@@ -594,7 +736,9 @@ export function AeroAnalysis({ run }: { run: CfdRunDetail }) {
         />
       </div>
 
-      {run.state === "succeeded" && <CpProbe key={run.run_id} runId={run.run_id} />}
+      {run.state === "succeeded" && (
+        <CpProbe key={run.run_id} runId={run.run_id} lengthMm={1000 * run.manifest.car.length_m} />
+      )}
 
       {!accepted && r?.reasons?.length ? (
         <div className="rounded-lg border border-risk/30 px-4 py-3 text-[12px]">
@@ -647,7 +791,7 @@ export function AeroAnalysis({ run }: { run: CfdRunDetail }) {
           )}
           <Caption>
             {wakeMid && drag != null
-              ? `Wake recovers ${((wakeMid.drag_n / drag) * 100).toFixed(0)}% of surface drag at 0.5 L. Within ±15% means the forces are trustworthy.`
+              ? `Wake recovers ${((wakeMid.drag_n / drag) * 100).toFixed(0)}% of surface drag at 0.5 L. The ±15% band is a consistency check for this plane.`
               : "Independent check of the force integration."}
           </Caption>
         </Panel>
@@ -663,9 +807,31 @@ export function AeroAnalysis({ run }: { run: CfdRunDetail }) {
               loss={wake.data.loss_map.cpt_loss}
             />
             <Caption>
-              Bright cores are vortices and separated flow: each one is drag you can design out.
+              Bright regions have greater total-pressure loss. Use Q surfaces to identify vortical
+              structures.
             </Caption>
           </Panel>
+        )}
+        {wake.data && (
+          <Panel
+            title="Wake velocity deficit"
+            actions={<ProvenanceBadge value="simulated" />}
+            description="Streamwise speed deficit relative to the inlet."
+          >
+            <WakeLossMap
+              y={wake.data.loss_map.y_mm}
+              z={wake.data.loss_map.z_mm}
+              loss={wake.data.loss_map.velocity_deficit}
+              label="1 − Ux/U∞"
+              signed
+            />
+            <Caption>
+              Positive values indicate slower flow. Negative values indicate local acceleration.
+            </Caption>
+          </Panel>
+        )}
+        {run.state === "succeeded" && (
+          <WakeComparison key={run.run_id} run={run} baseWake={wake.data} />
         )}
         <Panel
           title="Forces by part"

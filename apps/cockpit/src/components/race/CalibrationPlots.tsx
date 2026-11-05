@@ -340,3 +340,163 @@ export function CalibrationDensity({
     />
   );
 }
+
+export function PredictiveDiagnostics({
+  rows,
+}: {
+  rows: (HeldOutRow & { predictive_rank?: number })[];
+}) {
+  const host = useECharts(() => {
+    const t = chartTheme();
+    const ranks = rows
+      .flatMap((r) => (r.predictive_rank == null ? [] : [r.predictive_rank]))
+      .toSorted((a, b) => a - b);
+    return {
+      animation: false,
+      grid: [
+        { left: 58, right: 25, top: 30, height: "32%" },
+        { left: 58, right: 25, top: "60%", bottom: 40 },
+      ],
+      tooltip: { ...chartTooltip(t), trigger: "axis" },
+      xAxis: [
+        {
+          ...chartAxis(t),
+          type: "category",
+          data: rows.map((_, i) => i + 1),
+          name: "Held-out row",
+        },
+        {
+          ...chartAxis(t),
+          type: "value",
+          min: 0,
+          max: 1,
+          gridIndex: 1,
+          name: "Predictive rank [1]",
+          nameLocation: "middle",
+          nameGap: 25,
+        },
+      ],
+      yAxis: [
+        { ...chartAxis(t), type: "value", name: "Error (ms)" },
+        { ...chartAxis(t), type: "value", min: 0, max: 1, gridIndex: 1, name: "Empirical CDF [1]" },
+      ],
+      series: [
+        {
+          type: "line",
+          data: rows.map((r) => +(r.error_s * 1000).toFixed(2)),
+          itemStyle: { color: t.brand },
+          markLine: {
+            silent: true,
+            symbol: "none",
+            lineStyle: { type: "dashed", color: t.muted },
+            data: [{ yAxis: 0 }],
+          },
+        },
+        {
+          type: "line",
+          xAxisIndex: 1,
+          yAxisIndex: 1,
+          showSymbol: false,
+          lineStyle: { type: "dashed", color: t.muted },
+          data: [
+            [0, 0],
+            [1, 1],
+          ],
+        },
+        {
+          type: "line",
+          xAxisIndex: 1,
+          yAxisIndex: 1,
+          step: "end",
+          showSymbol: false,
+          itemStyle: { color: t.brand },
+          data: ranks.length
+            ? [[0, 0], ...ranks.map((rank, i) => [rank, (i + 1) / ranks.length]), [1, 1]]
+            : [],
+        },
+      ],
+    };
+  }, [rows]);
+  return (
+    <figure className="space-y-1">
+      <div
+        ref={host}
+        className="h-96 w-full"
+        role="img"
+        aria-label="Held-out residual trend and posterior predictive rank distribution"
+      />
+      <figcaption className="text-xs text-muted-foreground">
+        Residuals follow upload order. Predictive ranks should be roughly uniform for a calibrated
+        model, but a small held-out set can vary substantially.
+      </figcaption>
+    </figure>
+  );
+}
+
+export function RepeatRunControl({ times }: { times: number[] }) {
+  const host = useECharts(() => {
+    const t = chartTheme();
+    const mean = times.reduce((sum, time) => sum + time, 0) / times.length;
+    const range =
+      times.slice(1).reduce((sum, time, i) => sum + Math.abs(time - times[i]), 0) /
+      (times.length - 1);
+    const upper = mean + (3 * range) / 1.128;
+    const lower = mean - (3 * range) / 1.128;
+    return {
+      animation: false,
+      grid: { left: 62, right: 34, top: 30, bottom: 39 },
+      tooltip: {
+        ...chartTooltip(t),
+        trigger: "axis",
+        valueFormatter: (v: number) => `${v.toFixed(4)} s`,
+      },
+      xAxis: {
+        ...chartAxis(t),
+        type: "category",
+        name: "Upload order",
+        nameLocation: "middle",
+        nameGap: 25,
+        data: times.map((_, i) => i + 1),
+      },
+      yAxis: {
+        ...chartAxis(t),
+        type: "value",
+        name: "Car time (s)",
+        scale: true,
+        min: Math.min(lower, ...times) - Math.max(range, 0.001),
+        max: Math.max(upper, ...times) + Math.max(range, 0.001),
+      },
+      series: [
+        {
+          type: "line",
+          data: times.map((value) => ({
+            value,
+            itemStyle: { color: value < lower || value > upper ? t.risk : t.brand },
+          })),
+          lineStyle: { color: t.brand },
+          markLine: {
+            symbol: "none",
+            silent: true,
+            lineStyle: { type: "dashed", color: t.muted },
+            label: { show: false },
+            data: [{ yAxis: lower }, { yAxis: mean }, { yAxis: upper }],
+          },
+        },
+      ],
+    };
+  }, [times]);
+  return (
+    <figure className="space-y-1">
+      <div
+        ref={host}
+        className="h-56 w-full"
+        role="img"
+        aria-label="Individuals control chart for ordered repeat-run timings"
+      />
+      <figcaption className="text-xs text-muted-foreground">
+        Measured upload · mean ± 3σ, with σ estimated from successive moving ranges. Limits are
+        exploratory. Use one stable car and setup in acquisition order.
+      </figcaption>
+    </figure>
+  );
+}
