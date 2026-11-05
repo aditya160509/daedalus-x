@@ -119,7 +119,10 @@ const readNarrow = () => window.matchMedia("(max-width: 1023px)").matches;
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const active = ALL.find((w) => (w.href === "/" ? pathname === "/" : pathname.startsWith(w.href)));
+  // Longest match wins, so /race/day selects Race day rather than its parent Race.
+  const active = ALL.filter((w) =>
+    w.href === "/" ? pathname === "/" : pathname === w.href || pathname.startsWith(`${w.href}/`),
+  ).toSorted((a, b) => b.href.length - a.href.length)[0];
   const storedCollapsed = useSyncExternalStore(subscribeCollapsed, readCollapsed, () => false);
   const narrow = useSyncExternalStore(subscribeNarrow, readNarrow, () => false);
   const collapsed = narrow || storedCollapsed;
