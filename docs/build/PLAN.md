@@ -164,8 +164,8 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [ ] 🟨 Rule coverage reconciled with the regulation text. The YAML has 79 entries; the recount is pending. `data`
 - [x] ✅ Feasible frontier across imported CAD samples. `mid`
 - [ ] ⬜ Wall thickness, chamber holes, full section chord, halo comparison. `mid`
-- [ ] ⬜ Inspection log: who, tool, when, raw readings, physical part identity. `mid`
-- [ ] ⬜ Interactive dimensional what-if. `mid`
+- [x] ✅ Inspection log with physical builds, part identity, rule revision, instrument, operator, raw values and operator verdict. `mid`
+- [x] ✅ Interactive per-rule dimensional what-if and signed headroom. `mid`
 
 ### 3.7 Structure (strength)
 - [x] ✅ Beam FEM API and Strength panel with part and load presets. Analytic beam checks.
@@ -183,7 +183,7 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [x] ✅ Tests for source binding, lineage and numerical helpers. Regression tests for the new endpoints.
 - [x] ✅ Shared provenance badges applied to Wind Tunnel analyses and mesh, nominal Design results, Race timing and Compute. Mixed timing views distinguish prediction from entered measurements. `easy`
 - [x] ✅ PNG export by default on ECharts; shared iteration cursor for Cd and residuals; labeled keyboard-scrollable tables and native row actions. `easy`
-- [ ] ⬜ Source-linked decision log and engineering rationale record. `mid`
+- [x] ✅ Source-linked engineering decision log with existing candidate and support record IDs. `mid`
 - [x] ✅ AI Assistance and Verification Log (rule C2.18.3) exported from git history as CSV in the Evidence drawer.
 - [ ] 🟨 Practical quality: coverage targets are not set. Property tests are partial. OpenAPI-generated types are not in place. `mid`
 - [ ] ⏳ Grouped browser, keyboard, download and responsive review at 1440, 1024 and 375 px. `data`
@@ -279,7 +279,7 @@ Chart references consulted through TinyFish
 Taken from the TODO.md review (2026-11-04). Headline claim: "we optimise expected competition points under rule and manufacturing uncertainty, not lap time."
 - [ ] ⬜ **Points-aware ORACLE (headline).** Objective = E[racing points] − E[spec penalty], gated by P(legal under manufacturing spread) ≥ 1 − α. Show three picks: fastest, most reliable, recommended. Builds on the P90 robust pick, FORGE pass probability and the race Monte Carlo. `mid`
 - [ ] ⬜ **Counterfactual decision record.** Save one comparison of what lowest-Cd would choose against what the points-aware engine chooses, with signed deltas (CdA, mass, margins, time, points) and the reason. This is the smallest useful decision log. `mid`
-- [ ] ⬜ **A/B design comparison** under identical assumptions: geometry, rule margins, CFD acceptance, race time ± uncertainty, plus a "why A wins" line. `mid`
+- [x] ✅ **A/B design comparison:** matched accepted CFD and CAD hashes, shared TITAN assumptions, common rule margins and paired finish-time uncertainty. `mid`
 - [x] ✅ **Why this recommendation.** ORACLE shows its reasons in one line: length-scale importance, EI, uncertainty and nearest rule risk. `easy`
 - [ ] ⬜ **One status badge everywhere:** legal + accepted CFD + calibrated race model, as a filter across Design, ORACLE, Race and FORGE. `mid`
 - [ ] ⬜ **Rule-versioned points engine.** Race-mode switch (automatic vs manual reaction). Every scoring rule stored as data with its clause number, with the C9.1/C9.4 and C9.6/C9.7.2 contradictions flagged. Property-test ties and the 3rd/4th-place cliff. Show the ms→points exchange rate next to ms/g. `mid`
@@ -287,13 +287,46 @@ Taken from the TODO.md review (2026-11-04). Headline claim: "we optimise expecte
 - [x] ✅ **Regulation proof-load presets in Strength:** 100 g wheel, 1 kg halo, 200 g tether guide; plus launch and stopping dynamic loads. `easy`
 - [ ] ⬜ **Design-for-manufacture panel:** draft and undercut detection, minimum internal radius vs cutter, 3-axis reach, minimum feature size, model-block containment (trimesh / manifold3d). Extends the open wall-thickness and CNC-reach items. `hard`
 - [ ] ⬜ **Turbulence model-form uncertainty:** SST vs transition (kOmegaSSTLM) vs laminar spread as a Cd error bar (wings at Re 3e4–1e5). Needs runs. `data`
-- [ ] ⬜ **Real-objective optimiser benchmark** on the race model or a small CFD sweep, reported as regret; the synthetic study stays as method validation. `mid`
-- [ ] ⬜ **Value-of-information test planner:** recommend the measurement that most reduces points uncertainty. `mid`
+- [x] ✅ **Race-objective optimiser benchmark:** equal-budget GP/EI versus random search, with regret against the finite TITAN grid. `mid`
+- [x] ✅ **Value-of-information test planner:** choose tests that reduce local timing-driven points uncertainty using a declared scoring slope. `mid`
 - [x] ✅ **Race physics terms:** M2 Monte Carlo has a half-normal tether prior, uniform cartridge mass spread (±0.5 g by default in Race), and optional gas mass loss proportional to cumulative thrust impulse. The gas profile is an estimate and defaults to zero until supplied. `easy`
 - [ ] ⬜ **Car A/B nomination and reaction advisor:** paired-timing posterior, ex-Gaussian reaction fit (scipy `exponnorm`), earlier reaction vs false-start (−2.5 pts) trade-off. `mid`
-- [ ] ⬜ **Frozen demo mode** for judges: cached results, no solver calls, low GPU load. `mid`
+- [x] ✅ **Frozen demo mode:** browser-cached summaries of designs, accepted CFD and saved calibration. No solver or WebGL is used in the demo view. `mid`
 
 Not taken from TODO.md: PDF/submission validator, CadQuery, DAFoam, SU2, preCICE, SMT. Also not taken: MAPIE and PyMC/NumPyro until real held-out data exists, sustainability accounting, and portfolio/talk writing.
+
+## 5c. Added from the full doc sweep (2026-11-05)
+
+**Race and replay**
+- [ ] ⬜ Race replay: 8 mini sectors with live sector colours and sector deltas. `mid`
+- [ ] ⬜ Race replay finish: full broadcast view with the real car mesh loaded by default, no "needs display mesh" state. `hard`
+- [ ] ⬜ Compatible replay overlays: only compare runs with matching track and model. `mid`
+- [ ] ⬜ Stadium panel rotation between big numbers, table and history. `easy`
+- [ ] ⬜ Event leaderboard in stadium view. `easy`
+
+**Design and CAD**
+- [ ] ⬜ CAD rule-state overlays with real value and limit anchors on the parts. `mid`
+- [ ] ⬜ Geometry deviation frame and alignment checks. `mid`
+- [ ] ⬜ Surface-quality analysis: curvature comb and continuity. `mid`
+
+**Wind Tunnel**
+- [ ] ⬜ Guided run wizard: step-by-step setup before launch (the monitor and ETA already exist). `mid`
+- [ ] ⬜ Source-validated warm starts and mesh reuse to cut run time. `mid`
+- [ ] ⏳ Real-Mac frame rate, memory and first-display time. `data`
+
+**ORACLE and calibration**
+- [ ] ⬜ Pareto front with mass and rule margin as objectives. `mid`
+- [ ] ⬜ Prospective candidate snapshots saved before evaluation, scored against accepted results. `mid`
+- [ ] ⬜ Paired sample-size solver and complete uncertainty decomposition. `mid`
+- [ ] ⏳ Scheduled real benchmark and accepted adjoint campaign. `data`
+- [ ] ⏳ Independent held-out validation on measured runs. `data`
+- [ ] ⏳ CalculiX 3D halo and wing-mount work, once real materials exist. `data`
+
+**Deployment ($0)**
+- [ ] ⬜ Put the frozen demo on Vercel Hobby from `apps/cockpit`, deploying on push to `main`. `easy`
+- [ ] ⬜ Read-only API mode that blocks every write and job start. `mid`
+- [ ] ⬜ Production start script (`next build`, `next start`) plus Cloudflare Quick Tunnel for live sessions. `easy`
+- [ ] ⬜ Password protection for any live public link. `mid`
 
 ## 6. Open-source map
 
