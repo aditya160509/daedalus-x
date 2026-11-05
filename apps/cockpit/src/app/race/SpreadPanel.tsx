@@ -5,17 +5,21 @@ import { SpreadChart } from "@/components/charts/SpreadChart";
 import { chartAxis, chartTheme, chartTooltip, useECharts } from "@/components/charts/useECharts";
 import { NumberField, Panel, ProvenanceBadge } from "@/components/ui/primitives";
 
-const LABELS: Record<keyof UncertaintyInput, string> = {
+type RelativeKey = "thrust" | "cda" | "mass" | "crr";
+const LABELS: Record<RelativeKey, string> = {
   thrust: "Thrust",
   cda: "CdA",
   mass: "Mass",
   crr: "Rolling",
 };
 
-const UNCERTAINTY_KEYS = ["thrust", "cda", "mass", "crr"] as const satisfies ReadonlyArray<
-  keyof UncertaintyInput
->;
-const isUncertaintyKey = (k: string): k is keyof UncertaintyInput =>
+const UNCERTAINTY_KEYS = [
+  "thrust",
+  "cda",
+  "mass",
+  "crr",
+] as const satisfies ReadonlyArray<RelativeKey>;
+const isUncertaintyKey = (k: string): k is RelativeKey =>
   (UNCERTAINTY_KEYS as ReadonlyArray<string>).includes(k);
 
 /**
@@ -43,7 +47,7 @@ export function SpreadPanel({
   return (
     <Panel
       title="Race-time spread"
-      description={`${data?.n ?? 1000} seeded samples from the 1σ inputs below.`}
+      description={`${data?.n ?? 1000} seeded samples from the uncertainty inputs below.`}
       actions={
         <>
           {fetching && <span className="text-2xs text-muted-foreground">sampling…</span>}
@@ -113,7 +117,32 @@ export function SpreadPanel({
                 onChange={(v) => onUncertainty({ ...uncertainty, [k]: v / 100 })}
               />
             ))}
+            <NumberField
+              id="mc-cartridge"
+              label="Cartridge mass ± range"
+              unit="g"
+              value={uncertainty.cartridge_mass_half_range_g ?? 0}
+              min={0}
+              max={5}
+              step={0.1}
+              onChange={(v) => onUncertainty({ ...uncertainty, cartridge_mass_half_range_g: v })}
+            />
+            <NumberField
+              id="mc-tether"
+              label="Tether force prior scale"
+              unit="N"
+              value={uncertainty.tether_force_scale_n ?? 0}
+              min={0}
+              max={2}
+              step={0.01}
+              onChange={(v) => onUncertainty({ ...uncertainty, tether_force_scale_n: v })}
+            />
           </div>
+          <p className="text-2xs text-muted-foreground">
+            Cartridge mass varies uniformly across the entered range. The tether prior is
+            half-normal and adds constant resistance in M2 only. Mass stays constant within each
+            trial, so gas mass loss during the burn is omitted.
+          </p>
           <div>
             <p className="mb-1 text-xs text-muted-foreground">What drives the spread</p>
             <Tornado ranked={ranked} />
@@ -142,7 +171,7 @@ function Tornado({ ranked }: { ranked: Array<[string, number]> }) {
       xAxis: { type: "value", min: -1, max: 1, show: false },
       yAxis: {
         type: "category",
-        data: rows.map(([k]) => (isUncertaintyKey(k) ? LABELS[k] : k)),
+        data: rows.map(([k]) => (isUncertaintyKey(k) ? LABELS[k] : k.replaceAll("_", " "))),
         ...chartAxis(t),
         splitLine: { show: false },
         axisLabel: { color: t.text2, fontSize: 11, fontFamily: "inherit" },

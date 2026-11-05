@@ -150,6 +150,7 @@ export function RaceWorkspace() {
     cda: 0.05,
     mass: 0.005,
     crr: 0.2,
+    cartridge_mass_half_range_g: 0.5,
   });
   const [playhead, setPlayhead] = useState({ key: "", time: 0 });
   const [delta, setDelta] = useState({ a: 0, b: 0 });

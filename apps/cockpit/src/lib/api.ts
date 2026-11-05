@@ -113,6 +113,8 @@ export interface UncertaintyInput {
   cda: number;
   crr: number;
   thrust: number;
+  cartridge_mass_half_range_g?: number;
+  tether_force_scale_n?: number;
 }
 export const raceMonteCarlo = (
   race: RaceSimulationRequest,

@@ -118,3 +118,16 @@ def test_race_times_accepts_a_different_track_length_per_sample() -> None:
     ]
     assert np.allclose(together, alone)
     assert np.all(np.diff(together) > 0)
+
+
+def test_cartridge_spread_and_tether_prior() -> None:
+    car = _car()
+    fixed = dict(mass=0.0, cda=0.0, crr=0.0, thrust=0.0)
+    baseline = run(car, Uncertainty(**fixed), n=40)
+    cartridge = run(car, Uncertainty(**fixed, cartridge_mass_half_range_g=0.5), n=40)
+    tether = run(car, Uncertainty(**fixed, tether_force_scale_n=0.01), n=40)
+    assert cartridge.std_s is not None and cartridge.std_s > 0
+    assert cartridge.sensitivity["cartridge_mass"] > 0.9
+    assert tether.mean_s is not None and baseline.mean_s is not None
+    assert tether.mean_s > baseline.mean_s
+    assert tether.sensitivity["tether_force"] > 0.9

@@ -29,11 +29,17 @@ class Uncertainty:
     cda: float = 0.05
     crr: float = 0.2
     thrust: float = 0.05
+    cartridge_mass_half_range_g: float = 0.0
+    tether_force_scale_n: float = 0.0
 
     def __post_init__(self) -> None:
         for name in INPUTS:
             if not 0 <= getattr(self, name) < 0.5:
                 raise ValueError(f"{name} uncertainty must be in [0, 0.5)")
+        if not 0 <= self.cartridge_mass_half_range_g <= 5:
+            raise ValueError("cartridge mass half-range must be in [0, 5] g")
+        if not 0 <= self.tether_force_scale_n <= 2:
+            raise ValueError("tether force scale must be in [0, 2] N")
 
 
 @dataclass(frozen=True)
@@ -78,9 +84,14 @@ def run(
     # Truncate at 4 sigma below so every factor stays positive.
     factors = np.clip(1.0 + rng.standard_normal((n, len(INPUTS))) * sigma, 0.05, None)
 
-    mass = car.mass_kg * factors[:, 0]
+    cartridge_delta = rng.uniform(
+        -unc.cartridge_mass_half_range_g, unc.cartridge_mass_half_range_g, size=n
+    )
+    mass = np.maximum(car.mass_kg * factors[:, 0] + cartridge_delta / 1000, 0.05 * car.mass_kg)
+    tether_force = np.abs(rng.normal(0.0, unc.tether_force_scale_n, size=n))
     cda = float(car.cda_m2) * factors[:, 1]
-    crr = car.crr * factors[:, 2]
+    # M2's constant-resistance term can represent a separate constant tether force.
+    crr = car.crr * factors[:, 2] + tether_force / (mass * G0)
     times = race_times(
         car.thrust, factors[:, 3], mass, cda, crr, car.rho_kg_m3, car.track_length_m, model
     )
@@ -94,6 +105,12 @@ def run(
             continue
         rho = float(spearmanr(factors[ok, j], t).statistic)
         sens[k] = 0.0 if not np.isfinite(rho) else rho
+    for name, values, active in (
+        ("cartridge_mass", cartridge_delta, unc.cartridge_mass_half_range_g > 0),
+        ("tether_force", tether_force, unc.tether_force_scale_n > 0 and model is ModelLevel.M2),
+    ):
+        if active and t.size >= 3 and np.ptp(t) > 0 and np.ptp(values[ok]) > 0:
+            sens[name] = float(spearmanr(values[ok], t).statistic)
     pct = (
         dict(
             zip(

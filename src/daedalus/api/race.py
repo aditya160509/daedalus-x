@@ -247,6 +247,8 @@ class UncertaintyInput(BaseModel):
     cda: float = Field(default=0.05, ge=0, lt=0.5)
     crr: float = Field(default=0.2, ge=0, lt=0.5)
     thrust: float = Field(default=0.05, ge=0, lt=0.5)
+    cartridge_mass_half_range_g: float = Field(default=0.0, ge=0, le=5)
+    tether_force_scale_n: float = Field(default=0.0, ge=0, le=2)
 
 
 class MonteCarloRequest(BaseModel):

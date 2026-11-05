@@ -281,7 +281,7 @@ Taken from the TODO.md review (2026-11-04). Headline claim: "we optimise expecte
 - [ ] ⬜ **Turbulence model-form uncertainty:** SST vs transition (kOmegaSSTLM) vs laminar spread as a Cd error bar (wings at Re 3e4–1e5). Needs runs. `data`
 - [ ] ⬜ **Real-objective optimiser benchmark** on the race model or a small CFD sweep, reported as regret; the synthetic study stays as method validation. `mid`
 - [ ] ⬜ **Value-of-information test planner:** recommend the measurement that most reduces points uncertainty. `mid`
-- [ ] ⬜ **Race physics terms:** tether friction with a prior, cartridge mass spread (±0.5 g) in the Monte Carlo, check that gas mass loss is modelled. `easy`
+- [ ] 🟨 **Race physics terms:** M2 Monte Carlo has a half-normal tether resistance prior and a uniform cartridge mass spread (default ±0.5 g in Race). Gas mass loss during the burn remains unmodelled and is identified in the UI. `easy`
 - [ ] ⬜ **Car A/B nomination and reaction advisor:** paired-timing posterior, ex-Gaussian reaction fit (scipy `exponnorm`), earlier reaction vs false-start (−2.5 pts) trade-off. `mid`
 - [ ] ⬜ **Frozen demo mode** for judges: cached results, no solver calls, low GPU load. `mid`
 
