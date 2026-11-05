@@ -81,6 +81,7 @@ export function RaceInputs({
     massG: car.massG,
     cdaCm2: car.cdaCm2,
     crr: car.crr,
+    tetherN: car.tetherN,
     thrustScale,
     trackM: car.trackM,
     rho: car.rho,
@@ -159,6 +160,18 @@ export function RaceInputs({
                 Multiplies the whole thrust curve; 1 is the untouched curve.
               </p>
             </div>
+            {model === "M2" && (
+              <SizedField
+                id="race-tether"
+                label="Tether resistance while moving"
+                unit="N"
+                value={car.tetherN ?? 0}
+                min={0}
+                max={2}
+                step={0.001}
+                onChange={(v) => onCar({ tetherN: v })}
+              />
+            )}
             <div className="grid grid-cols-2 gap-2 border-t border-line pt-2">
               <SizedField
                 id="race-track"

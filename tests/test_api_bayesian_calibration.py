@@ -146,6 +146,14 @@ def test_calibration_is_saved_with_inputs_results_and_sources(monkeypatch):
     assert detail["sources"][0]["size_bytes"] == len(raw)
     assert detail["sources"][0]["content_sha256"].startswith("sha256:")
 
+    applied = client.post(
+        f"/v1/calibration-studies/{study_id}/applications", json={"mass_kg": 0.05, "track_m": 20}
+    )
+    assert applied.status_code == 201, applied.text
+    assert applied.json()["cda_m2"] == 0.0017
+    assert applied.json()["thrust_force_n"] == [1.0, 0.0]
+    assert applied.json()["artifact_id"].startswith("art_")
+
     model = client.get(f"/v1/calibrations/{model_id}").json()
     assert model["kind"] == "titan"
     assert model["config"]["method"] == "bayesian"

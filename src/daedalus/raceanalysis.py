@@ -35,6 +35,7 @@ class Car:
     crr: float
     rho_kg_m3: float = 1.204
     track_m: float = 20.0
+    tether_force_n: float = 0.0
 
     def __post_init__(self) -> None:
         if self.mass_kg <= 0 or self.cda_m2 < 0 or self.crr < 0 or self.rho_kg_m3 <= 0:
@@ -61,6 +62,7 @@ def _times(
         car.track_m,
         ModelLevel.M2,
         dt_s,
+        tether_n=car.tether_force_n,
     )
     if not np.all(np.isfinite(times)):
         raise RaceAnalysisError("the car does not finish the track with these inputs")
@@ -157,6 +159,7 @@ def sobol_time(car: Car) -> dict[str, object]:
             car.track_m,
             ModelLevel.M2,
             dt_s=5e-4,
+            tether_n=car.tether_force_n,
         )
 
     return {**analyze(evaluate, INPUTS[:4]), "target": "TITAN M2 finish time"}

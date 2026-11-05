@@ -83,6 +83,7 @@ export interface RaceSimulationRequest {
   crr: number;
   rho_kg_m3: number;
   input_provenance: Provenance;
+  tether_force_n?: number;
 }
 
 export const simulateRace = (req: RaceSimulationRequest) =>
@@ -911,6 +912,7 @@ export const getRaceSobol = (race: RaceSimulationRequest) =>
         thrust: { t_s: race.thrust.t_s, force_n: race.thrust.force_n },
         cda_m2: race.cda_m2,
         crr: race.crr,
+        tether_force_n: race.tether_force_n,
         rho_kg_m3: race.rho_kg_m3,
       }),
     },
@@ -924,6 +926,7 @@ export const getRaceBreakdown = (race: RaceSimulationRequest, reactionS: number)
       thrust: { t_s: race.thrust.t_s, force_n: race.thrust.force_n },
       cda_m2: race.cda_m2,
       crr: race.crr,
+      tether_force_n: race.tether_force_n,
       rho_kg_m3: race.rho_kg_m3,
       reaction_s: reactionS,
     }),
@@ -994,6 +997,7 @@ export const getEnergyAudit = (race: RaceSimulationRequest) =>
       thrust: { t_s: race.thrust.t_s, force_n: race.thrust.force_n },
       cda_m2: race.cda_m2,
       crr: race.crr,
+      tether_force_n: race.tether_force_n,
       rho_kg_m3: race.rho_kg_m3,
     }),
   });
@@ -1130,6 +1134,23 @@ const CalibrationStudySummary = z.object({
   medians: z.record(z.string(), z.number()).nullable(),
 });
 type CalibrationStudySummary = z.infer<typeof CalibrationStudySummary>;
+export const applyRaceCalibration = (id: string, target: { mass_kg: number; track_m: number }) =>
+  request(
+    `/v1/calibration-studies/${encodeURIComponent(id)}/applications`,
+    z.object({
+      study_id: z.string(),
+      model_id: z.string(),
+      artifact_id: z.string(),
+      cda_m2: z.number(),
+      crr: z.number(),
+      thrust_scale: z.number(),
+      rho_kg_m3: z.number(),
+      thrust_t_s: z.array(z.number()),
+      thrust_force_n: z.array(z.number()),
+    }),
+    { method: "POST", body: JSON.stringify(target) },
+  );
+export type RaceCalibrationApplication = Awaited<ReturnType<typeof applyRaceCalibration>>;
 const CalibrationStudyDetail = z.object({
   study: CalibrationStudySummary,
   inputs: z.object({
@@ -1174,6 +1195,7 @@ const CalibrationStudyDetail = z.object({
         p05_s: z.number(),
         p95_s: z.number(),
         error_s: z.number(),
+        predictive_rank: z.number().min(0).max(1).optional(),
       }),
     ),
   }),

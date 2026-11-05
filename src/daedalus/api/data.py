@@ -689,6 +689,59 @@ def _artifact_size(store: EvidenceStore, artifact_id: str) -> int:
         return 0
 
 
+class CalibrationApplication(BaseModel):
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    mass_kg: float = Field(gt=0, le=1)
+    track_m: float = Field(gt=0, le=100)
+
+
+@router.post("/calibration-studies/{study_id}/applications", status_code=201)
+def apply_calibration(study_id: str, target: CalibrationApplication) -> dict[str, object]:
+    """Record which stored posterior medians and thrust curve initialize a Race scenario."""
+    store = _store()
+    try:
+        try:
+            study = store.get(study_id, c.CalibrationStudy)
+        except KeyError as exc:
+            raise HTTPException(404, "Calibration study not found") from exc
+        try:
+            inputs = json.loads(store.read_artifact(study.inputs_artifact_id))
+            summaries = json.loads(store.read_artifact(study.results_artifact_id))["summaries"]
+            values = {k: float(summaries[k]["median"]) for k in ("cda_m2", "crr", "thrust_scale")}
+            rho = float(inputs["rho_kg_m3"])
+            curve = ThrustCurve(
+                np.asarray(inputs["thrust_t_s"]), np.asarray(inputs["thrust_force_n"])
+            )
+            if not (
+                0 < values["cda_m2"] <= 0.05
+                and 0 < values["crr"] <= 1
+                and 0 < values["thrust_scale"] <= 5
+                and 0.5 < rho < 1.5
+            ):
+                raise ValueError("posterior medians fall outside Race input bounds")
+        except (ValueError, KeyError, TypeError) as exc:
+            raise HTTPException(422, "Study has no usable posterior or thrust curve") from exc
+        payload = {
+            "study_id": study_id,
+            "model_id": study.model_id,
+            "method": "posterior_medians",
+            "target": target.model_dump(),
+            "rho_kg_m3": rho,
+            "thrust_t_s": curve.t_s.tolist(),
+            "thrust_force_n": curve.force_n.tolist(),
+            **values,
+        }
+        artifact = store.put_artifact(
+            _json_bytes(payload),
+            kind="race_calibration_application",
+            source_entity_id=study_id,
+            provenance=c.Provenance.PREDICTED,
+        )
+        return {**payload, "artifact_id": artifact.artifact_id}
+    finally:
+        store.close()
+
+
 class SealRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

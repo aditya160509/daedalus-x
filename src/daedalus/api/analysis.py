@@ -41,6 +41,7 @@ class EnergyRequest(BaseModel):
     thrust: Thrust
     cda_m2: float = Field(ge=0, le=0.05)
     crr: float = Field(ge=0, le=1)
+    tether_force_n: float = Field(default=0.0, ge=0, le=2)
     rho_kg_m3: float = Field(default=1.204, gt=0.5, lt=1.5)
 
 
@@ -52,6 +53,7 @@ def energy_audit(req: EnergyRequest) -> dict[str, object]:
         thrust=req.thrust.curve(),
         cda_m2=req.cda_m2,
         crr=req.crr,
+        tether_force_n=req.tether_force_n,
         rho_kg_m3=req.rho_kg_m3,
     )
     try:
@@ -377,6 +379,7 @@ def race_breakdown(req: BreakdownRequest) -> dict[str, object]:
             req.crr,
             req.rho_kg_m3,
             req.track_length_m,
+            req.tether_force_n,
         )
         return {
             "budget_ms": raceanalysis.time_budget(car, reaction_s=req.reaction_s),
@@ -400,6 +403,7 @@ def race_sobol(req: EnergyRequest) -> dict[str, object]:
                 req.crr,
                 req.rho_kg_m3,
                 req.track_length_m,
+                req.tether_force_n,
             )
         )
     except ValueError as exc:

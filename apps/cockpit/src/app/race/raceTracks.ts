@@ -42,6 +42,17 @@ export function buildTracks(sim: RaceSimulation): TelemetryTrack[] {
           color: "#f0525a",
           dashed: true,
         },
+        ...((sim.channels.find((c) => c.name === "tether_resistance")?.values.some((v) => v > 0) ??
+        false)
+          ? [
+              {
+                label: "tether",
+                values: channelOf(sim, "tether_resistance"),
+                color: "#9a88df",
+                dashed: true,
+              },
+            ]
+          : []),
       ],
     },
     {

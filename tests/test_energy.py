@@ -75,3 +75,12 @@ def test_audit_rejects_unusable_results() -> None:
     weak = dataclasses.replace(CAR, thrust=ThrustCurve.constant(0.05, 0.1))
     with pytest.raises(EnergyAuditError):
         audit(simulate(weak, ModelLevel.M2), weak.mass_kg)
+
+
+def test_constant_tether_loss_matches_force_times_distance() -> None:
+    from dataclasses import replace
+
+    car = CarParams(0.055, 20.0, thrust=ThrustCurve.constant(4.0, 0.4))
+    audited = audit_car(replace(car, tether_force_n=0.04))
+    assert audited.losses()["tether"] == pytest.approx(0.8, rel=0.002)
+    assert audited.closure_fraction < 0.005

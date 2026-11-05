@@ -43,6 +43,7 @@ import {
 import { loadGlbUrl } from "@/lib/gltf";
 import { estimateThrust } from "@/lib/thrust";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
+import { SavedCalibrationApplication } from "@/components/race/SavedCalibrationApplication";
 import { RaceInputs } from "./RaceInputs";
 import { StatusBar, WorkspaceTabs } from "@/components/shell/WorkspaceTabs";
 
@@ -135,12 +136,14 @@ interface RaceOverrides {
   massG?: number;
   cdaCm2?: number;
   crr?: number;
+  tetherN?: number;
   thrustScale?: number;
   model?: "M1" | "M2";
   trackM?: number;
 }
 
 export function RaceWorkspace() {
+  const [appliedStudy, setAppliedStudy] = useState<string | null>(null);
   const [model, setModel] = useState<"M1" | "M2">("M2");
   const [car, setCar] = useState<CarParamsUi>(DEFAULT_CAR);
   const [thrustScale, setThrustScale] = useState(1);
@@ -207,6 +210,7 @@ export function RaceWorkspace() {
         },
         cda_m2: cdaCm2 / 10_000,
         crr,
+        tether_force_n: over.tetherN ?? car.tetherN ?? 0,
         rho_kg_m3: car.rho,
         input_provenance: "estimated",
       };
@@ -226,6 +230,7 @@ export function RaceWorkspace() {
         massG: activePreset.massG,
         cdaCm2: activePreset.cdaCm2,
         crr: activePreset.crr,
+        tetherN: activePreset.tetherN ?? 0,
         thrustScale: activePreset.thrustScale,
         model: activePreset.model,
       })
@@ -362,11 +367,13 @@ export function RaceWorkspace() {
     persistPresets([...presets, preset]);
   };
   const applyPreset = (preset: RacePreset) => {
+    setAppliedStudy(null);
     setCar((c) => ({
       ...c,
       massG: preset.massG,
       cdaCm2: preset.cdaCm2,
       crr: preset.crr,
+      tetherN: preset.tetherN ?? 0,
       rho: preset.rho,
       trackM: preset.trackM,
     }));
@@ -397,6 +404,7 @@ export function RaceWorkspace() {
 
   const p = mc.data?.percentiles_s;
   const status = [
+    ...(appliedStudy ? [{ label: "Calibration", value: appliedStudy }] : []),
     {
       label: "Time",
       value:
@@ -417,13 +425,25 @@ export function RaceWorkspace() {
         <div className="max-h-[35vh] w-full shrink-0 overflow-y-auto border-b p-3 md:max-h-none md:w-[300px] md:border-r md:border-b-0">
           <RaceInputs
             model={model}
-            onModel={setModel}
+            onModel={(value) => {
+              setModel(value);
+              setAppliedStudy(null);
+            }}
             car={car}
-            onCar={(patch) => setCar((c) => ({ ...c, ...patch }))}
+            onCar={(patch) => {
+              setCar((c) => ({ ...c, ...patch }));
+              setAppliedStudy(null);
+            }}
             thrustScale={thrustScale}
-            onThrustScale={setThrustScale}
+            onThrustScale={(value) => {
+              setThrustScale(value);
+              setAppliedStudy(null);
+            }}
             source={source}
-            onSource={setSource}
+            onSource={(value) => {
+              setSource(value);
+              setAppliedStudy(null);
+            }}
             onFileError={setFileError}
             curves={curves}
             running={running}
@@ -687,7 +707,29 @@ export function RaceWorkspace() {
             </div>
           )}
           {tab === "calibration" && (
-            <div className="mx-auto h-full max-w-5xl p-3 [&>section]:h-full">
+            <div className="mx-auto flex min-h-full max-w-5xl flex-col gap-3 p-3">
+              <SavedCalibrationApplication
+                massG={car.massG}
+                trackM={car.trackM}
+                onApply={(application) => {
+                  setCar((current) => ({
+                    ...current,
+                    cdaCm2: application.cda_m2 * 10000,
+                    crr: application.crr,
+                    rho: application.rho_kg_m3,
+                    tetherN: 0,
+                  }));
+                  setSource({
+                    kind: "file",
+                    name: `Saved calibration ${application.study_id}`,
+                    provenance: "estimated",
+                    trace: { t_s: application.thrust_t_s, force_n: application.thrust_force_n },
+                  });
+                  setModel("M2");
+                  setThrustScale(application.thrust_scale);
+                  setAppliedStudy(application.study_id);
+                }}
+              />
               <CalibrationWorkbench />
             </div>
           )}

@@ -45,6 +45,7 @@ class RaceSimulationRequest(BaseModel):
     thrust: ThrustInput
     cda_m2: float = Field(ge=0, le=0.05)
     crr: float = Field(ge=0, le=1)
+    tether_force_n: float = Field(default=0.0, ge=0, le=2)
     rho_kg_m3: float = Field(default=1.204, gt=0.5, lt=1.5)
     input_provenance: Provenance = Field(
         description="weakest provenance among mass, CdA and friction inputs"
@@ -83,6 +84,7 @@ def _car(req: RaceSimulationRequest) -> CarParams:
         thrust=thrust,
         cda_m2=req.cda_m2,
         crr=req.crr,
+        tether_force_n=req.tether_force_n,
         rho_kg_m3=req.rho_kg_m3,
     )
 
@@ -92,7 +94,7 @@ def simulate_race(req: RaceSimulationRequest) -> RaceSimulationResponse:
     res = simulate(_car(req), ModelLevel(req.model))
     idx = _downsample(res.t.size)
     terms = res.force_terms
-    net = terms["thrust_n"] - terms["drag_n"] - terms["rolling_n"]
+    net = terms["thrust_n"] - terms["drag_n"] - terms["rolling_n"] - terms["tether_n"]
     accel = np.where((res.v <= 0) & (net < 0), 0.0, net / req.mass_kg)
 
     def ch(name: str, unit: str, arr: np.ndarray) -> Channel:
@@ -113,6 +115,7 @@ def simulate_race(req: RaceSimulationRequest) -> RaceSimulationResponse:
             ch("thrust", "N", terms["thrust_n"]),
             ch("drag", "N", terms["drag_n"]),
             ch("rolling_resistance", "N", terms["rolling_n"]),
+            ch("tether_resistance", "N", terms["tether_n"]),
         ],
     )
 
@@ -207,6 +210,7 @@ def best_ghost(req: BestGhostRequest) -> BestGhostResponse:
             thrust=primary.thrust,
             cda_m2=candidate.cda_m2,
             crr=candidate.crr,
+            tether_force_n=primary.tether_force_n,
             rho_kg_m3=candidate.rho_kg_m3,
             input_provenance=primary.input_provenance,
         )
@@ -294,14 +298,7 @@ def race_montecarlo(req: MonteCarloRequest) -> MonteCarloResponse:
     r = req.race
     if req.uncertainty.expelled_gas_g >= r.mass_kg * 1000:
         raise HTTPException(422, "expelled gas must weigh less than the starting car")
-    car = CarParams(
-        mass_kg=r.mass_kg,
-        track_length_m=r.track_length_m,
-        thrust=ThrustCurve(np.asarray(r.thrust.t_s, float), np.asarray(r.thrust.force_n, float)),
-        cda_m2=r.cda_m2,
-        crr=r.crr,
-        rho_kg_m3=r.rho_kg_m3,
-    )
+    car = _car(r)
     res = montecarlo.run(
         car,
         montecarlo.Uncertainty(**req.uncertainty.model_dump()),

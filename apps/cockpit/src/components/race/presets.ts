@@ -9,6 +9,7 @@ export interface RacePreset {
   massG: number;
   cdaCm2: number;
   crr: number;
+  tetherN?: number;
   thrustScale: number;
   trackM: number;
   rho: number;
@@ -22,6 +23,7 @@ const LIMITS = {
   massG: [1, 1000],
   cdaCm2: [0, 500],
   crr: [0, 1],
+  tetherN: [0, 2],
   thrustScale: [0.05, 5],
   trackM: [1, 100],
   rho: [0.5, 1.5],
@@ -48,6 +50,7 @@ export function sanitizePreset(input: unknown): RacePreset | null {
   const massG = numberIn(input.massG, "massG");
   const cdaCm2 = numberIn(input.cdaCm2, "cdaCm2");
   const crr = numberIn(input.crr, "crr");
+  const tetherN = input.tetherN === undefined ? undefined : numberIn(input.tetherN, "tetherN");
   const thrustScale = numberIn(input.thrustScale, "thrustScale");
   const trackM = numberIn(input.trackM, "trackM");
   const rho = numberIn(input.rho, "rho");
@@ -59,13 +62,25 @@ export function sanitizePreset(input: unknown): RacePreset | null {
     massG === null ||
     cdaCm2 === null ||
     crr === null ||
+    tetherN === null ||
     thrustScale === null ||
     trackM === null ||
     rho === null
   ) {
     return null;
   }
-  return { id, name, massG, cdaCm2, crr, thrustScale, trackM, rho, model };
+  return {
+    id,
+    name,
+    massG,
+    cdaCm2,
+    crr,
+    ...(tetherN === undefined ? {} : { tetherN }),
+    thrustScale,
+    trackM,
+    rho,
+    model,
+  };
 }
 
 export function parsePresets(raw: unknown): RacePreset[] {

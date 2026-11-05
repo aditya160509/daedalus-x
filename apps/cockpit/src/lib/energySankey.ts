@@ -4,6 +4,7 @@ const LABELS: Record<string, string> = {
   kinetic_energy: "Kinetic energy",
   drag: "Aerodynamic drag",
   rolling: "Rolling loss",
+  tether: "Tether loss",
 };
 
 /** Keep the integration residual visible; never rescale physical terms to force closure. */

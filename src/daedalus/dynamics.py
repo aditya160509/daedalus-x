@@ -69,12 +69,16 @@ class CarParams:
     crr: float = 0.0  # rolling resistance coefficient (F = crr * m * g while moving)
     rho_kg_m3: float = 1.204
     constant_accel_m_s2: float | None = None  # M0 only
+    tether_force_n: float = 0.0
 
     def __post_init__(self) -> None:
         if self.mass_kg <= 0 or self.track_length_m <= 0:
             raise ValueError("mass and track length must be positive")
         if self.crr < 0 or self.rho_kg_m3 <= 0:
             raise ValueError("crr must be >= 0 and density > 0")
+
+        if not np.isfinite(self.tether_force_n) or self.tether_force_n < 0:
+            raise ValueError("tether force must be finite and non-negative")
 
     def cda(self, v: float) -> float:
         return self.cda_m2(v) if callable(self.cda_m2) else self.cda_m2
@@ -122,9 +126,12 @@ def simulate(
     def roll(v: float) -> float:
         return car.crr * car.mass_kg * G0 if (with_losses and v > 0) else 0.0
 
+    def tether(v: float) -> float:
+        return car.tether_force_n if with_losses and v > 0 else 0.0
+
     def rhs(t: float, y: FloatArray) -> list[float]:
         v = max(float(y[1]), 0.0)
-        accel = (thrust(t) - drag(v) - roll(v)) / car.mass_kg
+        accel = (thrust(t) - drag(v) - roll(v) - tether(v)) / car.mass_kg
         if v <= 0 and accel < 0:  # static: losses cannot push the car backwards
             accel = 0.0
         return [v, accel]
@@ -167,6 +174,7 @@ def simulate(
             "thrust_n": np.array([thrust(ti) for ti in t]),
             "drag_n": np.array([drag(vi) for vi in v]),
             "rolling_n": np.array([roll(vi) for vi in v]),
+            "tether_n": np.array([tether(vi) for vi in v]),
         }
         if force_terms
         else {}

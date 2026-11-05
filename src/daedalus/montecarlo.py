@@ -91,7 +91,8 @@ def run(
         -unc.cartridge_mass_half_range_g, unc.cartridge_mass_half_range_g, size=n
     )
     mass = np.maximum(car.mass_kg * factors[:, 0] + cartridge_delta / 1000, 0.05 * car.mass_kg)
-    tether_force = np.abs(rng.normal(0.0, unc.tether_force_scale_n, size=n))
+    tether_prior = np.abs(rng.normal(0.0, unc.tether_force_scale_n, size=n))
+    tether_force = car.tether_force_n + tether_prior
     cda = float(car.cda_m2) * factors[:, 1]
     crr = car.crr * factors[:, 2]
     gas = unc.expelled_gas_g / 1000
@@ -123,7 +124,7 @@ def run(
         sens[k] = 0.0 if not np.isfinite(rho) else rho
     for name, values, active in (
         ("cartridge_mass", cartridge_delta, unc.cartridge_mass_half_range_g > 0),
-        ("tether_force", tether_force, unc.tether_force_scale_n > 0 and model is ModelLevel.M2),
+        ("tether_force", tether_prior, unc.tether_force_scale_n > 0 and model is ModelLevel.M2),
     ):
         if active and t.size >= 3 and np.ptp(t) > 0 and np.ptp(values[ok]) > 0:
             sens[name] = float(spearmanr(values[ok], t).statistic)
@@ -215,6 +216,8 @@ def race_times(
     track_m: float | FloatArray,
     model: ModelLevel = ModelLevel.M2,
     dt_s: float = BURN_DT_S,
+    *,
+    tether_n: float = 0.0,
 ) -> FloatArray:
     """Race time for every sample at once; NaN for a non-finish.
 
@@ -225,7 +228,9 @@ def race_times(
     `dt_s` defaults to the Monte Carlo step; calibration passes a coarser step (residuals
     are measured in milliseconds) to make thousands of bootstrap refits affordable.
     """
-    times, _ = _integrate(thrust, thrust_scale, mass, cda, crr, rho, track_m, model, dt_s=dt_s)
+    times, _ = _integrate(
+        thrust, thrust_scale, mass, cda, crr, rho, track_m, model, dt_s=dt_s, tether_n=tether_n
+    )
     return times
 
 

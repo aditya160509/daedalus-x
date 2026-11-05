@@ -58,7 +58,7 @@ export function EnergySankey({ data }: { data: EnergyAudit }) {
         hidden={!graph}
         className="h-72 w-full"
         role="img"
-        aria-label="Predicted thrust work flowing to kinetic energy, drag and rolling losses in joules"
+        aria-label="Predicted thrust work flowing to kinetic energy, drag, rolling and tether losses in joules"
       />
       {!graph && (
         <p className="p-4 text-sm text-muted-foreground">
@@ -67,8 +67,8 @@ export function EnergySankey({ data }: { data: EnergyAudit }) {
       )}
       <figcaption className="px-2 pb-1 text-xs text-muted-foreground">
         Flow widths show calculated joules. Integration remainder/surplus stays visible rather than
-        rescaling losses. Tether friction is not a separate term in the current model; this is a
-        prediction, not a measured energy audit. Export the diagram with the chart toolbar.
+        rescaling losses. Tether loss uses the entered constant M2 resistance while moving. Export
+        the diagram with the chart toolbar.
       </figcaption>
     </figure>
   );

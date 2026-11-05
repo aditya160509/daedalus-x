@@ -85,7 +85,7 @@ def test_step_size_convergence() -> None:
 def test_force_terms_reported() -> None:
     car = CarParams(0.05, 20.0, thrust=ThrustCurve.constant(2.0, 3.0), cda_m2=2e-3, crr=0.02)
     res = simulate(car)
-    assert set(res.force_terms) == {"thrust_n", "drag_n", "rolling_n"}
+    assert set(res.force_terms) == {"thrust_n", "drag_n", "rolling_n", "tether_n"}
     assert res.force_terms["drag_n"].shape == res.t.shape
     assert res.peak_speed_m_s > 0
 

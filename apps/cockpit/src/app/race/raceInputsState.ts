@@ -20,4 +20,5 @@ export type CarParamsUi = {
   cdaCm2: number;
   crr: number;
   rho: number;
+  tetherN?: number;
 };

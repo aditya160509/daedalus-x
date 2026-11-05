@@ -22,6 +22,7 @@ import {
   type TimingImport,
 } from "@/lib/api";
 import { comparisonRows, type StudyComparisonRow } from "@/lib/calibrationCompare";
+import { calibrationTimingFile, readRaceDayLedger } from "@/lib/raceDayLedger";
 import { estimateThrust, parseThrustCsv, type ThrustTrace } from "@/lib/thrust";
 import { outlierRowIndices } from "@/lib/timingRows";
 import {
@@ -150,6 +151,10 @@ function pointsToImport(
 }
 
 export function CalibrationPanel() {
+  const [ledger, setLedger] = useState<ReturnType<typeof readRaceDayLedger>>([]);
+  const [raceDaySession, setRaceDaySession] = useState("");
+  const [raceDayLane, setRaceDayLane] = useState<"A" | "B">("A");
+  const [raceDayError, setRaceDayError] = useState("");
   const [protocol, setProtocol] = useState<TestProtocolId>("custom");
   const queryClient = useQueryClient();
   const [training, setTraining] = useState<TimingPreview | null>(null);
@@ -399,6 +404,75 @@ export function CalibrationPanel() {
               fit.reset();
             }}
           />
+          <details className="space-y-2 rounded border p-2 text-xs">
+            <summary className="cursor-pointer">Use Race Day timing ledger</summary>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                const saved = readRaceDayLedger();
+                setLedger(saved);
+                setRaceDaySession(saved.at(-1)?.session ?? "");
+                setRaceDayError(saved.length ? "" : "No timing runs are saved in this browser.");
+              }}
+            >
+              Read saved sessions
+            </Button>
+            {ledger.length > 0 && (
+              <div className="grid gap-2">
+                <label className="grid gap-1">
+                  Session
+                  <select
+                    value={raceDaySession}
+                    onChange={(e) => setRaceDaySession(e.target.value)}
+                    className="rounded border bg-background p-1"
+                  >
+                    {[...new Set(ledger.map((r) => r.session))].map((session) => (
+                      <option key={session}>{session}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="grid gap-1">
+                  Lane / car
+                  <select
+                    value={raceDayLane}
+                    onChange={(e) => setRaceDayLane(e.target.value === "B" ? "B" : "A")}
+                    className="rounded border bg-background p-1"
+                  >
+                    <option>A</option>
+                    <option>B</option>
+                  </select>
+                </label>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    try {
+                      const file = calibrationTimingFile(ledger, raceDaySession, raceDayLane);
+                      setFiles((old) => ({ ...old, training: file }));
+                      setTraining(null);
+                      setConfirmed(false);
+                      setRaceDayError("");
+                      upload.mutate({ file, target: "training" });
+                    } catch (error) {
+                      setRaceDayError(error instanceof Error ? error.message : String(error));
+                    }
+                  }}
+                >
+                  Prepare calibration update
+                </Button>
+                <p className="text-muted-foreground">
+                  Review the car mass, track and timing definition before fitting. Reaction stays
+                  separate.
+                </p>
+              </div>
+            )}
+            {raceDayError && (
+              <p role="alert" className="text-destructive">
+                {raceDayError}
+              </p>
+            )}
+          </details>
           {(["training", "held"] as const).map((target) => (
             <div key={target} className="space-y-1">
               <label className="text-xs" htmlFor={`cal-${target}`}>
@@ -688,6 +762,22 @@ export function CalibrationPanel() {
                     label="Saved calibration comparison"
                     empty="No selected study could be loaded."
                   />
+                  {comparison.data
+                    .filter((study) => study.results.held_out.length > 0)
+                    .map((study) => (
+                      <details key={study.study.study_id} className="rounded border p-2">
+                        <summary className="cursor-pointer text-xs">
+                          {study.study.study_id} ·{" "}
+                          {
+                            study.results.held_out.filter(
+                              (row) => row.measured_s >= row.p05_s && row.measured_s <= row.p95_s,
+                            ).length
+                          }
+                          /{study.results.held_out.length} within predictive interval
+                        </summary>
+                        <PredictiveDiagnostics rows={study.results.held_out} />
+                      </details>
+                    ))}
                   <p className="text-2xs leading-relaxed text-muted-foreground">
                     Studies scored on a different held-out signature are marked non-comparable and
                     are not joined into an error trend. “Not evaluated” means no held-out rows were

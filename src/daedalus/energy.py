@@ -16,7 +16,7 @@ from numpy.typing import NDArray
 from daedalus.dynamics import CarParams, ModelLevel, RaceResult, simulate
 
 FloatArray = NDArray[np.float64]
-LOSS_NAMES = ("drag", "rolling")
+LOSS_NAMES = ("drag", "rolling", "tether")
 
 
 class EnergyAuditError(ValueError):
@@ -34,10 +34,11 @@ class EnergyAudit:
     thrust_end_s: float
     kinetic_energy_at_thrust_end_j: float
     closure_error_j: float
+    tether_loss_j: float = 0.0
 
     @property
     def total_loss_j(self) -> float:
-        return self.drag_loss_j + self.rolling_loss_j
+        return self.drag_loss_j + self.rolling_loss_j + self.tether_loss_j
 
     @property
     def closure_fraction(self) -> float:
@@ -55,7 +56,11 @@ class EnergyAudit:
         return self.kinetic_energy_at_thrust_end_j - self.kinetic_energy_j
 
     def losses(self) -> dict[str, float]:
-        return {"drag": self.drag_loss_j, "rolling": self.rolling_loss_j}
+        return {
+            "drag": self.drag_loss_j,
+            "rolling": self.rolling_loss_j,
+            "tether": self.tether_loss_j,
+        }
 
     def dominant_loss(self) -> str:
         losses = self.losses()
@@ -106,6 +111,7 @@ def audit(result: RaceResult, mass_kg: float) -> EnergyAudit:
     work = _work(thrust, v, t)
     drag = _work(result.force_terms["drag_n"], v, t)
     rolling = _work(result.force_terms["rolling_n"], v, t)
+    tether = _work(result.force_terms.get("tether_n", np.zeros_like(t)), v, t)
     kinetic = 0.5 * mass_kg * float(v[-1]) ** 2
     powered = np.nonzero(thrust > 0)[0]
     end = int(powered[-1]) if powered.size else 0
@@ -116,7 +122,8 @@ def audit(result: RaceResult, mass_kg: float) -> EnergyAudit:
         kinetic_energy_j=kinetic,
         thrust_end_s=float(t[end]),
         kinetic_energy_at_thrust_end_j=0.5 * mass_kg * float(v[end]) ** 2,
-        closure_error_j=work - drag - rolling - kinetic,
+        closure_error_j=work - drag - rolling - tether - kinetic,
+        tether_loss_j=tether,
     )
 
 
@@ -132,5 +139,6 @@ def compare(baseline: EnergyAudit, candidate: EnergyAudit) -> dict[str, float]:
         "kinetic_energy_j": candidate.kinetic_energy_j - baseline.kinetic_energy_j,
         "drag_loss_j": candidate.drag_loss_j - baseline.drag_loss_j,
         "rolling_loss_j": candidate.rolling_loss_j - baseline.rolling_loss_j,
+        "tether_loss_j": candidate.tether_loss_j - baseline.tether_loss_j,
         "conversion_efficiency": candidate.conversion_efficiency - baseline.conversion_efficiency,
     }

@@ -96,7 +96,7 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [x] ✅ Cp probe lines. `easy`
 - [x] ✅ Wall y+ map, projected bad-cell map and skewness histogram from OpenFOAM fields. Generate missing quality fields with checkMesh from the existing mesh. `easy`
 - [x] ✅ Momentum-deficit wake drag cross-check, wake loss map, drag by part (`1d4a1f3`).
-- [ ] ⬜ Δwake and Δforces between two runs. `mid`
+- [x] ✅ Aligned-grid Δwake and matched-group Δforces between two runs. `mid`
 - [x] ✅ Run monitor: residual chart per field and ETA in the Jobs drawer (`4853264`).
 - [x] ✅ Frontal-area versus Cd trade chart with iso-drag curves (`ff6bf40`).
 - [ ] ⬜ Yaw and ride-height sweeps. `data`
@@ -114,16 +114,16 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [x] ✅ Speed trap: peak and finish speed from the trace, m/s and km/h (`7de8fa2`).
 - [x] ✅ Timing export: CSV and JSON of the trace and speed trap (`7de8fa2`).
 - [x] ✅ Event annotations: launch, burnout, peak and finish markers (`aafbe8f`).
-- [ ] 🟨 Session timing: best, last, interval and reaction history. The tower exists. A full saved timing ledger does not. `mid`
+- [x] ✅ Session timing ledger with best, last, same-lane interval and reaction history. Persists in the browser and exports CSV or JSON. `mid`
 - [x] ✅ Points distribution. `easy`
 - [x] ✅ Stacked time-budget chart with measured reaction. `easy`
-- [ ] ⬜ Race-level SALib indices and a full variance budget. `mid`
-- [ ] ⬜ Best eligible real-run ghost (scenario ghost exists). `mid`
+- [x] ✅ Race-level SALib indices and a declared CFD, reaction and timing variance budget. `mid`
+- [x] ✅ Fastest eligible measured distance trace selected from uploads and compared by distance in Race analysis. `mid`
 - [x] ✅ History strip vs prediction band on Race day (`77d738d`).
 - [x] ✅ Stadium view: fullscreen race-day big numbers (`/race/day`, `750b64f`). Panel rotation still open.
-- [ ] ⬜ Supported tether model through dynamics and energy balance. `mid`
+- [x] ✅ M2 tether resistance in deterministic and Monte Carlo dynamics, telemetry and the energy balance. `mid`
 - [x] ✅ Race-day time and reaction entry with prediction comparison and CSV/JSON export (`750b64f`).
-- [ ] ⬜ Explicit calibration update from race-day runs. `mid`
+- [x] ✅ Explicit Race Day session and lane handoff into a new calibration fit with a stored timing source file. `mid`
 
 ### 3.4 ORACLE and closed loop
 - [x] ✅ Robust pick: P50/P90 race time per Pareto design under drag and race-day uncertainty (`9744fab`).
@@ -137,7 +137,7 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [ ] ⬜ Accepted-only CFD feedback. STEP-to-mesh hash guard. Performance-rule gate. `hard`
 - [ ] ⬜ Separate training pools: synthetic demo, unreviewed input, accepted CFD, physical data. `hard`
 - [x] ✅ Pareto front with pymoo NSGA-II: predicted CdA vs uncertainty (`40d8dc2`). Mass and rule-margin objectives wait for a mass model.
-- [ ] ⬜ Repeat-experiment noise estimate, separate from the GP nugget. `mid`
+- [x] ✅ Same-setup repeat CdA sample SD shown separately from the GP nugget. `mid`
 
 ### 3.5 Calibration and physical tests
 - [x] ✅ Unit-aware timing and thrust input with outlier flags. No rows are dropped silently.
@@ -147,8 +147,8 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [x] ✅ Lab-day, track-day and custom protocols with advanced settings.
 - [x] ✅ Paired timing: mean CI (SciPy t), prospective power and minimum detectable effect.
 - [x] ✅ Minimum-N solver for paired timing, with N and N-1 power.
-- [ ] 🟨 Across-study scoring and posterior predictive checks. `mid`
-- [ ] 🟨 Applying a saved posterior to Race. Explicit link and record still missing. `mid`
+- [x] ✅ Across-study held-out scoring, interval coverage and posterior predictive ranks. `mid`
+- [x] ✅ Apply saved posterior medians and thrust settings to Race with a source-linked application record. Joint posterior draws remain a separate modelling extension. `mid`
 - [x] ✅ Prior versus posterior density plots. `easy`
 - [x] ✅ Across-run error scoreboard over new measurements. `easy`
 - [ ] ⬜ Repeat-run control chart and gauge R&R. `data`

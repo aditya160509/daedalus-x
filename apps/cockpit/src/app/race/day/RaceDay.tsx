@@ -2,8 +2,9 @@
 
 import { Table } from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { Download, Maximize2, Minimize2, Plus, Trash2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { BarChart } from "echarts/charts";
 import { MarkAreaComponent, MarkLineComponent } from "echarts/components";
 import {
@@ -21,15 +22,24 @@ import { estimateThrust } from "@/lib/thrust";
 import { cn } from "@/lib/utils";
 import { DEFAULT_CAR, DEFAULT_ESTIMATE } from "../raceInputsState";
 
-type Run = { id: number; lane: "A" | "B"; car_s: number; reaction_s: number; at: string };
-const KEY = "daedalus.raceday.runs";
+import {
+  DEFAULT_SESSION,
+  RACE_DAY_KEY,
+  laneIntervals,
+  readRaceDayLedger,
+  type TimingRun,
+} from "@/lib/raceDayLedger";
 
-function load(): Run[] {
-  if (typeof window === "undefined") return [];
+const subscribeHydration = () => () => undefined;
+const clientHydrated = () => true;
+const serverHydrated = () => false;
+const SESSION_KEY = "daedalus.raceday.active-session";
+
+function readActiveSession(): string {
   try {
-    return JSON.parse(localStorage.getItem(KEY) ?? "[]") as Run[];
+    return localStorage.getItem(SESSION_KEY) || DEFAULT_SESSION;
   } catch {
-    return [];
+    return DEFAULT_SESSION;
   }
 }
 
@@ -42,7 +52,7 @@ function HistoryStrip({
   low,
   high,
 }: {
-  runs: Run[];
+  runs: TimingRun[];
   predicted: number | null;
   low: number | null;
   high: number | null;
@@ -148,7 +158,14 @@ function Big({
  */
 export function RaceDay() {
   const root = useRef<HTMLDivElement>(null);
-  const [runs, setRuns] = useState<Run[]>(load);
+  const [ledger, setRuns] = useState<TimingRun[]>(readRaceDayLedger);
+  const hydrated = useSyncExternalStore(subscribeHydration, clientHydrated, serverHydrated);
+  const [session, setSession] = useState(readActiveSession);
+  const [newSession, setNewSession] = useState("");
+  const [formError, setFormError] = useState("");
+  const sessions = [...new Set([DEFAULT_SESSION, ...ledger.map((r) => r.session), session])];
+  const runs = ledger.filter((r) => r.session === session);
+  const intervals = laneIntervals(runs);
   const [car, setCar] = useState("");
   const [reaction, setReaction] = useState("");
   const [lane, setLane] = useState<"A" | "B">("A");
@@ -156,11 +173,18 @@ export function RaceDay() {
 
   useEffect(() => {
     try {
-      localStorage.setItem(KEY, JSON.stringify(runs));
+      localStorage.setItem(RACE_DAY_KEY, JSON.stringify(ledger));
     } catch {
       /* storage unavailable: keep in memory */
     }
-  }, [runs]);
+  }, [ledger]);
+  useEffect(() => {
+    try {
+      localStorage.setItem(SESSION_KEY, session);
+    } catch {
+      /* Session selection stays in memory. */
+    }
+  }, [session]);
   useEffect(() => {
     const on = () => setFull(document.fullscreenElement != null);
     document.addEventListener("fullscreenchange", on);
@@ -194,18 +218,32 @@ export function RaceDay() {
   const best = runs.length ? Math.min(...runs.map((r) => r.car_s)) : null;
   const last = runs.at(-1);
   const mean = runs.length ? runs.reduce((s, r) => s + r.car_s, 0) / runs.length : null;
-  const meanReaction = runs.length
-    ? runs.reduce((s, r) => s + r.reaction_s, 0) / runs.length
+  const reactions = runs.flatMap((r) => (r.reaction_s == null ? [] : [r.reaction_s]));
+  const meanReaction = reactions.length
+    ? reactions.reduce((s, r) => s + r, 0) / reactions.length
     : null;
   const inBand = (t: number) => low != null && high != null && t >= low && t <= high;
 
   function add() {
     const c = Number(car);
-    const r = Number(reaction || 0);
-    if (!Number.isFinite(c) || c <= 0) return;
+    const r = reaction.trim() === "" ? null : Number(reaction);
+    if (!Number.isFinite(c) || c <= 0 || (r != null && (!Number.isFinite(r) || r < 0))) {
+      setFormError(
+        "Enter a positive car time and a nonnegative reaction, or leave reaction blank.",
+      );
+      return;
+    }
+    setFormError("");
     setRuns((xs) => [
       ...xs,
-      { id: Date.now(), lane, car_s: c, reaction_s: r, at: new Date().toISOString() },
+      {
+        id: Math.max(Date.now(), (xs.at(-1)?.id ?? 0) + 1),
+        lane,
+        car_s: c,
+        reaction_s: r,
+        session,
+        at: new Date().toISOString(),
+      },
     ]);
     setCar("");
     setReaction("");
@@ -217,7 +255,7 @@ export function RaceDay() {
   }
 
   const csv = () =>
-    ["run,lane,car_s,reaction_s,total_s,delta_vs_pred_s,at"]
+    ["run,lane,car_s,reaction_s,total_s,delta_vs_pred_s,interval_same_lane_s,at"]
       .concat(
         runs.map((r, i) =>
           [
@@ -225,13 +263,16 @@ export function RaceDay() {
             r.lane,
             r.car_s,
             r.reaction_s,
-            (r.car_s + r.reaction_s).toFixed(4),
+            r.reaction_s == null ? "" : (r.car_s + r.reaction_s).toFixed(4),
             predicted != null ? (r.car_s - predicted).toFixed(4) : "",
+            intervals[i]?.toFixed(4) ?? "",
             r.at,
           ].join(","),
         ),
       )
       .join("\n");
+
+  if (!hydrated) return <p className="p-4 text-xs text-muted-foreground">Loading timing ledger…</p>;
 
   return (
     <div
@@ -267,7 +308,7 @@ export function RaceDay() {
             onClick={() =>
               download(
                 "race-day.json",
-                JSON.stringify({ predicted, low, high, runs }, null, 2),
+                JSON.stringify({ session, predicted, low, high, runs }, null, 2),
                 "application/json",
               )
             }
@@ -279,6 +320,48 @@ export function RaceDay() {
           </Button>
         </div>
       </div>
+
+      {runs.length > 0 && (
+        <Link className="self-start text-xs underline underline-offset-4" href="/race#calibration">
+          Use session for a calibration update
+        </Link>
+      )}
+      <form
+        className="flex flex-wrap items-end gap-2"
+        onSubmit={(event) => {
+          event.preventDefault();
+          const name = newSession.trim();
+          if (name) {
+            setSession(name);
+            setNewSession("");
+          }
+        }}
+      >
+        <label className="grid gap-1 text-xs">
+          Timing session
+          <select
+            value={session}
+            onChange={(e) => setSession(e.target.value)}
+            className="h-8 rounded border bg-background px-2"
+          >
+            {sessions.map((name) => (
+              <option key={name}>{name}</option>
+            ))}
+          </select>
+        </label>
+        <label htmlFor="race-day-new-session" className="grid gap-1 text-xs">
+          New session name
+          <Input
+            id="race-day-new-session"
+            value={newSession}
+            maxLength={60}
+            onChange={(e) => setNewSession(e.target.value)}
+          />
+        </label>
+        <Button size="sm" type="submit" disabled={!newSession.trim()}>
+          Open session
+        </Button>
+      </form>
 
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <Big
@@ -311,7 +394,7 @@ export function RaceDay() {
           value={fmt(last?.reaction_s)}
           unit="s"
           tone={
-            last
+            last?.reaction_s != null
               ? last.reaction_s < 0.2
                 ? "good"
                 : last.reaction_s < 0.3
@@ -349,7 +432,14 @@ export function RaceDay() {
                   Total
                 </th>
                 <th scope="col" className="px-2 py-2 text-right font-normal">
-                  Δ pred
+                  Δ pred (ms)
+                </th>
+                <th
+                  scope="col"
+                  className="px-2 py-2 text-right font-normal"
+                  title="Difference from the previous car time in the same lane"
+                >
+                  Interval (s)
                 </th>
                 <th scope="col" className="w-12 px-2 py-2">
                   <span className="sr-only">Delete</span>
@@ -360,7 +450,7 @@ export function RaceDay() {
               {runs.length === 0 && (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={8}
                     className="px-4 py-8 text-center font-sans text-sm text-muted-foreground"
                   >
                     Type the first timed run below.
@@ -380,7 +470,9 @@ export function RaceDay() {
                     {fmt(r.car_s)}
                   </td>
                   <td className="tabular px-2 py-2 text-right">{fmt(r.reaction_s)}</td>
-                  <td className="tabular px-2 py-2 text-right">{fmt(r.car_s + r.reaction_s)}</td>
+                  <td className="tabular px-2 py-2 text-right">
+                    {fmt(r.reaction_s == null ? null : r.car_s + r.reaction_s)}
+                  </td>
                   <td
                     className={cn(
                       "tabular px-2 py-2 text-right",
@@ -391,11 +483,14 @@ export function RaceDay() {
                       ? `${r.car_s - predicted >= 0 ? "+" : ""}${((r.car_s - predicted) * 1000).toFixed(0)} ms`
                       : "—"}
                   </td>
+                  <td className="tabular px-2 py-2 text-right">{fmt(intervals[i])}</td>
                   <td className="px-2 py-2 text-right">
                     <button
                       type="button"
                       aria-label={`Delete run ${i + 1}`}
-                      onClick={() => setRuns((xs) => xs.filter((x) => x.id !== r.id))}
+                      onClick={() =>
+                        setRuns((xs) => xs.filter((x) => x.id !== r.id || x.session !== session))
+                      }
                       className="text-text-3 hover:text-destructive"
                     >
                       <Trash2 className="size-3.5" />
@@ -455,6 +550,11 @@ export function RaceDay() {
                 ))}
               </div>
             </div>
+            {formError && (
+              <p role="alert" className="text-xs text-destructive">
+                {formError}
+              </p>
+            )}
             <Button type="submit" size="sm">
               <Plus /> Add run
             </Button>

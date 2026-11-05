@@ -9,6 +9,7 @@ import {
   useECharts,
 } from "@/components/charts/useECharts";
 import { DataTable, type DataColumn } from "@/components/ui/data-table";
+import { RepeatNoise } from "./RepeatNoise";
 import type { OracleSensitivity } from "@/lib/api";
 
 echarts.use([ToolboxComponent]);
@@ -92,6 +93,7 @@ export function GpParameters({ data }: { data: Diagnostics }) {
         observations: {data.repeat_inputs}. This nugget comes from marginal likelihood, not measured
         repeat-run variability.
       </p>
+      <RepeatNoise nuggetCm2={data.noise_sd_m2 * 10000} />
       <p className="text-xs text-muted-foreground">
         Shorter RBF lengths allow the fitted surrogate to vary faster along that parameter. They are
         correlation scales, not causal importance scores or confidence intervals. Bound hits can
