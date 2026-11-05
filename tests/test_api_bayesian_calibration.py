@@ -32,6 +32,9 @@ def fake_posterior(summaries=None):
                 "warnings": [],
             }
 
+        def density_curves(self, priors):
+            return {}
+
         def predict(self, thrust, **kwargs):
             assert kwargs["track_m"] == 15
             return np.array([1.0, 1.1, 1.2])

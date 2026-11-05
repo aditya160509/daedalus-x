@@ -24,7 +24,7 @@ import {
 import { comparisonRows, type StudyComparisonRow } from "@/lib/calibrationCompare";
 import { estimateThrust, parseThrustCsv, type ThrustTrace } from "@/lib/thrust";
 import { outlierRowIndices } from "@/lib/timingRows";
-import { HeldOutPlot, PosteriorIntervals } from "./CalibrationPlots";
+import { CalibrationDensity, HeldOutPlot, PosteriorIntervals } from "./CalibrationPlots";
 
 type TimingPreview = TimingImport & {
   /** Saved studies do not store the importer's flags; say so instead of inventing them. */
@@ -331,6 +331,17 @@ export function CalibrationPanel() {
       mass_kg: r.mass_kg ?? values.mass / 1000,
     }));
   const result = fit.data;
+  const scored = result?.held_out ?? [];
+  const errorScore = scored.length
+    ? {
+        biasMs: (1000 * scored.reduce((sum, row) => sum + row.error_s, 0)) / scored.length,
+        maeMs: (1000 * scored.reduce((sum, row) => sum + Math.abs(row.error_s), 0)) / scored.length,
+        rmseMs:
+          1000 * Math.sqrt(scored.reduce((sum, row) => sum + row.error_s ** 2, 0) / scored.length),
+        covered: scored.filter((row) => row.measured_s >= row.p05_s && row.measured_s <= row.p95_s)
+          .length,
+      }
+    : null;
   const intervalItems = result
     ? Object.entries(result.summaries).flatMap(([key, summary]) => {
         const label = LABELS[key];
@@ -789,6 +800,16 @@ export function CalibrationPanel() {
                 })}
               </div>
               <PosteriorIntervals items={intervalItems} />
+              <section className="space-y-2">
+                <h3 className="text-sm font-medium">Prior and posterior densities</h3>
+                <p className="text-xs text-muted-foreground">
+                  Analytic prior bin averages and posterior draw histograms on the same scale.
+                </p>
+                {Object.entries(result.density_curves).map(([key, bins]) => {
+                  const variable = LABELS[key];
+                  return variable && <CalibrationDensity key={key} {...variable} bins={bins} />;
+                })}
+              </section>
               {result.warnings.map((w) => (
                 <p key={w} className="text-xs">
                   {w}
@@ -801,20 +822,42 @@ export function CalibrationPanel() {
                 and 300 draws.
               </p>
               <h3 className="font-medium">Held-out predictions</h3>
+              {errorScore && (
+                <dl
+                  aria-label="Held-out error scoreboard"
+                  className="grid grid-cols-2 gap-3 rounded-lg border p-3 text-xs sm:grid-cols-4"
+                >
+                  <div>
+                    <dt>Bias (predicted − measured)</dt>
+                    <dd>{errorScore.biasMs.toFixed(1)} ms</dd>
+                  </div>
+                  <div>
+                    <dt>Mean absolute error</dt>
+                    <dd>{errorScore.maeMs.toFixed(1)} ms</dd>
+                  </div>
+                  <div>
+                    <dt>Root mean square error</dt>
+                    <dd>{errorScore.rmseMs.toFixed(1)} ms</dd>
+                  </div>
+                  <div>
+                    <dt>Inside 90% interval</dt>
+                    <dd>
+                      {errorScore.covered}/{scored.length} runs
+                    </dd>
+                  </div>
+                </dl>
+              )}
               {result.held_out.length ? (
                 <div className="space-y-2">
                   <HeldOutPlot
                     rows={result.held_out}
-                    labels={result.held_out.map(
-                      (_, index) => `run ${held?.rows[index]?.run_no ?? `row ${index + 1}`}`,
-                    )}
+                    labels={result.held_out.map((_, index) => `held-out row ${index + 1}`)}
                   />
                   {result.held_out.map((r, i) => (
                     <p key={`${i}-${r.measured_s}`} className="rounded-lg border p-3 text-xs">
-                      Run {held?.rows[i]?.run_no ?? `row ${i + 1}`}: measured{" "}
-                      {r.measured_s.toFixed(4)} s · predicted median {r.median_s.toFixed(4)} s · 90%
-                      interval {r.p05_s.toFixed(4)}–{r.p95_s.toFixed(4)} s · error{" "}
-                      {r.error_s.toFixed(4)} s
+                      Held-out row {i + 1}: measured {r.measured_s.toFixed(4)} s · predicted median{" "}
+                      {r.median_s.toFixed(4)} s · 90% interval {r.p05_s.toFixed(4)}–
+                      {r.p95_s.toFixed(4)} s · error {r.error_s.toFixed(4)} s
                     </p>
                   ))}
                 </div>

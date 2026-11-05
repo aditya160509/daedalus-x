@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { NewRunDialog } from "@/components/jobs/NewRunDialog";
 import { buildOracleStudy, listDesigns } from "@/lib/api";
 
-export function BuildNextControls({ unit }: { unit: number[] }) {
+export function BuildNextControls({ unit, reason }: { unit: number[]; reason: string }) {
   const designs = useQuery({ queryKey: ["designs"], queryFn: listDesigns });
   const cache = useQueryClient();
   const [selected, setSelected] = useState<string | null>(null);
@@ -20,8 +20,23 @@ export function BuildNextControls({ unit }: { unit: number[] }) {
     mutationFn: buildOracleStudy,
     onSuccess: () => void cache.invalidateQueries({ queryKey: ["designs"] }),
   });
+  // FORGE's comparable dimensional headrooms are in millimetres.
+  const nearest = build.data?.checks
+    .filter((check) => check.unit === "mm" && check.margin != null)
+    .toSorted((a, b) => a.margin! - b.margin!)[0];
+
   return (
     <div className="mt-4 space-y-3 border-t pt-3 text-xs">
+      <p>
+        <span className="font-medium">Why this recommendation</span>
+        {" · "}
+        {reason} ·{" "}
+        {nearest
+          ? `Tightest FORGE dimension: ${nearest.rule_id} (${nearest.margin?.toFixed(2)} mm headroom)`
+          : build.data
+            ? "No computable dimensional rule margin"
+            : "Build candidate to check its rule margin"}
+      </p>
       <p className="leading-relaxed text-muted-foreground">
         Build this point as a parametric study using the baseline’s overall dimensions. This family
         is not a reconstruction of your manufactured car. FORGE checks it after import; halo, tether

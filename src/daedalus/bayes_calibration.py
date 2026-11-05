@@ -95,6 +95,32 @@ class Posterior:
         rng = np.random.default_rng(seed)
         return np.asarray(t + d["offset_s"] + rng.normal(size=n) * noise, dtype=np.float64)
 
+    def density_curves(self, priors: Priors) -> dict[str, list[tuple[float, float, float]]]:
+        """Analytic prior and posterior histogram densities on shared bins."""
+        from scipy.stats import halfnorm, lognorm, norm
+
+        distributions = {
+            name: lognorm(priors.relative_sd, scale=getattr(priors, name)) for name in NAMES
+        }
+        distributions["extra_noise_s"] = halfnorm(scale=priors.extra_noise_scale_s)
+        distributions["offset_s"] = norm(scale=priors.offset_sd_s)
+        curves = {}
+        for name, distribution in distributions.items():
+            posterior = self.draws[name]
+            lo = min(float(distribution.ppf(0.001)), float(posterior.min()))
+            hi = max(float(distribution.ppf(0.999)), float(posterior.max()))
+            edges = np.linspace(lo, hi, 41)
+            counts, _ = np.histogram(posterior, bins=edges)
+            widths = np.diff(edges)
+            centers = (edges[:-1] + edges[1:]) / 2
+            prior = np.diff(distribution.cdf(edges)) / widths
+            density = counts / (posterior.size * widths)
+            curves[name] = [
+                (float(x), float(a), float(b))
+                for x, a, b in zip(centers, prior, density, strict=True)
+            ]
+        return curves
+
     def to_mapping(self) -> dict[str, object]:
         return {
             "summaries": {k: vars(v) for k, v in self.summaries.items()},

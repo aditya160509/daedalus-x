@@ -105,6 +105,69 @@ def _require(store: EvidenceStore, record_id: str, kind: type[c.Record], label: 
         raise HTTPException(404, f"{label} {record_id!r} not found") from exc
 
 
+_PHYSICAL_UNITS = {
+    "part_mass": "g",
+    "caliper_dimension": "mm",
+    "coast_down_speed": "m/s",
+    "coast_down_distance": "m",
+    "tether_force": "N",
+    "load_test_force": "N",
+    "load_test_deflection": "mm",
+}
+
+
+class PhysicalReading(BaseModel):
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False, str_strip_whitespace=True)
+
+    subject_id: str = Field(min_length=1, max_length=120)
+    kind: Literal[
+        "part_mass",
+        "caliper_dimension",
+        "coast_down_speed",
+        "coast_down_distance",
+        "tether_force",
+        "load_test_force",
+        "load_test_deflection",
+    ]
+    reading: float = Field(ge=0)
+    source: str = Field(min_length=1, max_length=300)
+
+
+@router.get("/data/physical-readings/subjects")
+def physical_reading_subjects() -> list[str]:
+    store = _store()
+    try:
+        return [
+            *(build.build_id for build in store.records(c.PhysicalBuild)),
+            *(design.design_id for design in store.records(c.Design)),
+        ]
+    finally:
+        store.close()
+
+
+@router.post("/data/physical-readings", status_code=201)
+def save_physical_reading(req: PhysicalReading) -> c.Observation:
+    store = _store()
+    try:
+        eligible = any(build.build_id == req.subject_id for build in store.records(c.PhysicalBuild))
+        eligible = eligible or any(
+            design.design_id == req.subject_id for design in store.records(c.Design)
+        )
+        if not eligible:
+            raise HTTPException(404, "Select a registered design or physical build")
+        return store.add(
+            c.Observation(
+                subject_id=req.subject_id,
+                quantity=req.kind,
+                value=c.Quantity(value=req.reading, unit=_PHYSICAL_UNITS[req.kind]),
+                provenance=c.Provenance.MEASURED,
+                source=req.source,
+            )
+        )
+    finally:
+        store.close()
+
+
 @router.post("/data/import")
 def import_data(
     file: Annotated[UploadFile, File()],
@@ -385,7 +448,7 @@ def _json_bytes(payload: object) -> bytes:
 
 def _save_study(
     req: BayesianCalibrationRequest,
-    sources: list[tuple[str, bytes]],
+    sources: list[tuple[str, bytes, str | None]],
     results: dict[str, object],
 ) -> tuple[c.CalibrationStudy, c.Model]:
     """Append the model, the exact inputs, the results and any uploaded source files."""
@@ -504,7 +567,11 @@ def bayesian_calibration(req: BayesianCalibrationRequest) -> dict[str, object]:
                     "error_s": float(median - run.time_s),
                 }
             )
-        results: dict[str, object] = {**posterior.to_mapping(), "held_out": held_out}
+        results: dict[str, object] = {
+            **posterior.to_mapping(),
+            "held_out": held_out,
+            "density_curves": posterior.density_curves(priors),
+        }
         study, model = _save_study(req, sources, results)
         return {**results, "study_id": study.study_id, "model_id": model.model_id}
     except (BayesCalibrationError, ValueError, np.linalg.LinAlgError) as exc:

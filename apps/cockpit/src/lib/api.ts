@@ -146,6 +146,7 @@ const DesignPart = z.object({
   label: z.string(),
   group: z.string(),
   volume_m3: z.number(),
+  centroid_m: z.tuple([z.number(), z.number(), z.number()]).nullish(),
   bbox_min_m: z.tuple([z.number(), z.number(), z.number()]),
   bbox_max_m: z.tuple([z.number(), z.number(), z.number()]),
 });
@@ -196,6 +197,13 @@ const CfdWake = z.object({
   }),
   provenance: z.literal("simulated"),
 });
+export const probeCfdCp = (id: string, start: number[], end: number[]) =>
+  request(
+    `/v1/cfd/runs/${encodeURIComponent(id)}/cp-probe`,
+    z.object({ samples: z.array(z.tuple([z.number(), z.number().nullable()])) }),
+    { method: "POST", body: JSON.stringify({ start_m: start, end_m: end }) },
+  );
+
 export const getCfdWake = (id: string) =>
   request(`/v1/cfd/runs/${encodeURIComponent(id)}/wake.json`, CfdWake);
 
@@ -518,6 +526,7 @@ export const OracleState = z.object({
     params: z.record(z.string(), z.number()),
     unit: z.array(z.number()),
     expected_improvement_m2: z.number(),
+    shortest_length_scale_variable: z.string(),
     cda_m2: z.number(),
     cda_sd_m2: z.number(),
     race_time_s: z.number(),
@@ -893,6 +902,7 @@ const RacingOutcome = z.object({
   fastest_car_probability: z.number(),
   expected_bonus_points: z.number(),
   expected_total_points: z.number(),
+  total_points_distribution: z.array(z.tuple([z.number(), z.number()])),
   field_source: z.enum(["measured", "estimated", "synthetic"]),
   performance_compliant: z.boolean(),
   assumptions: z.array(z.string()),
@@ -940,6 +950,18 @@ export const previewTimingImport = (file: File) => {
   body.append("file", file);
   return request("/v1/data/import?kind=race_timing", TimingImport, { method: "POST", body });
 };
+export const physicalReadingSubjects = () =>
+  request("/v1/data/physical-readings/subjects", z.array(z.string()));
+export const savePhysicalReading = (input: {
+  subject_id: string;
+  kind: string;
+  reading: number;
+  source: string;
+}) =>
+  request("/v1/data/physical-readings", z.object({ observation_id: z.string() }), {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
 const BayesSummary = z.object({
   median: z.number(),
   p05: z.number(),
@@ -947,6 +969,7 @@ const BayesSummary = z.object({
   information_gain: z.number().nullable(),
 });
 const BayesianCalibration = z.object({
+  density_curves: z.record(z.string(), z.array(z.tuple([z.number(), z.number(), z.number()]))),
   summaries: z.record(z.string(), BayesSummary),
   effective_sample_size: z.number(),
   seed: z.number(),

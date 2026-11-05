@@ -88,6 +88,7 @@ class DesignPart(BaseModel):
     volume_m3: float
     bbox_min_m: list[float]
     bbox_max_m: list[float]
+    centroid_m: tuple[float, float, float] | None = None
 
 
 class DesignGeometry(BaseModel):
@@ -316,6 +317,38 @@ def run_vtk_layer(run_id: str, filename: str) -> FileResponse:
     return FileResponse(
         path, media_type="text/xml", headers={"Cache-Control": "private, max-age=300"}
     )
+
+
+class ProbeLine(BaseModel):
+    start_m: tuple[float, float, float]
+    end_m: tuple[float, float, float]
+
+
+@router.post("/cfd/runs/{run_id}/cp-probe")
+def cp_probe(run_id: str, line: ProbeLine) -> dict[str, object]:
+    import pyvista as pv
+
+    from daedalus.viz import _reader
+    from daedalus.viz.vtkexport import probe_cp
+
+    run = _safe_dir("runs", run_id)
+    try:
+        manifest = json.loads((run / "daedalus_manifest.json").read_text())
+        with _FIELD_EXPORT_LOCK:
+            internal = _reader(run, [])["internalMesh"]
+            if not isinstance(internal, pv.DataSet):
+                raise ValueError("run does not contain a solved internal mesh")
+            samples = probe_cp(
+                internal,
+                list(line.start_m),
+                list(line.end_m),
+                float(manifest["reference"]["U_m_s"]),
+            )
+    except FileNotFoundError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except (ValueError, KeyError, TypeError) as exc:
+        raise HTTPException(422, str(exc)) from exc
+    return {"samples": samples}
 
 
 @router.get("/cfd/compare/cp/metadata")

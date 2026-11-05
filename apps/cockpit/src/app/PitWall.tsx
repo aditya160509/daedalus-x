@@ -75,7 +75,13 @@ export function PitWall() {
             <PitWallDock
               slots={{
                 flow: heroRun ? (
-                  <HeroImage runId={heroRun} className="min-h-64 w-full" />
+                  <Panel
+                    title="Flow"
+                    description={heroRun}
+                    actions={<ProvenanceBadge value="simulated" />}
+                  >
+                    <HeroImage runId={heroRun} fit="contain" className="h-64 w-full" />
+                  </Panel>
                 ) : (
                   <p className="p-4 text-sm text-muted-foreground">
                     No flow render available. Select a completed CFD run in Wind Tunnel.
@@ -137,7 +143,13 @@ export function PitWall() {
                     ) : (
                       <Skeleton className="h-40" />
                     )}
-                    {s && <BuildNextControls key={s.next.unit.join(",")} unit={s.next.unit} />}
+                    {s && (
+                      <BuildNextControls
+                        key={s.next.unit.join(",")}
+                        unit={s.next.unit}
+                        reason={`EI ${fmtCm2(s.next.expected_improvement_m2)} cm² · GP uncertainty ${fmtCm2(s.next.cda_sd_m2)} cm² · shortest GP length scale: ${prettify(s.next.shortest_length_scale_variable)}`}
+                      />
+                    )}
                   </Panel>
                 ),
                 rules: <LegalPanel />,

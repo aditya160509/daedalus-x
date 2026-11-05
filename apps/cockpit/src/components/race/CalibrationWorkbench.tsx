@@ -2,6 +2,7 @@
 
 import { lazy, Suspense, useState } from "react";
 import { SegmentedControl, Skeleton } from "@/components/ui/primitives";
+import { PhysicalReadings } from "./PhysicalReadings";
 import { CalibrationPanel } from "./CalibrationPanel";
 
 const PairedTimingPanel = lazy(() =>
@@ -9,7 +10,7 @@ const PairedTimingPanel = lazy(() =>
 );
 
 export function CalibrationWorkbench() {
-  const [view, setView] = useState<"model" | "paired">("model");
+  const [view, setView] = useState<"model" | "paired" | "measurements">("model");
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
       <SegmentedControl
@@ -19,11 +20,14 @@ export function CalibrationWorkbench() {
         options={[
           { value: "model", label: "Model calibration" },
           { value: "paired", label: "Paired tests" },
+          { value: "measurements", label: "Physical readings" },
         ]}
       />
       <div className="min-h-0 flex-1 overflow-y-auto">
         <Suspense fallback={<Skeleton className="h-72" />}>
-          {view === "model" ? <CalibrationPanel /> : <PairedTimingPanel />}
+          {view === "model" && <CalibrationPanel />}
+          {view === "paired" && <PairedTimingPanel />}
+          {view === "measurements" && <PhysicalReadings />}
         </Suspense>
       </div>
     </div>

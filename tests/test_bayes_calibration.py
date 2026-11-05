@@ -100,3 +100,13 @@ def test_validation() -> None:
         Priors(cda_m2=-1, crr=0.01)
     with pytest.raises(BayesCalibrationError):
         calibrate(runs(2, seed=1), THRUST, PRIORS, particles=10)
+
+
+def test_density_curves_preserve_probability(posterior) -> None:
+    curves = posterior.density_curves(PRIORS)
+    assert set(curves) == set(posterior.draws)
+    for points in curves.values():
+        x, prior, fitted = np.asarray(points).T
+        width = x[1] - x[0]
+        assert np.sum(fitted) * width == pytest.approx(1.0)
+        assert 0.997 <= np.sum(prior) * width <= 1.000001

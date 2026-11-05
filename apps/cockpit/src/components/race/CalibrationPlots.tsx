@@ -279,3 +279,64 @@ export function HeldOutPlot({ rows, labels }: { rows: HeldOutRow[]; labels: stri
     </div>
   );
 }
+
+export function CalibrationDensity({
+  label,
+  unit,
+  scale,
+  bins,
+}: {
+  label: string;
+  unit: string;
+  scale: number;
+  bins: [number, number, number][];
+}) {
+  const host = useECharts(() => {
+    const t = chartTheme();
+    return {
+      animation: false,
+      toolbox: { feature: { saveAsImage: { type: "png", name: `calibration-${label}` } } },
+      legend: { textStyle: { color: t.text } },
+      grid: { left: 65, right: 20, top: 45, bottom: 45 },
+      tooltip: { ...chartTooltip(t), trigger: "axis" },
+      xAxis: {
+        ...chartAxis(t),
+        type: "value",
+        scale: true,
+        name: `${label} (${unit || "1"})`,
+        nameLocation: "middle",
+        nameGap: 28,
+      },
+      yAxis: {
+        ...chartAxis(t),
+        type: "value",
+        name: unit && unit !== "1" ? `Density (1/${unit})` : "Density",
+      },
+      series: [
+        {
+          type: "line",
+          name: "Prior",
+          showSymbol: false,
+          color: t.muted,
+          data: bins.map(([x, prior]) => [x * scale, prior / scale]),
+        },
+        {
+          type: "line",
+          name: "Posterior",
+          showSymbol: false,
+          step: "middle",
+          color: t.brand,
+          data: bins.map(([x, , posterior]) => [x * scale, posterior / scale]),
+        },
+      ],
+    };
+  }, [label, unit, scale, bins]);
+  return (
+    <div
+      ref={host}
+      className="h-52 w-full"
+      role="img"
+      aria-label={`Prior versus posterior density for ${label}`}
+    />
+  );
+}

@@ -83,6 +83,7 @@ def state() -> dict[str, object]:
             "params": dict(zip(names, oracle.to_physical(u).tolist(), strict=True)),
             "unit": u.tolist(),
             "expected_improvement_m2": ei,
+            "shortest_length_scale_variable": names[int(np.argmin(gp.log_ls))],
             "cda_m2": float(mean[0]),
             "cda_sd_m2": float(sd[0]),
             "race_time_s": float(times[1]),

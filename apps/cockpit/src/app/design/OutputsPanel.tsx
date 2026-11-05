@@ -1,13 +1,15 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { ArrowUpRight } from "lucide-react";
-import { Metric, Panel, Skeleton } from "@/components/ui/primitives";
+import { Metric, Panel, ProvenanceBadge, Skeleton } from "@/components/ui/primitives";
 import {
   getDesignGeometry,
   getForgeChecks,
   getOracleState,
   listPredictions,
+  type DesignGeometry,
   type Provenance,
   type RuleCheck,
 } from "@/lib/api";
@@ -45,6 +47,69 @@ const STATE_TEXT: Record<RuleCheck["state"], string> = {
 
 function fmt(v: number | null | undefined, digits = 2) {
   return v == null || !Number.isFinite(v) ? "—" : v.toFixed(digits);
+}
+
+function MassEstimate({ parts }: { parts: DesignGeometry["parts"] }) {
+  const [densities, setDensities] = useState<Record<number, string>>({});
+  const masses = parts.map((part, index) => part.volume_m3 * Number(densities[index]) * 1000);
+  const ready = masses.length > 0 && masses.every((mass) => Number.isFinite(mass) && mass > 0);
+  const mass = ready ? masses.reduce((sum, value) => sum + value, 0) : null;
+  const center =
+    mass && parts.every((part) => part.centroid_m != null)
+      ? [0, 1, 2].map(
+          (axis) =>
+            (parts.reduce((sum, part, i) => sum + part.centroid_m![axis] * masses[i], 0) / mass) *
+            1000,
+        )
+      : null;
+
+  return (
+    <Panel
+      title="Mass and centre of gravity"
+      description="Assign an effective material density to each solid. Account for infill and cavities absent from CAD."
+      actions={<ProvenanceBadge value="estimated" />}
+      bodyClassName="space-y-3 p-4"
+    >
+      <div className="grid gap-2 sm:grid-cols-2">
+        {parts.map((part, i) => (
+          <label key={i} className="flex items-center justify-between gap-2 text-xs">
+            <span>
+              {part.label} ({fmt(part.volume_m3 * 1e6)} cm³)
+            </span>
+            <input
+              type="number"
+              min="0"
+              step="any"
+              className="w-28 rounded border bg-background px-2 py-1"
+              placeholder="kg/m³"
+              aria-label={`Effective density of ${part.label}, solid ${i + 1}, in kg/m³`}
+              value={densities[i] ?? ""}
+              onChange={(event) => setDensities({ ...densities, [i]: event.target.value })}
+            />
+          </label>
+        ))}
+      </div>
+      {mass == null ? (
+        <p className="text-xs text-muted-foreground">
+          Enter a positive density for every solid to estimate the assembly mass.
+        </p>
+      ) : (
+        <div className="grid gap-2 sm:grid-cols-2">
+          <Metric label="Estimated CAD mass" value={fmt(mass)} unit="g" />
+          <Metric
+            label="Centre of gravity (x, y, z)"
+            value={center?.map((v) => fmt(v)).join(", ") ?? "—"}
+            unit="mm"
+            hint={
+              center
+                ? "Engineering frame · nose, centreline and ground plane"
+                : "Reimport the STEP to calculate missing solid centroids."
+            }
+          />
+        </div>
+      )}
+    </Panel>
+  );
 }
 
 /** Everything known about one design on one screen; each card links to its full analysis. */
@@ -172,6 +237,8 @@ export function OutputsPanel({
               />
             ))}
       </div>
+
+      {g && <MassEstimate key={g.source_sha256} parts={g.parts} />}
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel

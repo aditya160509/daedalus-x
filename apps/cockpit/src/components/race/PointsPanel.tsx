@@ -129,6 +129,54 @@ function RoundChart({ probabilities }: { probabilities: number[] }) {
   );
 }
 
+function PointsDistribution({ bins }: { bins: [number, number][] }) {
+  const host = useECharts(() => {
+    const t = chartTheme();
+    const probabilities = new Map(bins);
+    const start = bins[0]?.[0] ?? 0;
+    const end = bins.at(-1)?.[0] ?? start;
+    const points = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+    return {
+      animation: false,
+      toolbox: { feature: { saveAsImage: { type: "png", name: "race-points-distribution" } } },
+      grid: { left: 55, right: 20, top: 30, bottom: 42 },
+      tooltip: {
+        ...chartTooltip(t),
+        trigger: "axis",
+        valueFormatter: (v: number) => `${(100 * v).toFixed(2)}%`,
+      },
+      xAxis: {
+        ...chartAxis(t),
+        type: "category",
+        name: "Total points",
+        nameLocation: "middle",
+        nameGap: 28,
+        data: points,
+      },
+      yAxis: {
+        ...chartAxis(t),
+        type: "value",
+        axisLabel: { formatter: (v: number) => `${100 * v}%` },
+      },
+      series: [
+        {
+          type: "bar",
+          data: points.map((point) => probabilities.get(point) ?? 0),
+          itemStyle: { color: t.brand },
+        },
+      ],
+    };
+  }, [bins]);
+  return (
+    <div
+      ref={host}
+      className="h-52 w-full"
+      role="img"
+      aria-label="Probability by total racing points"
+    />
+  );
+}
+
 export function PointsPanel({
   baselineTime,
   baselineSpread,
@@ -446,6 +494,14 @@ export function PointsPanel({
                   <RoundChart probabilities={data.round_win_probabilities} />
                 </div>
               </div>
+
+              <section className="rounded-lg border border-border/70 p-3">
+                <h3 className="text-xs font-medium">Total points distribution</h3>
+                <p className="text-2xs text-muted-foreground">
+                  One-point bins. Scoring categories are modelled independently.
+                </p>
+                <PointsDistribution bins={data.total_points_distribution} />
+              </section>
 
               <details className="text-[11px]">
                 <summary className="cursor-pointer text-muted-foreground hover:text-foreground">

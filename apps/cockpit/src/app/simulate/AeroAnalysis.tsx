@@ -1,9 +1,10 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { HeatmapChart, PieChart, ScatterChart } from "echarts/charts";
 import { MarkLineComponent, VisualMapComponent } from "echarts/components";
-import { Metric, Panel } from "@/components/ui/primitives";
+import { Button, Metric, Panel, ProvenanceBadge } from "@/components/ui/primitives";
 import {
   chartAxis,
   chartTheme,
@@ -11,7 +12,7 @@ import {
   echarts,
   useECharts,
 } from "@/components/charts/useECharts";
-import { type CfdRunDetail, getCfdWake, listCfdRuns } from "@/lib/api";
+import { type CfdRunDetail, getCfdWake, listCfdRuns, probeCfdCp } from "@/lib/api";
 
 echarts.use([PieChart, ScatterChart, HeatmapChart, VisualMapComponent, MarkLineComponent]);
 
@@ -432,6 +433,92 @@ function WakeLossMap({ y, z, loss }: { y: number[]; z: number[]; loss: (number |
 }
 
 /** Every aerodynamic output for the selected run on one page. */
+function CpProbe({ runId }: { runId: string }) {
+  const [values, setValues] = useState(["0", "0", "40", "200", "0", "40"]);
+  const probe = useMutation({
+    mutationFn: (coords: number[]) => probeCfdCp(runId, coords.slice(0, 3), coords.slice(3)),
+  });
+  const host = useECharts(() => {
+    const t = chartTheme();
+    return {
+      animation: false,
+      grid: { left: 45, right: 20, top: 28, bottom: 45 },
+      toolbox: { feature: { saveAsImage: { type: "png", name: "cp-probe" } } },
+      tooltip: { ...chartTooltip(t), trigger: "axis" },
+      xAxis: {
+        ...chartAxis(t),
+        type: "value",
+        name: "Distance along line (mm)",
+        nameLocation: "middle",
+        nameGap: 28,
+      },
+      yAxis: { ...chartAxis(t), type: "value", name: "Cp (1)" },
+      series: [
+        {
+          type: "line",
+          showSymbol: false,
+          connectNulls: false,
+          data: probe.data?.samples.map(([m, cp]) => [m * 1000, cp]),
+          lineStyle: { color: t.brand },
+        },
+      ],
+    };
+  }, [probe.data]);
+  return (
+    <Panel
+      title="Cp probe line"
+      actions={<ProvenanceBadge value="simulated" />}
+      description="Sample the latest solved pressure field along a line in the engineering frame. Gaps indicate points outside the fluid."
+      bodyClassName="space-y-3 p-4"
+    >
+      <form
+        className="space-y-2"
+        onSubmit={(event) => {
+          event.preventDefault();
+          probe.mutate(values.map((value) => Number(value) / 1000));
+        }}
+      >
+        <div className="grid grid-cols-3 gap-2">
+          {values.map((value, i) => (
+            <label key={i} className="grid gap-1 text-xs">
+              {i < 3 ? "Start" : "End"} {"XYZ"[i % 3]} (mm)
+              <input
+                className="min-w-0 rounded border bg-background p-1"
+                type="number"
+                step="any"
+                required
+                value={value}
+                onChange={(event) =>
+                  setValues(values.map((v, j) => (i === j ? event.target.value : v)))
+                }
+              />
+            </label>
+          ))}
+        </div>
+        <Button type="submit" disabled={probe.isPending}>
+          {probe.isPending ? "Sampling…" : "Sample line"}
+        </Button>
+      </form>
+      {probe.error && (
+        <p role="alert" className="text-xs text-destructive">
+          {probe.error.message}
+        </p>
+      )}
+      {probe.data && !probe.data.samples.some(([, cp]) => cp != null) && (
+        <p className="text-xs text-muted-foreground">
+          No sampled points intersect the solved fluid.
+        </p>
+      )}
+      <div
+        ref={host}
+        className="h-52 w-full"
+        role="img"
+        aria-label="Pressure coefficient along the probe line"
+      />
+    </Panel>
+  );
+}
+
 export function AeroAnalysis({ run }: { run: CfdRunDetail }) {
   const r = run.result;
   const U = run.manifest.reference.U_m_s;
@@ -506,6 +593,8 @@ export function AeroAnalysis({ run }: { run: CfdRunDetail }) {
           hint={`${(totalTime / 60).toFixed(1)} min total`}
         />
       </div>
+
+      {run.state === "succeeded" && <CpProbe key={run.run_id} runId={run.run_id} />}
 
       {!accepted && r?.reasons?.length ? (
         <div className="rounded-lg border border-risk/30 px-4 py-3 text-[12px]">

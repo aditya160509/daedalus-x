@@ -3,14 +3,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { listCfdRuns, type RenderView, renderUrl } from "@/lib/api";
+import { useSelectedRun } from "@/lib/runSelection";
 import { cn } from "@/lib/utils";
 
-/** The lowest-Cd solved run with a flow field: the one the hero renders show. */
+/** Prefer the active solved run, then the lowest-Cd solved run. */
 export function useHeroRun(): string | undefined {
   const runs = useQuery({ queryKey: ["cfd-runs"], queryFn: listCfdRuns, staleTime: 60_000 });
-  return runs.data
-    ?.filter((r) => r.state === "succeeded" && r.has_viz && r.cd != null)
-    .toSorted((a, b) => (a.cd ?? 0) - (b.cd ?? 0))[0]?.run_id;
+  const [selected] = useSelectedRun();
+  const solved = runs.data?.filter((r) => r.state === "succeeded" && r.has_viz && r.cd != null);
+  return (
+    solved?.find((run) => run.run_id === selected)?.run_id ??
+    solved?.toSorted((a, b) => (a.cd ?? 0) - (b.cd ?? 0))[0]?.run_id
+  );
 }
 
 /** Server-rendered photo-style still (first request renders it, ~10 s; then cached). */
@@ -32,7 +36,7 @@ export function HeroImage({
   });
   const status = state.src === src ? state.status : "loading";
   return (
-    <div className={cn("relative overflow-hidden rounded-lg bg-black", className)}>
+    <div className={cn("relative overflow-hidden rounded-lg bg-background", className)}>
       {/* oxlint-disable-next-line nextjs/no-img-element -- a server PNG, not a static asset */}
       <img
         key={src}

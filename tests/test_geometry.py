@@ -73,6 +73,7 @@ def test_import_asymmetric_car_frame_and_outputs(tmp_path: Path) -> None:
     assert rep.width_m == pytest.approx(0.070, abs=1e-6)
     by = {p.group: p for p in rep.parts}
     # nose wing sits at the front (small x), fin at the tail (large x) and on top
+    assert by[ForceGroup.FRONT_WING].centroid_m == pytest.approx((0.010, 0, 0.006))
     assert by[ForceGroup.FRONT_WING].bbox_min_m[0] == pytest.approx(0.0, abs=1e-6)
     assert by[ForceGroup.REAR_WING].bbox_max_m[0] > 0.2
     assert by[ForceGroup.REAR_WING].bbox_max_m[2] == pytest.approx(rep.height_m, abs=1e-6)

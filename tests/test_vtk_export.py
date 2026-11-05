@@ -7,6 +7,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+import pyvista as pv
 from fastapi.testclient import TestClient
 
 from daedalus.api import app
@@ -94,3 +95,15 @@ def test_velocity_texture_matches_its_metadata(client: TestClient) -> None:
     assert float(np.abs(texels[..., 0]).max()) > 0.5
     cached = Path(os.environ["DAEDALUS_DATA"]) / "runs" / RUN / "viz/vtk/velocity.bin"
     assert cached.read_bytes() == response.content
+
+
+def test_cp_probe_mirrors_half_model_and_keeps_invalid_points() -> None:
+    from daedalus.viz.vtkexport import probe_cp
+
+    grid = pv.ImageData(dimensions=(2, 2, 2))
+    grid.point_data["p"] = 2.0 * grid.points[:, 1]
+    samples = probe_cp(grid, [0.5, -1.5, 0.5], [0.5, 1.5, 0.5], 2.0)
+    assert samples[0] == (0.0, None)
+    assert samples[-1] == (3.0, None)
+    assert samples[50] == pytest.approx((1.5, 0.0))
+    assert samples[25][1] == pytest.approx(samples[75][1])

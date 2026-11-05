@@ -193,6 +193,7 @@ class RacingOutcome:
     fastest_car_probability: float
     expected_bonus_points: float
     expected_total_points: float
+    total_points_distribution: tuple[tuple[int, float], ...]
     field_source: FieldSource
     performance_compliant: bool
     assumptions: tuple[str, ...] = field(default_factory=tuple)
@@ -236,11 +237,23 @@ def expected_racing_outcome(
         best_of(car, reaction_races, draws, rng), field_model.other_best_car_s
     )
     bonus = FASTEST_CAR_BONUS * p_fastest if performance_compliant else 0.0
-    knockout = expected_knockout_points(round_p)
+    knockout_prob = knockout_win_distribution(round_p)
+    knockout = float(knockout_prob @ np.array(KNOCKOUT_POINTS))
+    bonus_prob = bonus / FASTEST_CAR_BONUS
+    # Independence is a scenario assumption. Round totals to one-point display bins.
+    scores = reaction[:, None, None] + np.array(KNOCKOUT_POINTS)[None, :, None]
+    scores = scores + np.array([0.0, FASTEST_CAR_BONUS])[None, None, :]
+    weights = knockout_prob[None, :, None] * np.array([1 - bonus_prob, bonus_prob])
+    counts = np.bincount(
+        np.rint(scores).astype(int).ravel(),
+        weights=np.broadcast_to(weights, scores.shape).ravel() / draws,
+    )
+    distribution = tuple((int(i), float(counts[i])) for i in np.flatnonzero(counts))
     assumptions = (
         f"field model is {field_model.source}",
         f"best of {reaction_races} reaction races counts",
         "knock-out assumes a 16-team bracket and independent rounds",
+        "total points distribution assumes independence across scoring categories",
         "reaction time spread comes from the caller, not from measured data",
     )
     return RacingOutcome(
@@ -252,6 +265,7 @@ def expected_racing_outcome(
         fastest_car_probability=p_fastest,
         expected_bonus_points=bonus,
         expected_total_points=float(reaction.mean()) + knockout + bonus,
+        total_points_distribution=distribution,
         field_source=field_model.source,
         performance_compliant=performance_compliant,
         assumptions=assumptions,

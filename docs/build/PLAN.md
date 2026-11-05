@@ -75,7 +75,7 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [x] ✅ Inspect and editor controls consolidated into one side panel.
 - [x] ✅ Outputs tab: six KPI tiles, rules-to-fix table, volume by part (`b261ced`, another contributor).
 - [ ] ⬜ Live parametric controls with validated regeneration. `hard`
-- [ ] ⬜ Material-aware mass and centre-of-gravity estimate from geometry. `easy`
+- [x] ✅ Material-aware mass and centre-of-gravity estimate from geometry. `easy`
 - [ ] ⬜ Minimum wall thickness, CNC reach and measured-versus-CAD checks. `mid`
 - [ ] ⏳ Keyboard, responsive and manufactured-part acceptance. `data`
 
@@ -93,7 +93,7 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [x] ✅ Animated GPU air coloured by speed, moving floor, camera presets (`6142cd0`).
 - [ ] 🟨 One renderer and one scene for the advanced field layers. `hard`
 - [ ] ⬜ Surface LIC and separation lines. `hard`
-- [ ] ⬜ Cp probe lines. `easy`
+- [x] ✅ Cp probe lines. `easy`
 - [ ] ⬜ y+ and bad-cell maps, skewness histogram. `easy`
 - [x] ✅ Momentum-deficit wake drag cross-check, wake loss map, drag by part (`1d4a1f3`).
 - [ ] ⬜ Δwake and Δforces between two runs. `mid`
@@ -115,8 +115,8 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [x] ✅ Timing export: CSV and JSON of the trace and speed trap (`7de8fa2`).
 - [x] ✅ Event annotations: launch, burnout, peak and finish markers (`aafbe8f`).
 - [ ] 🟨 Session timing: best, last, interval and reaction history. The tower exists. A full saved timing ledger does not. `mid`
-- [ ] 🟨 Points distribution. Scenario averages exist. A full distribution does not. `easy`
-- [ ] ⬜ Stacked time-budget chart with measured reaction (reaction is fixed at 0 now). `easy`
+- [x] ✅ Points distribution. `easy`
+- [x] ✅ Stacked time-budget chart with measured reaction. `easy`
 - [ ] ⬜ Race-level SALib indices and a full variance budget. `mid`
 - [ ] ⬜ Best eligible real-run ghost (scenario ghost exists). `mid`
 - [x] ✅ History strip vs prediction band on Race day (`77d738d`).
@@ -149,10 +149,10 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [x] ✅ Minimum-N solver for paired timing, with N and N-1 power.
 - [ ] 🟨 Across-study scoring and posterior predictive checks. `mid`
 - [ ] 🟨 Applying a saved posterior to Race. Explicit link and record still missing. `mid`
-- [ ] ⬜ Prior versus posterior density plots. `easy`
-- [ ] ⬜ Across-run error scoreboard over new measurements. `easy`
+- [x] ✅ Prior versus posterior density plots. `easy`
+- [x] ✅ Across-run error scoreboard over new measurements. `easy`
 - [ ] ⬜ Repeat-run control chart and gauge R&R. `data`
-- [ ] ⬜ Entry for part masses, caliper dimensions, coast-down, tether and load-test data. `easy`
+- [x] ✅ Entry for part masses, caliper dimensions, coast-down, tether and load-test data. `easy`
 
 ### 3.6 FORGE (India rules, in app)
 - [x] ✅ India NF rulebook loaded with page, value, limits, state, margin, points at risk.
@@ -171,7 +171,7 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [x] ✅ Beam FEM API and Strength panel with part and load presets. Analytic beam checks.
 - [x] ✅ Solver deflection and bending-stress plots with yield band and PNG export.
 - [x] ✅ Configured-part comparison table for up to four captured cases.
-- [ ] ⬜ Safety-factor table across all four strength parts in one view. The comparison table covers captured cases only. `easy`
+- [x] ✅ Safety-factor table across all four strength parts in one view. `easy`
 - [ ] ⬜ Predicted versus measured load-test chart. `data`
 
 ### 3.8 Records, quality and operations
@@ -255,7 +255,7 @@ Each chart needs: shared theme, units on axes, a source tag, hairline grid, dash
 - [ ] ⬜ 4. Strength redo: part sketch with the load arrow, one compact input row, one deflection chart and one stress chart with the limit band, one summary row, all-part table. `hard`
 - [x] ✅ 5. Visual system: T3 Code / affectUI tokens (#111113 cards, 8% hairline borders, desaturated accent, flat status colours), 32 px compact buttons, white primary, underline tabs, 8 px radius, no glows.
 - [ ] ⬜ 6. Performance: lazy 3D, one WebGL context per page, dispose resources, demand-driven frames, bundle check. `mid`
-- [ ] 🟨 7. Tokens apply app-wide. Pit Wall Flow panel still blank; Race replay needs the display mesh. `easy`
+- [ ] 🟨 7. Tokens apply app-wide. Pit Wall Flow prefers the selected solved run; browser-check the flow render and Race replay with an imported display GLB. `easy`
 - [ ] ⏳ 8. Screenshot at 1440, compare with Linear and Vercel, fix anything louder than them. `data`
 
 **Visual tokens (target):** background `#0B0B0C`; surfaces `#111113` and `#161618`; borders `rgba(255,255,255,0.08)`; text `#EDEDEF`, `#A0A0A8`, `#6B6B73`; one accent for selected tab, focus and the primary series; status as 6 px flat dots or text, no glow.
@@ -272,11 +272,11 @@ Taken from the TODO.md review (2026-11-04). Headline claim: "we optimise expecte
 - [ ] ⬜ **Points-aware ORACLE (headline).** Objective = E[racing points] − E[spec penalty], gated by P(legal under manufacturing spread) ≥ 1 − α. Show three picks: fastest, most reliable, recommended. Builds on the P90 robust pick, FORGE pass probability and the race Monte Carlo. `mid`
 - [ ] ⬜ **Counterfactual decision record.** Save one comparison of what lowest-Cd would choose against what the points-aware engine chooses, with signed deltas (CdA, mass, margins, time, points) and the reason. This is the smallest useful decision log. `mid`
 - [ ] ⬜ **A/B design comparison** under identical assumptions: geometry, rule margins, CFD acceptance, race time ± uncertainty, plus a "why A wins" line. `mid`
-- [ ] ⬜ **Why this recommendation.** ORACLE shows its reasons in one line: length-scale importance, EI, uncertainty and nearest rule risk. `easy`
+- [x] ✅ **Why this recommendation.** ORACLE shows its reasons in one line: length-scale importance, EI, uncertainty and nearest rule risk. `easy`
 - [ ] ⬜ **One status badge everywhere:** legal + accepted CFD + calibrated race model, as a filter across Design, ORACLE, Race and FORGE. `mid`
 - [ ] ⬜ **Rule-versioned points engine.** Race-mode switch (automatic vs manual reaction). Every scoring rule stored as data with its clause number, with the C9.1/C9.4 and C9.6/C9.7.2 contradictions flagged. Property-test ties and the 3rd/4th-place cliff. Show the ms→points exchange rate next to ms/g. `mid`
 - [ ] ⬜ **Class-aware FORGE:** General / Safety / Performance class, rectifiable-at-half-penalty flag, per-car or per-wheel multiplicity, gauge guard band so margin means margin after tool error. Performance failure = ineligible for Fastest Car and Best Engineered Car. `mid`
-- [ ] ⬜ **Regulation proof-load presets in Strength:** 100 g wheel, 1 kg halo, 200 g tether guide; plus launch and stopping dynamic loads. `easy`
+- [x] ✅ **Regulation proof-load presets in Strength:** 100 g wheel, 1 kg halo, 200 g tether guide; plus launch and stopping dynamic loads. `easy`
 - [ ] ⬜ **Design-for-manufacture panel:** draft and undercut detection, minimum internal radius vs cutter, 3-axis reach, minimum feature size, model-block containment (trimesh / manifold3d). Extends the open wall-thickness and CNC-reach items. `hard`
 - [ ] ⬜ **Turbulence model-form uncertainty:** SST vs transition (kOmegaSSTLM) vs laminar spread as a Cd error bar (wings at Re 3e4–1e5). Needs runs. `data`
 - [ ] ⬜ **Real-objective optimiser benchmark** on the race model or a small CFD sweep, reported as regret; the synthetic study stays as method validation. `mid`

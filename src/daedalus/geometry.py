@@ -73,6 +73,7 @@ class Part:
     volume_m3: float
     bbox_min_m: tuple[float, float, float]
     bbox_max_m: tuple[float, float, float]
+    centroid_m: tuple[float, float, float]
 
 
 class Axle(TypedDict):
@@ -230,7 +231,7 @@ def import_car(
     body_meshes = [m for _, g, m, _ in meshes if g is ForceGroup.BODY]
     parts: list[Part] = []
     groups: dict[str, list[trimesh.Trimesh]] = {}
-    for label, group, mesh, vol in meshes:
+    for (label, group, mesh, vol), center in zip(meshes, centres, strict=True):
         if group is None:
             group = ForceGroup.BODY
             warnings.append(f"part {label!r} matched no rule; assigned to body")
@@ -247,6 +248,7 @@ def import_car(
                 volume_m3=vol,
                 bbox_min_m=tuple(float(v) for v in b[0]),  # type: ignore[arg-type]
                 bbox_max_m=tuple(float(v) for v in b[1]),  # type: ignore[arg-type]
+                centroid_m=tuple(float(v) for v in center + shift),  # type: ignore[arg-type]
             )
         )
         if group is not ForceGroup.INTERNAL:

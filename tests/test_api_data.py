@@ -208,3 +208,17 @@ def test_seal_rejects_unknown_references(client: TestClient) -> None:
         "crr": 0.012,
     }
     assert client.post("/v1/predictions/seal", json=payload).status_code == 404
+
+
+def test_save_physical_reading_requires_registered_subject(
+    client: TestClient, tmp_path: Path
+) -> None:
+    build_id = _build(client, tmp_path)
+    route = "/v1/data/physical-readings"
+    assert build_id in client.get(f"{route}/subjects").json()
+    reading = {"kind": "load_test_deflection", "reading": 0.1, "source": "Halo A · gauge"}
+    assert client.post(route, json={**reading, "subject_id": "unknown"}).status_code == 404
+    response = client.post(route, json={**reading, "subject_id": build_id})
+    assert response.status_code == 201
+    assert response.json()["provenance"] == "measured"
+    assert response.json()["value"]["unit"] == "mm"

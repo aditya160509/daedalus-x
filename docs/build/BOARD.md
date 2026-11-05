@@ -3,32 +3,32 @@
 Generated from `PLAN.md` by `scripts/board.py` on every commit. Do not edit by hand:
 tick the item in PLAN.md instead.
 
-**Whole plan: 77/147 done (52%).**
+**Whole plan: 87/147 done (59%).**
 
 | Group | Done | Open |
 |---|---|---|
-| Easy (10-30 min each) | 0 | 15 |
+| Easy (10-30 min each) | 10 | 5 |
 | Medium (1-2 h each) | 0 | 29 |
 | Hard (3-8 h each) | 0 | 10 |
 | Needs CFD runs or real measurements | 0 | 16 |
 
 ## Easy (10-30 min each)
 
-- [ ] Material-aware mass and centre-of-gravity estimate from geometry. _(3.1 Design Studio)_
-- [ ] Cp probe lines. _(3.2 Wind Tunnel and CFD)_
 - [ ] y+ and bad-cell maps, skewness histogram. _(3.2 Wind Tunnel and CFD)_
-- [ ] Points distribution. Scenario averages exist. A full distribution does not. _(3.3 Race, replay and timing)_
-- [ ] Stacked time-budget chart with measured reaction (reaction is fixed at 0 now). _(3.3 Race, replay and timing)_
-- [ ] Prior versus posterior density plots. _(3.5 Calibration and physical tests)_
-- [ ] Across-run error scoreboard over new measurements. _(3.5 Calibration and physical tests)_
-- [ ] Entry for part masses, caliper dimensions, coast-down, tether and load-test data. _(3.5 Calibration and physical tests)_
-- [ ] Safety-factor table across all four strength parts in one view. The comparison table covers captured cases only. _(3.7 Structure (strength))_
 - [ ] Per-screen provenance labels are not yet consistent everywhere. _(3.8 Records, quality and operations)_
 - [ ] Chart exports (PNG on every new chart), linked cursors and keyboard access for every table. _(3.8 Records, quality and operations)_
-- [ ] 7. Tokens apply app-wide. Pit Wall Flow panel still blank; Race replay needs the display mesh. _(5. UI redo plan (from UI-REDO.md))_
-- [ ] **Why this recommendation.** ORACLE shows its reasons in one line: length-scale importance, EI, uncertainty and nearest rule risk. _(5b. Innovation backlog (researched 2026-11-04))_
-- [ ] **Regulation proof-load presets in Strength:** 100 g wheel, 1 kg halo, 200 g tether guide; plus launch and stopping dynamic loads. _(5b. Innovation backlog (researched 2026-11-04))_
+- [ ] 7. Tokens apply app-wide. Pit Wall Flow prefers the selected solved run; browser-check the flow render and Race replay with an imported display GLB. _(5. UI redo plan (from UI-REDO.md))_
 - [ ] **Race physics terms:** tether friction with a prior, cartridge mass spread (±0.5 g) in the Monte Carlo, check that gas mass loss is modelled. _(5b. Innovation backlog (researched 2026-11-04))_
+- [x] Material-aware mass and centre-of-gravity estimate from geometry. _(3.1 Design Studio)_
+- [x] Cp probe lines. _(3.2 Wind Tunnel and CFD)_
+- [x] Points distribution. _(3.3 Race, replay and timing)_
+- [x] Stacked time-budget chart with measured reaction. _(3.3 Race, replay and timing)_
+- [x] Prior versus posterior density plots. _(3.5 Calibration and physical tests)_
+- [x] Across-run error scoreboard over new measurements. _(3.5 Calibration and physical tests)_
+- [x] Entry for part masses, caliper dimensions, coast-down, tether and load-test data. _(3.5 Calibration and physical tests)_
+- [x] Safety-factor table across all four strength parts in one view. _(3.7 Structure (strength))_
+- [x] **Why this recommendation.** ORACLE shows its reasons in one line: length-scale importance, EI, uncertainty and nearest rule risk. _(5b. Innovation backlog (researched 2026-11-04))_
+- [x] **Regulation proof-load presets in Strength:** 100 g wheel, 1 kg halo, 200 g tether guide; plus launch and stopping dynamic loads. _(5b. Innovation backlog (researched 2026-11-04))_
 
 ## Medium (1-2 h each)
 

@@ -106,6 +106,11 @@ def test_expected_racing_outcome_components_add_up() -> None:
     assert result.expected_total_points == pytest.approx(
         result.reaction_points_mean + result.knockout_points_mean + result.expected_bonus_points
     )
+    bins = result.total_points_distribution
+    assert sum(prob for _, prob in bins) == pytest.approx(1.0)
+    assert sum(points * prob for points, prob in bins) == pytest.approx(
+        result.expected_total_points, abs=0.5
+    )
     assert 5.0 <= result.reaction_points_p05 <= result.reaction_points_p95 <= 105.0
     assert 26.0 <= result.knockout_points_mean <= 135.0
     assert result.field_source == "synthetic"
@@ -128,6 +133,7 @@ def test_performance_failure_removes_the_bonus_only() -> None:
     assert legal.fastest_car_probability > 0.9
     assert legal.expected_bonus_points > 9.0
     assert illegal.expected_bonus_points == 0.0
+    assert max(points for points, _ in illegal.total_points_distribution) <= 240
     assert illegal.reaction_points_mean == pytest.approx(legal.reaction_points_mean)
 
 

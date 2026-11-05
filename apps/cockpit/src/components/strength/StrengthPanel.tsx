@@ -74,6 +74,27 @@ const PARTS: ReadonlyArray<{
 ];
 const G = 9.80665;
 
+function tipLoad(
+  lengthMm: number,
+  aMm: number,
+  bMm: number,
+  shape: "circle" | "rectangle",
+  material: string,
+  forceN: number,
+): BeamRequest {
+  const length = lengthMm / 1000;
+  return {
+    length_m: length,
+    section:
+      shape === "circle"
+        ? { kind: "circle", outer_m: aMm / 1000 }
+        : { kind: "rectangle", width_m: aMm / 1000, depth_m: bMm / 1000 },
+    material,
+    supports: { "0": "fixed" },
+    point_loads_n: { [String(length)]: forceN },
+  };
+}
+
 function verdict(sf: number): { tone: "default" | "risk" | "danger"; text: string } {
   if (sf < 1) return { tone: "danger", text: "breaks under this load" };
   if (sf < 2) return { tone: "risk", text: "thin margin" };
@@ -142,19 +163,27 @@ export function StrengthPanel() {
     setAMm(p.aMm);
     setBMm(p.bMm);
     setLoadG(p.loadG);
+    setLoadMode("proof");
   };
 
-  const length = lengthMm / 1000;
-  const req: BeamRequest = {
-    length_m: length,
-    section:
-      preset.shape === "circle"
-        ? { kind: "circle", outer_m: aMm / 1000 }
-        : { kind: "rectangle", width_m: aMm / 1000, depth_m: bMm / 1000 },
-    material,
-    supports: { "0": "fixed" },
-    point_loads_n: { [String(length)]: (loadG / 1000) * G },
-  };
+  const [loadMode, setLoadMode] = useState<"proof" | "launch" | "stopping">("proof");
+  const [effectiveMassG, setEffectiveMassG] = useState(0);
+  const [acceleration, setAcceleration] = useState(0);
+  const loadN = loadMode === "proof" ? (loadG * G) / 1000 : (effectiveMassG * acceleration) / 1000;
+  const req = tipLoad(lengthMm, aMm, bMm, preset.shape, material, loadN);
+  const presetResults = useQuery({
+    queryKey: ["beam-proof-presets", material],
+    queryFn: () =>
+      Promise.all(
+        PARTS.map(async (p) => ({
+          ...p,
+          result: await solveBeam(
+            tipLoad(p.lengthMm, p.aMm, p.bMm, p.shape, material, (p.loadG * G) / 1000),
+          ),
+        })),
+      ),
+    enabled: !!materials.data,
+  });
   const debounced = useDebouncedValue(req, 250);
   const result = useQuery({
     queryKey: ["beam", debounced],
@@ -281,7 +310,23 @@ export function StrengthPanel() {
       bodyClassName="flex flex-col gap-4 p-4"
     >
       <SegmentedControl options={PARTS} value={part} onChange={choose} label="Part" />
-      <p className="text-2xs text-muted-foreground">{preset.rule}</p>
+      <SegmentedControl
+        label="Load case"
+        options={
+          [
+            { value: "proof", label: "Static test" },
+            { value: "launch", label: "Launch" },
+            { value: "stopping", label: "Stopping" },
+          ] as const
+        }
+        value={loadMode}
+        onChange={setLoadMode}
+      />
+      <p className="text-2xs text-muted-foreground">
+        {loadMode === "proof"
+          ? preset.rule
+          : "Equivalent static load F = m × a. Enter the mass carried by this part and the peak acceleration magnitude along its bending direction. This does not model impact or transient response."}
+      </p>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <label className="flex flex-col gap-1 text-xs" htmlFor="beam-material">
           <span className="text-muted-foreground">Material</span>
@@ -330,17 +375,74 @@ export function StrengthPanel() {
             step={0.1}
           />
         )}
-        <NumberField
-          id="beam-load"
-          label="Test mass"
-          unit="g"
-          value={loadG}
-          onChange={setLoadG}
-          min={1}
-          max={5000}
-          step={10}
-        />
+        {loadMode === "proof" ? (
+          <NumberField
+            id="beam-load"
+            label="Test mass"
+            unit="g"
+            value={loadG}
+            onChange={setLoadG}
+            min={1}
+            max={5000}
+            step={10}
+          />
+        ) : (
+          <>
+            <NumberField
+              id="beam-effective-mass"
+              label="Supported mass"
+              unit="g"
+              value={effectiveMassG}
+              onChange={setEffectiveMassG}
+              min={0}
+              max={5000}
+              step={1}
+            />
+            <NumberField
+              id="beam-acceleration"
+              label={loadMode === "launch" ? "Launch acceleration" : "Stopping deceleration"}
+              unit="m/s²"
+              value={acceleration}
+              onChange={setAcceleration}
+              min={0}
+              max={100000}
+              step={1}
+            />
+            <Metric label="Equivalent tip force" value={loadN.toFixed(2)} unit="N" />
+          </>
+        )}
       </div>
+      <section className="space-y-2">
+        <h3 className="text-sm font-medium">All-part preset safety factors</h3>
+        <p className="text-2xs text-muted-foreground">
+          Uses the selected material and the preset dimensions for all four parts. Rear wing load is
+          illustrative.
+        </p>
+        {presetResults.isError ? (
+          <p role="alert" className="text-xs text-destructive">
+            {presetResults.error.message}
+          </p>
+        ) : presetResults.data ? (
+          <DataTable
+            data={presetResults.data}
+            label="All-part preset safety factors"
+            columns={[
+              { accessorKey: "label", header: "Part" },
+              { accessorKey: "loadG", header: "Test mass (g)", meta: { numeric: true } },
+              {
+                accessorFn: (row) => row.result.safety_factor,
+                id: "sf",
+                header: "Safety factor",
+                meta: { numeric: true },
+                cell: ({ row }) => row.original.result.safety_factor?.toFixed(2) ?? "—",
+              },
+              { accessorKey: "rule", header: "Load source" },
+            ]}
+          />
+        ) : (
+          materials.data && <Skeleton className="h-24" />
+        )}
+      </section>
       {materials.error ? (
         <EmptyState icon={<Ruler className="size-5" />} title="Could not load materials">
           {materials.error.message}

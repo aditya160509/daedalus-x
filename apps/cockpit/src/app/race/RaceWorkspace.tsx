@@ -382,6 +382,8 @@ export function RaceWorkspace() {
     queryFn: () => getEnergyAudit(request),
     enabled: valid && tab === "analysis" && analysis === "energy",
   });
+  const [measuredReactionMs, setMeasuredReactionMs] = useState("");
+  const reactionMs = measuredReactionMs.trim() === "" ? null : Number(measuredReactionMs);
   const breakdown = useQuery({
     queryKey: ["race-breakdown", request],
     queryFn: () => getRaceBreakdown(request, 0),
@@ -687,7 +689,17 @@ export function RaceWorkspace() {
           )}
           {tab === "analysis" && analysis === "breakdown" && (
             <div className="mx-auto w-full max-w-4xl">
-              <BreakdownPanel data={breakdown.data} error={breakdown.error} />
+              <BreakdownPanel
+                data={breakdown.data}
+                error={breakdown.error}
+                reactionMs={
+                  reactionMs != null && Number.isFinite(reactionMs) && reactionMs >= 0
+                    ? reactionMs
+                    : null
+                }
+                reactionInput={measuredReactionMs}
+                onReactionInput={setMeasuredReactionMs}
+              />
             </div>
           )}
         </div>

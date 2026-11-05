@@ -308,3 +308,20 @@ def export_layer(case: Path, layer: str, cache_dir: Path | None = None) -> Path:
     _write(data, path)
     stamp.write_text(json.dumps(key))
     return path
+
+
+def probe_cp(
+    internal: pv.DataSet, start_m: list[float], end_m: list[float], u_inf: float
+) -> list[tuple[float, float | None]]:
+    """Sample kinematic pressure along a full-car line against a mirrored half-domain."""
+    if not np.isfinite(u_inf) or u_inf <= 0 or "p" not in internal.point_data:
+        raise ValueError("probe requires a pressure field and a positive inlet speed")
+    length = float(np.linalg.norm(np.subtract(end_m, start_m)))
+    if not np.isfinite(length) or length == 0:
+        raise ValueError("probe endpoints must be finite and different")
+    xyz = np.linspace(start_m, end_m, 101)
+    xyz[:, 1] = np.abs(xyz[:, 1])
+    sampled = pv.PolyData(xyz).sample(internal)
+    cp = np.asarray(sampled.point_data["p"]) / (0.5 * u_inf**2)
+    valid = np.asarray(sampled.point_data["vtkValidPointMask"], bool) & np.isfinite(cp)
+    return [(length * i / 100, float(value) if valid[i] else None) for i, value in enumerate(cp)]
