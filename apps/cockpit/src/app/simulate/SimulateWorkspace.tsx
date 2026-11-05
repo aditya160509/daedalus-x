@@ -16,6 +16,7 @@ import { SERIES, SERIES_CYCLE } from "@/lib/colormap";
 import { useSelectedRun } from "@/lib/runSelection";
 import { cn } from "@/lib/utils";
 import { AeroAnalysis } from "./AeroAnalysis";
+import { MeshDiagnostics } from "./MeshDiagnostics";
 import { GridStudyPanel } from "./GridStudyPanel";
 import { StatusBar, useTab, WorkspaceTabs } from "@/components/shell/WorkspaceTabs";
 
@@ -292,6 +293,7 @@ function RunView({
             <div className="flex min-h-[520px] min-w-0 flex-1 flex-col gap-3 xl:min-h-0">
               <Panel
                 title="Drag by component"
+                actions={<ProvenanceBadge value="simulated" />}
                 description="Full-car drag split into pressure and skin friction."
                 className="min-h-0 flex-1"
               >
@@ -299,6 +301,7 @@ function RunView({
               </Panel>
               <Panel
                 title="Drag build-up along the car"
+                actions={<ProvenanceBadge value="simulated" />}
                 description="Cumulative drag from nose to tail, per part."
                 className="min-h-0 flex-1"
               >
@@ -334,6 +337,7 @@ function RunView({
                   band={band}
                   yRange={cdRange}
                   ariaLabel="Drag coefficient against iteration"
+                  cursorGroup={`solver-${run.run_id}`}
                 />
               ) : (
                 <Waiting />
@@ -341,6 +345,7 @@ function RunView({
             </Panel>
             <Panel
               title="Residuals"
+              actions={<ProvenanceBadge value="simulated" />}
               description="Initial residual per field, log scale."
               className="min-h-0 flex-1"
             >
@@ -351,6 +356,7 @@ function RunView({
                   yLabel="initial residual"
                   log
                   ariaLabel="Solver residuals against iteration"
+                  cursorGroup={`solver-${run.run_id}`}
                 />
               ) : (
                 <Waiting />
@@ -360,10 +366,12 @@ function RunView({
         )}
         {tab === "mesh" && (
           <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-0 xl:flex-row xl:overflow-hidden">
-            <div className="flex min-h-[520px] min-w-0 flex-1 flex-col gap-3 overflow-y-auto xl:min-h-0">
+            <div className="flex min-h-[520px] min-w-0 flex-1 flex-col gap-3 xl:min-h-0 xl:overflow-y-auto [&>section]:shrink-0">
               <GridStudyPanel />
+              {run.state === "succeeded" && <MeshDiagnostics key={run.run_id} runId={run.run_id} />}
               <Panel
                 title="Case assumptions"
+                actions={<ProvenanceBadge value="estimated" />}
                 className="min-h-0 flex-1 overflow-y-auto"
                 bodyClassName="p-4"
               >
@@ -377,7 +385,17 @@ function RunView({
                 </ul>
               </Panel>
             </div>
-            <Panel title="Pipeline" className="w-full shrink-0 xl:w-[360px]" bodyClassName="p-0">
+            <Panel
+              title="Pipeline"
+              actions={
+                <ProvenanceBadge
+                  value="measured"
+                  title="Wall-clock timings recorded by the job runner"
+                />
+              }
+              className="w-full shrink-0 xl:w-[360px]"
+              bodyClassName="p-0"
+            >
               <ol className="divide-y text-sm">
                 {(result?.steps ?? []).map((s) => (
                   <li key={s.name} className="flex items-center gap-3 px-4 py-2">

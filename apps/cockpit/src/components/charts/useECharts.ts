@@ -10,6 +10,7 @@ import {
   MarkLineComponent,
   ToolboxComponent,
   TooltipComponent,
+  type ToolboxComponentOption,
 } from "echarts/components";
 import * as echarts from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
@@ -77,14 +78,35 @@ export function chartAxis(t: ChartTheme) {
   };
 }
 
+const linkedCharts = new Map<string, number>();
+
+type ChartOption = echarts.EChartsCoreOption & { toolbox?: ToolboxComponentOption };
+
+export function withPngExport(option: ChartOption): ChartOption {
+  const toolbox = option.toolbox;
+  return {
+    ...option,
+    toolbox: {
+      right: 0,
+      top: 0,
+      ...toolbox,
+      feature: {
+        ...toolbox?.feature,
+        saveAsImage: { type: "png", pixelRatio: 2, ...toolbox?.feature?.saveAsImage },
+      },
+    },
+  };
+}
+
 /**
  * Owns one ECharts instance bound to a div. `build` receives the element height so layouts
  * that need pixel geometry stay correct; it re-runs on resize and when `deps` change.
  */
 export function useECharts(
-  build: (el: HTMLDivElement) => echarts.EChartsCoreOption,
+  build: (el: HTMLDivElement) => ChartOption,
   deps: ReadonlyArray<unknown>,
   events?: Record<string, (params: unknown) => void>,
+  cursorGroup?: string,
 ) {
   const host = useRef<HTMLDivElement>(null);
   const chart = useRef<echarts.ECharts | null>(null);
@@ -110,7 +132,7 @@ export function useECharts(
     });
     const ro = new ResizeObserver(() => {
       instance.resize();
-      instance.setOption(builder.current(el), { notMerge: true });
+      instance.setOption(withPngExport(builder.current(el)), { notMerge: true });
     });
     ro.observe(el);
     return () => {
@@ -122,8 +144,25 @@ export function useECharts(
   }, []);
 
   useEffect(() => {
+    const instance = chart.current;
+    if (!instance || !cursorGroup) return;
+    instance.group = cursorGroup;
+    linkedCharts.set(cursorGroup, (linkedCharts.get(cursorGroup) ?? 0) + 1);
+    echarts.connect(cursorGroup);
+    return () => {
+      const remaining = (linkedCharts.get(cursorGroup) ?? 1) - 1;
+      if (remaining) linkedCharts.set(cursorGroup, remaining);
+      else {
+        linkedCharts.delete(cursorGroup);
+        echarts.disconnect(cursorGroup);
+      }
+    };
+  }, [cursorGroup]);
+
+  useEffect(() => {
     const el = host.current;
-    if (chart.current && el) chart.current.setOption(builder.current(el), { notMerge: true });
+    if (chart.current && el)
+      chart.current.setOption(withPngExport(builder.current(el)), { notMerge: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 

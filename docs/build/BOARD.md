@@ -3,32 +3,32 @@
 Generated from `PLAN.md` by `scripts/board.py` on every commit. Do not edit by hand:
 tick the item in PLAN.md instead.
 
-**Whole plan: 87/147 done (59%).**
+**Whole plan: 91/147 done (62%).**
 
 | Group | Done | Open |
 |---|---|---|
-| Easy (10-30 min each) | 10 | 5 |
+| Easy (10-30 min each) | 14 | 1 |
 | Medium (1-2 h each) | 0 | 29 |
 | Hard (3-8 h each) | 0 | 10 |
 | Needs CFD runs or real measurements | 0 | 16 |
 
 ## Easy (10-30 min each)
 
-- [ ] y+ and bad-cell maps, skewness histogram. _(3.2 Wind Tunnel and CFD)_
-- [ ] Per-screen provenance labels are not yet consistent everywhere. _(3.8 Records, quality and operations)_
-- [ ] Chart exports (PNG on every new chart), linked cursors and keyboard access for every table. _(3.8 Records, quality and operations)_
 - [ ] 7. Tokens apply app-wide. Pit Wall Flow prefers the selected solved run; browser-check the flow render and Race replay with an imported display GLB. _(5. UI redo plan (from UI-REDO.md))_
-- [ ] **Race physics terms:** M2 Monte Carlo has a half-normal tether resistance prior and a uniform cartridge mass spread (default ±0.5 g in Race). Gas mass loss during the burn remains unmodelled and is identified in the UI. _(5b. Innovation backlog (researched 2026-11-04))_
 - [x] Material-aware mass and centre-of-gravity estimate from geometry. _(3.1 Design Studio)_
 - [x] Cp probe lines. _(3.2 Wind Tunnel and CFD)_
+- [x] Wall y+ map, projected bad-cell map and skewness histogram from OpenFOAM fields. Generate missing quality fields with checkMesh from the existing mesh. _(3.2 Wind Tunnel and CFD)_
 - [x] Points distribution. _(3.3 Race, replay and timing)_
 - [x] Stacked time-budget chart with measured reaction. _(3.3 Race, replay and timing)_
 - [x] Prior versus posterior density plots. _(3.5 Calibration and physical tests)_
 - [x] Across-run error scoreboard over new measurements. _(3.5 Calibration and physical tests)_
 - [x] Entry for part masses, caliper dimensions, coast-down, tether and load-test data. _(3.5 Calibration and physical tests)_
 - [x] Safety-factor table across all four strength parts in one view. _(3.7 Structure (strength))_
+- [x] Shared provenance badges applied to Wind Tunnel analyses and mesh, nominal Design results, Race timing and Compute. Mixed timing views distinguish prediction from entered measurements. _(3.8 Records, quality and operations)_
+- [x] PNG export by default on ECharts; shared iteration cursor for Cd and residuals; labeled keyboard-scrollable tables and native row actions. _(3.8 Records, quality and operations)_
 - [x] **Why this recommendation.** ORACLE shows its reasons in one line: length-scale importance, EI, uncertainty and nearest rule risk. _(5b. Innovation backlog (researched 2026-11-04))_
 - [x] **Regulation proof-load presets in Strength:** 100 g wheel, 1 kg halo, 200 g tether guide; plus launch and stopping dynamic loads. _(5b. Innovation backlog (researched 2026-11-04))_
+- [x] **Race physics terms:** M2 Monte Carlo has a half-normal tether prior, uniform cartridge mass spread (±0.5 g by default in Race), and optional gas mass loss proportional to cumulative thrust impulse. The gas profile is an estimate and defaults to zero until supplied. _(5b. Innovation backlog (researched 2026-11-04))_
 
 ## Medium (1-2 h each)
 

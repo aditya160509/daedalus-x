@@ -1,5 +1,6 @@
 "use client";
 
+import { Table } from "@/components/ui/table";
 import type { RaceSimulation } from "@/lib/api";
 import { speedTrap, timingCsv, timingJson } from "@/lib/raceTiming";
 import { Button } from "@/components/ui/button";
@@ -42,13 +43,21 @@ export function TimingPanel({ sim }: { sim: RaceSimulation }) {
       bodyClassName="p-3"
     >
       <div className="flex flex-col gap-3">
-        <table className="w-full text-xs">
+        <Table aria-label="Race timing channels" className="w-full text-xs">
           <thead className="text-muted-foreground">
             <tr>
-              <th className="text-left font-normal">point</th>
-              <th className="text-right font-normal">m/s</th>
-              <th className="text-right font-normal">km/h</th>
-              <th className="text-right font-normal">at, s</th>
+              <th scope="col" className="text-left font-normal">
+                point
+              </th>
+              <th scope="col" className="text-right font-normal">
+                m/s
+              </th>
+              <th scope="col" className="text-right font-normal">
+                km/h
+              </th>
+              <th scope="col" className="text-right font-normal">
+                at, s
+              </th>
             </tr>
           </thead>
           <tbody className="tabular font-mono">
@@ -61,7 +70,7 @@ export function TimingPanel({ sim }: { sim: RaceSimulation }) {
               </tr>
             ))}
           </tbody>
-        </table>
+        </Table>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"

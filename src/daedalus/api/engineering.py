@@ -5,18 +5,19 @@ from __future__ import annotations
 import json
 import os
 import re
+import subprocess
 import tempfile
 import threading
 from pathlib import Path
 from typing import Any
 
 import numpy as np
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
 from starlette.concurrency import run_in_threadpool
 
-from daedalus.cfd import CfdError, read_dat
+from daedalus.cfd import OPENFOAM_LAUNCHER, CfdError, read_dat
 
 router = APIRouter(prefix="/v1", tags=["engineering"])
 
@@ -317,6 +318,51 @@ def run_vtk_layer(run_id: str, filename: str) -> FileResponse:
     return FileResponse(
         path, media_type="text/xml", headers={"Cache-Control": "private, max-age=300"}
     )
+
+
+@router.get("/cfd/runs/{run_id}/mesh-diagnostics")
+@router.post("/cfd/runs/{run_id}/mesh-diagnostics")
+def run_mesh_diagnostics(run_id: str, request: Request) -> dict[str, object]:
+    from daedalus.viz import CAR_GROUPS
+    from daedalus.viz.mesh_quality import read_mesh_summary
+    from daedalus.viz.vtkexport import _latest_time
+
+    run = _safe_dir("runs", run_id)
+    try:
+        manifest = json.loads((run / "daedalus_manifest.json").read_text())
+        with _FIELD_EXPORT_LOCK:
+            latest = _latest_time(run)
+            if latest is None:
+                raise FileNotFoundError("No reconstructed solution to inspect")
+            if request.method == "POST" and not all(
+                (latest / field).is_file() or (latest / f"{field}.gz").is_file()
+                for field in ("skewness", "nonOrthoAngle")
+            ):
+                if not json.loads((run / "daedalus_result.json").read_text()).get("succeeded"):
+                    raise ValueError("Mesh diagnostics require a finished reconstructed run")
+                with (run / "log.meshDiagnostics").open("w") as log:
+                    subprocess.run(
+                        [
+                            OPENFOAM_LAUNCHER,
+                            "-c",
+                            "checkMesh -latestTime -writeFields '(skewness nonOrthoAngle)'",
+                        ],
+                        cwd=run,
+                        stdout=log,
+                        stderr=subprocess.STDOUT,
+                        timeout=120,
+                        check=True,
+                    )
+            groups = [group for group in manifest["car"]["groups"] if group in CAR_GROUPS]
+            return read_mesh_summary(run, groups)
+    except FileNotFoundError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except (ValueError, KeyError, TypeError) as exc:
+        raise HTTPException(422, str(exc)) from exc
+    except subprocess.SubprocessError as exc:
+        raise HTTPException(
+            422, "checkMesh did not finish successfully. See log.meshDiagnostics."
+        ) from exc
 
 
 class ProbeLine(BaseModel):

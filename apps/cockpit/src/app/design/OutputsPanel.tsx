@@ -1,5 +1,6 @@
 "use client";
 
+import { Table } from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { ArrowUpRight } from "lucide-react";
@@ -256,26 +257,40 @@ export function OutputsPanel({
           {ranked.length === 0 ? (
             <p className="p-4 text-sm text-muted-foreground">No failing or at-risk rules.</p>
           ) : (
-            <table className="w-full table-fixed text-[13px]">
+            <Table aria-label="Rule risks" className="w-full table-fixed text-[13px]">
               <thead className="text-[11px] text-muted-foreground">
                 <tr className="border-b border-border">
-                  <th className="px-4 py-2 text-left font-normal">Rule</th>
-                  <th className="w-28 px-2 py-2 text-right font-normal">Value</th>
-                  <th className="w-20 px-2 py-2 text-right font-normal">Margin</th>
-                  <th className="w-24 px-4 py-2 text-right font-normal">State</th>
+                  <th scope="col" className="px-4 py-2 text-left font-normal">
+                    Rule
+                  </th>
+                  <th scope="col" className="w-28 px-2 py-2 text-right font-normal">
+                    Value
+                  </th>
+                  <th scope="col" className="w-20 px-2 py-2 text-right font-normal">
+                    Margin
+                  </th>
+                  <th scope="col" className="w-24 px-4 py-2 text-right font-normal">
+                    State
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {ranked.map((c) => (
-                  <tr
-                    key={c.rule_id}
-                    tabIndex={0}
-                    onClick={() => onFocus?.(c)}
-                    onKeyDown={(e) => e.key === "Enter" && onFocus?.(c)}
-                    className="cursor-pointer border-b border-border/60 outline-none last:border-0 hover:bg-accent/50 focus-visible:bg-accent/50"
-                  >
-                    <td className="max-w-0 truncate px-4 py-2">
-                      <span className="font-mono text-text-3">{c.rule_id}</span> {c.name}
+                  <tr key={c.rule_id} className="border-b border-border/60 last:border-0">
+                    <td className="max-w-0 px-4 py-2">
+                      {onFocus ? (
+                        <button
+                          type="button"
+                          onClick={() => onFocus(c)}
+                          className="block w-full truncate rounded text-left hover:underline focus-visible:outline-2 focus-visible:outline-ring"
+                        >
+                          <span className="font-mono text-text-3">{c.rule_id}</span> {c.name}
+                        </button>
+                      ) : (
+                        <span className="block truncate">
+                          {c.rule_id} {c.name}
+                        </span>
+                      )}
                     </td>
                     <td className="tabular px-2 py-2 text-right font-mono">
                       {fmt(c.value)} <span className="text-text-3">{c.unit}</span>
@@ -287,21 +302,16 @@ export function OutputsPanel({
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </Table>
           )}
         </Panel>
 
         <Panel
           title="Volume by part"
-          description="CAD volume per part; multiply by density for mass. Biggest first."
           actions={
-            <a
-              href="#inspect"
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-            >
-              Inspect <ArrowUpRight className="size-3.5" />
-            </a>
+            <ProvenanceBadge value="estimated" title="Calculated from nominal CAD geometry" />
           }
+          description="CAD volume per part; multiply by density for mass. Biggest first."
         >
           <ul className="flex flex-col gap-2 p-4">
             {parts.slice(0, 10).map((p) => (

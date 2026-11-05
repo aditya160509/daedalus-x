@@ -31,6 +31,7 @@ class Uncertainty:
     thrust: float = 0.05
     cartridge_mass_half_range_g: float = 0.0
     tether_force_scale_n: float = 0.0
+    expelled_gas_g: float = 0.0
 
     def __post_init__(self) -> None:
         for name in INPUTS:
@@ -40,6 +41,8 @@ class Uncertainty:
             raise ValueError("cartridge mass half-range must be in [0, 5] g")
         if not 0 <= self.tether_force_scale_n <= 2:
             raise ValueError("tether force scale must be in [0, 2] N")
+        if not 0 <= self.expelled_gas_g <= 20:
+            raise ValueError("expelled gas must be in [0, 20] g")
 
 
 @dataclass(frozen=True)
@@ -90,10 +93,23 @@ def run(
     mass = np.maximum(car.mass_kg * factors[:, 0] + cartridge_delta / 1000, 0.05 * car.mass_kg)
     tether_force = np.abs(rng.normal(0.0, unc.tether_force_scale_n, size=n))
     cda = float(car.cda_m2) * factors[:, 1]
-    # M2's constant-resistance term can represent a separate constant tether force.
-    crr = car.crr * factors[:, 2] + tether_force / (mass * G0)
-    times = race_times(
-        car.thrust, factors[:, 3], mass, cda, crr, car.rho_kg_m3, car.track_length_m, model
+    crr = car.crr * factors[:, 2]
+    gas = unc.expelled_gas_g / 1000
+    if gas >= car.mass_kg:
+        raise ValueError("expelled gas must weigh less than the starting car")
+    # Condition the mass prior on the car retaining positive dry mass.
+    mass = np.maximum(mass, gas + 0.05 * (car.mass_kg - gas))
+    times, _ = _integrate(
+        car.thrust,
+        factors[:, 3],
+        mass,
+        cda,
+        crr,
+        car.rho_kg_m3,
+        car.track_length_m,
+        model,
+        gas_kg=gas,
+        tether_n=tether_force,
     )
 
     ok = np.isfinite(times)
@@ -122,7 +138,17 @@ def run(
     )
     band = (
         _velocity_band(
-            car.thrust, factors[:, 3], mass, cda, crr, car.rho_kg_m3, car.track_length_m, model, t
+            car.thrust,
+            factors[:, 3],
+            mass,
+            cda,
+            crr,
+            car.rho_kg_m3,
+            car.track_length_m,
+            model,
+            t,
+            gas_kg=gas,
+            tether_n=tether_force,
         )
         if trajectory_band
         else None
@@ -150,6 +176,9 @@ def _velocity_band(
     track_m: float,
     model: ModelLevel,
     times: FloatArray,
+    *,
+    gas_kg: float,
+    tether_n: FloatArray,
 ) -> TrajectoryBand:
     """v(t) percentiles across samples on a common grid from 0 to the slowest finish.
 
@@ -159,8 +188,18 @@ def _velocity_band(
     finite = times[np.isfinite(times)]
     end = float(finite.max()) if finite.size else thrust.burn_end_s
     grid = np.linspace(0.0, end, BAND_POINTS)
-    velocities = velocity_trajectory(
-        thrust, thrust_scale, mass, cda, crr, rho, track_m, model, grid
+    _, velocities = _integrate(
+        thrust,
+        thrust_scale,
+        mass,
+        cda,
+        crr,
+        rho,
+        track_m,
+        model,
+        grid,
+        gas_kg=gas_kg,
+        tether_n=tether_n,
     )
     p5, p50, p95 = np.percentile(velocities, [5, 50, 95], axis=0)
     return TrajectoryBand(time_s=grid, p5=p5, p50=p50, p95=p95)
@@ -222,9 +261,13 @@ def _integrate(
     model: ModelLevel,
     record_times: FloatArray | None = None,
     dt_s: float = BURN_DT_S,
+    *,
+    gas_kg: float = 0.0,
+    tether_n: float | FloatArray = 0.0,
 ) -> tuple[FloatArray, FloatArray]:
     losses = model is ModelLevel.M2
-    a = 0.5 * rho * cda / mass if losses else np.zeros_like(mass)
+    drag = 0.5 * rho * cda if losses else np.zeros_like(mass)
+    tether = tether_n if losses else 0.0
     b = crr * G0 if losses else np.zeros_like(mass)
     n = mass.size
     x, v = np.zeros(n), np.zeros(n)
@@ -236,7 +279,18 @@ def _integrate(
     # Thrust per unit mass is sampled once on the RK4 half-step grid (index 2*i + j).
     grid = np.linspace(0.0, t_end, 2 * steps + 1)
     thrust_grid = np.interp(grid, thrust.t_s, thrust.force_n, left=0.0, right=0.0)
+    released = np.zeros_like(grid)
+    if gas_kg:
+        impulse = np.cumsum((thrust_grid[:-1] + thrust_grid[1:]) * np.diff(grid) / 2)
+        if impulse[-1] > 0:
+            released[1:] = gas_kg * (impulse / impulse[-1])
+    dry_mass = mass - released[-1]
+    coast_a = drag / dry_mass
+    coast_b = b + tether / dry_mass
+    fixed_mass = not gas_kg
     per_mass = thrust_scale / mass
+    fixed_drag = drag / mass
+    fixed_resistance = b + tether / mass
 
     if record_times is None:
         record_times = np.zeros(0)
@@ -247,9 +301,17 @@ def _integrate(
     in_burn = record_times <= t_end
 
     def accel(k: int, v_: FloatArray) -> FloatArray:
-        f = thrust_grid[k] * per_mass
-        loss = a * v_ * v_ + np.where(v_ > 0, b, 0.0)
-        acc = f - loss
+        rolling = v_ > 0
+        if fixed_mass:
+            acc = (
+                thrust_grid[k] * per_mass
+                - fixed_drag * v_ * v_
+                - np.where(rolling, fixed_resistance, 0.0)
+            )
+        else:
+            acc = (
+                thrust_grid[k] * thrust_scale - drag * v_ * v_ - np.where(rolling, tether, 0.0)
+            ) / (mass - released[k]) - np.where(rolling, b, 0.0)
         return np.where((v_ <= 0) & (acc < 0), 0.0, acc)
 
     track = np.broadcast_to(np.asarray(track_m, dtype=np.float64), x.shape)  # per sample
@@ -278,11 +340,11 @@ def _integrate(
 
     beyond = np.flatnonzero(record_times > t_end)
     for j in beyond:
-        v_grid[:, j] = _coast_velocity(v, a, b, float(record_times[j] - t_end))
+        v_grid[:, j] = _coast_velocity(v, coast_a, coast_b, float(record_times[j] - t_end))
 
     todo = np.isnan(t_fin)
     d = track[todo] - x[todo]
-    t_fin[todo] = t_end + _coast_time(v[todo], a[todo], b[todo], d)
+    t_fin[todo] = t_end + _coast_time(v[todo], coast_a[todo], coast_b[todo], d)
     return t_fin, v_grid
 
 

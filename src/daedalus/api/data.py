@@ -715,6 +715,8 @@ def seal_prediction(req: SealRequest) -> SealResponse:
     """Seal the next-race p50 with a p_low-p_high MC interval; manifest = the exact request."""
     if len(req.thrust_t_s) != len(req.thrust_force_n):
         raise HTTPException(422, "thrust_t_s and thrust_force_n must have the same length")
+    if req.uncertainty.expelled_gas_g >= req.mass_kg * 1000:
+        raise HTTPException(422, "expelled gas must weigh less than the starting car")
     store = _store()
     try:
         try:

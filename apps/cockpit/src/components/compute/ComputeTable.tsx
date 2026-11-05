@@ -1,5 +1,6 @@
 "use client";
 
+import { Table } from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
 import { listCfdCompute } from "@/lib/api-extra";
 import { Panel, ProvenanceBadge } from "@/components/ui/primitives";
@@ -22,7 +23,9 @@ export function ComputeTable() {
     <Panel
       title="Compute and wall time"
       description="Per CFD run, read from the OpenFOAM logs. Wall time is the solver ClockTime."
-      actions={<ProvenanceBadge value="measured" />}
+      actions={
+        <ProvenanceBadge value="measured" title="Wall-clock timings recorded by the job runner" />
+      }
       bodyClassName="p-0"
     >
       {query.isError ? (
@@ -35,16 +38,30 @@ export function ComputeTable() {
         <p className="p-3 text-xs text-muted-foreground">No CFD runs have logs yet.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-xs">
+          <Table aria-label="Compute wall times" className="w-full text-xs">
             <thead className="text-left text-muted-foreground">
               <tr className="border-b">
-                <th className="px-3 py-2 font-normal">run</th>
-                <th className="px-3 py-2 font-normal">status</th>
-                <th className="px-3 py-2 font-normal">acceptance</th>
-                <th className="px-3 py-2 text-right font-normal">cells</th>
-                <th className="px-3 py-2 text-right font-normal">iterations</th>
-                <th className="px-3 py-2 text-right font-normal">solver wall</th>
-                <th className="px-3 py-2 text-right font-normal">solver CPU</th>
+                <th scope="col" className="px-3 py-2 font-normal">
+                  run
+                </th>
+                <th scope="col" className="px-3 py-2 font-normal">
+                  status
+                </th>
+                <th scope="col" className="px-3 py-2 font-normal">
+                  acceptance
+                </th>
+                <th scope="col" className="px-3 py-2 text-right font-normal">
+                  cells
+                </th>
+                <th scope="col" className="px-3 py-2 text-right font-normal">
+                  iterations
+                </th>
+                <th scope="col" className="px-3 py-2 text-right font-normal">
+                  solver wall
+                </th>
+                <th scope="col" className="px-3 py-2 text-right font-normal">
+                  solver CPU
+                </th>
               </tr>
             </thead>
             <tbody className="tabular font-mono">
@@ -60,7 +77,7 @@ export function ComputeTable() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </Table>
           <p className="px-3 py-2 text-2xs text-muted-foreground">
             Total solver wall time across runs with a log: {fmtHours(totalWall)}. Runs without a
             solver log show a dash.

@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Literal
 
 import numpy as np
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from daedalus import montecarlo
@@ -249,6 +249,7 @@ class UncertaintyInput(BaseModel):
     thrust: float = Field(default=0.05, ge=0, lt=0.5)
     cartridge_mass_half_range_g: float = Field(default=0.0, ge=0, le=5)
     tether_force_scale_n: float = Field(default=0.0, ge=0, le=2)
+    expelled_gas_g: float = Field(default=0.0, ge=0, le=20)
 
 
 class MonteCarloRequest(BaseModel):
@@ -291,6 +292,8 @@ class MonteCarloResponse(BaseModel):
 @router.post("/montecarlo")
 def race_montecarlo(req: MonteCarloRequest) -> MonteCarloResponse:
     r = req.race
+    if req.uncertainty.expelled_gas_g >= r.mass_kg * 1000:
+        raise HTTPException(422, "expelled gas must weigh less than the starting car")
     car = CarParams(
         mass_kg=r.mass_kg,
         track_length_m=r.track_length_m,

@@ -608,7 +608,11 @@ export function AeroAnalysis({ run }: { run: CfdRunDetail }) {
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Panel title="Drag split" description="Pressure drag vs skin friction, full car.">
+        <Panel
+          title="Drag split"
+          actions={<ProvenanceBadge value="simulated" />}
+          description="Pressure drag vs skin friction, full car."
+        >
           <DragSplit pressure={pressure} viscous={viscous} />
           <Caption>
             Pressure drag comes from shape; skin friction from surface area and finish.
@@ -616,6 +620,7 @@ export function AeroAnalysis({ run }: { run: CfdRunDetail }) {
         </Panel>
         <Panel
           title="Drag by part"
+          actions={<ProvenanceBadge value="simulated" />}
           description="Pressure and skin-friction drag per part; % of total."
         >
           {groups.length ? (
@@ -630,6 +635,7 @@ export function AeroAnalysis({ run }: { run: CfdRunDetail }) {
         </Panel>
         <Panel
           title="Wake drag cross-check"
+          actions={<ProvenanceBadge value="simulated" />}
           description="Momentum and pressure lost in the wake, at three distances behind the car."
         >
           {wake.data && drag != null ? (
@@ -648,6 +654,7 @@ export function AeroAnalysis({ run }: { run: CfdRunDetail }) {
         {wake.data && (
           <Panel
             title="Wake loss map"
+            actions={<ProvenanceBadge value="simulated" />}
             description={`Total-pressure loss ${wake.data.loss_map.x_over_L} L behind the car, looking forward.`}
           >
             <WakeLossMap
@@ -660,7 +667,11 @@ export function AeroAnalysis({ run }: { run: CfdRunDetail }) {
             </Caption>
           </Panel>
         )}
-        <Panel title="Forces by part" description="Drag and lift per part group (N).">
+        <Panel
+          title="Forces by part"
+          actions={<ProvenanceBadge value="simulated" />}
+          description="Drag and lift per part group (N)."
+        >
           {groups.length ? (
             <GroupForces forces={Object.fromEntries(groups)} />
           ) : (
@@ -670,18 +681,32 @@ export function AeroAnalysis({ run }: { run: CfdRunDetail }) {
         </Panel>
         <Panel
           title="Cd across runs"
+          actions={<ProvenanceBadge value="simulated" />}
           description="Every solved run; green = accepted, outlined = this run."
         >
           <RunsCd current={run.run_id} />
           <Caption>Only accepted runs count as evidence.</Caption>
         </Panel>
         {r?.cd != null && (
-          <Panel title="Area vs Cd trade" description="Points on one curve give the same drag.">
+          <Panel
+            title="Area vs Cd trade"
+            actions={<ProvenanceBadge value="simulated" />}
+            description="Points on one curve give the same drag."
+          >
             <AreaTrade cd={r.cd} area={A} />
             <Caption>Shrink frontal area or Cd; moving below the solid line cuts drag.</Caption>
           </Panel>
         )}
-        <Panel title="Compute time" description="Wall-clock time per pipeline step.">
+        <Panel
+          title="Compute time"
+          actions={
+            <ProvenanceBadge
+              value="measured"
+              title="Wall-clock timings recorded by the job runner"
+            />
+          }
+          description="Wall-clock time per pipeline step."
+        >
           {steps.length ? (
             <StepTimes steps={steps} />
           ) : (

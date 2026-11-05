@@ -36,7 +36,12 @@ export function DataTable<T extends RowData>({
 }) {
   const table = useTable({ features: TABLE_FEATURES, data, columns });
   return (
-    <div className="max-h-96 overflow-auto rounded-lg border">
+    <div
+      role="region"
+      aria-label={`${label} scroll area`}
+      tabIndex={0}
+      className="max-h-96 overflow-auto rounded-lg border focus-visible:outline-2 focus-visible:outline-ring"
+    >
       <table aria-label={label} className="w-full text-xs">
         <thead className="sticky top-0 z-10 bg-card text-muted-foreground">
           {table.getHeaderGroups().map((group) => (

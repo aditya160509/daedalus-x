@@ -1,6 +1,7 @@
 "use client";
 
 import { EmptyState, Metric, Panel, ProvenanceBadge, Skeleton } from "@/components/ui/primitives";
+import { chartAxis, chartTheme, chartTooltip, useECharts } from "@/components/charts/useECharts";
 import { Input } from "@/components/ui/input";
 import type { RaceBreakdown } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -15,6 +16,51 @@ const INPUT_LABEL: Record<string, string> = {
 };
 
 const ms = (v: number) => `${v > 0 ? "+" : ""}${v.toFixed(1)}`;
+
+function TimeBudgetChart({ carMs, reactionMs }: { carMs: number; reactionMs: number | null }) {
+  const host = useECharts(() => {
+    const t = chartTheme();
+    return {
+      animation: false,
+      grid: { left: 50, right: 18, top: 25, bottom: 30 },
+      tooltip: {
+        ...chartTooltip(t),
+        trigger: "axis",
+        valueFormatter: (v: number) => `${v.toFixed(1)} ms`,
+      },
+      xAxis: { ...chartAxis(t), type: "value", name: "ms" },
+      yAxis: { ...chartAxis(t), type: "category", data: ["Time"] },
+      series: [
+        {
+          type: "bar",
+          name: "Predicted car time",
+          stack: "time",
+          data: [carMs],
+          itemStyle: { color: t.brand },
+        },
+        ...(reactionMs == null
+          ? []
+          : [
+              {
+                type: "bar",
+                name: "Measured reaction",
+                stack: "time",
+                data: [reactionMs],
+                itemStyle: { color: t.risk },
+              },
+            ]),
+      ],
+    };
+  }, [carMs, reactionMs]);
+  return (
+    <div
+      ref={host}
+      className="h-24 w-full"
+      role="img"
+      aria-label="Predicted car time stacked with entered measured reaction"
+    />
+  );
+}
 
 /** ORDER 4 (C19-C21): where the race time goes, what moves it, and what each unit is worth. */
 export function BreakdownPanel({
@@ -71,10 +117,7 @@ export function BreakdownPanel({
             onChange={(event) => onReactionInput(event.target.value)}
           />
         </label>
-        <div className="flex h-4 overflow-hidden rounded bg-muted" aria-hidden>
-          <div className="bg-brand" style={{ width: `${(100 * b.car_time_ms) / combinedMs}%` }} />
-          {reactionMs != null && <div className="bg-risk flex-1" />}
-        </div>
+        <TimeBudgetChart carMs={b.car_time_ms} reactionMs={reactionMs} />
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           <Metric
             label="Car time"
@@ -85,6 +128,7 @@ export function BreakdownPanel({
           <Metric
             label="Gate reaction"
             value={reactionMs?.toFixed(1) ?? "—"}
+            provenance={reactionMs == null ? undefined : "measured"}
             unit="ms"
             hint={
               reactionMs == null

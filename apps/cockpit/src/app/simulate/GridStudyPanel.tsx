@@ -1,5 +1,6 @@
 "use client";
 
+import { Table } from "@/components/ui/table";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Panel, ProvenanceBadge } from "@/components/ui/primitives";
@@ -153,14 +154,20 @@ export function GridStudyPanel() {
             <StudyChart study={study} speed />
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-xs">
+            <Table aria-label="Grid-study cases" className="w-full text-xs">
               <caption className="sr-only">Study run status and numerical Cd intervals</caption>
               <thead>
                 <tr className="border-b text-left text-muted-foreground">
-                  <th className="py-2">Case</th>
+                  <th scope="col" className="py-2">
+                    Case
+                  </th>
                   <th>Quality</th>
-                  <th className="text-right">Cells</th>
-                  <th className="text-right">Cd mean [95% CI]</th>
+                  <th scope="col" className="text-right">
+                    Cells
+                  </th>
+                  <th scope="col" className="text-right">
+                    Cd mean [95% CI]
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -182,7 +189,7 @@ export function GridStudyPanel() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </Table>
           </div>
           {study.speed_check && (
             <p className="text-xs text-muted-foreground">

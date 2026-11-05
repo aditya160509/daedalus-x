@@ -1,5 +1,6 @@
 "use client";
 
+import { Table } from "@/components/ui/table";
 import { useRouter } from "next/navigation";
 import { useDeferredValue, useMemo, useState } from "react";
 import type { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams } from "echarts";
@@ -516,7 +517,7 @@ export function LegalPanel({
             )}
             {risk.data && <RuleRiskDetail risk={risk.data} checks={checks} />}
           </details>
-          <table className="w-full text-xs">
+          <Table aria-label="FORGE rule results" className="w-full text-xs">
             <tbody>
               {checks.map((c) => (
                 <tr
@@ -572,7 +573,7 @@ export function LegalPanel({
                 </tr>
               ))}
             </tbody>
-          </table>
+          </Table>
         </>
       )}
     </Panel>

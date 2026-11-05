@@ -1,5 +1,6 @@
 "use client";
 
+import { Table } from "@/components/ui/table";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -136,14 +137,16 @@ export function SensitivityPanel() {
           <SensitivityChart data={data} />
           <GpParameters data={data.gp} />
           <div className="overflow-x-auto border-t">
-            <table className="w-full text-left text-xs">
+            <Table aria-label="ORACLE sensitivity values" className="w-full text-left text-xs">
               <thead className="text-muted-foreground">
                 <tr>
-                  <th className="px-4 py-2 font-medium">Parameter</th>
-                  <th className="px-4 py-2 font-medium">
+                  <th scope="col" className="px-4 py-2 font-medium">
+                    Parameter
+                  </th>
+                  <th scope="col" className="px-4 py-2 font-medium">
                     {method === "sobol" ? "S1 ± 95% CI [1]" : "μ* ± 95% CI [cm²]"}
                   </th>
-                  <th className="px-4 py-2 font-medium">
+                  <th scope="col" className="px-4 py-2 font-medium">
                     {method === "sobol" ? "ST ± 95% CI [1]" : "σ [cm²]"}
                   </th>
                 </tr>
@@ -165,7 +168,7 @@ export function SensitivityPanel() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </Table>
           </div>
           <p className="border-t px-4 py-3 text-[10px] text-muted-foreground">
             Seed {data.seed} · {data.input_distribution}.{" "}

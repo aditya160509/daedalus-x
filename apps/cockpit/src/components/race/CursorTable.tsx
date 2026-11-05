@@ -1,5 +1,6 @@
 "use client";
 
+import { Table } from "@/components/ui/table";
 import type { TelemetryTrack } from "@/components/charts/TelemetryChart";
 import { deltaReading, sampleAt } from "./raceMath";
 import { cn } from "@/lib/utils";
@@ -42,14 +43,24 @@ export function CursorTable({
         </span>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <table aria-label="Cursor values" className="w-full text-[11px]">
+        <Table aria-label="Cursor values" className="w-full text-[11px]">
           <thead className="sticky top-0 bg-card text-muted-foreground">
             <tr>
-              <th className="px-3 py-1 text-left font-medium">Channel</th>
-              <th className="px-1 py-1 text-right font-medium">Cursor</th>
-              <th className="px-1 py-1 text-right font-medium">A</th>
-              <th className="px-1 py-1 text-right font-medium">B</th>
-              <th className="px-2 py-1 text-right font-medium">Δ</th>
+              <th scope="col" className="px-3 py-1 text-left font-medium">
+                Channel
+              </th>
+              <th scope="col" className="px-1 py-1 text-right font-medium">
+                Cursor
+              </th>
+              <th scope="col" className="px-1 py-1 text-right font-medium">
+                A
+              </th>
+              <th scope="col" className="px-1 py-1 text-right font-medium">
+                B
+              </th>
+              <th scope="col" className="px-2 py-1 text-right font-medium">
+                Δ
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -82,7 +93,7 @@ export function CursorTable({
               }),
             )}
           </tbody>
-        </table>
+        </Table>
       </div>
       <p className="border-t px-3 py-1.5 text-[10px] leading-relaxed text-muted-foreground">
         Linear interpolation between samples. Drag A or B on the chart, or focus a handle and use

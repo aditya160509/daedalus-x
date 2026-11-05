@@ -94,7 +94,7 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [ ] 🟨 One renderer and one scene for the advanced field layers. `hard`
 - [ ] ⬜ Surface LIC and separation lines. `hard`
 - [x] ✅ Cp probe lines. `easy`
-- [ ] ⬜ y+ and bad-cell maps, skewness histogram. `easy`
+- [x] ✅ Wall y+ map, projected bad-cell map and skewness histogram from OpenFOAM fields. Generate missing quality fields with checkMesh from the existing mesh. `easy`
 - [x] ✅ Momentum-deficit wake drag cross-check, wake loss map, drag by part (`1d4a1f3`).
 - [ ] ⬜ Δwake and Δforces between two runs. `mid`
 - [x] ✅ Run monitor: residual chart per field and ETA in the Jobs drawer (`4853264`).
@@ -181,8 +181,8 @@ Source tags on every number: measured, simulated, estimated, synthetic. Race and
 - [x] ✅ Compute and wall-time table per CFD run, read from logs.
 - [x] ✅ CI workflow exists in the repo as `ci/github-actions-ci.yml`. Moving it to `.github/workflows` is blocked: the token lacks the `workflow` scope.
 - [x] ✅ Tests for source binding, lineage and numerical helpers. Regression tests for the new endpoints.
-- [ ] 🟨 Per-screen provenance labels are not yet consistent everywhere. `easy`
-- [ ] 🟨 Chart exports (PNG on every new chart), linked cursors and keyboard access for every table. `easy`
+- [x] ✅ Shared provenance badges applied to Wind Tunnel analyses and mesh, nominal Design results, Race timing and Compute. Mixed timing views distinguish prediction from entered measurements. `easy`
+- [x] ✅ PNG export by default on ECharts; shared iteration cursor for Cd and residuals; labeled keyboard-scrollable tables and native row actions. `easy`
 - [ ] ⬜ Source-linked decision log and engineering rationale record. `mid`
 - [x] ✅ AI Assistance and Verification Log (rule C2.18.3) exported from git history as CSV in the Evidence drawer.
 - [ ] 🟨 Practical quality: coverage targets are not set. Property tests are partial. OpenAPI-generated types are not in place. `mid`
@@ -207,7 +207,7 @@ Each chart needs: shared theme, units on axes, a source tag, hairline grid, dash
 | W08 | LIC and separation lines | ⬜ | Build. |
 | W09 | Speed, yaw and ride-height study | 🟨 | Yaw and ride-height sweeps. |
 | W10 | Frontal area versus Cd | ⬜ | Build. |
-| W11 | Mesh and y+ maps, skewness histogram | 🟨 | Spatial maps, histogram. |
+| W11 | Mesh and y+ maps, skewness histogram | ✅ | Existing OpenFOAM solution and checkMesh field summaries. |
 | R01 | Linked telemetry traces and events | 🟨 | Annotations (in uncommitted `raceTracks.ts`). |
 | R02 | Ghost Δtime against the best run | 🟨 | Automatic best real run. |
 | R03 | Time-budget stacked bar | ⬜ | Stacked chart with measured reaction. |
@@ -281,7 +281,7 @@ Taken from the TODO.md review (2026-11-04). Headline claim: "we optimise expecte
 - [ ] ⬜ **Turbulence model-form uncertainty:** SST vs transition (kOmegaSSTLM) vs laminar spread as a Cd error bar (wings at Re 3e4–1e5). Needs runs. `data`
 - [ ] ⬜ **Real-objective optimiser benchmark** on the race model or a small CFD sweep, reported as regret; the synthetic study stays as method validation. `mid`
 - [ ] ⬜ **Value-of-information test planner:** recommend the measurement that most reduces points uncertainty. `mid`
-- [ ] 🟨 **Race physics terms:** M2 Monte Carlo has a half-normal tether resistance prior and a uniform cartridge mass spread (default ±0.5 g in Race). Gas mass loss during the burn remains unmodelled and is identified in the UI. `easy`
+- [x] ✅ **Race physics terms:** M2 Monte Carlo has a half-normal tether prior, uniform cartridge mass spread (±0.5 g by default in Race), and optional gas mass loss proportional to cumulative thrust impulse. The gas profile is an estimate and defaults to zero until supplied. `easy`
 - [ ] ⬜ **Car A/B nomination and reaction advisor:** paired-timing posterior, ex-Gaussian reaction fit (scipy `exponnorm`), earlier reaction vs false-start (−2.5 pts) trade-off. `mid`
 - [ ] ⬜ **Frozen demo mode** for judges: cached results, no solver calls, low GPU load. `mid`
 
@@ -344,7 +344,7 @@ These items cannot be finished in software alone.
 1. [ ] Push pending local commits when the owner refreshes the token. Include the CI move.
 2. [ ] Commit the other contributor's `raceTracks.ts` annotation work once they finish it. Then `d42e65f` passes on HEAD.
 3. [ ] Task 10 gaps: the safety-factor table for all four parts in one view. Rule margin bars already exist.
-4. [ ] Wind Tunnel: LIC, Cp probes, y+ and bad-cell maps. Then Δwake and Δforces.
+4. [ ] Wind Tunnel: LIC, Δwake and Δforces. Cp probes, y+ and bad-cell maps are implemented.
 5. [ ] Inspect redo (UI-REDO §3) and Strength redo (§4).
 6. [ ] Stadium and TV mode, with F1ReplayTiming for the layout.
 7. [ ] Event timing ledger with lap and interval history, and the speed-trap leaderboard.

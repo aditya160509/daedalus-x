@@ -115,6 +115,7 @@ export interface UncertaintyInput {
   thrust: number;
   cartridge_mass_half_range_g?: number;
   tether_force_scale_n?: number;
+  expelled_gas_g?: number;
 }
 export const raceMonteCarlo = (
   race: RaceSimulationRequest,
@@ -199,6 +200,22 @@ const CfdWake = z.object({
   }),
   provenance: z.literal("simulated"),
 });
+const MeshDiagnostics = z.object({
+  wall_y_plus: z.array(z.tuple([z.number(), z.number(), z.number(), z.number()])),
+  quality: z
+    .object({
+      counts: z.array(z.number()),
+      edges: z.array(z.number()),
+      flagged_count: z.number(),
+      cell_count: z.number(),
+      bad_cells: z.array(z.tuple([z.number(), z.number(), z.number(), z.number()])),
+    })
+    .nullable(),
+});
+export const getMeshDiagnostics = (id: string, generate = false) =>
+  request(`/v1/cfd/runs/${encodeURIComponent(id)}/mesh-diagnostics`, MeshDiagnostics, {
+    method: generate ? "POST" : "GET",
+  });
 export const probeCfdCp = (id: string, start: number[], end: number[]) =>
   request(
     `/v1/cfd/runs/${encodeURIComponent(id)}/cp-probe`,

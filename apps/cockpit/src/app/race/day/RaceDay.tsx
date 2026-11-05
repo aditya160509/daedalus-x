@@ -1,5 +1,6 @@
 "use client";
 
+import { Table } from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
 import { Download, Maximize2, Minimize2, Plus, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -13,6 +14,7 @@ import {
   useECharts,
 } from "@/components/charts/useECharts";
 import { Button } from "@/components/ui/button";
+import { ProvenanceBadge } from "@/components/ui/primitives";
 import { Input } from "@/components/ui/input";
 import { listPredictions, simulateRace } from "@/lib/api";
 import { estimateThrust } from "@/lib/thrust";
@@ -238,6 +240,13 @@ export function RaceDay() {
     >
       <div className="flex flex-wrap items-center gap-2">
         <h1 className="text-sm font-medium">Race day</h1>
+        <ProvenanceBadge
+          value="predicted"
+          title="Reference time from the saved prediction or race model"
+        />
+        {runs.length > 0 && (
+          <ProvenanceBadge value="measured" title="Car times entered by the timing operator" />
+        )}
         <span className="text-xs text-muted-foreground">
           Predicted {fmt(predicted)} s
           {low != null && high != null ? ` · band ${fmt(low)}–${fmt(high)} s` : " · model estimate"}
@@ -321,16 +330,28 @@ export function RaceDay() {
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
         <section className="overflow-hidden rounded-lg border border-border bg-card">
-          <table className="w-full table-fixed text-sm">
+          <Table aria-label="Race-day timing ledger" className="w-full table-fixed text-sm">
             <thead className="text-[11px] text-muted-foreground">
               <tr className="border-b border-border">
-                <th className="w-12 px-4 py-2 text-left font-normal">#</th>
-                <th className="w-14 px-2 py-2 text-left font-normal">Lane</th>
-                <th className="px-2 py-2 text-right font-normal">Car time</th>
-                <th className="px-2 py-2 text-right font-normal">Reaction</th>
-                <th className="px-2 py-2 text-right font-normal">Total</th>
-                <th className="px-2 py-2 text-right font-normal">Δ pred</th>
-                <th className="w-12 px-2 py-2">
+                <th scope="col" className="w-12 px-4 py-2 text-left font-normal">
+                  #
+                </th>
+                <th scope="col" className="w-14 px-2 py-2 text-left font-normal">
+                  Lane
+                </th>
+                <th scope="col" className="px-2 py-2 text-right font-normal">
+                  Car time
+                </th>
+                <th scope="col" className="px-2 py-2 text-right font-normal">
+                  Reaction
+                </th>
+                <th scope="col" className="px-2 py-2 text-right font-normal">
+                  Total
+                </th>
+                <th scope="col" className="px-2 py-2 text-right font-normal">
+                  Δ pred
+                </th>
+                <th scope="col" className="w-12 px-2 py-2">
                   <span className="sr-only">Delete</span>
                 </th>
               </tr>
@@ -383,7 +404,7 @@ export function RaceDay() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </Table>
         </section>
 
         <aside className="flex flex-col gap-4">

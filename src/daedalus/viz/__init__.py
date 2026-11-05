@@ -39,7 +39,13 @@ CAR_GROUPS = (
 )
 
 
-def _reader(case: Path, groups: list[str], time_value: float | None = None) -> pv.MultiBlock:
+def _reader(
+    case: Path,
+    groups: list[str],
+    time_value: float | None = None,
+    *,
+    cell_fields: tuple[str, ...] | None = None,
+) -> pv.MultiBlock:
     marker = case / "case.foam"
     marker.touch(exist_ok=True)
     r = pv.POpenFOAMReader(str(marker))
@@ -53,7 +59,12 @@ def _reader(case: Path, groups: list[str], time_value: float | None = None) -> p
     r.enable_patch_array("internalMesh")
     for g in groups:
         r.enable_patch_array(f"patch/{g}")
-    r.cell_to_point_creation = True
+    if cell_fields is not None:
+        r.disable_all_cell_arrays()
+        for name in cell_fields:
+            if name in r.cell_array_names:
+                r.enable_cell_array(name)
+    r.cell_to_point_creation = cell_fields is None
     mesh: pv.MultiBlock = r.read()
     return mesh
 

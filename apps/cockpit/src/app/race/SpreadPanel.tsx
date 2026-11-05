@@ -54,9 +54,60 @@ export function SpreadPanel({
           <ProvenanceBadge value="predicted" />
         </>
       }
-      bodyClassName="p-3"
+      bodyClassName="space-y-3 p-3"
       className="min-h-0"
     >
+      <div className="grid grid-cols-2 gap-2">
+        {UNCERTAINTY_KEYS.map((k) => (
+          <NumberField
+            key={k}
+            id={`mc-${k}`}
+            label={`${LABELS[k]} 1σ`}
+            unit="%"
+            value={+(uncertainty[k] * 100).toFixed(2)}
+            min={0}
+            max={49}
+            step={0.5}
+            onChange={(v) => onUncertainty({ ...uncertainty, [k]: v / 100 })}
+          />
+        ))}
+        <NumberField
+          id="mc-cartridge"
+          label="Cartridge mass ± range"
+          unit="g"
+          value={uncertainty.cartridge_mass_half_range_g ?? 0}
+          min={0}
+          max={5}
+          step={0.1}
+          onChange={(v) => onUncertainty({ ...uncertainty, cartridge_mass_half_range_g: v })}
+        />
+        <NumberField
+          id="mc-tether"
+          label="Tether force prior scale"
+          unit="N"
+          value={uncertainty.tether_force_scale_n ?? 0}
+          min={0}
+          max={2}
+          step={0.01}
+          onChange={(v) => onUncertainty({ ...uncertainty, tether_force_scale_n: v })}
+        />
+        <NumberField
+          id="mc-gas"
+          label="Expelled gas during burn"
+          unit="g"
+          value={uncertainty.expelled_gas_g ?? 0}
+          min={0}
+          max={20}
+          step={0.1}
+          onChange={(v) => onUncertainty({ ...uncertainty, expelled_gas_g: v })}
+        />
+      </div>
+      <p className="text-2xs text-muted-foreground">
+        Cartridge mass varies uniformly across the entered range. The tether prior is half-normal
+        and adds constant resistance in M2 only. Starting mass includes the gas. The entered gas
+        mass is released in proportion to cumulative thrust impulse, an estimate for Monte Carlo
+        only.
+      </p>
       {!data && !error ? (
         <div className="flex h-full flex-col gap-2">
           <div className="grid h-8 grid-cols-4 gap-2">
@@ -103,46 +154,6 @@ export function SpreadPanel({
               </div>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            {UNCERTAINTY_KEYS.map((k) => (
-              <NumberField
-                key={k}
-                id={`mc-${k}`}
-                label={`${LABELS[k]} 1σ`}
-                unit="%"
-                value={+(uncertainty[k] * 100).toFixed(2)}
-                min={0}
-                max={49}
-                step={0.5}
-                onChange={(v) => onUncertainty({ ...uncertainty, [k]: v / 100 })}
-              />
-            ))}
-            <NumberField
-              id="mc-cartridge"
-              label="Cartridge mass ± range"
-              unit="g"
-              value={uncertainty.cartridge_mass_half_range_g ?? 0}
-              min={0}
-              max={5}
-              step={0.1}
-              onChange={(v) => onUncertainty({ ...uncertainty, cartridge_mass_half_range_g: v })}
-            />
-            <NumberField
-              id="mc-tether"
-              label="Tether force prior scale"
-              unit="N"
-              value={uncertainty.tether_force_scale_n ?? 0}
-              min={0}
-              max={2}
-              step={0.01}
-              onChange={(v) => onUncertainty({ ...uncertainty, tether_force_scale_n: v })}
-            />
-          </div>
-          <p className="text-2xs text-muted-foreground">
-            Cartridge mass varies uniformly across the entered range. The tether prior is
-            half-normal and adds constant resistance in M2 only. Mass stays constant within each
-            trial, so gas mass loss during the burn is omitted.
-          </p>
           <div>
             <p className="mb-1 text-xs text-muted-foreground">What drives the spread</p>
             <Tornado ranked={ranked} />

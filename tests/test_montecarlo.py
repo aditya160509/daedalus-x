@@ -131,3 +131,24 @@ def test_cartridge_spread_and_tether_prior() -> None:
     assert tether.mean_s is not None and baseline.mean_s is not None
     assert tether.mean_s > baseline.mean_s
     assert tether.sensitivity["tether_force"] > 0.9
+
+
+def test_gas_release_matches_analytic_constant_thrust_burn() -> None:
+    from daedalus.montecarlo import _integrate
+
+    thrust = ThrustCurve.constant(1.0, 0.5)
+    times, v = _integrate(
+        thrust,
+        np.ones(1),
+        np.array([0.06]),
+        np.zeros(1),
+        np.zeros(1),
+        1.2,
+        20.0,
+        ModelLevel.M1,
+        np.array([0.5, 1.0]),
+        gas_kg=0.008,
+    )
+    expected_v = (0.5 / 0.008) * np.log(0.06 / 0.052)
+    assert times[0] > 0.5
+    assert v[0] == pytest.approx([expected_v, expected_v], rel=1e-8)
